@@ -1,0 +1,123 @@
+{
+  "task": "T02",
+  "job_id": "113aef5d390044108136a894d14489b7",
+  "mode": "PlayMode",
+  "summary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 0.4460469,
+    "resultState": "Passed"
+  },
+  "results": [
+    {
+      "name": "MouseDeltaReachesLookWithoutSpeedScaling",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.MouseDeltaReachesLookWithoutSpeedScaling",
+      "state": "Passed",
+      "durationSeconds": 0.0840862,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "PauseStopsGameplayInputButEscapeStillWorksForResume",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.PauseStopsGameplayInputButEscapeStillWorksForResume",
+      "state": "Passed",
+      "durationSeconds": 0.0312804,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "WasdShiftAndLeftCtrlReachTheMotorFrame",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.WasdShiftAndLeftCtrlReachTheMotorFrame",
+      "state": "Passed",
+      "durationSeconds": 0.0123206,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "BlenderLabSupportsCrouchRampStairsAndDoorway",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonLabTests.BlenderLabSupportsCrouchRampStairsAndDoorway",
+      "state": "Passed",
+      "durationSeconds": 0.2362977,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "CharacterControllerStopsAtWallAndStaysOnFloor",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CharacterControllerStopsAtWallAndStaysOnFloor",
+      "state": "Passed",
+      "durationSeconds": 0.0050203,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+      "state": "Passed",
+      "durationSeconds": 0.0014587,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "DiagonalMovementHasSameSpeedAsForward",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.DiagonalMovementHasSameSpeedAsForward",
+      "state": "Passed",
+      "durationSeconds": 0.0018492,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+      "state": "Passed",
+      "durationSeconds": 0.0018138,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "HoldingSprintWhileIdleDoesNotUseStamina",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.HoldingSprintWhileIdleDoesNotUseStamina",
+      "state": "Passed",
+      "durationSeconds": 0.0016219,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+      "state": "Passed",
+      "durationSeconds": 0.0014944,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "SprintLastsFiveSecondsThenWalksAndRecharges",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.SprintLastsFiveSecondsThenWalksAndRecharges",
+      "state": "Passed",
+      "durationSeconds": 0.002608,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+      "state": "Passed",
+      "durationSeconds": 0.0030117,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    }
+  ]
+}

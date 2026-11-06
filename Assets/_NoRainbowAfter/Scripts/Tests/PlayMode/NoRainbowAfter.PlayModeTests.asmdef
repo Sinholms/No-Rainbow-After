@@ -1,0 +1,10 @@
+{
+  "name": "NoRainbowAfter.PlayModeTests",
+  "references": [
+    "NoRainbowAfter.Player",
+    "Unity.InputSystem",
+    "Unity.InputSystem.TestFramework"
+  ],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false
+}

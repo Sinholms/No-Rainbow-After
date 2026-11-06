@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace NoRainbowAfter.Core
 {
-    public enum GameScene { Boot, MainMenu, MasterGameplay, Credits }
+    public enum GameScene { Boot, MainMenu, MasterGameplay, Credits, FirstPersonTest }
 
     /// <summary>One persistent owner of guarded, asynchronous scene transitions.</summary>
     public sealed class SceneFlow : MonoBehaviour

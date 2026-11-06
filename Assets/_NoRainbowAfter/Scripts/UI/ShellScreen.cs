@@ -19,6 +19,7 @@ namespace NoRainbowAfter.UI
         [SerializeField] private Button creditsButton;
         [SerializeField] private Button quitButton;
         [SerializeField] private Button menuButton;
+        [SerializeField] private Button playTestButton;
         [SerializeField] private GameObject settingsPanel;
         [SerializeField] private Button settingsBackButton;
         [SerializeField] private Slider masterVolume;
@@ -38,6 +39,7 @@ namespace NoRainbowAfter.UI
                     kind == ShellKind.MainMenu ? GameScene.MasterGameplay : GameScene.MainMenu));
             if (creditsButton != null) creditsButton.onClick.AddListener(() => flow.Load(GameScene.Credits));
             if (menuButton != null) menuButton.onClick.AddListener(() => flow.Load(GameScene.MainMenu));
+            if (playTestButton != null) playTestButton.onClick.AddListener(() => flow.Load(GameScene.FirstPersonTest));
             if (settingsButton != null) settingsButton.onClick.AddListener(() => ShowSettings(true));
             if (settingsBackButton != null) settingsBackButton.onClick.AddListener(() => ShowSettings(false));
             if (quitButton != null) quitButton.onClick.AddListener(Quit);
@@ -92,7 +94,7 @@ namespace NoRainbowAfter.UI
 
         private void SetMenuInteraction(bool enabled)
         {
-            foreach (Button button in new[] { primaryButton, settingsButton, creditsButton, quitButton, menuButton })
+            foreach (Button button in new[] { primaryButton, settingsButton, creditsButton, quitButton, menuButton, playTestButton })
                 if (button != null) button.interactable = enabled;
         }
 

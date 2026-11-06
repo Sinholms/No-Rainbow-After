@@ -1,0 +1,6 @@
+{
+  "name": "NoRainbowAfter.Player",
+  "rootNamespace": "NoRainbowAfter.Player",
+  "references": ["Unity.InputSystem"],
+  "autoReferenced": true
+}

@@ -22,6 +22,8 @@ namespace NoRainbowAfter.Editor
         private static readonly Color Muted = new Color32(151, 172, 172, 255);
         private static readonly Color Panel = new Color32(26, 43, 50, 255);
         private static Font font;
+        private static readonly GameScene[] FoundationScenes =
+            { GameScene.Boot, GameScene.MainMenu, GameScene.MasterGameplay, GameScene.Credits };
 
         [MenuItem("No Rainbow After/Create T01 Foundation")]
         public static void Create()
@@ -31,14 +33,14 @@ namespace NoRainbowAfter.Editor
             for (int i = 0; i < SceneManager.sceneCount; i++)
                 if (SceneManager.GetSceneAt(i).isDirty)
                     throw new InvalidOperationException("Save your open scenes before running setup.");
-            foreach (GameScene scene in Enum.GetValues(typeof(GameScene)))
+            foreach (GameScene scene in FoundationScenes)
                 if (File.Exists(SceneFlow.PathFor(scene)))
                     throw new InvalidOperationException("Setup cancelled: existing scene " + SceneFlow.PathFor(scene));
 
             CreateFolders();
             font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            foreach (GameScene id in Enum.GetValues(typeof(GameScene))) CreateScene(id);
-            var paths = Enum.GetValues(typeof(GameScene)).Cast<GameScene>().Select(SceneFlow.PathFor).ToArray();
+            foreach (GameScene id in FoundationScenes) CreateScene(id);
+            var paths = FoundationScenes.Select(SceneFlow.PathFor).ToArray();
             var entries = paths.Select(p => new EditorBuildSettingsScene(p, true)).ToList();
             entries.AddRange(EditorBuildSettings.scenes.Where(s => !paths.Contains(s.path)));
             EditorBuildSettings.scenes = entries.ToArray();
