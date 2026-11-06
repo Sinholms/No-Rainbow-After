@@ -168,7 +168,7 @@ namespace NoRainbowAfter.Editor
 
         private static void BuildSettings(SerializedObject screen, RectTransform content)
         {
-            var overlay = Rect("SettingsPanel", content, Vector2.zero, new Vector2(1920, 1080));
+            var overlay = Rect("SettingsPanel", content.parent, Vector2.zero, new Vector2(1920, 1080));
             overlay.gameObject.AddComponent<Image>().color = new Color(0.025f, 0.05f, 0.065f, 0.98f);
             Label("SettingsTitle", overlay, "PENGATURAN", new Vector2(0, 180), new Vector2(620, 70), 42, Ink);
             Label("MasterLabel", overlay, "Volume utama", new Vector2(0, 65), new Vector2(620, 50), 25, Ink);

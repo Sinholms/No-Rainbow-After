@@ -73,16 +73,19 @@ namespace NoRainbowAfter.UI
 
         private void RefreshState()
         {
-            controls.interactable = !flow.IsLoading;
-            controls.blocksRaycasts = !flow.IsLoading;
-            SetMenuInteraction(!flow.IsLoading && (settingsPanel == null || !settingsPanel.activeSelf));
+            bool settingsVisible = settingsPanel != null && settingsPanel.activeSelf;
+            bool menuEnabled = !flow.IsLoading && !settingsVisible;
+            controls.alpha = settingsVisible ? 0f : 1f;
+            controls.interactable = menuEnabled;
+            controls.blocksRaycasts = menuEnabled;
+            SetMenuInteraction(menuEnabled);
             statusLabel.text = flow.Status;
         }
 
         private void ShowSettings(bool visible)
         {
             settingsPanel.SetActive(visible);
-            SetMenuInteraction(!visible && !flow.IsLoading);
+            RefreshState();
             Focus(visible ? (Selectable)masterVolume : settingsButton);
             if (!visible) PlayerPrefs.Save();
         }
