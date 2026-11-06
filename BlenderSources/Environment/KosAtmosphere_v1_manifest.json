@@ -1,0 +1,1416 @@
+{
+  "parts": [
+    {
+      "name": "SM_ENV_RoomFloor",
+      "material": "MAT_H_Floor",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_RoomCeiling",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_RoomFront",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_RoomRight",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_WindowWall",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_WindowWall.001",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_WindowBelow",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_WindowAbove",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_DoorWall",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_DoorWall.001",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_DoorHeader",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorFloor",
+      "material": "MAT_H_Floor",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorCeiling",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorWall",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorWall.001",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheBack",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheFloor",
+      "material": "MAT_H_Floor",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheEnd",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheEnd.001",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorWall.002",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorWall.003",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheBack.001",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheFloor.001",
+      "material": "MAT_H_Floor",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheEnd.002",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_NicheEnd.003",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_CorridorEnd",
+      "material": "MAT_H_Wall",
+      "collision": "box"
+    },
+    {
+      "name": "SM_ENV_RoomSkirting",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_ENV_RoomSkirting.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_ENV_HallSkirting",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_ENV_HallSkirting.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowGlass",
+      "material": "MAT_H_Glass",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_WindowFrame",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowFrame.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowSill",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowSill.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars.004",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WindowBars.005",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DoorJamb",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_DoorJamb.001",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_DoorLintel",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_HallPipe",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.004",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallPipe.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.005",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.006",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.007",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.008",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PipeClamp.009",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_RoomCable",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallFixture",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDiffuser",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallFixture.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDiffuser.001",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallFixture.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDiffuser.002",
+      "material": "MAT_H_LampCold",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_RoomFixture",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_RoomDiffuser",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedRail",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedLeg",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedLeg.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedRail.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedLeg.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedLeg.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedCrossbar",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BedCrossbar.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Mattress",
+      "material": "MAT_H_Cloth",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_WrinkledBlanket",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_SoftPillow",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_MattressSeam",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_StudyDesktop",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_DeskLeg",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskLeg.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskLeg.002",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskLeg.003",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskApron",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskDrawer",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskHandle",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskBrace",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ChairSeat",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_ChairFrame",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ChairUpright",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ChairFrame.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ChairUpright.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CurvedChairBack",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_StackedTextbook",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BookPages",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_StackedTextbook.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BookPages.001",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_StackedTextbook.002",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BookPages.002",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_OpenNotes",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesHeading",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesLine",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesLine.001",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesLine.002",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesLine.003",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_NotesLine.004",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DeskPen",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WorkSlip",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WorkSlipHeading",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_LampBase",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_LampStem",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_LampShade",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_LampBulb",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanStand",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_FanBase",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanNeck",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanCage",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanCage.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanCage.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanCage.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanCageBack",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.004",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.005",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.006",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.007",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.008",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.009",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.010",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.011",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.012",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanSpoke.013",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanMotor",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanBlade",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanBlade.001",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FanBlade.002",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoe",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ShoeSole",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace.001",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace.002",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoe.001",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_ShoeSole.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace.003",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace.004",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_Shoelace.005",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_StudentBag",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_BagStrap",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_UmbrellaShaft",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FoldedUmbrella",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerStrip",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket.001",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket.002",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket.003",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket.004",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_PowerSocket.005",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_OpenDormDoor",
+      "material": "MAT_H_Wood",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_DoorRaisedPanel",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DoorRaisedPanel.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DoorHandlePlate",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_DoorHandle",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorTop",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.002",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.003",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorTop.001",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor.002",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.004",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.005",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorTop.002",
+      "material": "MAT_H_Wood",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_UtilityCabinet",
+      "material": "MAT_H_Metal",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_CabinetDoor",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.001",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.001",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.002",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.003",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_UtilityCabinet.001",
+      "material": "MAT_H_Metal",
+      "collision": "box"
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.002",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.003",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.004",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.005",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.006",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_CabinetVent.007",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.001",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.002",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.003",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.004",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.005",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.006",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.007",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.008",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.009",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.010",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.011",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.012",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.013",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.014",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.015",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.016",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.017",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.018",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.019",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.020",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.021",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.022",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_WallFlake.023",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.001",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.002",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.003",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.004",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.005",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.006",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.007",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_PROP_FallenPaper.008",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    }
+  ],
+  "materials": [
+    {
+      "name": "MAT_H_Wall",
+      "texturePrefix": "Wall",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.17,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Floor",
+      "texturePrefix": "Floor",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.48,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Wood",
+      "texturePrefix": "Wood",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.3,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Cloth",
+      "texturePrefix": "Cloth",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.08,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Metal",
+      "texturePrefix": "Metal",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.65,
+      "smoothness": 0.45,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Paper",
+      "texturePrefix": "Paper",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.04,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Ink",
+      "texturePrefix": "",
+      "baseColor": [
+        0.025,
+        0.032,
+        0.027,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.04,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Glass",
+      "texturePrefix": "",
+      "baseColor": [
+        0.06,
+        0.13,
+        0.17,
+        1
+      ],
+      "metallic": 0.15,
+      "smoothness": 0.8,
+      "emission": [
+        0.0072,
+        0.0156,
+        0.0204
+      ]
+    },
+    {
+      "name": "MAT_H_LampWarm",
+      "texturePrefix": "",
+      "baseColor": [
+        0.75,
+        0.55,
+        0.3,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.15,
+      "emission": [
+        1.2000000000000002,
+        0.8800000000000001,
+        0.48
+      ]
+    },
+    {
+      "name": "MAT_H_LampCold",
+      "texturePrefix": "",
+      "baseColor": [
+        0.35,
+        0.62,
+        0.68,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.15,
+      "emission": [
+        0.5599999999999999,
+        0.992,
+        1.088
+      ]
+    }
+  ],
+  "lights": [
+    {
+      "name": "Room Fluorescent",
+      "position": [
+        0,
+        2.4,
+        2.6
+      ],
+      "color": [
+        0.65,
+        0.72,
+        0.63
+      ],
+      "intensity": 0.75,
+      "range": 4.3
+    },
+    {
+      "name": "Desk Lamp",
+      "position": [
+        1.61,
+        1.1,
+        3.7
+      ],
+      "color": [
+        1.0,
+        0.64,
+        0.34
+      ],
+      "intensity": 2.5,
+      "range": 2.2
+    },
+    {
+      "name": "Window Spill",
+      "position": [
+        -1.86,
+        1.8,
+        3.4
+      ],
+      "color": [
+        0.2,
+        0.43,
+        0.68
+      ],
+      "intensity": 1.2,
+      "range": 4.0
+    },
+    {
+      "name": "Corridor Near",
+      "position": [
+        0,
+        2.4,
+        6.3
+      ],
+      "color": [
+        0.64,
+        0.71,
+        0.53
+      ],
+      "intensity": 0.8,
+      "range": 3.5
+    },
+    {
+      "name": "Corridor Middle",
+      "position": [
+        0,
+        2.4,
+        10.8
+      ],
+      "color": [
+        0.72,
+        0.45,
+        0.26
+      ],
+      "intensity": 0.55,
+      "range": 3.4
+    },
+    {
+      "name": "Corridor Far",
+      "position": [
+        0,
+        2.4,
+        17.1
+      ],
+      "color": [
+        0.25,
+        0.42,
+        0.6
+      ],
+      "intensity": 0.65,
+      "range": 3.5
+    }
+  ],
+  "spawn": [
+    0.15,
+    0.04,
+    1.1
+  ],
+  "meshCount": 226,
+  "triangles": 63128,
+  "roomMetres": [
+    4,
+    5,
+    2.7
+  ],
+  "corridorMetres": [
+    1.8,
+    14,
+    2.7
+  ],
+  "source": "Blender 5.2.3 LTS, original geometry; wall and wood albedos from built-in imagegen, other maps procedural"
+}

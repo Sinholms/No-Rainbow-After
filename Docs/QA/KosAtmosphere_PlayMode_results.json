@@ -1,0 +1,141 @@
+{
+  "task": "Kos atmosphere and circular POV",
+  "job_id": "d4e7619801e742c896b7b7f431141423",
+  "mode": "PlayMode",
+  "summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "durationSeconds": 0.9962802,
+    "resultState": "Passed"
+  },
+  "results": [
+    {
+      "name": "MouseDeltaReachesLookWithoutSpeedScaling",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.MouseDeltaReachesLookWithoutSpeedScaling",
+      "state": "Passed",
+      "durationSeconds": 0.1183603,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "PauseStopsGameplayInputButEscapeStillWorksForResume",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.PauseStopsGameplayInputButEscapeStillWorksForResume",
+      "state": "Passed",
+      "durationSeconds": 0.0256418,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "WasdShiftAndLeftCtrlReachTheMotorFrame",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.WasdShiftAndLeftCtrlReachTheMotorFrame",
+      "state": "Passed",
+      "durationSeconds": 0.0133629,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "BlenderLabSupportsCrouchRampStairsAndDoorway",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonLabTests.BlenderLabSupportsCrouchRampStairsAndDoorway",
+      "state": "Passed",
+      "durationSeconds": 0.3160507,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "CharacterControllerStopsAtWallAndStaysOnFloor",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CharacterControllerStopsAtWallAndStaysOnFloor",
+      "state": "Passed",
+      "durationSeconds": 0.0076576,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+      "state": "Passed",
+      "durationSeconds": 0.0021681,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "DiagonalMovementHasSameSpeedAsForward",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.DiagonalMovementHasSameSpeedAsForward",
+      "state": "Passed",
+      "durationSeconds": 0.0095563,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+      "state": "Passed",
+      "durationSeconds": 0.0070236,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "HoldingSprintWhileIdleDoesNotUseStamina",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.HoldingSprintWhileIdleDoesNotUseStamina",
+      "state": "Passed",
+      "durationSeconds": 0.0057118,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+      "state": "Passed",
+      "durationSeconds": 0.0057905,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "SprintLastsFiveSecondsThenWalksAndRecharges",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.SprintLastsFiveSecondsThenWalksAndRecharges",
+      "state": "Passed",
+      "durationSeconds": 0.0094759,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+      "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+      "state": "Passed",
+      "durationSeconds": 0.009734,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "GameplaySceneHasOnePlayerAndPassableDoorway",
+      "fullName": "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.GameplaySceneHasOnePlayerAndPassableDoorway",
+      "state": "Passed",
+      "durationSeconds": 0.2412883,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    },
+    {
+      "name": "PauseStopsPlayerAndHidesCircularMask",
+      "fullName": "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.PauseStopsPlayerAndHidesCircularMask",
+      "state": "Passed",
+      "durationSeconds": 0.1257419,
+      "message": null,
+      "stackTrace": null,
+      "output": ""
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "job_id": "build-64dc4280a3",
+  "result": "succeeded",
+  "platform": "StandaloneWindows64",
+  "scripting_backend": "Mono",
+  "output_path": "Builds/KosVisualPreview/NoRainbowAfter.exe",
+  "duration_seconds": 363.9941481,
+  "total_size_mb": 111.61,
+  "errors": 0,
+  "warnings": 0,
+  "standalone_runtime_profiled": false
+}

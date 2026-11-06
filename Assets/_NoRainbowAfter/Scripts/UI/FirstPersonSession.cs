@@ -20,6 +20,12 @@ namespace NoRainbowAfter.UI
         [SerializeField] private GameObject staminaRoot;
         [SerializeField] private RectTransform staminaFill;
         [SerializeField] private GameObject gameplayHud;
+        [SerializeField] private CircularViewMask viewMask;
+        [SerializeField] private Toggle circularViewToggle;
+        [SerializeField] private Slider viewRadius;
+        [SerializeField] private Text viewRadiusLabel;
+        private bool circularViewEnabled;
+        private float circularViewRadius;
         public bool IsPaused { get; private set; }
 
         private void Awake()
@@ -29,6 +35,18 @@ namespace NoRainbowAfter.UI
                 PlayerPrefs.GetFloat("NRA.FieldOfView", motor.FieldOfView));
             sensitivity.SetValueWithoutNotify(motor.MouseSensitivity);
             fov.SetValueWithoutNotify(motor.FieldOfView);
+            circularViewEnabled = PlayerPrefs.GetInt("NRA.CircularViewEnabled", 1) != 0;
+            circularViewRadius = Mathf.Clamp(PlayerPrefs.GetFloat("NRA.CircularViewRadius", 0.50f), 0.45f, 0.80f);
+            if (circularViewToggle != null)
+            {
+                circularViewToggle.SetIsOnWithoutNotify(circularViewEnabled);
+                circularViewToggle.onValueChanged.AddListener(OnCircularViewChanged);
+            }
+            if (viewRadius != null)
+            {
+                viewRadius.SetValueWithoutNotify(circularViewRadius);
+                viewRadius.onValueChanged.AddListener(OnViewRadiusChanged);
+            }
             UpdateLabels();
             sensitivity.onValueChanged.AddListener(_ => ApplySettings());
             fov.onValueChanged.AddListener(_ => ApplySettings());
@@ -71,6 +89,7 @@ namespace NoRainbowAfter.UI
             player.SetPaused(paused);
             pausePanel.SetActive(paused);
             gameplayHud.SetActive(!paused);
+            ApplyCircularView();
             if (paused && EventSystem.current != null)
                 EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
             else PlayerPrefs.Save();
@@ -88,6 +107,29 @@ namespace NoRainbowAfter.UI
         {
             sensitivityLabel.text = "Sensitivitas mouse  " + motor.MouseSensitivity.ToString("F2");
             fovLabel.text = "Bidang pandang  " + Mathf.RoundToInt(motor.FieldOfView) + "°";
+            if (viewRadiusLabel != null)
+                viewRadiusLabel.text = "Lebar pandang  " + Mathf.RoundToInt(circularViewRadius * 100f) + "%";
+        }
+
+        private void OnCircularViewChanged(bool enabled)
+        {
+            circularViewEnabled = enabled;
+            PlayerPrefs.SetInt("NRA.CircularViewEnabled", enabled ? 1 : 0);
+            ApplyCircularView();
+        }
+
+        private void OnViewRadiusChanged(float radius)
+        {
+            circularViewRadius = Mathf.Clamp(radius, 0.45f, 0.80f);
+            PlayerPrefs.SetFloat("NRA.CircularViewRadius", circularViewRadius);
+            UpdateLabels();
+            ApplyCircularView();
+        }
+
+        private void ApplyCircularView()
+        {
+            if (viewMask != null)
+                viewMask.ApplySettings(circularViewEnabled && !IsPaused, circularViewRadius);
         }
 
         private void ReturnToMenu()
