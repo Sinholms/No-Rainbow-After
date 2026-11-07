@@ -327,7 +327,9 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 **Checks:** clean deformation topology at joints; transforms applied; UV clean; 2K base maps initially (only if justified), LOD0 ~20–40k triangles **as starting target not guarantee**; LOD1 optional after profile; silhouette approved in fog and without fog; eight animations have no T-pose or clipping; normals and backfaces correct; reflections visible but not too glossy; prefab runs T06/T11 events unchanged.
 
-**Reference image:** `Docs/References/Untitled.png` exists in the audited workspace; inspect its content before using it as a creature reference. The previously suggested `Docs/References/rain_soaked_corridor_nightmare.png` is not present. Do not assume the two filenames identify the same artwork. Neither a reference image nor this specification constitutes a completed monster mesh/rig.
+**Reference image (LOCKED CANONICAL TURNAROUND FOR T13):**
+- **`Docs/References/Raka’s Manifestation Character Turnaround.png`** (`1672×941`, 5 views: `FRONT`, `LEFT SIDE`, `BACK`, `RIGHT SIDE`, `FRONT THREE-QUARTER`) is the **user-approved locked character design ("design fix")** for Raka's manifestation (`ACT_Shadow_Raka` / `ACT_001_ShadowRakaFinal`). When executing **T13**, the agent **must** load this turnaround in Blender and rebuild the final rigged 3D character to match its proportions, blindfold + temple paper slips, wet long hair, torn student shirt with circled red `"F"` mark, X-crossed leather harness & waist belts, hip academic/overtime paper sheets, tattered pleated lower wrap, asymmetric left shin guard + right thigh strap, and elongated hands/fingers as closely as possible (full breakdown in `Docs/References/ACT_Shadow_Raka_Turnaround_Spec.md`), while preserving GDD non-gore rules and T06/T11 gameplay capsule/doorway clearance.
+- `Docs/References/Untitled.png` remains available as an atmospheric corridor mood reference (`Docs/References/rain_soaked_corridor_nightmare.png` is not present; do not assume identical filenames). Neither reference image constitutes a completed monster mesh/rig until modeled and rigged in Blender during T13.
 
 ---
 

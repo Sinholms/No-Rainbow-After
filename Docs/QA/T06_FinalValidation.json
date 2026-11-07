@@ -42,8 +42,8 @@
   "humanPhysicalPlaytestExecuted": false,
   "preservedUserFiles": {
     "ProjectSettings/ProjectSettings.asset": "0CF6715193CCA1DE9CF0C77AE8E198AF3A02C5C2F9F59341CCF91DE31A6CA535",
-    "ProjectSettings/UnityConnectSettings.asset": "C3DBB998537BC5C0357729E0EA4554AE78213E38A6E3BCE52FA300E0090E81FF",
-    "Docs/References/Raka’s Manifestation Character Turnaround.png": "preserved untracked (user reference file)"
+    "ProjectSettings/UnityConnectSettings.asset": "C3DBB998537BC5C0357729E0EA4554AE78213E38A6E3BCE52FA300E0090E81FF"
   },
+  "lockedCharacterTurnaroundForT13": "Docs/References/Raka’s Manifestation Character Turnaround.png",
   "playerClueProfileUntouched": true
 }

@@ -213,9 +213,16 @@ Acceptance: QA09-QA11 from GDD pass in Windows build.
 
 ```text
 Task T13 only. Build ORIGINAL ACT_Shadow_Raka asset from GDD section 7.1A.
-Use the provided concept image only if it is actually accessible in workspace.
-Do not falsely claim a referenced image was imported; ask for asset placement
-if it is absent. No copied franchise monsters or downloaded unreviewed meshes.
+LOCKED TURNAROUND REFERENCE (WAJIB DIIKUTI):
+- Use `Docs/References/Raka’s Manifestation Character Turnaround.png` (5-view turnaround:
+  FRONT, LEFT SIDE, BACK, RIGHT SIDE, FRONT THREE-QUARTER) and the detailed breakdown in
+  `Docs/References/ACT_Shadow_Raka_Turnaround_Spec.md` as the user-approved locked design fix.
+- Rebuild the 3D mesh, proportions (HEAD / SHOULDER / WAIST / KNEE / FEET), blindfold + temple
+  paper slips, long wet hair, torn shirt with circled red 'F' academic mark, X-back / diagonal
+  chest leather straps, waist belt academic paper sheets, tattered pleated lower wrap,
+  asymmetric left shin guard + right thigh strap, and elongated hands/fingers in Blender as
+  faithfully as possible to this turnaround while keeping GDD non-gore limits and T06 doorway/capsule compatibility.
+No copied franchise monsters or downloaded unreviewed meshes.
 
 VISUAL LOCK:
 - Humanoid distorted black silhouette, 2.25–2.45 m overall including slouch;
