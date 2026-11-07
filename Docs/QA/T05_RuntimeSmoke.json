@@ -1,0 +1,27 @@
+{
+  "isPlaying": true,
+  "BeatIndex": 3,
+  "LoopIndex": 3,
+  "paused": true,
+  "checkpointReturned": true,
+  "book": true,
+  "overtime": true,
+  "clues": [
+    "CLUE_02"
+  ],
+  "loadedClues": [
+    "CLUE_02"
+  ],
+  "awaitingEncounter": true,
+  "completedObjectives": [
+    "objective.book",
+    "objective.overtime"
+  ],
+  "fog": 0.0165599883,
+  "light": 0.5920006,
+  "notePosition": "(1.49, 0.81, 3.60)",
+  "slipPosition": "(1.51, 0.81, 3.92)",
+  "storageStatus": "Ready",
+  "width": 1920,
+  "height": 1080
+}

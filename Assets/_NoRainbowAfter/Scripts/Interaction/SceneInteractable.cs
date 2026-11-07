@@ -12,7 +12,7 @@ namespace NoRainbowAfter.Interaction
         void Interact(PlayerInteractor interactor);
     }
 
-    // Runtime-only seam for a future narrative director; no persistence or clue registry.
+    // Session objective flags remain independent of the T05 clue profile.
     public interface IObjectiveFlags { bool Set(string flag); bool Contains(string flag); }
     public sealed class SessionObjectiveFlags : IObjectiveFlags
     {
@@ -39,6 +39,7 @@ namespace NoRainbowAfter.Interaction
             interactor.Flags.Set(objectiveFlag);
             used = true;
             interactor.ShowInspection(title, body);
+            interactor.NotifyInteraction(stableId);
         }
     }
 }

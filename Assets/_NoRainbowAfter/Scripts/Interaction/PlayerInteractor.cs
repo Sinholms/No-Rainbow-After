@@ -15,6 +15,8 @@ namespace NoRainbowAfter.Interaction
         private Text reticle, prompt, heading, body;
         private GameObject overlay;
         public IObjectiveFlags Flags { get; set; } = new SessionObjectiveFlags();
+        public event System.Action<string> InteractionCompleted;
+        public void NotifyInteraction(string stableId) => InteractionCompleted?.Invoke(stableId);
         public bool IsInspecting => overlay != null && overlay.activeSelf;
         public IInteractable Focused => focused;
 

@@ -44,6 +44,7 @@ namespace NoRainbowAfter.Player
         private bool crouchRequested;
         private bool exhausted;
 
+        public event System.Action PoseRestored;
         public Camera ViewCamera => viewCamera;
         public float FieldOfView => fieldOfView;
         public float MouseSensitivity => mouseSensitivity;
@@ -159,6 +160,7 @@ namespace NoRainbowAfter.Player
             crouchRequested = false; IsCrouched = false; IsSprinting = false;
             viewCamera.transform.localRotation = Quaternion.identity;
             UpdateEyeHeight();
+            PoseRestored?.Invoke();
             return true;
         }
 

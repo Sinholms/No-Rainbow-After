@@ -1,0 +1,33 @@
+using System;
+using NoRainbowAfter.Interaction;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace NoRainbowAfter.Narrative
+{
+    public sealed class ObjectiveTracker : MonoBehaviour
+    {
+        [SerializeField] private ChapterDirector director;
+        [SerializeField] private PlayerInteractor interactor;
+        [SerializeField] private Text objective, hint;
+        private static readonly string[] KnownFlags = { "objective.book", "objective.overtime", "objective.doorChecked" };
+        public event Action<string> ObjectiveCompleted;
+        public void Configure(ChapterDirector source, PlayerInteractor interaction, Text title, Text detail)
+        { director = source; interactor = interaction; objective = title; hint = detail; }
+        public bool IsCompleted(string flag) => director != null && director.State != null && director.State.HasObjective(flag);
+        private void Update()
+        {
+            if (director == null || interactor == null || director.State == null) return;
+            foreach (string flag in KnownFlags)
+                if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag)) ObjectiveCompleted?.Invoke(flag);
+            if (objective != null) objective.text = "Bersiap berangkat";
+            if (hint == null) return;
+            if (director.BeatIndex >= 6) hint.text = "";
+            else if (!interactor.Flags.Contains("objective.book")) hint.text = "Ambil buku di meja. Arahkan pandangan ke buku dan tekan E.";
+            else if (director.LoopIndex == 0) hint.text = "Telusuri lorong, lalu kembali ke kamar.";
+            else if (!interactor.Flags.Contains("objective.overtime")) hint.text = "Periksa slip lembur di kamar.";
+            else if (director.BeatIndex < 4) hint.text = "Kembali ke lorong.";
+            else hint.text = "Hadapi atau hindari sosok di lorong.";
+        }
+    }
+}

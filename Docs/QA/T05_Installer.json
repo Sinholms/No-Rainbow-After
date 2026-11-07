@@ -1,0 +1,12 @@
+{
+  "directors": 1,
+  "trackers": 1,
+  "subtitles": 1,
+  "atmosphere": 1,
+  "pivots": 2,
+  "movingParts": 9,
+  "staticMovingParts": 0,
+  "notePrefabLinked": true,
+  "noteParent": "ENV_KosAtmosphere",
+  "dirty": false
+}

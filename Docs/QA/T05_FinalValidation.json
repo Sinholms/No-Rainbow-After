@@ -1,0 +1,17 @@
+{
+  "scene": "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+  "isDirty": false,
+  "playing": false,
+  "compiling": false,
+  "missingScripts": 0,
+  "players": 1,
+  "cameras": 1,
+  "timeScale": 1.0,
+  "fog": 0.012,
+  "notePosition": "(1.40, 0.81, 3.60)",
+  "consoleErrors": 0,
+  "consoleWarnings": 0,
+  "buildJob": "build-231fcc15e7",
+  "standaloneLaunched": false,
+  "performanceMeasured": false
+}

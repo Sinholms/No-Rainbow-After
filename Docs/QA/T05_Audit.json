@@ -1,0 +1,516 @@
+{
+  "props": [
+    {
+      "name": "SM_ENV_DoorHeader",
+      "position": "(0.00, 2.42, 5.08)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_ENV_DoorWall",
+      "position": "(-1.27, 1.35, 5.08)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_ENV_DoorWall.001",
+      "position": "(1.27, 1.35, 5.08)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_PROP_BookPages",
+      "position": "(0.91, 0.82, 3.82)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_BookPages.001",
+      "position": "(0.91, 0.87, 3.82)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_BookPages.002",
+      "position": "(0.91, 0.91, 3.82)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_CabinetDoor",
+      "position": "(-1.83, 0.86, 8.97)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.001",
+      "position": "(-1.83, 0.86, 9.43)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.002",
+      "position": "(1.83, 0.86, 12.87)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_CabinetDoor.003",
+      "position": "(1.83, 0.86, 13.33)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorHandle",
+      "position": "(-0.17, 1.06, 5.72)",
+      "rotation": "(270.00, 105.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorHandlePlate",
+      "position": "(-0.20, 1.02, 5.70)",
+      "rotation": "(270.00, 105.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorJamb",
+      "position": "(-0.50, 1.06, 5.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorJamb.001",
+      "position": "(0.50, 1.06, 5.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorLintel",
+      "position": "(0.00, 2.09, 5.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorRaisedPanel",
+      "position": "(-0.30, 0.48, 5.40)",
+      "rotation": "(270.00, 105.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_DoorRaisedPanel.001",
+      "position": "(-0.30, 1.40, 5.40)",
+      "rotation": "(270.00, 105.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor",
+      "position": "(0.89, 1.03, 7.10)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider",
+        "SceneInteractable"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor.001",
+      "position": "(-0.89, 1.03, 11.10)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallClosedDoor.002",
+      "position": "(0.89, 1.03, 15.40)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb",
+      "position": "(0.87, 1.05, 6.62)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.001",
+      "position": "(0.87, 1.05, 7.58)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.002",
+      "position": "(-0.87, 1.05, 10.62)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.003",
+      "position": "(-0.87, 1.05, 11.58)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.004",
+      "position": "(0.87, 1.05, 14.92)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorJamb.005",
+      "position": "(0.87, 1.05, 15.88)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob",
+      "position": "(0.84, 1.00, 7.40)",
+      "rotation": "(270.00, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob.001",
+      "position": "(-0.84, 1.00, 11.40)",
+      "rotation": "(270.00, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorKnob.002",
+      "position": "(0.84, 1.00, 15.70)",
+      "rotation": "(270.00, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorTop",
+      "position": "(0.87, 2.10, 7.10)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorTop.001",
+      "position": "(-0.87, 2.10, 11.10)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_HallDoorTop.002",
+      "position": "(0.87, 2.10, 15.40)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesHeading",
+      "position": "(1.23, 0.82, 3.67)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesLine",
+      "position": "(0.00, 0.00, 0.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesLine.001",
+      "position": "(0.00, 0.00, 0.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesLine.002",
+      "position": "(0.00, 0.00, 0.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesLine.003",
+      "position": "(0.00, 0.00, 0.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_NotesLine.004",
+      "position": "(0.00, 0.00, 0.00)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_OpenDormDoor",
+      "position": "(-0.33, 1.01, 5.40)",
+      "rotation": "(270.00, 105.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider"
+      ]
+    },
+    {
+      "name": "SM_PROP_OpenNotes",
+      "position": "(1.40, 0.81, 3.60)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    },
+    {
+      "name": "SM_PROP_WorkSlip",
+      "position": "(1.45, 0.81, 3.92)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer",
+        "BoxCollider",
+        "SceneInteractable"
+      ]
+    },
+    {
+      "name": "SM_PROP_WorkSlipHeading",
+      "position": "(1.35, 0.82, 3.96)",
+      "rotation": "(270.02, 180.00, 0.00)",
+      "components": [
+        "Transform",
+        "MeshFilter",
+        "MeshRenderer"
+      ]
+    }
+  ],
+  "lights": [
+    {
+      "name": "Corridor Far",
+      "intensity": 0.65,
+      "color": "RGBA(0.250, 0.420, 0.600, 1.000)"
+    },
+    {
+      "name": "Room Fluorescent",
+      "intensity": 0.75,
+      "color": "RGBA(0.650, 0.720, 0.630, 1.000)"
+    },
+    {
+      "name": "Corridor Near",
+      "intensity": 0.8,
+      "color": "RGBA(0.640, 0.710, 0.530, 1.000)"
+    },
+    {
+      "name": "Window Spill",
+      "intensity": 1.2,
+      "color": "RGBA(0.200, 0.430, 0.680, 1.000)"
+    },
+    {
+      "name": "Desk Lamp",
+      "intensity": 2.5,
+      "color": "RGBA(1.000, 0.640, 0.340, 1.000)"
+    },
+    {
+      "name": "Player View Light",
+      "intensity": 3.0,
+      "color": "RGBA(1.000, 0.910, 0.780, 1.000)"
+    },
+    {
+      "name": "Corridor Middle",
+      "intensity": 0.55,
+      "color": "RGBA(0.720, 0.450, 0.260, 1.000)"
+    }
+  ],
+  "fog": {
+    "fog": true,
+    "fogDensity": 0.012,
+    "color": "RGBA(0.025, 0.035, 0.045, 1.000)"
+  },
+  "missing": 0,
+  "build": [
+    {
+      "path": "Assets/_NoRainbowAfter/Scenes/Boot.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_NoRainbowAfter/Scenes/MainMenu.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_NoRainbowAfter/Scenes/Credits.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/Scenes/SampleScene.unity",
+      "enabled": true
+    },
+    {
+      "path": "Assets/_NoRainbowAfter/Scenes/FirstPersonTest.unity",
+      "enabled": true
+    }
+  ],
+  "date": "2026-11-07",
+  "baselineCommit": "197433a",
+  "unityVersion": "6000.6.8f1",
+  "renderPipeline": "URP 17.6.0",
+  "inputSystem": "1.20.1",
+  "initialUserChanges": [
+    "ProjectSettings/ProjectSettings.asset",
+    "ProjectSettings/UnityConnectSettings.asset"
+  ],
+  "sourceAuthority": "GDD v1.1 DOCX textual paragraphs and tables read directly via OOXML; mirror compared for relevant C1 beats. DOCX artwork/layout not rendered; no DOCX edit.",
+  "initialSceneDirty": false,
+  "initialConsoleWarningsOrErrors": 0
+}

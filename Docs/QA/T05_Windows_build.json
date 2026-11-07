@@ -1,0 +1,14 @@
+{
+  "job_id": "build-231fcc15e7",
+  "result": "succeeded",
+  "platform": "StandaloneWindows64",
+  "output_path": "Builds/T05NarrativePreview/NoRainbowAfter.exe",
+  "started_at": "2026-11-07T04:09:18.4322926Z",
+  "duration_seconds": 8.5284848,
+  "completed_at": "2026-11-07T04:09:26.9607774Z",
+  "total_size_mb": 132,
+  "errors": 0,
+  "warnings": 0,
+  "standaloneLaunched": false,
+  "performanceMeasured": false
+}
