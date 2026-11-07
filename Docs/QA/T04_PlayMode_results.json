@@ -1,0 +1,272 @@
+{
+  "result": {
+    "success": true,
+    "message": "Test job status retrieved.",
+    "error": null,
+    "data": {
+      "job_id": "38dbf0593fd84da8884d796cf888bc32",
+      "status": "succeeded",
+      "mode": "PlayMode",
+      "started_unix_ms": 1794022353611,
+      "finished_unix_ms": 1794022376816,
+      "last_update_unix_ms": 1794022376816,
+      "progress": {
+        "completed": 25,
+        "total": 25,
+        "current_test_full_name": null,
+        "current_test_started_unix_ms": null,
+        "last_finished_test_full_name": "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.PauseStopsPlayerAndHidesCircularMask",
+        "last_finished_unix_ms": 1794022376748,
+        "stuck_suspected": false,
+        "editor_is_focused": false,
+        "run_in_background": false,
+        "focus_nudge_attempts": null,
+        "focus_nudge_limit": null,
+        "focus_nudge_status": null,
+        "blocked_reason": null,
+        "failures_so_far": [],
+        "failures_capped": false
+      },
+      "error": null,
+      "result": {
+        "mode": "PlayMode",
+        "summary": {
+          "total": 25,
+          "passed": 25,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 17.958015,
+          "resultState": "Passed"
+        },
+        "results": [
+          {
+            "name": "InteractionRecastsWhenNewWallAppears",
+            "fullName": "InteractionSceneTests.InteractionRecastsWhenNewWallAppears",
+            "state": "Passed",
+            "durationSeconds": 0.2960555,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "SceneHasThreeUniqueTargetsAndEscapeClosesBeforePause",
+            "fullName": "InteractionSceneTests.SceneHasThreeUniqueTargetsAndEscapeClosesBeforePause",
+            "state": "Passed",
+            "durationSeconds": 0.2980587,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "SlipCanBeTargetedStandingAndCrouchedWithoutSelfOcclusion",
+            "fullName": "InteractionSceneTests.SlipCanBeTargetedStandingAndCrouchedWithoutSelfOcclusion",
+            "state": "Passed",
+            "durationSeconds": 0.1080988,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "ClosestSolidBlocksTargetAndRangeIsLimited",
+            "fullName": "InteractionTests.ClosestSolidBlocksTargetAndRangeIsLimited",
+            "state": "Passed",
+            "durationSeconds": 0.0034886,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "ObjectiveFlagsAreUnique",
+            "fullName": "InteractionTests.ObjectiveFlagsAreUnique",
+            "state": "Passed",
+            "durationSeconds": 0.0003476,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "OnlyOwnHierarchyIsIgnored",
+            "fullName": "InteractionTests.OnlyOwnHierarchyIsIgnored",
+            "state": "Passed",
+            "durationSeconds": 0.0014924,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "TriggersDoNotBlockButIgnoreRaycastLayerSolidsDo",
+            "fullName": "InteractionTests.TriggersDoNotBlockButIgnoreRaycastLayerSolidsDo",
+            "state": "Passed",
+            "durationSeconds": 0.0012114,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "CheckpointRestoresPoseWithoutErasingBookOrChangingInspectionAndPause",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneSceneTests.CheckpointRestoresPoseWithoutErasingBookOrChangingInspectionAndPause",
+            "state": "Passed",
+            "durationSeconds": 0.0969059,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "DormCorridorBothCoverZonesAndReturnAreTraversable",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneSceneTests.DormCorridorBothCoverZonesAndReturnAreTraversable",
+            "state": "Passed",
+            "durationSeconds": 16.4623201,
+            "message": null,
+            "stackTrace": null,
+            "output": "[T04 test] Simulated route traversal: 313.5 seconds.\r\n"
+          },
+          {
+            "name": "InteractUsesEAndCannotFireWhileGameplayLocked",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.InteractUsesEAndCannotFireWhileGameplayLocked",
+            "state": "Passed",
+            "durationSeconds": 0.0611499,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "MouseDeltaReachesLookWithoutSpeedScaling",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.MouseDeltaReachesLookWithoutSpeedScaling",
+            "state": "Passed",
+            "durationSeconds": 0.018147,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "PauseStopsGameplayInputButEscapeStillWorksForResume",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.PauseStopsGameplayInputButEscapeStillWorksForResume",
+            "state": "Passed",
+            "durationSeconds": 0.0138288,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "WasdShiftAndLeftCtrlReachTheMotorFrame",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonInputTests.WasdShiftAndLeftCtrlReachTheMotorFrame",
+            "state": "Passed",
+            "durationSeconds": 0.0225075,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "BlenderLabSupportsCrouchRampStairsAndDoorway",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonLabTests.BlenderLabSupportsCrouchRampStairsAndDoorway",
+            "state": "Passed",
+            "durationSeconds": 0.1423956,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "CharacterControllerStopsAtWallAndStaysOnFloor",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CharacterControllerStopsAtWallAndStaysOnFloor",
+            "state": "Passed",
+            "durationSeconds": 0.0106759,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+            "state": "Passed",
+            "durationSeconds": 0.0026107,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "DiagonalMovementHasSameSpeedAsForward",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.DiagonalMovementHasSameSpeedAsForward",
+            "state": "Passed",
+            "durationSeconds": 0.0021846,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+            "state": "Passed",
+            "durationSeconds": 0.0024469,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "HoldingSprintWhileIdleDoesNotUseStamina",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.HoldingSprintWhileIdleDoesNotUseStamina",
+            "state": "Passed",
+            "durationSeconds": 0.0018298,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+            "state": "Passed",
+            "durationSeconds": 0.0016852,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn",
+            "state": "Passed",
+            "durationSeconds": 0.0024794,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "SprintLastsFiveSecondsThenWalksAndRecharges",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.SprintLastsFiveSecondsThenWalksAndRecharges",
+            "state": "Passed",
+            "durationSeconds": 0.0040463,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+            "fullName": "NoRainbowAfter.Tests.FirstPersonMotorTests.StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+            "state": "Passed",
+            "durationSeconds": 0.0030969,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "GameplaySceneHasOnePlayerAndPassableDoorway",
+            "fullName": "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.GameplaySceneHasOnePlayerAndPassableDoorway",
+            "state": "Passed",
+            "durationSeconds": 0.1420917,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "PauseStopsPlayerAndHidesCircularMask",
+            "fullName": "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.PauseStopsPlayerAndHidesCircularMask",
+            "state": "Passed",
+            "durationSeconds": 0.1229055,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          }
+        ]
+      }
+    },
+    "hint": null
+  }
+}

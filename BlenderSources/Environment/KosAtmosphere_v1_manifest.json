@@ -1412,5 +1412,6 @@
     14,
     2.7
   ],
-  "source": "Blender 5.2.3 LTS, original geometry; wall and wood albedos from built-in imagegen, other maps procedural"
+  "source": "Blender 5.2.3 LTS, original geometry; wall and wood albedos from built-in imagegen, other maps procedural",
+  "revision": "T04: deeper cover niches, relocated cabinets, extended ceiling"
 }

@@ -1,0 +1,18 @@
+{
+  "date": "2026-11-07",
+  "task": "T04",
+  "baselineCommit": "ce291e3",
+  "unity": "6000.6.8f1",
+  "pipeline": "URP 17.6.0",
+  "initialScene": "MasterGameplay",
+  "initialSceneDirty": false,
+  "initialConsoleWarnings": 0,
+  "initialConsoleErrors": 0,
+  "initialUserChanges": ["ProjectSettings/ProjectSettings.asset", "ProjectSettings/UnityConnectSettings.asset"],
+  "backupDirectory": "Temp/T04Baseline (ignored)",
+  "existingArt": {"roomMetres": [4, 5, 2.7], "corridorMetres": [1.8, 14, 2.7], "meshes": 226, "triangles": 63128},
+  "missingBeforeT04": ["Chapter1Root", "initial objective guidance", "session checkpoint", "cover markers", "usable clear space in cabinet niches"],
+  "blenderConnectionVerified": true,
+  "workflowException": "Reuse user-approved Blender art; primitives-only instruction applies to physics tests, not replacement of presented kos",
+  "scope": "T04 route, collision, spawn, checkpoint and cover geometry only; no narrative loops, monster hiding resolution or save implementation"
+}

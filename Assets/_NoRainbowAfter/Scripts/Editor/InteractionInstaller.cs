@@ -22,7 +22,11 @@ namespace NoRainbowAfter.Editor
             if (!scene.isLoaded) throw new InvalidOperationException("Open MasterGameplay first.");
             GameObject environment = null, player = null;
             foreach (var root in scene.GetRootGameObjects())
-            { if (root.name == "ENV_KosAtmosphere") environment = root; if (root.name == "Player_Raka_FPP") player = root; }
+            {
+                var env = Find(root.transform, "ENV_KosAtmosphere");
+                if (env != null) environment = env.gameObject;
+                if (root.name == "Player_Raka_FPP") player = root;
+            }
             if (environment == null || player == null || player.GetComponent<FirstPersonPlayer>() == null) throw new InvalidOperationException("Kos environment or player missing.");
             var book = Find(environment.transform, "SM_PROP_StackedTextbook");
             var slip = Find(environment.transform, "SM_PROP_WorkSlip");

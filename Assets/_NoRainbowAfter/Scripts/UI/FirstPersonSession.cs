@@ -1,4 +1,5 @@
 using NoRainbowAfter.Core;
+using NoRainbowAfter.Level;
 using NoRainbowAfter.Player;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -13,6 +14,8 @@ namespace NoRainbowAfter.UI
         [SerializeField] private GameObject pausePanel;
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button menuButton;
+        [SerializeField] private Button checkpointButton;
+        [SerializeField] private DormCheckpoint checkpoint;
         [SerializeField] private Slider sensitivity;
         [SerializeField] private Slider fov;
         [SerializeField] private Text sensitivityLabel;
@@ -52,6 +55,8 @@ namespace NoRainbowAfter.UI
             fov.onValueChanged.AddListener(_ => ApplySettings());
             resumeButton.onClick.AddListener(() => SetPaused(false));
             menuButton.onClick.AddListener(ReturnToMenu);
+            if (checkpointButton != null && checkpoint != null)
+                checkpointButton.onClick.AddListener(RestoreCheckpoint);
             pausePanel.SetActive(false);
         }
 
@@ -146,6 +151,16 @@ namespace NoRainbowAfter.UI
         {
             Time.timeScale = 1;
             SceneFlow.EnsureInstance().Load(GameScene.MainMenu);
+        }
+
+        private void RestoreCheckpoint()
+        {
+            var label = checkpointButton.GetComponentInChildren<Text>();
+            if (checkpoint.TryRestore())
+            {
+                if (label != null) label.text = "Kembali ke titik awal";
+            }
+            else if (label != null) label.text = "Titik awal terhalang";
         }
     }
 }

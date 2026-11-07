@@ -1,0 +1,14 @@
+{
+  "job_id": "build-a78192ee1e",
+  "result": "succeeded",
+  "platform": "StandaloneWindows64",
+  "output_path": "Builds/T04RoutePreview/NoRainbowAfter.exe",
+  "started_at": "2026-11-07T03:33:56.3597840Z",
+  "duration_seconds": 23.5879801,
+  "completed_at": "2026-11-07T03:34:19.9477641Z",
+  "total_size_mb": 131.98,
+  "errors": 0,
+  "warnings": 0,
+  "standaloneLaunched": false,
+  "performanceMeasured": false
+}

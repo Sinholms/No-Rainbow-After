@@ -202,14 +202,14 @@ def structure():
     for x in [-1.27,1.27]:box('SM_ENV_DoorWall',(x,5.08,1.35),(1.46,0.18,2.7),'Wall',0,'box')
     box('SM_ENV_DoorHeader',(0,5.08,2.42),(1.08,0.18,0.56),'Wall',0,'box')
     box('SM_ENV_CorridorFloor',(0,12,-0.10),(2.0,14.2,0.2),'Floor',0,'box')
-    box('SM_ENV_CorridorCeiling',(0,12,2.76),(2.15,14.2,0.14),'Wall',0,'box')
+    box('SM_ENV_CorridorCeiling',(0,12,2.76),(4.80,14.2,0.14),'Wall',0,'box')
     # Small occluded side pockets, following design.md's readable corridor/cover layout.
     for side,gap in [(-1,(8.2,9.8)),(1,(12.2,13.8))]:
         for start,end in [(5,gap[0]),(gap[1],19)]:
             box('SM_ENV_CorridorWall',(side*0.99,(start+end)/2,1.35),(0.18,end-start,2.7),'Wall',0,'box')
-        box('SM_ENV_NicheBack',(side*1.65,sum(gap)/2,1.35),(0.18,gap[1]-gap[0]+0.18,2.7),'Wall',0,'box')
-        box('SM_ENV_NicheFloor',(side*1.25,sum(gap)/2,-0.1),(0.9,1.8,0.2),'Floor',0,'box')
-        for y in gap:box('SM_ENV_NicheEnd',(side*1.32,y,1.35),(0.74,0.18,2.7),'Wall',0,'box')
+        box('SM_ENV_NicheBack',(side*2.25,sum(gap)/2,1.35),(0.18,gap[1]-gap[0]+0.18,2.7),'Wall',0,'box')
+        box('SM_ENV_NicheFloor',(side*1.55,sum(gap)/2,-0.1),(1.50,1.8,0.2),'Floor',0,'box')
+        for y in gap:box('SM_ENV_NicheEnd',(side*1.62,y,1.35),(1.34,0.18,2.7),'Wall',0,'box')
     box('SM_ENV_CorridorEnd',(0,19.08,1.35),(2.15,0.18,2.7),'Wall',0,'box')
     for x in [-1.97,1.97]:box('SM_ENV_RoomSkirting',(x,2.5,0.055),(0.045,5,0.11),'Wood',0.006)
     for x in [-0.87,0.87]:box('SM_ENV_HallSkirting',(x,12,0.055),(0.045,14,0.11),'Wood',0.006)
@@ -361,7 +361,7 @@ def dressing():
         box('SM_PROP_HallDoorTop',(x-side*0.02,y,2.10),(0.075,1.02,0.08),'Wood',0.008)
         ellipsoid('SM_PROP_HallDoorKnob',(x-side*0.05,y+0.3,1.0),(0.028,0.028,0.028),'Metal')
     # Repaired utility cupboards sit within the two cover pockets.
-    for x,y in [(-1.44,9.2),(1.44,13.1)]:
+    for x,y in [(-2.02,9.2),(2.02,13.1)]:
         box('SM_PROP_UtilityCabinet',(x,y,0.82),(0.36,0.95,1.64),'Metal',0.018,'box')
         for yy in [y-0.23,y+0.23]:
             box('SM_PROP_CabinetDoor',(x-math.copysign(0.19,x),yy,0.86),(0.018,0.43,1.5),'Metal',0.006)

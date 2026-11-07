@@ -21,6 +21,25 @@ namespace NoRainbowAfter.Tests
         }
 
         [Test]
+        public void RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn()
+        {
+            var motor = Actor(origin + Vector3.forward * 5);
+            var block = Box("SpawnBlock", origin + Vector3.up, new Vector3(1, 2, 1));
+            Physics.SyncTransforms();
+            Vector3 before = motor.transform.position;
+            Assert.That(motor.TryRestorePose(origin, Quaternion.identity), Is.False);
+            Assert.That(motor.transform.position, Is.EqualTo(before));
+            Object.DestroyImmediate(block);
+            Physics.SyncTransforms();
+            motor.Simulate(new FirstPersonFrame { CrouchPressed = true, Look = new Vector2(50, 80) }, .02f);
+            Assert.That(motor.TryRestorePose(origin, Quaternion.Euler(0, 10, 0)), Is.True);
+            Assert.That(motor.transform.position, Is.EqualTo(origin));
+            Assert.That(motor.Pitch, Is.Zero);
+            Assert.That(motor.IsCrouched, Is.False);
+            Assert.That(motor.GetComponent<CharacterController>().height, Is.EqualTo(1.8f).Within(.01f));
+        }
+
+        [Test]
         public void CharacterControllerStopsAtWallAndStaysOnFloor()
         {
             var motor = Actor(origin);
@@ -146,12 +165,13 @@ namespace NoRainbowAfter.Tests
             return motor;
         }
 
-        private void Box(string name, Vector3 position, Vector3 size)
+        private GameObject Box(string name, Vector3 position, Vector3 size)
         {
             var obj = new GameObject(name); objects.Add(obj);
             obj.transform.position = position;
             obj.AddComponent<BoxCollider>().size = size;
             Physics.SyncTransforms();
+            return obj;
         }
 
         private static void Tick(FirstPersonMotor motor, FirstPersonFrame input, int count)

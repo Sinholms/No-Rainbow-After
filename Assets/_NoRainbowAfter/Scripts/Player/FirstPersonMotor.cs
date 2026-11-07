@@ -140,6 +140,28 @@ namespace NoRainbowAfter.Player
             return count < overlaps.Length;
         }
 
+        public bool TryRestorePose(Vector3 position, Quaternion rotation)
+        {
+            if (controller == null || !controller.enabled || viewCamera == null) return false;
+            float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
+            int count = Physics.OverlapCapsuleNonAlloc(position + Vector3.up * (radius + 0.05f),
+                position + Vector3.up * (standingHeight - radius), radius, overlaps, obstructionMask,
+                QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < count; i++)
+                if (overlaps[i] != null && overlaps[i] != controller && !overlaps[i].transform.IsChildOf(transform)) return false;
+            if (count >= overlaps.Length) return false;
+            controller.enabled = false;
+            transform.SetPositionAndRotation(position, rotation);
+            controller.height = standingHeight;
+            controller.center = Vector3.up * (standingHeight * 0.5f);
+            controller.enabled = true;
+            horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f;
+            crouchRequested = false; IsCrouched = false; IsSprinting = false;
+            viewCamera.transform.localRotation = Quaternion.identity;
+            UpdateEyeHeight();
+            return true;
+        }
+
         public void StopMotion()
         {
             horizontalVelocity = Vector3.zero;
