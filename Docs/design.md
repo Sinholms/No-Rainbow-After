@@ -1,14 +1,14 @@
 # NO RAINBOW AFTER — WORLD, CHARACTER & ASSET DESIGN BIBLE
 
 **Document:** `design.md`  
-**Version:** 1.1-compatible / Production Design v1.0  
-**Date:** 2026-11-06  
-**Project:** First-person psychological horror / PC Windows / Unity 6 / HDRP target / Blender  
+**Version:** 1.1-compatible / Production Design v1.1\
+**Updated:** 2026-11-07 (original: 2026-11-06)\
+**Project:** First-person psychological horror / PC Windows / Unity 6 / installed URP; original HDRP target unresolved / Blender\
 **Companions:** `GDD_No_Rainbow_After_v1_1.docx` + `CODEX_TASKS_No_Rainbow_After_v1_1.md`  
-**Audience:** Game designer, environment artist, technical artist, programmer, Codex agent (Unity MCP / optional Blender MCP).  
+**Audience:** Game designer, environment artist, technical artist, programmer, Codex agents (Unity MCP; Blender required for 3D asset authoring).\
 **Status:** Operational design specification; **new concrete art/layout values in this file are IMPLEMENTATION PROPOSALS**, not amendments to established story canon.
 
-> **Read this first.** `GDD v1.1` owns **story, narrative invariants, gameplay, ending rules, schedule and task IDs**. `CODEX_TASKS v1.1` owns task execution **T00–T16**. This file owns **how worlds, characters, props, materials, visuals and assets should be designed and handed to Unity**. If anything conflicts, GDD wins and the agent must report the conflict before editing. Concept art is a **2D reference**, not a finished 3D mesh. Do not claim a feature or asset exists until inspected in the actual Unity/Blender project.
+> **Read this first.** `GDD v1.1` owns **story, narrative invariants, gameplay, ending rules, schedule and task IDs**. `CODEX_TASKS v1.1` owns task execution **T00–T16**. This file owns **how worlds, characters, props, materials, visuals and assets should be designed and handed to Unity**. Explicit user instructions take precedence; the presentation/workflow decisions recorded below do not amend story canon. Otherwise, report conflicts against the GDD before editing the affected feature. Concept art is a **2D reference**, not a finished 3D mesh. Do not claim a feature or asset exists until inspected in the actual Unity/Blender project.
 
 ---
 
@@ -31,11 +31,38 @@
 
 ### 0.1 What is new in this document?
 
-Everything listed with a specific `size`, `hex color`, `asset filename`, `poly budget`, `lighting configuration` or `blockout layout` is a **proposed implementation default** that should be validated in-editor. Canonical values from GDD—dorm approximately **4 × 5 m**, corridor **12–18 m**, camera height approximately **1.65 m**, standard door height approximately **2.05 m**, FOV starting at **75°**, T00–T16, and clue and ending contracts—remain unchanged.
+Unless explicitly marked **implemented** or **user requirement**, specific `size`, `hex color`, `asset filename`, `poly budget`, `lighting configuration` and `blockout layout` entries are **proposed implementation defaults** to validate in-editor. Canonical values from GDD—dorm approximately **4 × 5 m**, corridor **12–18 m**, camera height approximately **1.65 m**, standard door height approximately **2.05 m**, FOV starting at **75°**, T00–T16, and clue and ending contracts—remain unchanged.
 
 ### 0.2 Asset sources and rights
 
-Only use original models, original audio, legally licensed assets with recorded source/license, or placeholders made by the team. *Silent Hill 2 Remake* is a **quality/mood reference only**, not a source of copied creatures, environments, UI, logo, sound or textures. Do not use the copyrighted Prince song *Purple Rain* without a suitable license. Avoid using real WhatsApp branding/icons; create a fictional messaging UI with familiar functionality.
+Only use original models, original audio, legally licensed assets with recorded source/license, or placeholders made by the team. *Silent Hill 2 Remake* is a **quality/mood reference only**. The user's *Silent Hill f* menu reference guides spacious composition, atmosphere and lighting; *Pacify* guides the requested oppressive first-person mood. These references are not sources of copied creatures, environments, UI, logo, sound or textures, and the circular POV is a user requirement rather than a claim of reproducing Pacify's exact effect. Do not use the copyrighted Prince song *Purple Rain* without a suitable license. Avoid using real WhatsApp branding/icons; create a fictional messaging UI with familiar functionality.
+
+### 0.3 Implemented baseline — verified handoff, 2026-11-07
+
+This is a dated implementation snapshot, not a claim that the full design below exists. Recheck the live project before further work.
+
+| Area | Implemented state / remaining work |
+|---|---|
+| Editor / renderer | Unity **6000.6.8f1**, **URP 17.6.0**, Input System **1.20.1**. The project originated in URP; no HDRP migration or final fallback decision has been made. |
+| T01 / menu | Boot, MainMenu, MasterGameplay and Credits; original imagegen rainy-kos menu background with live UI. Menu art is 2D; gameplay uses realtime 3D. |
+| T02 / player | True FPP movement, sprint/stamina, crouch/ceiling checks, pause, sensitivity and FOV preferences. `FirstPersonTest.unity` remains an isolated control/debug lab. |
+| Current gameplay art | New Game enters the Blender-authored kos and corridor in `MasterGameplay.unity`, rooted at `ENV_KosAtmosphere`. Room **4 × 5 m**, ceiling **2.7 m**, corridor **14 × 1.8 m**, two side niches. Niches do not yet implement hiding. |
+| Blender assets | `BlenderSources/Environment/KosAtmosphere_v1.blend`, generator and manifest; exported `Assets/_NoRainbowAfter/Art/Models/Environment/ENV_KosAtmosphere_v1.fbx`: **226 meshes / 63,128 triangles**. Bed/cloth, desk/chair, fan, books/notes, window, doors, shoes/bag/umbrella, cables and hallway utility props are present. This remains an initial art pass, not final photorealism approval. |
+| Materials / atmosphere | Six BaseColor/Normal/Mask sets: Wall, Floor, Wood, Cloth, Metal, Paper. Wall/Wood base colors use imagegen; other maps are procedural approximations, not calibrated scans. Warm desk/cold window lighting, camera-follow spotlight, fog, room reflection probe, ACES, light grain and original synthesized rain are implemented. |
+| POV | Aspect-correct circular black mask, soft edge, pause toggle/radius slider and saved preferences; see §11. |
+| Verification | Last art-pass handoff: **14/14 PlayMode tests passed**; Windows x64 Mono preview built with **0 errors / 0 warnings**. Build success and Editor screenshots do not establish standalone FPS or a complete playthrough. |
+| Still pending | T03 interaction/inspect, chapter direction/loops, functional hide/monster, phone/tasks/clues, saves and endings. This art pass does **not** complete T03–T07, T13–T16 or Chapter 1. |
+
+Evidence and limitations: [kos atmosphere handoff](KOS_ATMOSPHERE_HANDOFF.md), [T02 handoff](T02_HANDOFF.md), [PlayMode results](QA/KosAtmosphere_PlayMode_results.json), [Windows build report](QA/KosAtmosphere_Windows_build.json). Build output: `Builds/KosVisualPreview/NoRainbowAfter.exe` (local, ignored by Git).
+
+### 0.4 User requirements for subsequent work
+
+- Use this file for environment, character, monster, item, texture, lighting and Blender asset decisions on every relevant task.
+- Gameplay should feel grounded and creepy: believable silhouettes, cloth/curved forms, material wear, layered lighting and deliberate clutter. Plain box geometry is acceptable for temporary collision/blockout checks, not the presented finished environment. If realism is beyond current capability, deliver a coherent horror look and state the limitation.
+- Author new 3D assets in **Blender**, then integrate in Unity. Imagegen supplies original bitmap assets/references, not finished 3D models. If Blender cannot be used, tell the user **before** substituting another 3D production method.
+- Keep the current work visible in Blender/Unity; headless generation may assist, but open/update the resulting scene for inspection. Do not restore an old scene/view after work or discard unrelated user changes.
+- Delegate code as specified in §17.1: **GPT-6.1 Terra / GPT-6.0 Luna**; the lead agent handles assets and verification. Make a scoped **local commit after game-screen changes**; do not push without instructions.
+- The visual pass is complete; the user requested discussion afterward. This document revision does not authorize starting the next gameplay task.
 
 ---
 
@@ -85,7 +112,7 @@ Boot → MainMenu → MasterGameplay
                           +----------------------→ Credits / MainMenu
 ```
 
-This is a **logical** hierarchy, not permission to leave all geometry and lights active simultaneously. Implement chapter roots with deterministic activation and spawn points, fade/blackout, and state restore. The ending zones may be staged within MasterGameplay or implemented with an equivalent safe loading method: preserve the GDD's externally observable scene flow.
+This is the **planned logical** hierarchy, not a description of the current scene or permission to leave all geometry and lights active simultaneously. Current gameplay is the `ENV_KosAtmosphere` art/test environment (§0.3); chapter roots, prologue routing and endings remain to be implemented. Implement chapter roots with deterministic activation and spawn points, fade/blackout, and state restore. The ending zones may be staged within MasterGameplay or implemented with an equivalent safe loading method: preserve the GDD's externally observable scene flow.
 
 ### 2.3 Map boundaries
 
@@ -297,7 +324,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 **Checks:** clean deformation topology at joints; transforms applied; UV clean; 2K base maps initially (only if justified), LOD0 ~20–40k triangles **as starting target not guarantee**; LOD1 optional after profile; silhouette approved in fog and without fog; eight animations have no T-pose or clipping; normals and backfaces correct; reflections visible but not too glossy; prefab runs T06/T11 events unchanged.
 
-**Reference image:** `References/rain_soaked_corridor_nightmare.png` if the user explicitly copies the generated artwork into that path. No agent may assume the image exists locally before checking.
+**Reference image:** `Docs/References/Untitled.png` exists in the audited workspace; inspect its content before using it as a creature reference. The previously suggested `Docs/References/rain_soaked_corridor_nightmare.png` is not present. Do not assume the two filenames identify the same artwork. Neither a reference image nor this specification constitutes a completed monster mesh/rig.
 
 ---
 
@@ -432,7 +459,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 ## 9. Lighting, palette and atmosphere by chapter
 
-> The colors below are **art-direction swatches**, not fixed HDRP numerical light values. Validate exposure and white balance on the target build, then tune local volumes and practical lights for each space.
+> The colors below are **art-direction swatches**, not fixed numerical light values. The installed renderer is URP (§0.3); original HDRP goals remain a separate unresolved production decision. Validate exposure and white balance on the target build, then tune atmosphere for each space using supported features.
 
 | Space / phase | Primary palette | Practical light | Atmosphere + material | Player focus |
 |---|---|---|---|---|
@@ -445,14 +472,14 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 | Good graduation | faded sunset `#BE936A`, cloud blue `#738395` | soft sky and rims | fine rain, damp ground | letter and congratulations |
 | Bad/Hidden | midnight blue `#17212A`, phone blue `#9CB4BE` | phone screen + cold window | empty room and heavy rain | message content |
 
-**HDRP starting setup**
+**Current URP setup and further lighting work**
 
-1. Global Volume sets tonemapping, baseline exposure, color adjustments, restrained vignette/film grain.
-2. Chapter-specific **local Volumes** handle fog/exposure transitions without rewriting all materials.
-3. Use **baked/mixed** light where practical for static architecture and limited realtime light for monster, swinging lamp/flicker, phone rim.
-4. Wet surfaces use **smoothness variation**, puddle masks and selective SSR/probes. Avoid forcing expensive SSR across every floor.
-5. Keep player route legible in **Low** quality: reduce volumetric samples/SSR/shadow distance before sacrificing core visibility.
-6. Use no mandatory ray tracing. Profile a **Windows standalone build**, not Editor only.
+1. Current kos art uses ACES tonemapping, mild film grain/color adjustments, scene fog and a dark room reflection probe. The circular POV is a separate UI shader (§11), not volume vignette alone.
+2. Keep the warm desk/cold window contrast and limited corridor light pools. The camera-follow spotlight currently has range **10 m**, outer angle **65°**, inner angle **25°**, intensity **3** and soft shadows; these are recorded URP implementation values, not portable HDRP physical-light settings.
+3. Use baked/mixed light where practical after profiling and after testing chapter-state changes. The current pass does not establish completed light baking, per-chapter volume transitions or monster lighting.
+4. Wet surfaces use smoothness variation and selective reflection probes. SSR and HDRP volumetric fog are **future pipeline-dependent proposals**, not features assumed to be available or implemented in the current renderer.
+5. Keep routes and future item prompts legible through the circular aperture at Low/High quality. Tune shadow distance, light counts and supported effects against actual measurements.
+6. Require no ray tracing. Profile a **Windows standalone build**, not Editor only. Any HDRP migration requires a separate decision and material/lighting/performance validation; do not upgrade the pipeline as part of routine asset work.
 
 **Lighting review shots:** camera at dorm doorway, desk at item pickup distance, 8–12 m monster silhouette, C2 phone close-up, 2–3 m monster reveal, graduation close-up letter, phone text in Bad/Hidden. Test color accessibility with grayscale preview and subtitles.
 
@@ -477,13 +504,15 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 ## 11. First-person UI, text and interaction standards
 
-- **Default controls:** WASD move, mouse look, Shift sprint, Ctrl crouch, E interact, left-click contextual Fight, Esc pause/close overlay. Always check existing Input System mapping before adding bindings.
-- **Camera:** eye ≈1.65 m, FOV default 75° and adjustable 65–95°, head-bob optional/off by default in T02.
+- **Controls:** implemented WASD move, mouse look, Shift sprint, Ctrl **toggle** crouch and Esc pause. Planned E interact, left-click contextual Fight and overlay closing must be implemented with their respective tasks; bindings alone do not establish gameplay. Always check existing Input System mapping before adding bindings.
+- **Camera:** eye ≈1.65 m, FOV default 75° and adjustable 65–95°; current head-bob is off. Any later motion effect should be optional.
+- **Circular POV — user requirement, implemented:** the world is visible through a centered circle with dark/opaque surroundings and a soft edge. Correct for aspect ratio so the aperture stays circular. Default enabled; radius **0.50 × viewport height**, adjustable **0.45–0.80**, softness **0.11**. Radius is not a percentage of the screen width or a camera FOV change; the present UI label is “Lebar pandang 50%” at default.
+- **POV comfort/UI:** pause provides the effect toggle and radius slider. Preferences `NRA.CircularViewEnabled` / `NRA.CircularViewRadius` override defaults; preserve the user's saved values. Hide the mask while paused, keep HUD/settings readable above it and do not intercept UI raycasts. Camera-follow light supports the atmosphere without replacing ambient/material detail.
 - **Interaction:** raycast max 2.3 m, proper occlusion/layer mask, no interaction through walls.
 - **HUD:** tiny reticle, one `[E]` label, subtitles at bottom, no health bar or numerical mental-health meter.
 - **Inspect:** centered reading surface with zoom or overlay; temporarily lock locomotion; Esc returns focus. Small paper must not become unreadable because of artistic texture grunge.
 - **Phone:** legible header, thread labels, message list, one-checkmark sent state, back path; no real service logo.
-- **Color/comfort:** reduce flicker/flashes, motion blur off option, vignette intensity slider, head-bob off option, subtitle size, FOV and volume persisted.
+- **Color/comfort:** current art adds no flicker/flashes or motion blur. Implement future reduce-flashes, subtitle size and volume controls with the relevant tasks; do not claim them complete. FOV/sensitivity and circular POV preferences already persist. Avoid stacking a strong volume vignette over the circular mask.
 - **Content note:** trauma, grief, serious mental-health themes and implied death. Credit/menu help text may point to local support sources, without inventing a crisis number.
 
 ---
@@ -525,10 +554,10 @@ NoRainbowAfter/                         # Unity project root, example only
 ├── Docs/
 │   ├── GDD_No_Rainbow_After_v1_1.docx
 │   ├── CODEX_TASKS_No_Rainbow_After_v1_1.md
-│   ├── DESIGN.md
+│   ├── design.md
 │   ├── CODEX_MASTER_PROMPT.md
-│   └── References/rain_soaked_corridor_nightmare.png  # optional copy by user
-└── BlenderSources/                    # original .blend project files if stored outside Assets
+│   └── References/Untitled.png          # existing bitmap; inspect before use
+└── BlenderSources/                    # current tracked .blend sources, generators and manifests
 ```
 
 **Do not silently relocate existing project files.** If the Unity project uses another structure, adapt with a clear mapping in the task report.
@@ -539,10 +568,11 @@ NoRainbowAfter/                         # Unity project root, example only
 
 - **Albedo/base color:** free of baked direct shadows. Realistic muted wear variation; correct color space.
 - **Normal:** tangent-space and correct channel orientation after import; validate on angled light.
-- **Mask/smoothness:** respect Unity HDRP shader's expected channel packing. Do not blindly treat Blender metallic-roughness textures as HDRP-ready mask maps; explicitly repack or use a shader supporting the chosen layout.
+- **Mask/smoothness:** match the shader actually in use. Current kos **URP Lit metallic/smoothness** maps use **R = metallic, A = smoothness**; their material smoothness multiplier is **1**. This is not an HDRP mask map. A future HDRP Lit conversion requires its R metallic / G AO / B detail mask / A smoothness layout and separate import/material verification. Do not pass Blender roughness directly as smoothness; repack/invert as needed for the selected shader.
 - **AO:** subtle enough not to darken readable object edges; filmic color management configured intentionally.
 - **Decals:** leak/stain/wet edge additions on static modules; avoid every worn mark being unique high-poly geometry.
 - **Typography:** paper, labels, and envelope should use fictional original readable text textures, not arbitrary AI-generated illegible letters.
+- **Current texture fidelity:** Wall/Wood albedos are generated originals; normals and other procedural maps approximate surface detail. Inspect seams, texture scale and light response in-game; do not describe these as scanned or fully calibrated PBR materials.
 
 ### 12.4 Standard handoff per art asset
 
@@ -559,6 +589,8 @@ Every delivered asset should include:
 ---
 
 ## 13. Unity scene / prefab component contract
+
+The tree below is the **target architecture for later tasks**. It does not assert that story systems, interactables, hiding zones or chapter roots currently exist; use §0.3 and the latest handoff for implemented state.
 
 ```text
 MasterGameplay
@@ -617,7 +649,9 @@ MasterGameplay
 | **T15** | audio sources, subtitle styles, optional visual settings | mixer/subtitles/accessibility work |
 | **T16** | cross-scene art pass and QA shots | Windows x64, QA01–QA16, performant |
 
-**Task sequencing note:** `T06` monster is **functional placeholder**; `T13` final monster is a later visual swap. `T07` is **HDRP vertical slice**, **not phone UI**; `T08` is phone. If the asset priority is P0 but its final polished model is scheduled late, create an early greybox version, then replace it only after mechanics pass.
+**Task sequencing note:** `T06` monster is **functional placeholder**; `T13` final monster is a later visual swap. The canonical name of `T07` remains **HDRP vertical slice**; `T08` is phone. The current URP art pass does not resolve the original HDRP target or satisfy T07's standalone profiling gate. Preserve IDs and report this pipeline difference when planning T07.
+
+**User-directed sequence exception:** after T02, the user requested an early Blender kos/corridor art pass and circular POV because the in-game greybox was too plain. That pass is implemented and locally committed, but advances only those visual requirements. Retain/reuse the new art while implementing and checking the remaining T03–T07 mechanics and gates; do not replace the presented environment with the debug lab. Temporary blockout/collider tests remain acceptable internally.
 
 ---
 
@@ -659,12 +693,25 @@ For each shot, keep an **in-game screenshot** at Low and High settings, plus not
 ## 17. Security, production and definition of done
 
 - **Before MCP work:** Codex audits project state and tool list, reads three documents, confirms current scene, Unity version, render pipeline, console, source-control status; does **not** fabricate access.
-- **One task per prompt:** `T00` first, then `T01` onward after verified gates. Do not ask Codex to generate the entire game in one run.
-- **Destructive operations:** snapshot/commit before editing scenes/prefabs; ask before deleting, overwriting user assets, changing render pipeline, or upgrading packages.
+- **Task scope:** T00–T02 have recorded handoffs; recheck the relevant baseline instead of restarting them. Continue one bounded task after its dependencies, honoring the user's early visual-pass exception (§14). Do not start another gameplay task during the requested discussion/document update.
+- **Scene/asset safety:** snapshot/commit before substantial scene/prefab edits. Authorized reversible changes can proceed; preserve unrelated user assets/settings and ask before unapproved destructive removal, pipeline migration or package upgrades.
 - **Build validation:** compile clean, run targeted tests, try PlayMode if connected, record actual screenshots/paths and Windows build results.
 - **Art approval:** original silhouette and material, correct scale, functional collision, accessible interaction, appropriate light, performance checked; no copyright violations.
 - **Sensitive content:** narrate grief respectfully and non-graphically. Avoid the misleading message that a single emotion/choice deterministically causes a real-world outcome.
 - **Reporting:** exact changed files, which MCP tools were used, evidence of compilation/PlayMode tests, unfinished items, next task. Unsupported actions must be identified as blockers.
+- **Local handoff:** after game-screen changes, make a scoped local commit with the related assets/source/evidence. Exclude unrelated Editor/user setting changes, leave the current Blender/Unity work visible, then respect the user's requested discussion boundary.
+
+### 17.1 Code delegation and token budget — explicit user workflow
+
+| Role | Work allocation | Verification / escalation |
+|---|---|---|
+| **GPT-6.0 Luna** (`gpt-6-luna`) | Default for small, well-specified code tasks: local UI wiring, simple utilities, limited repetitive edits and straightforward fixes using established patterns. | Give exact files, interfaces and acceptance checks. Escalate to Terra if the work requires broader architecture reasoning or unresolved cross-system debugging. |
+| **GPT-6.1 Terra** (`gpt-6.1-terra`) | Complex code: gameplay state, save/clue/ending contracts, controller or shader integration, cross-scene logic, substantial refactors and difficult bugs. | Handle integration-sensitive decisions; document assumptions and meaningful validation for lead review. |
+| **Lead agent / Sol** | Art direction, asset creation/selection, Blender/Unity asset integration, task scoping, code review and final visual/runtime verification. | Inspect the actual diff and resulting scene, check canon/material/scale/collision/UI behavior, run appropriate checks, and make the scoped local commit. Delegation does not replace verification. |
+
+Choose the smallest capable code agent to reduce token usage; do not send every task to both models. Use focused context with `Docs/design.md` sections, relevant source paths, constraints and acceptance criteria rather than duplicating full chat history or the entire project. Have the agent read necessary dependencies and return a concise changed-file/validation/limitations report. Parallel code work is useful only for genuinely independent files/interfaces; serialize dependent edits. Reuse an existing suitable agent when practical, and avoid repeated tests after a passing result unless new edits or evidence justify them.
+
+Model availability must be checked at dispatch; do not claim a model ran when unavailable. If the requested model cannot be used, report that limitation before substituting another model. The completed kos pass used Terra for code; this table governs subsequent authorized coding work and does not initiate it.
 
 ---
 
@@ -678,14 +725,15 @@ For each shot, keep an **in-game screenshot** at Low and High settings, plus not
 Create only the original ENV_001_DormShell / ENV_001_DormDoor modular meshes defined
 in Docs/design.md §§3 and 7. Use meters, 4×5 m shell, 2.7 m ceiling, 0.9×2.05 m
 door with hinge pivot, aged plaster and inexpensive wood. Prepare correct UVs,
-export with tested axis scale, then import as Unity HDRP prefabs with colliders.
+export with tested axis scale, then import as Unity prefabs with colliders and
+materials for the installed URP pipeline. Do not migrate render pipelines.
 Do not build unrelated rooms. Validate from Raka's 1.65 m FPP camera.
 ```
 
 **Monster (T13):**
 
 ```text
-Implement ACT_Shadow_Raka only according to DESIGN.md §6 and CODEX_TASKS T13.
+Implement ACT_Shadow_Raka only according to Docs/design.md §6 and CODEX_TASKS T13.
 Use the concept reference only if it exists in the actual workspace. Make one
 Generic rig with 8 named animations, two restrained face/damage materials, wet
 black PBR, paper fragments and subtle chest fissure. Keep T06/T11 AI untouched.
@@ -696,7 +744,7 @@ validation, and build performance. No graphic gore and no franchise copies.
 **Phone (T08):**
 
 ```text
-Implement only Raka's fictional phone presentation based on DESIGN.md §§7–8.
+Implement only Raka's fictional phone presentation based on Docs/design.md §§7–8.
 Ella thread: send/lock choice, one checkmark if sent, never a reply. Bayu's
 thread is separate. Preserve save flags, exact clues and ending reveal wording.
 No official messaging app logos. Verify font legibility at 1080p and Esc back.
@@ -706,7 +754,7 @@ No official messaging app logos. Verify font legibility at 1080p and Esc back.
 
 ```text
 Create a production-efficient sunset/drizzle graduation micro-set using the
-DESIGN.md WB-07 and GDD Good Ending. Show passage of study time, graduation,
+Docs/design.md WB-07 and GDD Good Ending. Show passage of study time, graduation,
 congratulations, and the handwritten early letter. Do not imply instantaneous
 mental recovery; use few original props/figures and camera-focused composition.
 ```
@@ -721,7 +769,7 @@ mental recovery; use few original props/figures and camera-focused composition.
 | Exact dorm dressing items | listed P0/P1 set | after hero room screenshot |
 | C2 campus/work assets | micro-sets or sound-only vistas | if narrative clarity suffers |
 | C3 arena dimensions | ~6×8 m room as proposal | if hide/approach paths conflict |
-| Pipeline | HDRP if target GPU adequate, URP fallback by explicit decision | after T07 build profile |
+| Pipeline | Work in installed URP 17.6.0; original HDRP target remains unresolved, with no migration or final fallback approval inferred | separate pipeline decision informed by Windows profiling before T07 acceptance |
 | Graduation population | silhouette/cropped figures | if Good Ending feels empty |
 | Monster detailed mesh time | T13 after functional T06 | if team wants independent artist to work in parallel, keep interface lock |
 
@@ -730,6 +778,9 @@ mental recovery; use few original props/figures and camera-focused composition.
 - **Primary story/GDD:** `GDD_No_Rainbow_After_v1_1.docx` (authoritative).
 - **Canonical implementation IDs:** `CODEX_TASKS_No_Rainbow_After_v1_1.md` (**T00–T16**, do not renumber).
 - **This file:** implementation-level **world/asset/art** choices only. Its new geometry, palette and size proposals are **not retroactive GDD requirements** until approved and measured in Unity.
-- **Tooling references:** official Unity Codex plugin / Unity CLI + MCP, Unity 6 HDRP volumes and lighting, Blender FBX exporter; versions/tools must be rechecked in the actual environment.
+- **Implementation evidence:** `T01_HANDOFF.md`, `MENU_ART_HANDOFF.md`, `T02_HANDOFF.md`, `KOS_ATMOSPHERE_HANDOFF.md` and the QA reports referenced in §0.3. Handoffs record checks at delivery time, not perpetual live Editor status.
+- **Tooling references:** installed Unity MCP, URP shader/lighting settings and Blender FBX exporter; HDRP guidance applies only to a separately approved migration. Recheck versions and connection capabilities in the actual environment.
+
+**Revision v1.1:** distinguished installed URP from the original HDRP goal; recorded the kos art/QA baseline, circular POV and Blender/visible-work requirements; clarified planned systems versus completed work; corrected reference/file casing; added Terra/Luna code allocation with focused context for token economy. Story, four clues, ending rules and T00–T16 numbering are unchanged.
 
 **End of `design.md`**
