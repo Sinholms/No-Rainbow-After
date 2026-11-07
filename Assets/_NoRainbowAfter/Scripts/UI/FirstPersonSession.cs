@@ -79,8 +79,18 @@ namespace NoRainbowAfter.UI
             staminaFill.anchorMax = new Vector2(motor.StaminaNormalized, 1);
         }
 
-        private void TogglePause() => SetPaused(!IsPaused);
-        private void PauseForFocusLoss() => SetPaused(true);
+        private void TogglePause()
+        {
+            var inspection = player.GetComponent<NoRainbowAfter.Interaction.PlayerInteractor>();
+            if (inspection != null && inspection.CloseInspection()) return;
+            SetPaused(!IsPaused);
+        }
+        private void PauseForFocusLoss()
+        {
+            var inspection = player.GetComponent<NoRainbowAfter.Interaction.PlayerInteractor>();
+            if (inspection != null) inspection.CloseInspection();
+            SetPaused(true);
+        }
 
         public void SetPaused(bool paused)
         {

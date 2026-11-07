@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-07",
+  "environment": "Unity Editor Play Mode, MasterGameplay, 1920x1080 captures",
+  "bookObjective": true,
+  "overtimeObjective": true,
+  "lockedDoorCheckedObjective": true,
+  "doorRemainedClosed": true,
+  "syntheticEOpenedSlip": true,
+  "syntheticFirstEscape": {"inspect": false, "paused": false, "cursor": "Locked"},
+  "syntheticSecondEscape": {"inspect": false, "paused": true, "cursor": "None"},
+  "inputMethod": "InputSystem QueueStateEvent with explicit InputSystem.Update; synthetic keyboard devices removed after use",
+  "physicalHumanInputTested": false,
+  "sceneValidation": {"issues": 0, "missingScripts": 0, "brokenPrefabs": 0},
+  "finalConsoleWarnings": 0,
+  "finalConsoleErrors": 0,
+  "standaloneLaunched": false,
+  "fpsMeasured": false,
+  "finalUserSettingsMatchSessionStartSHA256": true
+}

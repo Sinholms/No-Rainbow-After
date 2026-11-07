@@ -43,6 +43,22 @@ namespace NoRainbowAfter.Tests
         }
 
         [Test]
+        public void InteractUsesEAndCannotFireWhileGameplayLocked()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            int requests = 0;
+            source.InteractRequested += () => requests++;
+            Press(keyboard.eKey);
+            Assert.That(requests, Is.EqualTo(1));
+            source.SetGameplayEnabled(false);
+            Release(keyboard.eKey); Press(keyboard.eKey);
+            Assert.That(requests, Is.EqualTo(1));
+            source.SetGameplayEnabled(true);
+            Release(keyboard.eKey); Press(keyboard.eKey);
+            Assert.That(requests, Is.EqualTo(2));
+        }
+
+        [Test]
         public void MouseDeltaReachesLookWithoutSpeedScaling()
         {
             var mouse = InputSystem.AddDevice<Mouse>();

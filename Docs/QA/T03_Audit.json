@@ -1,0 +1,20 @@
+{
+  "task": "T03",
+  "date": "2026-11-07",
+  "baselineCommit": "0d482f32b8a9f4ae089e8e5d818a243fb45a438f",
+  "unity": "6000.6.8f1",
+  "pipeline": "URP 17.6.0",
+  "inputSystem": "1.20.1",
+  "activeScene": "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+  "sceneInitiallyDirty": false,
+  "initialMissingScripts": 0,
+  "initialUserChanges": [
+    "ProjectSettings/ProjectSettings.asset",
+    "ProjectSettings/UnityConnectSettings.asset"
+  ],
+  "blenderScene": "NRA_KosAtmosphere_v1",
+  "blenderObjects": 226,
+  "initialConsole": "No game errors; one MCP duplicate-command transport warning",
+  "backup": "Temp/T03Baseline (ignored)",
+  "scope": "Interaction/inspect only; reuse Blender meshes; no chapters, clue registry, save or ending implementation"
+}

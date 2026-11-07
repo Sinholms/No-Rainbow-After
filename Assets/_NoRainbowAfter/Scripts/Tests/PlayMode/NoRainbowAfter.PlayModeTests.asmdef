@@ -3,8 +3,11 @@
   "references": [
     "NoRainbowAfter.Player",
     "Unity.InputSystem",
-    "Unity.InputSystem.TestFramework"
+    "Unity.InputSystem.TestFramework",
+    "NoRainbowAfter.Interaction"
   ],
-  "optionalUnityReferences": ["TestAssemblies"],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ],
   "autoReferenced": false
 }

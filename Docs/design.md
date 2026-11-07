@@ -51,7 +51,8 @@ This is a dated implementation snapshot, not a claim that the full design below 
 | Materials / atmosphere | Six BaseColor/Normal/Mask sets: Wall, Floor, Wood, Cloth, Metal, Paper. Wall/Wood base colors use imagegen; other maps are procedural approximations, not calibrated scans. Warm desk/cold window lighting, camera-follow spotlight, fog, room reflection probe, ACES, light grain and original synthesized rain are implemented. |
 | POV | Aspect-correct circular black mask, soft edge, pause toggle/radius slider and saved preferences; see §11. |
 | Verification | Last art-pass handoff: **14/14 PlayMode tests passed**; Windows x64 Mono preview built with **0 errors / 0 warnings**. Build success and Editor screenshots do not establish standalone FPS or a complete playthrough. |
-| Still pending | T03 interaction/inspect, chapter direction/loops, functional hide/monster, phone/tasks/clues, saves and endings. This art pass does **not** complete T03–T07, T13–T16 or Chapter 1. |
+| T03 / interaction | Camera raycast 2.3 m with solid occlusion and self-collider exclusion, E prompts, readable inspect overlay and Esc priority; book, work slip and locked hallway door have stable IDs and session objective flags. Verified 22/22 PlayMode tests and Windows build, 0 errors/warnings. See [T03 handoff](T03_HANDOFF.md); no saved clue registry or chapter gate yet. |
+| Still pending | Chapter direction/loops, functional hide/monster, phone/tasks/clues, saves and endings. The art pass and T03 do **not** complete T04–T07, T13–T16 or Chapter 1. |
 
 Evidence and limitations: [kos atmosphere handoff](KOS_ATMOSPHERE_HANDOFF.md), [T02 handoff](T02_HANDOFF.md), [PlayMode results](QA/KosAtmosphere_PlayMode_results.json), [Windows build report](QA/KosAtmosphere_Windows_build.json). Build output: `Builds/KosVisualPreview/NoRainbowAfter.exe` (local, ignored by Git).
 
@@ -504,7 +505,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 ## 11. First-person UI, text and interaction standards
 
-- **Controls:** implemented WASD move, mouse look, Shift sprint, Ctrl **toggle** crouch and Esc pause. Planned E interact, left-click contextual Fight and overlay closing must be implemented with their respective tasks; bindings alone do not establish gameplay. Always check existing Input System mapping before adding bindings.
+- **Controls:** implemented WASD move, mouse look, Shift sprint, Ctrl **toggle** crouch, E interact/inspect and Esc close-inspect-before-pause. Contextual left-click Fight remains for T06. Always check existing Input System mapping before adding bindings.
 - **Camera:** eye ≈1.65 m, FOV default 75° and adjustable 65–95°; current head-bob is off. Any later motion effect should be optional.
 - **Circular POV — user requirement, implemented:** the world is visible through a centered circle with dark/opaque surroundings and a soft edge. Correct for aspect ratio so the aperture stays circular. Default enabled; radius **0.50 × viewport height**, adjustable **0.45–0.80**, softness **0.11**. Radius is not a percentage of the screen width or a camera FOV change; the present UI label is “Lebar pandang 50%” at default.
 - **POV comfort/UI:** pause provides the effect toggle and radius slider. Preferences `NRA.CircularViewEnabled` / `NRA.CircularViewRadius` override defaults; preserve the user's saved values. Hide the mask while paused, keep HUD/settings readable above it and do not intercept UI raycasts. Camera-follow light supports the atmosphere without replacing ambient/material detail.
@@ -693,7 +694,7 @@ For each shot, keep an **in-game screenshot** at Low and High settings, plus not
 ## 17. Security, production and definition of done
 
 - **Before MCP work:** Codex audits project state and tool list, reads three documents, confirms current scene, Unity version, render pipeline, console, source-control status; does **not** fabricate access.
-- **Task scope:** T00–T02 have recorded handoffs; recheck the relevant baseline instead of restarting them. Continue one bounded task after its dependencies, honoring the user's early visual-pass exception (§14). Do not start another gameplay task during the requested discussion/document update.
+- **Task scope:** T00–T03 have recorded handoffs; recheck the relevant baseline instead of restarting them. Continue one bounded task after its dependencies, honoring the user's early visual-pass exception (§14). Only continue to a subsequent task when authorized.
 - **Scene/asset safety:** snapshot/commit before substantial scene/prefab edits. Authorized reversible changes can proceed; preserve unrelated user assets/settings and ask before unapproved destructive removal, pipeline migration or package upgrades.
 - **Build validation:** compile clean, run targeted tests, try PlayMode if connected, record actual screenshots/paths and Windows build results.
 - **Art approval:** original silhouette and material, correct scale, functional collision, accessible interaction, appropriate light, performance checked; no copyright violations.

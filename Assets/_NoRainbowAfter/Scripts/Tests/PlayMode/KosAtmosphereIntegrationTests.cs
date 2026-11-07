@@ -39,7 +39,7 @@ namespace NoRainbowAfter.Tests
         {
             yield return SceneManager.LoadSceneAsync(ScenePath);
             yield return null;
-            var cameras = Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            var cameras = Object.FindObjectsByType<Camera>();
             Assert.That(cameras.Length, Is.EqualTo(1), "Gameplay should have one active camera.");
             Assert.That(GameObject.Find("ENV_KosAtmosphere"), Is.Not.Null);
             Assert.That(GameObject.Find("T02_BlenderLab"), Is.Null);

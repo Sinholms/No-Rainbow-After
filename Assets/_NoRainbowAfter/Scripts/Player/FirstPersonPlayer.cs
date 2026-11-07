@@ -12,6 +12,8 @@ namespace NoRainbowAfter.Player
         private FirstPersonMotor motor;
         private bool discardNextLook = true;
         public bool IsPaused { get; private set; }
+        public bool IsInspecting { get; private set; }
+        public event Action InteractRequested;
         public event Action PauseRequested;
         public event Action FocusLost;
 
@@ -26,6 +28,7 @@ namespace NoRainbowAfter.Player
             }
             input = new FirstPersonInputSource(actions);
             input.PauseRequested += RequestPause;
+            input.InteractRequested += () => InteractRequested?.Invoke();
         }
 
         private void OnEnable()
@@ -47,7 +50,7 @@ namespace NoRainbowAfter.Player
 
         private void Update()
         {
-            if (IsPaused || input == null) return;
+            if (IsPaused || IsInspecting || input == null) return;
             FirstPersonFrame frame = input.ReadFrame();
             if (discardNextLook) { frame.Look = Vector2.zero; discardNextLook = false; }
             motor.Simulate(frame, Time.deltaTime);
@@ -58,14 +61,20 @@ namespace NoRainbowAfter.Player
             if (!focused) FocusLost?.Invoke();
         }
 
+        public void SetInspecting(bool inspecting)
+        {
+            IsInspecting = inspecting;
+            SetPaused(IsPaused);
+        }
+
         public void SetPaused(bool paused)
         {
             IsPaused = paused;
-            input?.SetGameplayEnabled(!paused);
+            input?.SetGameplayEnabled(!paused && !IsInspecting);
             motor.StopMotion();
             discardNextLook = true;
-            Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = paused;
+            Cursor.lockState = paused || IsInspecting ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = paused || IsInspecting;
         }
     }
 }

@@ -9,8 +9,9 @@ namespace NoRainbowAfter.Player
         private readonly InputActionAsset ownedAsset;
         private readonly InputActionMap gameplay;
         private readonly InputActionMap global;
-        private readonly InputAction move, look, sprint, crouch, pause;
+        private readonly InputAction move, look, sprint, crouch, pause, interact;
         public event Action PauseRequested;
+        public event Action InteractRequested;
         public bool GameplayEnabled => gameplay.enabled;
 
         public FirstPersonInputSource(InputActionAsset asset)
@@ -23,6 +24,8 @@ namespace NoRainbowAfter.Player
             look = gameplay.FindAction("Look", true);
             sprint = gameplay.FindAction("Sprint", true);
             crouch = gameplay.FindAction("Crouch", true);
+            interact = gameplay.FindAction("Interact") ?? gameplay.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
+            interact.performed += OnInteract;
             pause = global.FindAction("Pause", true);
             pause.performed += OnPause;
         }
@@ -42,11 +45,13 @@ namespace NoRainbowAfter.Player
             CrouchPressed = crouch.WasPressedThisFrame()
         };
 
+        private void OnInteract(InputAction.CallbackContext context) => InteractRequested?.Invoke();
         private void OnPause(InputAction.CallbackContext context) => PauseRequested?.Invoke();
 
         public void Dispose()
         {
             pause.performed -= OnPause;
+            interact.performed -= OnInteract;
             ownedAsset.Disable();
             if (Application.isPlaying) UnityEngine.Object.Destroy(ownedAsset);
             else UnityEngine.Object.DestroyImmediate(ownedAsset);
@@ -63,6 +68,7 @@ namespace NoRainbowAfter.Player
             player.AddAction("Look", InputActionType.Value, "<Mouse>/delta", expectedControlLayout: "Vector2");
             player.AddAction("Sprint", InputActionType.Button, "<Keyboard>/leftShift");
             player.AddAction("Crouch", InputActionType.Button, "<Keyboard>/leftCtrl");
+            player.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
             asset.AddActionMap("Global").AddAction("Pause", InputActionType.Button, "<Keyboard>/escape");
             return asset;
         }
