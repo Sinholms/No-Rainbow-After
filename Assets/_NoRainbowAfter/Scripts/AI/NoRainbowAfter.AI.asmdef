@@ -1,0 +1,19 @@
+{
+  "name": "NoRainbowAfter.AI",
+  "rootNamespace": "NoRainbowAfter.AI",
+  "references": [
+    "NoRainbowAfter.Player",
+    "NoRainbowAfter.Interaction",
+    "NoRainbowAfter.Level",
+    "NoRainbowAfter.Narrative"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -10,6 +10,7 @@ namespace NoRainbowAfter.Narrative
     {
         [SerializeField] private ChapterDirector director;
         [SerializeField] private FirstPersonPlayer player;
+        [SerializeField] private MonoBehaviour encounterCueSource;
 
         private readonly Queue<NarrativeCue> pending = new Queue<NarrativeCue>();
         private Canvas canvas;
@@ -44,11 +45,12 @@ namespace NoRainbowAfter.Narrative
         }
 
         /// <summary>Assigns runtime dependencies and safely moves the cue subscription.</summary>
-        public void Configure(ChapterDirector source, FirstPersonPlayer firstPersonPlayer)
+        public void Configure(ChapterDirector source, FirstPersonPlayer firstPersonPlayer, MonoBehaviour optionalEncounterSource = null)
         {
             DetachDirector();
             director = source;
             player = firstPersonPlayer;
+            encounterCueSource = optionalEncounterSource;
             if (isActiveAndEnabled) AttachDirector();
             RefreshVisibility();
         }
@@ -56,11 +58,21 @@ namespace NoRainbowAfter.Narrative
         private void AttachDirector()
         {
             if (director != null) director.CueRequested += EnqueueCue;
+            var extra = encounterCueSource as IAudioCueSource;
+            if (extra != null && !ReferenceEquals(extra, director)) extra.CueRequested += EnqueueOptionalCue;
         }
 
         private void DetachDirector()
         {
             if (director != null) director.CueRequested -= EnqueueCue;
+            var extra = encounterCueSource as IAudioCueSource;
+            if (extra != null && !ReferenceEquals(extra, director)) extra.CueRequested -= EnqueueOptionalCue;
+        }
+
+        private void EnqueueOptionalCue(NarrativeCue cue)
+        {
+            if (cue == null || string.IsNullOrWhiteSpace(cue.Text)) return;
+            EnqueueCue(cue);
         }
 
         private void EnqueueCue(NarrativeCue cue)

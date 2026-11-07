@@ -84,5 +84,23 @@ namespace NoRainbowAfter.Tests
             Release(keyboard.wKey); Press(keyboard.wKey);
             Assert.That(source.ReadFrame().Move, Is.EqualTo(Vector2.up));
         }
+
+        [Test]
+        public void FightUsesMouseLeftButtonAndCannotFireWhileGameplayLocked()
+        {
+            var mouse = InputSystem.AddDevice<Mouse>();
+            int fightRequests = 0;
+            source.FightRequested += () => fightRequests++;
+            Press(mouse.leftButton);
+            Assert.That(fightRequests, Is.EqualTo(1));
+            source.SetGameplayEnabled(false);
+            Release(mouse.leftButton);
+            Press(mouse.leftButton);
+            Assert.That(fightRequests, Is.EqualTo(1));
+            source.SetGameplayEnabled(true);
+            Release(mouse.leftButton);
+            Press(mouse.leftButton);
+            Assert.That(fightRequests, Is.EqualTo(2));
+        }
     }
 }

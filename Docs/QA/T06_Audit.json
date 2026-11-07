@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-07",
+  "task": "T06",
+  "baselineCommit": "d4ab8f0",
+  "unity": "6000.6.8f1",
+  "pipeline": "URP 17.6.0 (PC_RPAsset)",
+  "inputSystem": "1.20.1",
+  "initialScene": "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+  "initialSceneDirty": false,
+  "initialRootCount": 13,
+  "initialMissingScripts": 0,
+  "initialBrokenPrefabs": 0,
+  "initialConsoleWarnings": 0,
+  "initialConsoleErrors": 0,
+  "initialUserChanges": [
+    "ProjectSettings/ProjectSettings.asset",
+    "ProjectSettings/UnityConnectSettings.asset"
+  ],
+  "initialUserHashes": {
+    "ProjectSettings/ProjectSettings.asset": "0CF6715193CCA1DE9CF0C77AE8E198AF3A02C5C2F9F59341CCF91DE31A6CA535",
+    "ProjectSettings/UnityConnectSettings.asset": "C3DBB998537BC5C0357729E0EA4554AE78213E38A6E3BCE52FA300E0090E81FF"
+  },
+  "mcpVerification": {
+    "unityMcp": "Connected (read-only telemetry_ping, manage_scene get_active/get_hierarchy/validate, read_console, execute_code verified)",
+    "blenderMcp": "Initially disconnected because Blender GUI was not open; after launching installed Blender 5.2.3 LTS, Blender MCP addon v1.8 (protocol 15) connected and verified via get_addon_status and get_scene_info"
+  },
+  "docxReadingNote": "read_file treats GDD_No_Rainbow_After_v1_1.docx as binary zip; text paragraphs/tables verified via OOXML word/document.xml (1096 non-empty paragraphs) alongside GDD_No_Rainbow_After_v1_1_REFERENCE.md. Embedded DOCX layout/images not rendered directly; Docs/References/Untitled.png inspected directly.",
+  "geometryAudit": {
+    "dormRoomClearMetres": "x in [-2.00, 2.00], z in [0.00, 4.99], ceiling y=2.69",
+    "openDormDoorwayClear": "x in [-0.20, +0.46] (width 0.66m centered at x=+0.13), lintel min.y=2.05",
+    "corridorClearMetres": "x in [-0.90, +0.90] (width 1.80m), z in [5.00, 18.99], ceiling y=2.69",
+    "coverLeft": "C1_COVER_LEFT trigger (-1.45, 0.90, 9.00) size (0.80, 1.80, 1.10); niche opening z in [8.20, 9.80]",
+    "coverRight": "C1_COVER_RIGHT trigger (1.45, 0.90, 13.00) size (0.80, 1.80, 1.10); niche opening z in [12.20, 13.80]",
+    "lockedHallDoor": "INT_C1_DOOR on SM_PROP_HallClosedDoor at (0.89, 1.03, 7.10), layer 8 (T03 test door, preserved)"
+  },
+  "t06GapsIdentified": [
+    "No runtime IShadowEncounter implementation attached in MasterGameplay; C1-04..C1-06 only tested via mock test double in T05",
+    "No Blender 3D placeholder silhouette model/FBX/prefab for ACT_001_ShadowPlaceholder",
+    "No Dormant -> Spawn -> Pursue -> FightResolved / HideResolved / Caught state machine",
+    "No contextual Left-Click Fight binding in NRA_FirstPersonActions / FirstPersonInputSource / FirstPersonPlayer or range/occlusion/single-resolve feedback",
+    "CoverZone only reports trigger occupancy (PlayerInside) without crouch check, line-of-sight/occlusion visibility check, monster pass completion, or cancellation on standing/exiting",
+    "No Caught non-graphic blackout fade, safe checkpoint recovery without erasing clues/flags, or ChapterDirector unresolved-encounter reset for Caught and Pause checkpoint recovery"
+  ]
+}

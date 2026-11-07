@@ -1,0 +1,48 @@
+{
+  "assetId": "ACT_001_ShadowPlaceholder",
+  "task": "T06",
+  "note": "Original T06 3D placeholder silhouette authored in Blender 5.2.3 LTS. Final deformable topology, Generic rig, Variant A/B 2K PBR, and 8 animations remain T13.",
+  "blendSource": "D:\\GRAVKOM\\No rainbow after\\BlenderSources\\Characters\\ACT_001_ShadowPlaceholder_v1.blend",
+  "fbxExport": "D:\\GRAVKOM\\No rainbow after\\Assets\\_NoRainbowAfter\\Art\\Models\\Characters\\ACT_001_ShadowPlaceholder_v1.fbx",
+  "previewRender": "D:\\GRAVKOM\\No rainbow after\\Docs\\QA\\T06_Blender_Placeholder.png",
+  "exportAxes": {
+    "forward": "-Z",
+    "up": "Y",
+    "unityAssemblyYawDegrees": 0.0
+  },
+  "boundsMinMetres": [
+    -0.2738,
+    -0.3154,
+    0.0
+  ],
+  "boundsMaxMetres": [
+    0.2629,
+    0.1475,
+    2.2875
+  ],
+  "dimensionsMetres": {
+    "widthX": 0.5367,
+    "depthY": 0.463,
+    "heightZ": 2.2875
+  },
+  "upperPivotHeightMetres": 1.06,
+  "meshCount": 9,
+  "vertices": 1012,
+  "triangles": 1812,
+  "materials": [
+    "MAT_Shadow_Skin",
+    "MAT_Shadow_Cloth",
+    "MAT_Shadow_Paper"
+  ],
+  "meshes": [
+    "SM_ACT_ShadowLower",
+    "SM_ACT_ShadowLowerCloth",
+    "SM_ACT_ShadowTorso",
+    "SM_ACT_ShadowJacket",
+    "SM_ACT_ShadowHead",
+    "SM_ACT_ShadowFaceWrap",
+    "SM_ACT_ShadowArmLeft",
+    "SM_ACT_ShadowArmRight",
+    "SM_ACT_ShadowPapers"
+  ]
+}

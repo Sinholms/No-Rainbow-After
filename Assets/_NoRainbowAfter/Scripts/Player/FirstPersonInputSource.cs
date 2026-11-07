@@ -9,9 +9,10 @@ namespace NoRainbowAfter.Player
         private readonly InputActionAsset ownedAsset;
         private readonly InputActionMap gameplay;
         private readonly InputActionMap global;
-        private readonly InputAction move, look, sprint, crouch, pause, interact;
+        private readonly InputAction move, look, sprint, crouch, pause, interact, fight;
         public event Action PauseRequested;
         public event Action InteractRequested;
+        public event Action FightRequested;
         public bool GameplayEnabled => gameplay.enabled;
 
         public FirstPersonInputSource(InputActionAsset asset)
@@ -26,6 +27,8 @@ namespace NoRainbowAfter.Player
             crouch = gameplay.FindAction("Crouch", true);
             interact = gameplay.FindAction("Interact") ?? gameplay.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
             interact.performed += OnInteract;
+            fight = gameplay.FindAction("Fight") ?? gameplay.AddAction("Fight", InputActionType.Button, "<Mouse>/leftButton");
+            fight.performed += OnFight;
             pause = global.FindAction("Pause", true);
             pause.performed += OnPause;
         }
@@ -46,12 +49,14 @@ namespace NoRainbowAfter.Player
         };
 
         private void OnInteract(InputAction.CallbackContext context) => InteractRequested?.Invoke();
+        private void OnFight(InputAction.CallbackContext context) => FightRequested?.Invoke();
         private void OnPause(InputAction.CallbackContext context) => PauseRequested?.Invoke();
 
         public void Dispose()
         {
             pause.performed -= OnPause;
             interact.performed -= OnInteract;
+            fight.performed -= OnFight;
             ownedAsset.Disable();
             if (Application.isPlaying) UnityEngine.Object.Destroy(ownedAsset);
             else UnityEngine.Object.DestroyImmediate(ownedAsset);
@@ -69,6 +74,7 @@ namespace NoRainbowAfter.Player
             player.AddAction("Sprint", InputActionType.Button, "<Keyboard>/leftShift");
             player.AddAction("Crouch", InputActionType.Button, "<Keyboard>/leftCtrl");
             player.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
+            player.AddAction("Fight", InputActionType.Button, "<Mouse>/leftButton");
             asset.AddActionMap("Global").AddAction("Pause", InputActionType.Button, "<Keyboard>/escape");
             return asset;
         }

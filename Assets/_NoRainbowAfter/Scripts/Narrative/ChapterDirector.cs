@@ -37,7 +37,8 @@ namespace NoRainbowAfter.Narrative
         public GameState State { get; private set; }
         public int LoopIndex { get; private set; }
         public int BeatIndex { get; private set; }
-        public bool AwaitingEncounter => BeatIndex == 3 && !encounterBegun;
+        public bool AwaitingEncounter => (BeatIndex == 3 || BeatIndex == 4) && !encounterBegun && !resolved;
+        public bool IsCurrentEncounter(IShadowEncounter candidate) => ReferenceEquals(encounter, candidate);
         // Tests set this before scene load and restore it after the test run.
         public static string StoragePathOverride { get; set; }
 
@@ -88,6 +89,14 @@ namespace NoRainbowAfter.Narrative
             if (encounter != null) encounter.Ready -= TryBeginEncounter;
             encounter = provider;
             if (encounter != null) encounter.Ready += TryBeginEncounter;
+            TryBeginEncounter();
+        }
+        // Invalidates an active unresolved attempt (e.g. Caught or checkpoint restore) without repeating C1-04.
+        public void ResetActiveEncounter()
+        {
+            if (!encounterBegun || resolved) return;
+            generation++;
+            encounterBegun = false;
             TryBeginEncounter();
         }
         private void OnInteraction(string id) { if (id == "INT_OVERTIME") RegisterSlip(); }

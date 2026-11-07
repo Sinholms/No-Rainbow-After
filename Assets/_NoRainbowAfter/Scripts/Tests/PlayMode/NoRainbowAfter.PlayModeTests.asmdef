@@ -6,7 +6,8 @@
     "Unity.InputSystem.TestFramework",
     "NoRainbowAfter.Interaction",
     "NoRainbowAfter.Level",
-    "NoRainbowAfter.Narrative"
+    "NoRainbowAfter.Narrative",
+    "NoRainbowAfter.AI"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

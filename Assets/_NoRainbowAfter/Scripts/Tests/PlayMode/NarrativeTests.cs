@@ -194,6 +194,8 @@ public sealed class NarrativeTests
         var player = Object.FindAnyObjectByType<FirstPersonPlayer>(); player.SetPaused(false);
         var interactor = player.GetComponent<PlayerInteractor>();
         var director = player.GetComponent<ChapterDirector>();
+        // Clear the scene's installed T06 encounter first so no-provider and unready-provider gating can be tested explicitly.
+        director.SetEncounter(null);
         var audio = new List<string>(); director.CueRequested += cue => audio.Add(cue.AudioCueId);
         interactor.Flags.Set("objective.book");
         var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(x => x.StableId == "INT_OVERTIME");

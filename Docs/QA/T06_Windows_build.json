@@ -1,0 +1,20 @@
+{
+  "jobId": "build-9e0435db62",
+  "result": "succeeded",
+  "platform": "StandaloneWindows64",
+  "outputPath": "Builds/T06EncounterPreview/NoRainbowAfter.exe",
+  "scenes": [
+    "Assets/_NoRainbowAfter/Scenes/Boot.unity",
+    "Assets/_NoRainbowAfter/Scenes/MainMenu.unity",
+    "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+    "Assets/_NoRainbowAfter/Scenes/Credits.unity"
+  ],
+  "startedAt": "2026-11-07T08:59:59.4481590Z",
+  "completedAt": "2026-11-07T09:00:15.9948442Z",
+  "durationSeconds": 16.5466852,
+  "totalSizeMb": 132.12,
+  "errors": 0,
+  "warnings": 0,
+  "standaloneLaunchedOrProfiled": false,
+  "note": "Initial build with default BuildSettings scene list (including FirstPersonTest) emitted 1 pre-existing warning on SM_ENV_T02_Ramp; production 4-scene build (Boot, MainMenu, MasterGameplay, Credits) succeeded with 0 errors and 0 warnings."
+}
