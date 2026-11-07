@@ -1,6 +1,7 @@
 using NoRainbowAfter.Core;
 using NoRainbowAfter.Level;
 using NoRainbowAfter.Player;
+using NoRainbowAfter.Quality;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -27,13 +28,19 @@ namespace NoRainbowAfter.UI
         [SerializeField] private Toggle circularViewToggle;
         [SerializeField] private Slider viewRadius;
         [SerializeField] private Text viewRadiusLabel;
+        [SerializeField] private Text qualityPresetLabel;
+        [SerializeField] private Button qualityLowButton;
+        [SerializeField] private Button qualityMediumButton;
+        [SerializeField] private Button qualityHighButton;
         private bool circularViewEnabled;
         private float circularViewRadius;
         public bool IsPaused { get; private set; }
+        public QualityPreset CurrentQualityPreset => GraphicsQualityService.CurrentPreset;
 
         private void Awake()
         {
             SceneFlow.EnsureInstance();
+            GraphicsQualityService.ApplySavedPreset();
             motor.SetViewSettings(PlayerPrefs.GetFloat("NRA.MouseSensitivity", motor.MouseSensitivity),
                 PlayerPrefs.GetFloat("NRA.FieldOfView", motor.FieldOfView));
             sensitivity.SetValueWithoutNotify(motor.MouseSensitivity);
@@ -50,7 +57,14 @@ namespace NoRainbowAfter.UI
                 viewRadius.SetValueWithoutNotify(circularViewRadius);
                 viewRadius.onValueChanged.AddListener(OnViewRadiusChanged);
             }
+            if (qualityLowButton != null)
+                qualityLowButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.Low));
+            if (qualityMediumButton != null)
+                qualityMediumButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.Medium));
+            if (qualityHighButton != null)
+                qualityHighButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.High));
             UpdateLabels();
+            UpdateQualityButtons(GraphicsQualityService.CurrentPreset);
             sensitivity.onValueChanged.AddListener(_ => ApplySettings());
             fov.onValueChanged.AddListener(_ => ApplySettings());
             resumeButton.onClick.AddListener(() => SetPaused(false));
@@ -64,6 +78,8 @@ namespace NoRainbowAfter.UI
         {
             player.PauseRequested += TogglePause;
             player.FocusLost += PauseForFocusLoss;
+            GraphicsQualityService.PresetChanged += OnQualityPresetChanged;
+            OnQualityPresetChanged(GraphicsQualityService.CurrentPreset);
         }
 
         private void Start() => SetPaused(false);
@@ -72,6 +88,7 @@ namespace NoRainbowAfter.UI
         {
             player.PauseRequested -= TogglePause;
             player.FocusLost -= PauseForFocusLoss;
+            GraphicsQualityService.PresetChanged -= OnQualityPresetChanged;
             Time.timeScale = 1;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -124,6 +141,46 @@ namespace NoRainbowAfter.UI
             fovLabel.text = "Bidang pandang  " + Mathf.RoundToInt(motor.FieldOfView) + "°";
             if (viewRadiusLabel != null)
                 viewRadiusLabel.text = "Lebar pandang  " + Mathf.RoundToInt(circularViewRadius * 100f) + "%";
+            if (qualityPresetLabel != null)
+                qualityPresetLabel.text = "Kualitas grafis  " + GraphicsQualityService.GetDisplayLabel(GraphicsQualityService.CurrentPreset);
+        }
+
+        public void SelectQualityPreset(QualityPreset preset)
+        {
+            GraphicsQualityService.ApplyPreset(preset, savePreference: true);
+        }
+
+        private void OnQualityPresetChanged(QualityPreset preset)
+        {
+            UpdateLabels();
+            UpdateQualityButtons(preset);
+        }
+
+        private void UpdateQualityButtons(QualityPreset activePreset)
+        {
+            StyleQualityButton(qualityLowButton, activePreset == QualityPreset.Low);
+            StyleQualityButton(qualityMediumButton, activePreset == QualityPreset.Medium);
+            StyleQualityButton(qualityHighButton, activePreset == QualityPreset.High);
+        }
+
+        private static void StyleQualityButton(Button button, bool selected)
+        {
+            if (button == null) return;
+            var bg = button.GetComponent<Image>();
+            if (bg != null)
+            {
+                bg.color = selected
+                    ? new Color(0.27f, 0.38f, 0.40f, 0.96f)
+                    : new Color(0.12f, 0.17f, 0.19f, 0.88f);
+            }
+            var caption = button.GetComponentInChildren<Text>(true);
+            if (caption != null)
+            {
+                caption.color = selected
+                    ? new Color(0.96f, 0.94f, 0.86f, 1f)
+                    : new Color(0.72f, 0.78f, 0.79f, 1f);
+                caption.fontStyle = selected ? FontStyle.Bold : FontStyle.Normal;
+            }
         }
 
         private void OnCircularViewChanged(bool enabled)

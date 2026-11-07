@@ -1,4 +1,5 @@
 using NoRainbowAfter.Core;
+using NoRainbowAfter.Quality;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -25,11 +26,16 @@ namespace NoRainbowAfter.UI
         [SerializeField] private Slider masterVolume;
         [SerializeField] private Text volumeValue;
         [SerializeField] private Text statusLabel;
+        [SerializeField] private Text qualityPresetLabel;
+        [SerializeField] private Button qualityLowButton;
+        [SerializeField] private Button qualityMediumButton;
+        [SerializeField] private Button qualityHighButton;
         private SceneFlow flow;
 
         private void Awake()
         {
             flow = SceneFlow.EnsureInstance();
+            GraphicsQualityService.ApplySavedPreset();
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             if (continueButton != null) continueButton.interactable = false;
@@ -49,12 +55,21 @@ namespace NoRainbowAfter.UI
                 UpdateVolumeLabel(AudioListener.volume);
                 masterVolume.onValueChanged.AddListener(SetVolume);
             }
+            if (qualityLowButton != null)
+                qualityLowButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.Low));
+            if (qualityMediumButton != null)
+                qualityMediumButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.Medium));
+            if (qualityHighButton != null)
+                qualityHighButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.High));
+            RefreshQualityControls(GraphicsQualityService.CurrentPreset);
             if (settingsPanel != null) settingsPanel.SetActive(false);
         }
 
         private void OnEnable()
         {
             flow.StateChanged += RefreshState;
+            GraphicsQualityService.PresetChanged += RefreshQualityControls;
+            RefreshQualityControls(GraphicsQualityService.CurrentPreset);
             RefreshState();
         }
 
@@ -63,6 +78,7 @@ namespace NoRainbowAfter.UI
         private void OnDisable()
         {
             if (flow != null) flow.StateChanged -= RefreshState;
+            GraphicsQualityService.PresetChanged -= RefreshQualityControls;
         }
 
         private void Update()
@@ -108,6 +124,40 @@ namespace NoRainbowAfter.UI
         private void UpdateVolumeLabel(float value)
         {
             if (volumeValue != null) volumeValue.text = Mathf.RoundToInt(value * 100f) + "%";
+        }
+
+        public void SelectQualityPreset(QualityPreset preset)
+        {
+            GraphicsQualityService.ApplyPreset(preset, savePreference: true);
+        }
+
+        private void RefreshQualityControls(QualityPreset activePreset)
+        {
+            if (qualityPresetLabel != null)
+                qualityPresetLabel.text = "Kualitas Grafis  —  " + GraphicsQualityService.GetDisplayLabel(activePreset);
+            StyleMenuQualityButton(qualityLowButton, activePreset == QualityPreset.Low);
+            StyleMenuQualityButton(qualityMediumButton, activePreset == QualityPreset.Medium);
+            StyleMenuQualityButton(qualityHighButton, activePreset == QualityPreset.High);
+        }
+
+        private static void StyleMenuQualityButton(Button button, bool selected)
+        {
+            if (button == null) return;
+            var bg = button.GetComponent<Image>();
+            if (bg != null)
+            {
+                bg.color = selected
+                    ? new Color(0.24f, 0.34f, 0.36f, 0.90f)
+                    : new Color(0.08f, 0.13f, 0.16f, 0.72f);
+            }
+            var caption = button.GetComponentInChildren<Text>(true);
+            if (caption != null)
+            {
+                caption.color = selected
+                    ? new Color(0.95f, 0.92f, 0.82f, 1f)
+                    : new Color(0.68f, 0.76f, 0.78f, 1f);
+                caption.fontStyle = selected ? FontStyle.Bold : FontStyle.Normal;
+            }
         }
 
         private static void Focus(Selectable target)

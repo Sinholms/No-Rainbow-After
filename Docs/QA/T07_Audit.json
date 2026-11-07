@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-07",
+  "task": "T07",
+  "baselineCommit": "0b389c7",
+  "previousFeatureCommit": "5ae514b",
+  "sessionModel": "Gemini 4 Argon",
+  "subAgentsAvailable": {
+    "Terra": false,
+    "Luna": false,
+    "note": "Executed directly in Antigravity without claiming unavailable Terra/Luna sub-agents; Docs/design.md §17.1 preserved unchanged."
+  },
+  "unity": {
+    "connected": true,
+    "version": "6000.6.8f1",
+    "platform": "StandaloneWindows64",
+    "renderPipeline": "URP 17.6.0",
+    "inputSystem": "1.20.1",
+    "initialPlayModeState": "Was in PlayMode on MainMenu.unity (isDirty=false); stopped cleanly and inspected MasterGameplay.unity (isDirty=false).",
+    "consoleErrors": 0,
+    "consoleWarnings": 0,
+    "activeCamerasInMasterGameplay": 1,
+    "qualityLevelsBeforeT07": [
+      "Mobile (Assets/Settings/Mobile_RPAsset.asset, excluded on Standalone)",
+      "PC (Assets/Settings/PC_RPAsset.asset)"
+    ],
+    "sceneObjectsVerified": {
+      "chapter1Root": true,
+      "envKosAtmosphereConnectedPrefab": true,
+      "shadowPlaceholderConnectedPrefab": true,
+      "interactables": [
+        "INT_BOOK",
+        "INT_OVERTIME",
+        "INT_C1_DOOR"
+      ],
+      "coverZones": [
+        "C1_COVER_LEFT",
+        "C1_COVER_RIGHT"
+      ],
+      "loopAtmosphereNonStaticParts": 9
+    }
+  },
+  "blender": {
+    "connected": true,
+    "version": "5.2.3 LTS",
+    "addonVersion": "1.8 (protocol 15)",
+    "openFileAtAudit": "BlenderSources/Characters/ACT_001_ShadowPlaceholder_v1.blend",
+    "isDirty": false
+  },
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+    "graphicsApi": "Direct3D12",
+    "vramMb": 6001,
+    "cpu": "13th Gen Intel(R) Core(TM) i5-13450HX",
+    "ramMb": 28379,
+    "displayPhysical": "1920x1080 @ 144Hz (Windows DPI scale 125% -> logical 1536x864)"
+  },
+  "gitBaseline": {
+    "modifiedFiles": [
+      "ProjectSettings/ProjectSettings.asset",
+      "ProjectSettings/UnityConnectSettings.asset"
+    ],
+    "sha256": {
+      "ProjectSettings/ProjectSettings.asset": "0CF6715193CCA1DE9CF0C77AE8E198AF3A02C5C2F9F59341CCF91DE31A6CA535",
+      "ProjectSettings/UnityConnectSettings.asset": "C3DBB998537BC5C0357729E0EA4554AE78213E38A6E3BCE52FA300E0090E81FF",
+      "persistentCluesProfile": "6666DEAD0F1C36CB032CAF8947393AEDEF07E77EB43BEC1F5CF4A5F93CF2BE46"
+    }
+  },
+  "docxReadStatus": "Direct text reader cannot render binary ZIP .docx layout/images; extracted and verified all 1,096 non-empty OOXML paragraphs from word/document.xml alongside Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md.",
+  "t07Gaps": [
+    "Only 1 active Standalone quality level ('PC') exists; 3 real Low/Medium/High URP quality presets and persistent Settings/Pause selector are missing.",
+    "Hero dorm room and corridor lack damp plaster seepage/peeling decals, wet corridor puddles/window condensation streaks, improved natural blanket/pillow folds, worn desk detail, detailed fluorescent batten housings, and controlled dust/water-drip atmospheric particles.",
+    "Distant monster silhouette (8-12 m) blends into dark corridor back wall; needs wet floor reflection probe and subtle rim/bounce lighting for crisp FPP readability across Low/Medium/High.",
+    "No standalone frame-time/FPS benchmark harness or verified 1080p Windows standalone FPS measurements across Low/Medium/High exist yet."
+  ],
+  "backupPath": "Temp/T07Baseline/20261107-164230"
+}

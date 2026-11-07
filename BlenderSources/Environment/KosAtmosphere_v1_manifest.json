@@ -1129,6 +1129,266 @@
       "name": "SM_PROP_FallenPaper.008",
       "material": "MAT_H_Paper",
       "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomTube_0",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomTube_1",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomLampCap_0",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomLampCap_1",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomStarter",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_0_0",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_0_1",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_0_0",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_0_1",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_JunctionBox_0",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_1_0",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_1_1",
+      "material": "MAT_H_LampWarm",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_1_0",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_1_1",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_JunctionBox_1",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_2_0",
+      "material": "MAT_H_LampCold",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallTube_2_1",
+      "material": "MAT_H_LampCold",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_2_0",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_HallLampCap_2_1",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_JunctionBox_2",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_StudyMug",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_StudyMugInner",
+      "material": "MAT_H_Ink",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WallSwitchPlate",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WallSwitchRocker",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_SwitchConduit",
+      "material": "MAT_H_Metal",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WallCalendar",
+      "material": "MAT_H_Paper",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WallCalendarHeader",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WaterJugBody",
+      "material": "MAT_H_Glass",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WaterJugNeck",
+      "material": "MAT_H_Glass",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_WaterJugCap",
+      "material": "MAT_H_Cloth",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomCorniceX_0",
+      "material": "MAT_H_Wall",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomCorniceX_1",
+      "material": "MAT_H_Wall",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomCorniceY_0",
+      "material": "MAT_H_Wall",
+      "collision": "none"
+    },
+    {
+      "name": "SM_T07_RoomCorniceY_1",
+      "material": "MAT_H_Wall",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_WindowRainPane",
+      "material": "MAT_H_WindowRain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_WindowBelowDamp",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_BedWallDamp",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_DeskWallDamp",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_DoorWallDamp",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_RoomCeilingLeak",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallWallDamp_01",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallWallDamp_02",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallWallDamp_03",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallWallDamp_04",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallEndDamp",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallCeilingLeak_01",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallCeilingLeak_02",
+      "material": "MAT_H_DampStain",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_WindowFloorPuddle",
+      "material": "MAT_H_WetPuddle",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallPuddle_Near",
+      "material": "MAT_H_WetPuddle",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallPuddle_Mid",
+      "material": "MAT_H_WetPuddle",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallPuddle_Leak2",
+      "material": "MAT_H_WetPuddle",
+      "collision": "none"
+    },
+    {
+      "name": "SM_DEC_HallPuddle_FarRim",
+      "material": "MAT_H_WetPuddle",
+      "collision": "none"
     }
   ],
   "materials": [
@@ -1301,6 +1561,57 @@
         0.992,
         1.088
       ]
+    },
+    {
+      "name": "MAT_H_WetPuddle",
+      "texturePrefix": "WetPuddle",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.04,
+      "smoothness": 0.93,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_DampStain",
+      "texturePrefix": "DampStain",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.58,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_WindowRain",
+      "texturePrefix": "WindowRain",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.08,
+      "smoothness": 0.92,
+      "emission": [
+        0.02,
+        0.05,
+        0.08
+      ]
     }
   ],
   "lights": [
@@ -1400,8 +1711,8 @@
     0.04,
     1.1
   ],
-  "meshCount": 226,
-  "triangles": 63128,
+  "meshCount": 278,
+  "triangles": 65988,
   "roomMetres": [
     4,
     5,
@@ -1413,5 +1724,5 @@
     2.7
   ],
   "source": "Blender 5.2.3 LTS, original geometry; wall and wood albedos from built-in imagegen, other maps procedural",
-  "revision": "T04: deeper cover niches, relocated cabinets, extended ceiling"
+  "revision": "T07: PBR wetness/damp decals, natural blanket/pillow sculpt, detailed fluorescent tubes/junctions, kos set dressing"
 }

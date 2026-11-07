@@ -1,0 +1,473 @@
+﻿{
+    "job_id":  "36129512a9e949bea14c4cf8a21590d0",
+    "status":  "succeeded",
+    "mode":  "PlayMode",
+    "started_unix_ms":  1794049225315,
+    "finished_unix_ms":  1794049263750,
+    "last_update_unix_ms":  1794049263750,
+    "progress":  {
+                     "completed":  48,
+                     "total":  48,
+                     "current_test_full_name":  null,
+                     "current_test_started_unix_ms":  null,
+                     "last_finished_test_full_name":  "NoRainbowAfter.Tests.VisualQualitySliceTests.SceneIntegrityAndDoorwayClearanceHoldAcrossAllPresets",
+                     "last_finished_unix_ms":  1794049263634,
+                     "stuck_suspected":  false,
+                     "editor_is_focused":  false,
+                     "run_in_background":  false,
+                     "focus_nudge_attempts":  null,
+                     "focus_nudge_limit":  null,
+                     "focus_nudge_status":  null,
+                     "blocked_reason":  null,
+                     "failures_so_far":  [
+
+                                         ],
+                     "failures_capped":  false
+                 },
+    "error":  null,
+    "result":  {
+                   "mode":  "PlayMode",
+                   "summary":  {
+                                   "total":  48,
+                                   "passed":  48,
+                                   "failed":  0,
+                                   "skipped":  0,
+                                   "durationSeconds":  32.3864446,
+                                   "resultState":  "Passed"
+                               },
+                   "results":  [
+                                   {
+                                       "name":  "InteractionRecastsWhenNewWallAppears",
+                                       "fullName":  "InteractionSceneTests.InteractionRecastsWhenNewWallAppears",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.6391255,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "SceneHasThreeUniqueTargetsAndEscapeClosesBeforePause",
+                                       "fullName":  "InteractionSceneTests.SceneHasThreeUniqueTargetsAndEscapeClosesBeforePause",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.2108689,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "SlipCanBeTargetedStandingAndCrouchedWithoutSelfOcclusion",
+                                       "fullName":  "InteractionSceneTests.SlipCanBeTargetedStandingAndCrouchedWithoutSelfOcclusion",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1707177,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "ClosestSolidBlocksTargetAndRangeIsLimited",
+                                       "fullName":  "InteractionTests.ClosestSolidBlocksTargetAndRangeIsLimited",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0033657,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "ObjectiveFlagsAreUnique",
+                                       "fullName":  "InteractionTests.ObjectiveFlagsAreUnique",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0004077,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "OnlyOwnHierarchyIsIgnored",
+                                       "fullName":  "InteractionTests.OnlyOwnHierarchyIsIgnored",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0015401,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "TriggersDoNotBlockButIgnoreRaycastLayerSolidsDo",
+                                       "fullName":  "InteractionTests.TriggersDoNotBlockButIgnoreRaycastLayerSolidsDo",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0012747,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "AtmosphereMovesImportedPaperAndRestoresIt",
+                                       "fullName":  "NarrativeTests.AtmosphereMovesImportedPaperAndRestoresIt",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.1396745,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "ClueStorageDeduplicatesAndProtectsUnknownSchema",
+                                       "fullName":  "NarrativeTests.ClueStorageDeduplicatesAndProtectsUnknownSchema",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0537714,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "EarlySlipAndDeferredFightRemainOrdered",
+                                       "fullName":  "NarrativeTests.EarlySlipAndDeferredFightRemainOrdered",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1982131,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "EarlySlipAndDeferredHideRemainOrdered",
+                                       "fullName":  "NarrativeTests.EarlySlipAndDeferredHideRemainOrdered",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.2179675,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "LoopCapPauseAndCheckpointReset",
+                                       "fullName":  "NarrativeTests.LoopCapPauseAndCheckpointReset",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1782134,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "MotorExcursionAcrossDoorwayCountsOnce",
+                                       "fullName":  "NarrativeTests.MotorExcursionAcrossDoorwayCountsOnce",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.7994497,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "ProviderReadinessAndSynchronousResolutionAreExplicit",
+                                       "fullName":  "NarrativeTests.ProviderReadinessAndSynchronousResolutionAreExplicit",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1758981,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "SubtitlesSuspendWhileInspectingAndPaused",
+                                       "fullName":  "NarrativeTests.SubtitlesSuspendWhileInspectingAndPaused",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.3311016,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "CheckpointRestoresPoseWithoutErasingBookOrChangingInspectionAndPause",
+                                       "fullName":  "NoRainbowAfter.Tests.ChapterOneSceneTests.CheckpointRestoresPoseWithoutErasingBookOrChangingInspectionAndPause",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.2090582,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "DormCorridorBothCoverZonesAndReturnAreTraversable",
+                                       "fullName":  "NoRainbowAfter.Tests.ChapterOneSceneTests.DormCorridorBothCoverZonesAndReturnAreTraversable",
+                                       "state":  "Passed",
+                                       "durationSeconds":  16.5611852,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  "[T04 test] Simulated route traversal: 313.5 seconds.\r\n"
+                                   },
+                                   {
+                                       "name":  "FightUsesMouseLeftButtonAndCannotFireWhileGameplayLocked",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonInputTests.FightUsesMouseLeftButtonAndCannotFireWhileGameplayLocked",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0522179,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "InteractUsesEAndCannotFireWhileGameplayLocked",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonInputTests.InteractUsesEAndCannotFireWhileGameplayLocked",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0163568,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "MouseDeltaReachesLookWithoutSpeedScaling",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonInputTests.MouseDeltaReachesLookWithoutSpeedScaling",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0230284,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "PauseStopsGameplayInputButEscapeStillWorksForResume",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonInputTests.PauseStopsGameplayInputButEscapeStillWorksForResume",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0126054,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "WasdShiftAndLeftCtrlReachTheMotorFrame",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonInputTests.WasdShiftAndLeftCtrlReachTheMotorFrame",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0095164,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "BlenderLabSupportsCrouchRampStairsAndDoorway",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonLabTests.BlenderLabSupportsCrouchRampStairsAndDoorway",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1183439,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "CharacterControllerStopsAtWallAndStaysOnFloor",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.CharacterControllerStopsAtWallAndStaysOnFloor",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0042593,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.CrouchCannotStandInsideLowRoofAndRecoversAfterExit",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0023701,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "DiagonalMovementHasSameSpeedAsForward",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.DiagonalMovementHasSameSpeedAsForward",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0020405,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0014928,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "HoldingSprintWhileIdleDoesNotUseStamina",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.HoldingSprintWhileIdleDoesNotUseStamina",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0017663,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.MouseDeltaIsFrameRateIndependentAndPitchIsClamped",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0013024,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0011819,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "SprintLastsFiveSecondsThenWalksAndRecharges",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.SprintLastsFiveSecondsThenWalksAndRecharges",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0037381,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+                                       "fullName":  "NoRainbowAfter.Tests.FirstPersonMotorTests.StandingDoesNotAutomaticallyCrouchIntoLowPassage",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0029994,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "GameplaySceneHasOnePlayerAndPassableDoorway",
+                                       "fullName":  "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.GameplaySceneHasOnePlayerAndPassableDoorway",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.2650149,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "PauseStopsPlayerAndHidesCircularMask",
+                                       "fullName":  "NoRainbowAfter.Tests.KosAtmosphereIntegrationTests.PauseStopsPlayerAndHidesCircularMask",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.1976171,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.9581128,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.2105151,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.3170319,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.8770719,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.2221003,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.9207593,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide",
+                                       "fullName":  "NoRainbowAfter.Tests.ShadowEncounterTests.StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide",
+                                       "state":  "Passed",
+                                       "durationSeconds":  1.2980607,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "FrameTimeSamplerComputesAccurateFrameMetrics",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.FrameTimeSamplerComputesAccurateFrameMetrics",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0082983,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "InteractablesAndMonsterSilhouetteRemainReadableAcrossPresets",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.InteractablesAndMonsterSilhouetteRemainReadableAcrossPresets",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.3760122,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "MainMenuSettingsQualitySelectorPersistsIntoGameplay",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.MainMenuSettingsQualitySelectorPersistsIntoGameplay",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.336975,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "MasterGameplayAtmosphereScalesCorrectlyAcrossPresets",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.MasterGameplayAtmosphereScalesCorrectlyAcrossPresets",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.3447274,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "PauseMenuQualityButtonsSwitchAndPersistWithoutBreakingViewSettings",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.PauseMenuQualityButtonsSwitchAndPersistWithoutBreakingViewSettings",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.3561289,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "QualitySettingsDefineThreeDistinctPresets_LowMediumHigh",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.QualitySettingsDefineThreeDistinctPresets_LowMediumHigh",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.0191292,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   },
+                                   {
+                                       "name":  "SceneIntegrityAndDoorwayClearanceHoldAcrossAllPresets",
+                                       "fullName":  "NoRainbowAfter.Tests.VisualQualitySliceTests.SceneIntegrityAndDoorwayClearanceHoldAcrossAllPresets",
+                                       "state":  "Passed",
+                                       "durationSeconds":  0.358051,
+                                       "message":  null,
+                                       "stackTrace":  null,
+                                       "output":  ""
+                                   }
+                               ]
+               }
+}

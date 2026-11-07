@@ -7,7 +7,11 @@
     "NoRainbowAfter.Interaction",
     "NoRainbowAfter.Level",
     "NoRainbowAfter.Narrative",
-    "NoRainbowAfter.AI"
+    "NoRainbowAfter.AI",
+    "NoRainbowAfter.Quality",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "UnityEngine.UI"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

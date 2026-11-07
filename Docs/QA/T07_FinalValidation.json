@@ -1,0 +1,60 @@
+{
+  "task": "T07",
+  "title": "Visual vertical slice (URP hero room & corridor art polish, Low/Medium/High quality presets, FPP readability, standalone FPS benchmark)",
+  "validatedAtUtc": "2026-11-07T11:16:00Z",
+  "baselineCommit": "0b389c7",
+  "renderer": "URP 17.6.0 (Forward+, retained intentionally per Docs/design.md §0.3, §9, §12.3)",
+  "unityVersion": "6000.6.8f1",
+  "blenderVersion": "5.2.3 LTS",
+  "activeScene": {
+    "path": "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+    "isDirty": false,
+    "missingScripts": 0,
+    "brokenPrefabs": 0,
+    "activeCameras": 1,
+    "consoleErrors": 0,
+    "consoleWarnings": 0
+  },
+  "blenderState": {
+    "blendPath": "BlenderSources/Environment/KosAtmosphere_v1.blend",
+    "sceneName": "NRA_KosAtmosphere_v1",
+    "meshCount": 278,
+    "triangleCount": 65988,
+    "isDirty": false
+  },
+  "playModeTests": {
+    "jobId": "36129512a9e949bea14c4cf8a21590d0",
+    "total": 48,
+    "passed": 48,
+    "failed": 0,
+    "skipped": 0,
+    "regressionTestsT02ToT06": 41,
+    "newTestsT07": 7
+  },
+  "windowsStandaloneBuild": {
+    "jobId": "build-b8ef18643a",
+    "outputPath": "Builds/T07VisualSlice/NoRainbowAfter.exe",
+    "sizeMb": 148.17,
+    "errors": 0,
+    "warnings": 0
+  },
+  "standalone1080pFpsAggregates": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU (Direct3D12)",
+    "resolution": "1920x1080",
+    "Low": { "avgFps": 657.04, "avgMs": 1.52, "p95Ms": 2.35, "onePercentLowFps": 327.94 },
+    "Medium": { "avgFps": 296.57, "avgMs": 3.37, "p95Ms": 4.53, "onePercentLowFps": 157.54 },
+    "High": { "avgFps": 230.67, "avgMs": 4.34, "p95Ms": 5.82, "onePercentLowFps": 127.57 }
+  },
+  "editor1080pFpsAggregates": {
+    "Low": { "avgFps": 270.89, "avgMs": 3.69, "p95Ms": 5.50, "onePercentLowFps": 108.10 },
+    "Medium": { "avgFps": 219.35, "avgMs": 4.56, "p95Ms": 6.34, "onePercentLowFps": 88.12 },
+    "High": { "avgFps": 193.03, "avgMs": 5.18, "p95Ms": 6.88, "onePercentLowFps": 100.36 }
+  },
+  "protectedHashesVerifiedIdentical": {
+    "ProjectSettings/ProjectSettings.asset": "0CF6715193CCA1DE9CF0C77AE8E198AF3A02C5C2F9F59341CCF91DE31A6CA535",
+    "ProjectSettings/UnityConnectSettings.asset": "C3DBB998537BC5C0357729E0EA4554AE78213E38A6E3BCE52FA300E0090E81FF",
+    "persistentCluesJson": "6666DEAD0F1C36CB032CAF8947393AEDEF07E77EB43BEC1F5CF4A5F93CF2BE46"
+  },
+  "t13HeroMonsterUntouched": true,
+  "t08PhoneUntouched": true
+}

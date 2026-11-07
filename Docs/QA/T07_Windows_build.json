@@ -1,0 +1,23 @@
+{
+  "jobId": "build-b8ef18643a",
+  "initialColdShaderBuildJobId": "build-1bc594300f",
+  "result": "succeeded",
+  "platform": "StandaloneWindows64",
+  "outputPath": "Builds/T07VisualSlice/NoRainbowAfter.exe",
+  "scenes": [
+    "Assets/_NoRainbowAfter/Scenes/Boot.unity",
+    "Assets/_NoRainbowAfter/Scenes/MainMenu.unity",
+    "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity",
+    "Assets/_NoRainbowAfter/Scenes/Credits.unity"
+  ],
+  "startedAt": "2026-11-07T11:10:27.3211177Z",
+  "completedAt": "2026-11-07T11:10:33.3778292Z",
+  "durationSeconds": 6.0567115,
+  "initialColdShaderCompileSeconds": 524.6824416,
+  "totalSizeMb": 148.17,
+  "errors": 0,
+  "warnings": 0,
+  "standaloneLaunchedOrProfiled": true,
+  "standaloneBenchmarkReport": "Docs/QA/T07_Standalone_FPS.json",
+  "note": "Production 4-scene Windows x64 standalone build succeeded cleanly with 0 errors and 0 warnings across NRA_URP_Low, NRA_URP_Medium, and NRA_URP_High."
+}

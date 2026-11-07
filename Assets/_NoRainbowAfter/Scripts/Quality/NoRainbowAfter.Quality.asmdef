@@ -1,0 +1,21 @@
+{
+  "name": "NoRainbowAfter.Quality",
+  "rootNamespace": "NoRainbowAfter.Quality",
+  "references": [
+    "NoRainbowAfter.Player",
+    "NoRainbowAfter.Narrative",
+    "NoRainbowAfter.AI",
+    "Unity.RenderPipelines.Universal.Runtime",
+    "Unity.RenderPipelines.Core.Runtime",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
