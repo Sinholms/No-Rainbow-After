@@ -15,6 +15,8 @@ namespace NoRainbowAfter.AI
         private Image border;
         private Texture2D texture;
         private Sprite sprite;
+        private RawImage viewMask;
+        private float borderRadius=-1, borderAspect;
         private bool animating, injured;
         private float phase;
         public float DamageAlpha => border != null ? border.color.a : 0f;
@@ -24,21 +26,28 @@ namespace NoRainbowAfter.AI
             view=motor != null ? motor.ViewCamera : null;
             if(canvas != null) return;
             var root=new GameObject("Capture damage feedback",typeof(Canvas));root.transform.SetParent(transform,false);
-            canvas=root.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=18;
+            // Keep the black POV mask and HUD above the injury tint, including the corners.
+            canvas=root.GetComponent<Canvas>();canvas.renderMode=RenderMode.ScreenSpaceOverlay;canvas.sortingOrder=-1;
             var panel=new GameObject("Red screen edges",typeof(RectTransform),typeof(Image));panel.transform.SetParent(root.transform,false);
             var rect=(RectTransform)panel.transform;rect.anchorMin=Vector2.zero;rect.anchorMax=Vector2.one;rect.offsetMin=rect.offsetMax=Vector2.zero;
             border=panel.GetComponent<Image>();border.raycastTarget=false;
             const int size=256;texture=new Texture2D(size,size,TextureFormat.RGBA32,false);texture.wrapMode=TextureWrapMode.Clamp;
-            var pixels=new Color[size*size];float aspect=(float)Screen.width/Mathf.Max(1,Screen.height);
+            RebuildBorder(.5f,(float)Screen.width/Mathf.Max(1,Screen.height));
+            sprite=Sprite.Create(texture,new Rect(0,0,size,size),new Vector2(.5f,.5f));border.sprite=sprite;
+            border.color=new Color(.45f,.01f,.008f,0);
+        }
+        private void RebuildBorder(float visibleRadius, float aspect)
+        {
+            borderRadius=visibleRadius;borderAspect=aspect;
+            int size=texture.width;
+            var pixels=new Color[size*size];
             for(int y=0;y<size;y++)for(int x=0;x<size;x++)
             {
                 float radius=new Vector2(((x+.5f)/size-.5f)*aspect,(y+.5f)/size-.5f).magnitude;
-                float a=Mathf.SmoothStep(0,1,Mathf.InverseLerp(.25f,.48f,radius));
+                float a=Mathf.SmoothStep(0,1,Mathf.InverseLerp(visibleRadius-.10f,visibleRadius,radius));
                 pixels[y*size+x]=new Color(1,1,1,a);
             }
             texture.SetPixels(pixels);texture.Apply();
-            sprite=Sprite.Create(texture,new Rect(0,0,size,size),new Vector2(.5f,.5f));border.sprite=sprite;
-            border.color=new Color(.65f,.015f,.01f,0);
         }
         public void BeginGrab(Transform monster)
         {
@@ -50,8 +59,14 @@ namespace NoRainbowAfter.AI
         {
             if(canvas != null) canvas.enabled=!suspended;
             if(suspended) return;
+            if(viewMask == null)
+                foreach(var candidate in FindObjectsByType<RawImage>(FindObjectsSortMode.None))
+                    if(candidate.material != null && candidate.material.HasProperty("_Radius")) { viewMask=candidate;break; }
+            float radius=viewMask != null ? viewMask.material.GetFloat("_Radius") : .5f;
+            float aspect=(float)Screen.width/Mathf.Max(1,Screen.height);
+            if(texture != null && (Mathf.Abs(radius-borderRadius)>.001f || Mathf.Abs(aspect-borderAspect)>.001f)) RebuildBorder(radius,aspect);
             phase+=dt;
-            if(border != null) border.color=new Color(.65f,.015f,.01f,injured ? (animating ? .68f : .27f+.035f*Mathf.Sin(phase*2.4f)) : 0f);
+            if(border != null) border.color=new Color(.45f,.01f,.008f,injured ? (animating ? .28f : .09f+.01f*Mathf.Sin(phase*2.4f)) : 0f);
             if(!animating || view == null || attacker == null) return;
             float strength=Mathf.Sin(Mathf.Clamp01(progress)*Mathf.PI);
             var target=attacker.position+Vector3.up*1.85f-view.transform.position;
@@ -65,7 +80,7 @@ namespace NoRainbowAfter.AI
             if(animating && view != null) { view.transform.localPosition=restPosition;view.transform.localRotation=restRotation; }
             animating=false;attacker=null;
         }
-        public void ResetFeedback() { FinishGrab();injured=false;if(border != null)border.color=new Color(.65f,.015f,.01f,0); }
+        public void ResetFeedback() { FinishGrab();injured=false;if(border != null)border.color=new Color(.45f,.01f,.008f,0); }
         private void OnDestroy() { FinishGrab();if(sprite != null)Destroy(sprite);if(texture != null)Destroy(texture); }
     }
 }

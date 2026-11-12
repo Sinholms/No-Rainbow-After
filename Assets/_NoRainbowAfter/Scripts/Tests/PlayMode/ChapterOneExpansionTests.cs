@@ -86,7 +86,7 @@ namespace NoRainbowAfter.Tests
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Grabbed));
             Assert.That(player.IsTransitionLocked,Is.True);
             yield return new WaitForSeconds(.3f);
-            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.5f));
+            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.01f));
             player.SetPaused(true);
             var frozen= motor.ViewCamera.transform.localRotation;
             monster.TickEncounter(.1f);
@@ -95,7 +95,7 @@ namespace NoRainbowAfter.Tests
             yield return new WaitForSeconds(1.1f);
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Pursue));
             Assert.That(player.IsTransitionLocked,Is.False);
-            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.2f),"Red injury border persists after the first escape.");
+            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.01f),"Red injury border persists after the first escape.");
             caught.Invoke(monster,null);
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Grabbed));
             yield return new WaitForSeconds(1.3f);
