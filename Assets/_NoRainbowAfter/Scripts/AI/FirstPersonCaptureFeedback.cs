@@ -60,7 +60,7 @@ namespace NoRainbowAfter.AI
             if(canvas != null) canvas.enabled=!suspended;
             if(suspended) return;
             if(viewMask == null)
-                foreach(var candidate in FindObjectsByType<RawImage>(FindObjectsSortMode.None))
+                foreach(var candidate in FindObjectsByType<RawImage>())
                     if(candidate.material != null && candidate.material.HasProperty("_Radius")) { viewMask=candidate;break; }
             float radius=viewMask != null ? viewMask.material.GetFloat("_Radius") : .5f;
             float aspect=(float)Screen.width/Mathf.Max(1,Screen.height);
