@@ -41,6 +41,8 @@ namespace NoRainbowAfter.Narrative
         public bool IsCurrentEncounter(IShadowEncounter candidate) => ReferenceEquals(encounter, candidate);
         // Tests set this before scene load and restore it after the test run.
         public static string StoragePathOverride { get; set; }
+        // Environmental monologues use the existing cue stream without advancing story beats.
+        public void RequestNarrativeCue(NarrativeCue cue) { if(cue != null) CueRequested?.Invoke(cue); }
 
         private bool outside, armed, slip, encounterBegun, resolved, bound, pathConfigured;
         private int generation;

@@ -22,6 +22,12 @@ namespace NoRainbowAfter.Narrative
 
         public string CurrentText => label != null ? label.text : string.Empty;
         public int PendingCount => pending.Count + (hasCurrentCue ? 1 : 0);
+        public void ClearQueuedCues()
+        {
+            pending.Clear();hasCurrentCue=false;currentCue=null;remaining=0;
+            if(label != null)label.text=string.Empty;
+            RefreshVisibility();
+        }
 
         private void Awake() => BuildUi();
 

@@ -17,7 +17,7 @@ User-authorized revision to T04/T05/T06/T07: longer, varied horror corridors, no
 
 Horror Corridor 3 is adapted in Blender: storage/library removed, floor height and ceiling clearance corrected, sections reused for an east extension with turns and a connected return loop. Route colors differ between entrance, east stretch and return. The physical traversal test covered **78.5m**, compared with the old 14m corridor; this measures traversal distance, not human playtime. A fixed return route is implemented, not procedural generation or randomized room rearrangement on each lap.
 
-Two original wooden wardrobes are installed: entrance terminus and a recessed opening in the east stretch. Blender sources are `C1_RoomDisarray.blend`, `C1_HidingWardrobe.blend`, and `HC3_Extended.blend`; corresponding preparation scripts are stored alongside them.
+Five original wooden wardrobes are installed: entrance terminus, a recessed opening in the east stretch, and three additional corner bays. Blender sources are `C1_RoomDisarray.blend`, `C1_HidingWardrobe.blend`, and the current `HC3_Repaired.blend` (derived from `HC3_Extended.blend`); corresponding preparation scripts are stored alongside them.
 
 The original user download is copied into `ThirdPartySources/HorrorCorridor3/` and kept locally. **Source provenance is uncertain** and was disclosed before integration; the user selected private coursework use. Attribution and the exact concern are recorded in [ASSET_LICENSES.md](ASSET_LICENSES.md).
 
@@ -41,3 +41,15 @@ No push. Unrelated staged Raka assets, recovery files and user project-setting c
 Removed all 8 floating room pages from the `.blend`, exported FBX, and generator after user feedback. The room uses grounded clutter. Five updated integration tests passed (`Docs/QA/C1Feedback_Tests.json`), including the new grab state, retained red border, pause freeze, restored controls, second-capture checkpoint, preserved clue, and the corridor objective hint. Current captures are in `Docs/QA/C1Feedback/`; earlier screenshots with floating pages document the superseded visual pass. Grab animation is procedural on the existing placeholder model; it is not a new rigged animation clip or an integration of the separately staged Raka hero asset.
 
 The red border was subsequently reduced after visual feedback: resting opacity is 0.08–0.10 (previously roughly 0.27), and grab opacity is 0.28 (previously 0.68). It now occupies only the outer 0.10 viewport-height band of the configured circular POV and renders behind its black mask and HUD. The center and black corners remain clear of the red tint. The capture/checkpoint integration test passed again after the adjustment. `AfterEscape_SubtleRed.png` is a staged in-engine preview of this reduced effect; its objective text is unrelated to the damage preview.
+
+## Floor, corner wardrobe, and arrival narration repair
+
+A physics audit reproduced six missing-floor samples along the return junction near world x=77.55–79.35, z=-2.70. `repair_c1_corridor_bounds.py` authors a continuous backing floor across the route union and expands the three outer corners into wardrobe bays. `Repair Corridor Bounds And Add Wardrobes` installs 100 perimeter collision segments, three additional wardrobes with warm local lights, and rebuilt navigation. Door interaction colliders make E reachable even when aiming through the narrow visual viewing slit. The corner rooms preserve the through-route and provide space outside the main running line.
+
+As a backup, an unexpected fall below y=-1 restores the player to the most recent grounded navigation position, preserving clue state. This does not replace the floor and perimeter repairs: a physical traversal test verifies the repaired edge stops the player without triggering fallback recovery.
+
+On the first successful corridor arrival, obsolete queued subtitles clear and Raka's monologues appear in sequence: **Aku di mana? Kenapa aku bisa di sini?**, then **Aku harus menemukan jalan keluar dan pergi kerja.** These are subtitles and named audio cues; no voice recording has been fabricated. The sequence plays once, and does not advance or duplicate chapter beats on checkpoint retry.
+
+Eight integration tests passed, covering earlier encounter/route behavior plus repaired floor samples, physical perimeter collision, entry/exit and E-raycast access for all three new wardrobes, arrival subtitle ordering, and fall recovery with clue preservation. See `Docs/QA/C1CorridorRepair_Tests.json`. Current captures are under `Docs/QA/C1CorridorRepair/`.
+
+To reproduce: generate/extend the source corridor as before, run `BlenderSources/Environment/repair_c1_corridor_bounds.py`, then invoke the repair installer on saved MasterGameplay. Both authoring and installation preserve the original source files and unrelated staged Raka work.

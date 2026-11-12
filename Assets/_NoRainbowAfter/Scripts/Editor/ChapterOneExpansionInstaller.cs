@@ -17,6 +17,59 @@ namespace NoRainbowAfter.Editor
     {
         [Serializable] private class MaterialEntry { public string name, texture; }
         [Serializable] private class MaterialList { public MaterialEntry[] materials; }
+        [Serializable] private class BoundaryEdge { public float[] a,b,normal; }
+        [Serializable] private class WardrobeSpot { public string id;public float[] position;public float yaw; }
+        [Serializable] private class RepairManifest { public BoundaryEdge[] boundaryEdges;public WardrobeSpot[] wardrobes; }
+        [MenuItem("No Rainbow After/Repair Corridor Bounds And Add Wardrobes")]
+        public static void RepairCorridor()
+        {
+            var scene=SceneManager.GetActiveScene();
+            if(EditorApplication.isPlaying || scene.path!="Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity" || scene.isDirty) throw new InvalidOperationException("Open saved MasterGameplay first.");
+            var shift=UnityEngine.Object.FindAnyObjectByType<ChapterOneCorridorShift>();
+            if(shift == null || shift.Corridor == null)throw new InvalidOperationException("Install the extended corridor first.");
+            var root=shift.Corridor.transform;
+            var manifest=JsonUtility.FromJson<RepairManifest>(File.ReadAllText("BlenderSources/Environment/C1_CorridorRepair_manifest.json"));
+            const string modelPath="Assets/_NoRainbowAfter/Art/Models/Environment/ENV_HC3_NoStorage.fbx";
+            var importer=(ModelImporter)AssetImporter.GetAtPath(modelPath);importer.isReadable=true;
+            var imported=new SerializedObject(importer);imported.FindProperty("m_PreBakeTriangleCollisionMesh").boolValue=true;imported.ApplyModifiedPropertiesWithoutUndo();importer.SaveAndReimport();
+            foreach(var r in root.GetComponentsInChildren<MeshRenderer>(true))
+            {
+                r.sharedMaterials=r.sharedMaterials.Select(m=>AssetDatabase.LoadAssetAtPath<Material>("Assets/_NoRainbowAfter/Art/Materials/HorrorCorridor3/"+m.name+".mat") ?? m).ToArray();
+                var collider=r.GetComponent<MeshCollider>();if(collider==null)collider=r.gameObject.AddComponent<MeshCollider>();collider.sharedMesh=r.GetComponent<MeshFilter>().sharedMesh;
+            }
+            var old=root.Find("C1_PerimeterGuards");if(old != null)UnityEngine.Object.DestroyImmediate(old.gameObject);
+            var guards=new GameObject("C1_PerimeterGuards");guards.transform.SetParent(root,false);
+            int index=0;
+            foreach(var edge in manifest.boundaryEdges)
+            {
+                Vector3 a=new Vector3(edge.a[0],0,edge.a[1]),b=new Vector3(edge.b[0],0,edge.b[1]);
+                var go=new GameObject("Boundary_"+(index++));go.transform.SetParent(guards.transform,false);
+                go.transform.localPosition=(a+b)*.5f+new Vector3(edge.normal[0]*.06f,1.55f,edge.normal[1]*.06f);
+                var box=go.AddComponent<BoxCollider>();box.size=Mathf.Abs(a.x-b.x)>.001f ? new Vector3(Mathf.Abs(a.x-b.x)+.02f,3.2f,.12f) : new Vector3(.12f,3.2f,Mathf.Abs(a.z-b.z)+.02f);
+            }
+            var wood=AssetDatabase.LoadAssetAtPath<Material>("Assets/_NoRainbowAfter/Art/Materials/KosAtmosphere/MAT_H_Wood.mat");
+            foreach(var spot in manifest.wardrobes)
+            {
+                if(root.Find("Wardrobe_"+spot.id)==null)InstallWardrobe(root,new Vector3(spot.position[0],spot.position[1],spot.position[2]),spot.yaw,wood,spot.id);
+                if(root.Find("WardrobeLight_"+spot.id)!=null)continue;
+                var lamp=new GameObject("WardrobeLight_"+spot.id);lamp.transform.SetParent(root,false);lamp.transform.localPosition=new Vector3(spot.position[0],2.2f,spot.position[2]);
+                var light=lamp.AddComponent<Light>();light.type=LightType.Point;light.color=new Color(.95f,.7f,.4f);light.intensity=1.25f;light.range=3.5f;
+            }
+            foreach(var wardrobe in root.GetComponentsInChildren<HidingWardrobe>(true))
+            {
+                var door=wardrobe.GetComponent<BoxCollider>();if(door==null)door=wardrobe.gameObject.AddComponent<BoxCollider>();
+                door.center=new Vector3(0,1.15f,-.61f);door.size=new Vector3(1.42f,2.3f,.065f);
+            }
+            var sources=new List<NavMeshBuildSource>();
+            foreach(var mesh in root.GetComponentsInChildren<MeshFilter>(true))sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.Mesh,sourceObject=mesh.sharedMesh,transform=mesh.transform.localToWorldMatrix});
+            foreach(var box in guards.GetComponentsInChildren<BoxCollider>())sources.Add(new NavMeshBuildSource{shape=NavMeshBuildSourceShape.Box,size=box.size,transform=box.transform.localToWorldMatrix});
+            var settings=NavMesh.GetSettingsByIndex(0);settings.agentRadius=.23f;settings.agentHeight=1.8f;settings.agentClimb=.25f;settings.overrideVoxelSize=true;settings.voxelSize=.08f;
+            var nav=NavMeshBuilder.BuildNavMeshData(settings,sources,new Bounds(new Vector3(76,1,4),new Vector3(47,12,34)),Vector3.zero,Quaternion.identity);
+            if(nav==null)throw new InvalidOperationException("Navigation bake failed.");
+            EditorUtility.CopySerialized(nav,shift.Navigation);UnityEngine.Object.DestroyImmediate(nav);EditorUtility.SetDirty(shift.Navigation);
+            EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            Debug.Log("[NRA] Repaired corridor floor/perimeter and installed three corner wardrobes.");
+        }
         [MenuItem("No Rainbow After/Install Extended Horror Corridor")]
         public static void InstallCorridor()
         {
@@ -88,6 +141,7 @@ namespace NoRainbowAfter.Editor
             model.transform.SetParent(holder.transform,false);model.transform.localRotation=Quaternion.Euler(0,180,0)*model.transform.localRotation;
             foreach(var r in model.GetComponentsInChildren<MeshRenderer>()) { r.sharedMaterial=wood;r.gameObject.AddComponent<MeshCollider>().sharedMesh=r.GetComponent<MeshFilter>().sharedMesh; }
             holder.AddComponent<HidingWardrobe>();
+            var door=holder.AddComponent<BoxCollider>();door.center=new Vector3(0,1.15f,-.61f);door.size=new Vector3(1.42f,2.3f,.065f);
         }
         [MenuItem("No Rainbow After/Install Chapter One Expansion")]
         public static void Apply()

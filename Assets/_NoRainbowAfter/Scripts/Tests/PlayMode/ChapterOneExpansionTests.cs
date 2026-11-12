@@ -150,5 +150,47 @@ namespace NoRainbowAfter.Tests
             }
             Assert.That(distance,Is.LessThanOrEqualTo(2.8f),"Monster got stuck at "+monster.transform.position);
         }
+        [UnityTest] public IEnumerator RepairedFloorAndPerimeterPreventFallingAtReturnJunction()
+        {
+            yield return Load();yield return Expand();monster.enabled=false;player.enabled=false;
+            for(float x=77.55f;x<=79.35f;x+=.15f)
+                Assert.That(Physics.Raycast(new Vector3(x,.35f,-2.7f),Vector3.down,.65f,~0,QueryTriggerInteraction.Ignore),Is.True,"Missing floor at "+x);
+            Assert.That(motor.TryRestorePose(new Vector3(78.3f,.1f,-2.2f),Quaternion.Euler(0,180,0),false),Is.True);
+            for(int n=0;n<100;n++)motor.Simulate(new FirstPersonFrame{Move=Vector2.up},.04f);
+            Assert.That(motor.transform.position.z,Is.GreaterThan(-2.65f));
+            Assert.That(motor.transform.position.y,Is.GreaterThan(-.2f));
+            Assert.That(world.FallRecoveryCount,Is.Zero,"The physical boundary should stop the fall before recovery is needed.");
+        }
+        [UnityTest] public IEnumerator AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit()
+        {
+            yield return Load();yield return Expand();monster.enabled=false;
+            var all=Object.FindObjectsByType<HidingWardrobe>();Assert.That(all.Length,Is.EqualTo(5));
+            foreach(var name in new[]{"Wardrobe_CornerA","Wardrobe_CornerB","Wardrobe_CornerC"})
+            {
+                var wardrobe=all.Single(x=>x.name==name);
+                Assert.That(motor.TryRestorePose(wardrobe.transform.TransformPoint(new Vector3(0,.08f,-1.35f)),wardrobe.transform.rotation,false),Is.True,name+" exit must be clear");
+                var camera=motor.ViewCamera;
+                camera.transform.rotation=wardrobe.transform.rotation;
+                Assert.That(PlayerInteractor.FindTarget(new Ray(camera.transform.position,camera.transform.forward),motor.transform),Is.SameAs(wardrobe),name+" must be reachable with E");
+                wardrobe.Interact(player.GetComponent<PlayerInteractor>());Assert.That(player.IsHiding,Is.True,name);
+                Assert.That(wardrobe.TryExit(),Is.True,name);Assert.That(player.IsHiding,Is.False);
+            }
+        }
+        [UnityTest] public IEnumerator ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue()
+        {
+            yield return Load();
+            var cues=new System.Collections.Generic.List<NarrativeCue>();director.CueRequested+=cues.Add;
+            yield return Expand();monster.enabled=false;
+            var arrival=cues.Where(c=>c.AudioCueId.StartsWith("AUD_C1_CORRIDOR_")).ToArray();
+            Assert.That(arrival.Length,Is.EqualTo(2));
+            Assert.That(arrival[0].Text,Is.EqualTo("Aku di mana? Kenapa aku bisa di sini?"));
+            Assert.That(arrival[1].Text,Is.EqualTo("Aku harus menemukan jalan keluar dan pergi kerja."));
+            var subtitles=player.GetComponent<SubtitlePlaceholder>();Assert.That(subtitles.CurrentText,Does.Contain(arrival[0].Text));
+            yield return new WaitForSeconds(3.5f);Assert.That(subtitles.CurrentText,Does.Contain(arrival[1].Text));
+            var cc=motor.GetComponent<CharacterController>();cc.enabled=false;motor.transform.position=new Vector3(65,-3,-1.65f);cc.enabled=true;
+            yield return null;yield return null;
+            Assert.That(world.FallRecoveryCount,Is.EqualTo(1));Assert.That(motor.transform.position.y,Is.GreaterThan(-.2f));
+            Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));Assert.That(player.IsTransitionLocked,Is.False);
+        }
     }
 }

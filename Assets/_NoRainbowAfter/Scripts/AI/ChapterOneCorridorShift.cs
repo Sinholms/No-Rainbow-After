@@ -21,6 +21,9 @@ namespace NoRainbowAfter.AI
         private NavMeshDataInstance instance;
         private bool shifting;
         private ObjectiveTracker objectives;
+        private bool arrivalNarrated;
+        private Vector3 lastSafePosition;
+        public int FallRecoveryCount { get; private set; }
         private void Start()
         {
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
@@ -31,6 +34,18 @@ namespace NoRainbowAfter.AI
         private void OnDestroy() { if(instance.valid) instance.Remove(); }
         private void LateUpdate()
         {
+            if(OwnsPlayer && !shifting && !player.IsPaused && !player.IsTransitionLocked)
+            {
+                if(motor.transform.position.y < -1f)
+                {
+                    if(motor.TryRestorePose(lastSafePosition+Vector3.up*.08f,motor.transform.rotation)) FallRecoveryCount++;
+                }
+                else if(!player.IsHiding && motor.GetComponent<CharacterController>().isGrounded)
+                {
+                    NavMeshHit safe;
+                    if(NavMesh.SamplePosition(motor.transform.position,out safe,.35f,NavMesh.AllAreas)) lastSafePosition=safe.position;
+                }
+            }
             if(objectives != null && director != null)
             {
                 if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
@@ -54,10 +69,17 @@ namespace NoRainbowAfter.AI
             var image=p.GetComponent<Image>();image.color=Color.black;image.raycastTarget=false;
             yield return new WaitForSeconds(.35f);
             Corridor.SetActive(true);Physics.SyncTransforms();
-            if(motor.TryRestorePose(Entry,Quaternion.Euler(0,180,0))) Expanded=true;
+            if(motor.TryRestorePose(Entry,Quaternion.Euler(0,180,0))) { Expanded=true;lastSafePosition=Entry; }
             else { Corridor.SetActive(false); Debug.LogError("[NRA] Horror corridor entry is blocked."); }
             yield return new WaitForSeconds(.2f);
             Destroy(root);player.SetTransitionLocked(false);shifting=false;
+            if(Expanded && !arrivalNarrated)
+            {
+                arrivalNarrated=true;
+                GetComponent<SubtitlePlaceholder>()?.ClearQueuedCues();
+                director.RequestNarrativeCue(new NarrativeCue("Raka","Aku di mana? Kenapa aku bisa di sini?",3.4f,"AUD_C1_CORRIDOR_ARRIVAL"));
+                director.RequestNarrativeCue(new NarrativeCue("Raka","Aku harus menemukan jalan keluar dan pergi kerja.",3.6f,"AUD_C1_CORRIDOR_FIND_EXIT"));
+            }
         }
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {
