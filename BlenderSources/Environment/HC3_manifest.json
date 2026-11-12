@@ -1,0 +1,258 @@
+{
+  "materials": [
+    {
+      "name": "TextureMaterial",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/d7da68bf.png.png"
+    },
+    {
+      "name": "TextureMaterial_1",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/e52ad3ad.png.png"
+    },
+    {
+      "name": "TextureMaterial_10",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/a72cfb7a.png.png"
+    },
+    {
+      "name": "TextureMaterial_11",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_017d2e5.png.png"
+    },
+    {
+      "name": "TextureMaterial_12",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/af23da7a.png.png"
+    },
+    {
+      "name": "TextureMaterial_13",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_fa58feb.png.png"
+    },
+    {
+      "name": "TextureMaterial_14",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_3352155.png.png"
+    },
+    {
+      "name": "TextureMaterial_15",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_51b2178.png.png"
+    },
+    {
+      "name": "TextureMaterial_16",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_96d049c.png.png"
+    },
+    {
+      "name": "TextureMaterial_17",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/c1d2fa8d.png.png"
+    },
+    {
+      "name": "TextureMaterial_18",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_f8db208.png.png"
+    },
+    {
+      "name": "TextureMaterial_19",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_fd66ec8.png.png"
+    },
+    {
+      "name": "TextureMaterial_2",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_33aeb5e.png.png"
+    },
+    {
+      "name": "TextureMaterial_20",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/e5888f78.png.png"
+    },
+    {
+      "name": "TextureMaterial_21",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_0290772.png.png"
+    },
+    {
+      "name": "TextureMaterial_22",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/eb690491.png.png"
+    },
+    {
+      "name": "TextureMaterial_23",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_f6ec3ad.png.png"
+    },
+    {
+      "name": "TextureMaterial_24",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_e6f502f.png.png"
+    },
+    {
+      "name": "TextureMaterial_25",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_d40de9d.png.png"
+    },
+    {
+      "name": "TextureMaterial_26",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_aa50a64.png.png"
+    },
+    {
+      "name": "TextureMaterial_27",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/a4a6d7d3.png.png"
+    },
+    {
+      "name": "TextureMaterial_28",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/d514aabe.png.png"
+    },
+    {
+      "name": "TextureMaterial_29",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_4b52aa8.png.png"
+    },
+    {
+      "name": "TextureMaterial_3",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_2ef6fce.png.png"
+    },
+    {
+      "name": "TextureMaterial_30",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/e09c1129.png.png"
+    },
+    {
+      "name": "TextureMaterial_31",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/eae5b120.png.png"
+    },
+    {
+      "name": "TextureMaterial_32",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_9ffbb74.png.png"
+    },
+    {
+      "name": "TextureMaterial_33",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_f20d981.png.png"
+    },
+    {
+      "name": "TextureMaterial_34",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_c7973de.png.png"
+    },
+    {
+      "name": "TextureMaterial_35",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/b33480c9.png.png"
+    },
+    {
+      "name": "TextureMaterial_36",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_8fdd5fe.png.png"
+    },
+    {
+      "name": "TextureMaterial_37",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/e896484a.png.png"
+    },
+    {
+      "name": "TextureMaterial_38",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/f6be02e6.png.png"
+    },
+    {
+      "name": "TextureMaterial_39",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_152496a.png.png"
+    },
+    {
+      "name": "TextureMaterial_4",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_eb5da13.png.png"
+    },
+    {
+      "name": "TextureMaterial_40",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_fc1735d.png.png"
+    },
+    {
+      "name": "TextureMaterial_41",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_94fd02e.png.png"
+    },
+    {
+      "name": "TextureMaterial_42",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_c6aa8f3.png.png"
+    },
+    {
+      "name": "TextureMaterial_43",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_751a9bd.png.png"
+    },
+    {
+      "name": "TextureMaterial_44",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_ce138af.png.png"
+    },
+    {
+      "name": "TextureMaterial_45",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_952e894.png.png"
+    },
+    {
+      "name": "TextureMaterial_46",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/ef433795.png.png"
+    },
+    {
+      "name": "TextureMaterial_47",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_b80f367.png.png"
+    },
+    {
+      "name": "TextureMaterial_48",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_5195b40.png.png"
+    },
+    {
+      "name": "TextureMaterial_49",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_e4d2af5.png.png"
+    },
+    {
+      "name": "TextureMaterial_5",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_0b145a1.png.png"
+    },
+    {
+      "name": "TextureMaterial_50",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_22cdeeb.png.png"
+    },
+    {
+      "name": "TextureMaterial_51",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_a0b32cb.png.png"
+    },
+    {
+      "name": "TextureMaterial_52",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_18bb58d.png.png"
+    },
+    {
+      "name": "TextureMaterial_53",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_cb75557.png.png"
+    },
+    {
+      "name": "TextureMaterial_54",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_9b02673.png.png"
+    },
+    {
+      "name": "TextureMaterial_55",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_00ea325.png.png"
+    },
+    {
+      "name": "TextureMaterial_56",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_572e967.png.png"
+    },
+    {
+      "name": "TextureMaterial_57",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_5b54feb.png.png"
+    },
+    {
+      "name": "TextureMaterial_58",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_b129efc.png.png"
+    },
+    {
+      "name": "TextureMaterial_59",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_f96e8a5.png.png"
+    },
+    {
+      "name": "TextureMaterial_6",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/c1983d37.png.png"
+    },
+    {
+      "name": "TextureMaterial_60",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_8e5b8f2.png.png"
+    },
+    {
+      "name": "TextureMaterial_61",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/f7f85d36.png.png"
+    },
+    {
+      "name": "TextureMaterial_62",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_e660d5b.png.png"
+    },
+    {
+      "name": "TextureMaterial_7",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/_febc28a.png.png"
+    },
+    {
+      "name": "TextureMaterial_8",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/f13b928b.png.png"
+    },
+    {
+      "name": "TextureMaterial_9",
+      "texture": "Assets/_NoRainbowAfter/Art/Textures/HorrorCorridor3/b99cfe4d.png.png"
+    }
+  ],
+  "removed": "Storage/library room: x[-.55,2.3], y>-.55 before horizontal widening",
+  "horizontalScale": 1.5
+}

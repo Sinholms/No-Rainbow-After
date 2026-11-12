@@ -141,7 +141,7 @@ namespace NoRainbowAfter.Player
             return count < overlaps.Length;
         }
 
-        public bool TryRestorePose(Vector3 position, Quaternion rotation)
+        public bool TryRestorePose(Vector3 position, Quaternion rotation, bool notify = true)
         {
             if (controller == null || !controller.enabled || viewCamera == null) return false;
             float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
@@ -160,7 +160,7 @@ namespace NoRainbowAfter.Player
             crouchRequested = false; IsCrouched = false; IsSprinting = false;
             viewCamera.transform.localRotation = Quaternion.identity;
             UpdateEyeHeight();
-            PoseRestored?.Invoke();
+            if (notify) PoseRestored?.Invoke();
             return true;
         }
 

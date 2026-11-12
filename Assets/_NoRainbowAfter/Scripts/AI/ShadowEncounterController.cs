@@ -60,6 +60,12 @@ namespace NoRainbowAfter.AI
         [SerializeField, Min(0.55f)] private float catchDistance = 1.05f;
         [SerializeField, Min(0.15f)] private float caughtFadeOutDuration = 0.32f;
         [SerializeField, Min(0.15f)] private float caughtFadeInDuration = 0.38f;
+        [SerializeField] private bool allowFirstEscape;
+        private bool escapeUsed;
+        private ChapterOneCorridorShift shiftedWorld;
+        private float wardrobeHideTime;
+        public bool EscapeUsed => escapeUsed;
+        public void EnableFirstEscape() => allowFirstEscape = true;
 
         private CharacterController monsterController;
         private Action<EncounterResponse> activeResolve;
@@ -99,7 +105,7 @@ namespace NoRainbowAfter.AI
             State == ShadowEncounterState.Dormant &&
             director != null &&
             player != null &&
-            motor != null;
+            motor != null && (shiftedWorld == null || shiftedWorld.CanBegin);
 
         public void Configure(
             ChapterDirector chapterDirector,
@@ -116,6 +122,7 @@ namespace NoRainbowAfter.AI
             checkpoint = dormCheckpoint;
             coverZones = zones;
             placeholderVisual = visual;
+            shiftedWorld = director != null ? director.GetComponent<ChapterOneCorridorShift>() : null;
             if (isActiveAndEnabled)
             {
                 BindEvents();
@@ -125,6 +132,7 @@ namespace NoRainbowAfter.AI
 
         private void Awake()
         {
+            shiftedWorld = director != null ? director.GetComponent<ChapterOneCorridorShift>() : null;
             monsterController = GetComponent<CharacterController>();
             if (placeholderVisual == null)
                 placeholderVisual = GetComponent<ShadowPlaceholderVisual>();
@@ -204,6 +212,7 @@ namespace NoRainbowAfter.AI
             currentBlackoutAlpha = 0f;
 
             Vector3 spawnPos = SelectSafeCorridorSpawn();
+            escapeUsed = false;
             Vector3 toPlayer = motor != null ? (motor.transform.position - spawnPos) : Vector3.back;
             toPlayer.y = 0f;
             Quaternion spawnRot = toPlayer.sqrMagnitude > 0.001f
@@ -280,6 +289,33 @@ namespace NoRainbowAfter.AI
 
         private void TickPursue(float dt)
         {
+            if (postCaughtGraceTimer > 0f)
+            {
+                currentBlackoutAlpha = Mathf.MoveTowards(currentBlackoutAlpha, 0f, dt);
+                return;
+            }
+            var wardrobe=HidingWardrobe.Occupied;
+            if(wardrobe != null && wardrobe.Occupant == motor)
+            {
+                wardrobeHideTime += dt;
+                if(wardrobe.Spotted)
+                {
+                    if(wardrobeHideTime > 2f) { wardrobe.TryExit(); wardrobe.Release(); EnterCaught(); wardrobeHideTime=0f; }
+                    return;
+                }
+                Vector3 search=shiftedWorld != null ? shiftedWorld.MonsterSpawn+Vector3.left*6f : new Vector3(0,0,17);
+                Vector3 next=shiftedWorld != null ? shiftedWorld.Navigate(transform.position,search) : search;
+                MoveAlongFloor(next,searchPassSpeed,dt);
+                placeholderVisual?.TickVisual(ShadowEncounterState.Pursue,dt,.6f,0f,motor.transform);
+                if(wardrobeHideTime >= 6f)
+                {
+                    stateTimer=0f;
+                    CueRequested?.Invoke(new NarrativeCue("Raka","Langkahnya menjauh...",2.5f,"AUD_C1_HIDE"));
+                    SetState(ShadowEncounterState.HideResolved);
+                }
+                return;
+            }
+            wardrobeHideTime=0f;
             Vector3 eyePos = GetMonsterEyePosition();
             CoverEvaluation cover = ShadowVisibility.EvaluateCover(
                 motor,
@@ -293,7 +329,9 @@ namespace NoRainbowAfter.AI
             if (State != ShadowEncounterState.Pursue) return;
 
             bool concealed = cover.IsConcealedFromMonster && !spottedEnteringCover;
-            Vector3 destination = concealed ? SelectSearchPassWaypoint(dt) : SelectPursuitWaypoint(motor.transform.position);
+            Vector3 destination = shiftedWorld != null && shiftedWorld.OwnsPlayer
+                ? shiftedWorld.Navigate(transform.position,motor.transform.position)
+                : concealed ? SelectSearchPassWaypoint(dt) : SelectPursuitWaypoint(motor.transform.position);
             float moveSpeed = concealed ? searchPassSpeed : pursueSpeed;
 
             float actualHorizontalSpeed = MoveAlongFloor(destination, moveSpeed, dt);
@@ -503,6 +541,7 @@ namespace NoRainbowAfter.AI
         public bool CanFightRightNow()
         {
             if (player == null || motor == null || motor.ViewCamera == null) return false;
+            if (player.IsHiding) return false;
             if (player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return false;
             if (State != ShadowEncounterState.Spawn && State != ShadowEncounterState.Pursue) return false;
             float visualHeight = placeholderVisual != null ? placeholderVisual.CurrentVisualHeight : 2.15f;
@@ -550,6 +589,15 @@ namespace NoRainbowAfter.AI
 
         private void EnterCaught()
         {
+            if (allowFirstEscape && !escapeUsed)
+            {
+                escapeUsed = true;
+                postCaughtGraceTimer = 3f;
+                currentBlackoutAlpha = .45f;
+                ResetHideTracking();
+                CueRequested?.Invoke(new NarrativeCue("Raka", "Lepas! Aku harus cari tempat sembunyi...", 3f, "AUD_C1_ESCAPE"));
+                return;
+            }
             CaughtCount++;
             stateTimer = 0f;
             caughtRestoredPose = false;
@@ -655,6 +703,7 @@ namespace NoRainbowAfter.AI
 
         private Vector3 SelectSafeCorridorSpawn()
         {
+            if(shiftedWorld != null && shiftedWorld.OwnsPlayer) return shiftedWorld.MonsterSpawn;
             float playerZ = motor != null ? motor.transform.position.z : 6.0f;
             // Default staging at 10.5-11.5m ahead in the far corridor, backlit/lit near Corridor Far (z=17.1).
             float[] candidates = playerZ <= 11.2f

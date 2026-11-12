@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "message": "Build Succeeded.",
+  "data": {
+    "job_id": "build-00204840a8",
+    "result": "succeeded",
+    "platform": "StandaloneWindows64",
+    "output_path": "Builds/Chapter1Expanded/NoRainbowAfter.exe",
+    "started_at": "2026-11-12T12:01:38.8599854Z",
+    "duration_seconds": 17.9784455,
+    "completed_at": "2026-11-12T12:01:56.8384309Z",
+    "total_size_mb": 156.22,
+    "errors": 0,
+    "warnings": 1
+  }
+}

@@ -38,6 +38,7 @@ namespace NoRainbowAfter.Interaction
             reticle.enabled = !player.IsPaused && !player.IsInspecting;
             prompt.enabled = !player.IsPaused && !player.IsInspecting;
             if (player.IsPaused || player.IsInspecting || viewCamera == null) { SetFocus(null); return; }
+            if (player.IsHiding) { SetFocus(null); prompt.text="[E] Keluar lemari"; return; }
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
         }
         // The first non-trigger solid on any layer wins, even if it has no interactable.
@@ -62,7 +63,7 @@ namespace NoRainbowAfter.Interaction
         }
         public void Interact()
         {
-            if (player.IsPaused || player.IsInspecting || viewCamera == null) return;
+            if (player.IsPaused || player.IsInspecting || player.IsHiding || player.IsTransitionLocked || viewCamera == null) return;
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
             focused?.Interact(this);
         }

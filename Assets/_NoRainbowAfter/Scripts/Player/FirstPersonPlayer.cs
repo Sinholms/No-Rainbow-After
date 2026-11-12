@@ -15,6 +15,8 @@ namespace NoRainbowAfter.Player
         public bool IsPaused { get; private set; }
         public bool IsInspecting { get; private set; }
         public bool IsTransitionLocked { get; private set; }
+        public bool IsHiding { get; private set; }
+        public void SetHiding(bool hiding) { IsHiding = hiding; motor.StopMotion(); }
         public event Action InteractRequested;
         public event Action FightRequested;
         public event Action PauseRequested;
@@ -55,7 +57,7 @@ namespace NoRainbowAfter.Player
         private void RequestPause() => PauseRequested?.Invoke();
         private void RequestFight()
         {
-            if (IsPaused || IsInspecting || IsTransitionLocked || Time.frameCount == unpausedFrame) return;
+            if (IsPaused || IsInspecting || IsTransitionLocked || IsHiding || Time.frameCount == unpausedFrame) return;
             FightRequested?.Invoke();
         }
 
@@ -63,6 +65,7 @@ namespace NoRainbowAfter.Player
         {
             if (IsPaused || IsInspecting || IsTransitionLocked || input == null) return;
             FirstPersonFrame frame = input.ReadFrame();
+            if (IsHiding) { frame.Move = Vector2.zero; frame.SprintHeld = false; frame.CrouchPressed = false; }
             if (discardNextLook) { frame.Look = Vector2.zero; discardNextLook = false; }
             motor.Simulate(frame, Time.deltaTime);
         }

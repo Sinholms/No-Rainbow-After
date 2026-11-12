@@ -789,3 +789,9 @@ mental recovery; use few original props/figures and camera-focused composition.
 **Revision v1.1:** distinguished installed URP from the original HDRP goal; recorded the kos art/QA baseline, circular POV and Blender/visible-work requirements; clarified planned systems versus completed work; corrected reference/file casing; added Terra/Luna code allocation with focused context for token economy. Story, four clues, ending rules and T00–T16 numbering are unchanged.
 
 **End of `design.md`**
+
+## Authorized Chapter 1 revision — 12 November 2026
+
+The user requested a substantially disordered room on the first return, an overtime-slip-triggered transfer to longer horror corridors without the source asset's storage/library area, E-interactive wardrobe hiding that makes the monster depart, and an escape opportunity on first capture. These explicit requests supersede the earlier fixed 14m encounter layout and crouch-only hiding assumptions for the expanded Chapter 1. The route is a connected authored return loop rather than procedural generation. First capture permits escape; a subsequent capture restores the checkpoint while preserving clues.
+
+The user explicitly selected the supplied Horror Corridor 3 archive for private coursework after its unresolved source provenance was explained. See [asset attribution and provenance](ASSET_LICENSES.md) and [implementation/handoff](CHAPTER1_EXPANSION_HANDOFF.md). No final Bad/Secret Ending revision is locked: preserve the recorded Hide response as an integration hook while the script is in progress.
