@@ -14,7 +14,8 @@ namespace NoRainbowAfter.AI
         Pursue,
         FightResolved,
         HideResolved,
-        Caught
+        Caught,
+        Grabbed
     }
 
     /// <summary>
@@ -64,6 +65,10 @@ namespace NoRainbowAfter.AI
         private bool escapeUsed;
         private ChapterOneCorridorShift shiftedWorld;
         private float wardrobeHideTime;
+        private FirstPersonCaptureFeedback captureFeedback;
+        private bool grabWillEscape;
+        private const float GrabDuration=1.15f;
+        public float DamageBorderAlpha => captureFeedback != null ? captureFeedback.DamageAlpha : 0f;
         public bool EscapeUsed => escapeUsed;
         public void EnableFirstEscape() => allowFirstEscape = true;
 
@@ -122,6 +127,7 @@ namespace NoRainbowAfter.AI
             checkpoint = dormCheckpoint;
             coverZones = zones;
             placeholderVisual = visual;
+            captureFeedback?.Configure(motor);
             shiftedWorld = director != null ? director.GetComponent<ChapterOneCorridorShift>() : null;
             if (isActiveAndEnabled)
             {
@@ -137,6 +143,8 @@ namespace NoRainbowAfter.AI
             if (placeholderVisual == null)
                 placeholderVisual = GetComponent<ShadowPlaceholderVisual>();
             BuildRuntimeUi();
+            captureFeedback=gameObject.AddComponent<FirstPersonCaptureFeedback>();
+            captureFeedback.Configure(motor);
             SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
         }
 
@@ -156,6 +164,7 @@ namespace NoRainbowAfter.AI
 
         private void OnDisable()
         {
+            captureFeedback?.ResetFeedback();
             UnbindEvents();
             if (player != null && player.IsTransitionLocked)
                 player.SetTransitionLocked(false);
@@ -213,6 +222,7 @@ namespace NoRainbowAfter.AI
 
             Vector3 spawnPos = SelectSafeCorridorSpawn();
             escapeUsed = false;
+            captureFeedback?.ResetFeedback();
             Vector3 toPlayer = motor != null ? (motor.transform.position - spawnPos) : Vector3.back;
             toPlayer.y = 0f;
             Quaternion spawnRot = toPlayer.sqrMagnitude > 0.001f
@@ -238,11 +248,13 @@ namespace NoRainbowAfter.AI
             bool suspended = player != null && (player.IsPaused || player.IsInspecting);
             if (suspended)
             {
+                captureFeedback?.Tick(0f,true,0f);
                 RefreshUi();
                 return;
             }
 
             float dt = Mathf.Clamp(deltaTime, 0f, 0.1f);
+            captureFeedback?.Tick(dt,false,State==ShadowEncounterState.Grabbed ? stateTimer/GrabDuration : 0f);
             if (postCaughtGraceTimer > 0f)
                 postCaughtGraceTimer = Mathf.Max(0f, postCaughtGraceTimer - dt);
 
@@ -268,6 +280,9 @@ namespace NoRainbowAfter.AI
                     break;
                 case ShadowEncounterState.Caught:
                     TickCaught(dt);
+                    break;
+                case ShadowEncounterState.Grabbed:
+                    TickGrabbed(dt);
                     break;
             }
 
@@ -577,6 +592,7 @@ namespace NoRainbowAfter.AI
 
         private void CompleteSuccessResolution(EncounterResponse response)
         {
+            captureFeedback?.ResetFeedback();
             permanentlyResolved = true;
             currentBlackoutAlpha = 0f;
             SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
@@ -589,15 +605,40 @@ namespace NoRainbowAfter.AI
 
         private void EnterCaught()
         {
-            if (allowFirstEscape && !escapeUsed)
+            if(State==ShadowEncounterState.Grabbed || State==ShadowEncounterState.Caught || permanentlyResolved)return;
+            if (allowFirstEscape)
             {
-                escapeUsed = true;
-                postCaughtGraceTimer = 3f;
-                currentBlackoutAlpha = .45f;
+                grabWillEscape=!escapeUsed;
+                if(grabWillEscape)escapeUsed=true;
+                stateTimer=0f;
                 ResetHideTracking();
-                CueRequested?.Invoke(new NarrativeCue("Raka", "Lepas! Aku harus cari tempat sembunyi...", 3f, "AUD_C1_ESCAPE"));
+                player?.SetTransitionLocked(true);
+                captureFeedback?.BeginGrab(transform);
+                SetState(ShadowEncounterState.Grabbed);
+                CueRequested?.Invoke(new NarrativeCue("Raka", "Lepas!", 1.15f, "AUD_C1_GRAB"));
                 return;
             }
+            BeginCheckpointCaught();
+        }
+        private void TickGrabbed(float dt)
+        {
+            stateTimer+=dt;
+            placeholderVisual?.AnimateGrab(stateTimer/GrabDuration);
+            if(stateTimer<GrabDuration)return;
+            captureFeedback?.FinishGrab();
+            placeholderVisual?.ResetPostureImmediate(motor.transform);
+            if(grabWillEscape)
+            {
+                postCaughtGraceTimer=3f;
+                currentBlackoutAlpha=0f;
+                player?.SetTransitionLocked(false);
+                SetState(ShadowEncounterState.Pursue);
+                CueRequested?.Invoke(new NarrativeCue("Raka","Aku harus cari tempat sembunyi...",3f,"AUD_C1_ESCAPE"));
+            }
+            else BeginCheckpointCaught();
+        }
+        private void BeginCheckpointCaught()
+        {
             CaughtCount++;
             stateTimer = 0f;
             caughtRestoredPose = false;
@@ -622,6 +663,7 @@ namespace NoRainbowAfter.AI
 
                 // Move and disable monster collider BEFORE checkpoint restore so monster never blocks DormSpawn_T04.
                 SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
+                captureFeedback?.ResetFeedback();
                 RestoreSafeCheckpointPose();
                 CueRequested?.Invoke(new NarrativeCue("Raka", "Napas dulu... aku masih di kamar.", 2.4f, "AUD_C1_CAUGHT"));
             }
@@ -678,6 +720,7 @@ namespace NoRainbowAfter.AI
             if (internalCheckpointRestore || permanentlyResolved) return;
             if (State == ShadowEncounterState.Spawn ||
                 State == ShadowEncounterState.Pursue ||
+                State == ShadowEncounterState.Grabbed ||
                 State == ShadowEncounterState.Caught)
             {
                 AbortToDormant(notifyDirectorReset: true);
@@ -686,6 +729,7 @@ namespace NoRainbowAfter.AI
 
         public void AbortToDormant(bool notifyDirectorReset = true)
         {
+            captureFeedback?.ResetFeedback();
             if (permanentlyResolved) return;
             activeResolve = null;
             stateTimer = 0f;

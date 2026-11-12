@@ -54,6 +54,9 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Dormant),"No monster before the exploration threshold.");
             Assert.That(director.BeatIndex,Is.EqualTo(3));
+            var tracker=player.GetComponent<ObjectiveTracker>();
+            var hint=(UnityEngine.UI.Text)typeof(ObjectiveTracker).GetField("hint",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(tracker);
+            Assert.That(hint.text,Is.EqualTo("Berjalan ke ujung lorong."));
         }
         [UnityTest] public IEnumerator WardrobeHideDespawnsMonster_AndRecordsHideOnce()
         {
@@ -80,13 +83,28 @@ namespace NoRainbowAfter.Tests
             var caught=typeof(ShadowEncounterController).GetMethod("EnterCaught",BindingFlags.Instance|BindingFlags.NonPublic);
             caught.Invoke(monster,null);
             Assert.That(monster.EscapeUsed,Is.True);Assert.That(monster.CaughtCount,Is.Zero);
+            Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Grabbed));
+            Assert.That(player.IsTransitionLocked,Is.True);
+            yield return new WaitForSeconds(.3f);
+            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.5f));
+            player.SetPaused(true);
+            var frozen= motor.ViewCamera.transform.localRotation;
+            monster.TickEncounter(.1f);
+            Assert.That(motor.ViewCamera.transform.localRotation,Is.EqualTo(frozen));
+            player.SetPaused(false);
+            yield return new WaitForSeconds(1.1f);
+            Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Pursue));
             Assert.That(player.IsTransitionLocked,Is.False);
+            Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.2f),"Red injury border persists after the first escape.");
             caught.Invoke(monster,null);
+            Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Grabbed));
+            yield return new WaitForSeconds(1.3f);
             Assert.That(monster.CaughtCount,Is.EqualTo(1));
             yield return new WaitForSeconds(1f);
             Assert.That(motor.transform.position.x,Is.LessThan(4));
             Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));
             Assert.That(player.IsTransitionLocked,Is.False);
+            Assert.That(monster.DamageBorderAlpha,Is.Zero);
         }
         [UnityTest] public IEnumerator PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit()
         {

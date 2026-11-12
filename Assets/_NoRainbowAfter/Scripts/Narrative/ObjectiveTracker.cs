@@ -12,6 +12,8 @@ namespace NoRainbowAfter.Narrative
         [SerializeField] private Text objective, hint;
         private static readonly string[] KnownFlags = { "objective.book", "objective.overtime", "objective.doorChecked" };
         public event Action<string> ObjectiveCompleted;
+        private string chapterTitle, chapterHint;
+        public void SetChapterGuidance(string title, string detail) { chapterTitle=title; chapterHint=detail; }
         public void Configure(ChapterDirector source, PlayerInteractor interaction, Text title, Text detail)
         { director = source; interactor = interaction; objective = title; hint = detail; }
         public bool IsCompleted(string flag) => director != null && director.State != null && director.State.HasObjective(flag);
@@ -20,6 +22,12 @@ namespace NoRainbowAfter.Narrative
             if (director == null || interactor == null || director.State == null) return;
             foreach (string flag in KnownFlags)
                 if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag)) ObjectiveCompleted?.Invoke(flag);
+            if (!string.IsNullOrEmpty(chapterTitle))
+            {
+                if (objective != null) objective.text=chapterTitle;
+                if (hint != null) hint.text=chapterHint;
+                return;
+            }
             if (objective != null) objective.text = "Bersiap berangkat";
             if (hint == null) return;
             if (director.BeatIndex >= 6) hint.text = "";

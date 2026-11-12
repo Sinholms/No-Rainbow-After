@@ -23,6 +23,9 @@ namespace NoRainbowAfter.AI
         private float phase;
         private float stoopBlend;
         private bool initialized;
+        private Transform[] grabArms;
+        private Vector3[] armPositions;
+        private Quaternion[] armRotations;
 
         public float CurrentVisualHeight => Mathf.Lerp(standingVisualHeight, stoopedVisualHeight, stoopBlend);
 
@@ -60,6 +63,14 @@ namespace NoRainbowAfter.AI
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
             }
             initialized = true;
+            if(visualWrapper != null)
+            {
+                var arms=new System.Collections.Generic.List<Transform>();
+                foreach(var t in visualWrapper.GetComponentsInChildren<Transform>(true))
+                    if(t.name.StartsWith("SM_ACT_ShadowArm")) arms.Add(t);
+                grabArms=arms.ToArray();armPositions=new Vector3[grabArms.Length];armRotations=new Quaternion[grabArms.Length];
+                for(int i=0;i<grabArms.Length;i++){armPositions[i]=grabArms[i].localPosition;armRotations[i]=grabArms[i].localRotation;}
+            }
         }
 
         public void SetVisible(bool visible)
@@ -73,6 +84,7 @@ namespace NoRainbowAfter.AI
         {
             EnsureInitialized();
             phase = 0f;
+            RestoreArms();
             stoopBlend = ComputeTargetStoop(ignoredPlayerRoot);
             ApplyPosture(0f, 0f, 0f, Vector3.zero);
         }
@@ -86,6 +98,7 @@ namespace NoRainbowAfter.AI
         {
             EnsureInitialized();
             if (visualWrapper == null || !visualWrapper.gameObject.activeSelf) return;
+            RestoreArms();
 
             float dt = Mathf.Max(0f, deltaTime);
             phase += dt * (state == ShadowEncounterState.Pursue ? Mathf.Lerp(2.2f, 5.4f, moveSpeedNormalized) : 1.5f);
@@ -136,6 +149,24 @@ namespace NoRainbowAfter.AI
                     maxY = Mathf.Max(maxY, r.bounds.max.y);
             }
             return maxY;
+        }
+        private void RestoreArms()
+        {
+            if(grabArms == null)return;
+            for(int i=0;i<grabArms.Length;i++)if(grabArms[i] != null)grabArms[i].SetLocalPositionAndRotation(armPositions[i],armRotations[i]);
+        }
+        public void AnimateGrab(float progress)
+        {
+            EnsureInitialized();RestoreArms();
+            float reach=Mathf.Sin(Mathf.Clamp01(progress)*Mathf.PI);
+            ApplyPosture(18*reach,Mathf.Sin(progress*28)*2*reach,Mathf.Sin(progress*36)*3*reach,new Vector3(0,-.07f*reach,.18f*reach));
+            if(grabArms == null)return;
+            foreach(var arm in grabArms)
+            {
+                float side=arm.name.Contains("Left") ? -1 : 1;
+                Vector3 shoulder=transform.position+Vector3.up*1.8f+transform.right*(.27f*side);
+                arm.RotateAround(shoulder,transform.right,-72*reach);
+            }
         }
 
         private float ComputeTargetStoop(Transform ignoredPlayerRoot)

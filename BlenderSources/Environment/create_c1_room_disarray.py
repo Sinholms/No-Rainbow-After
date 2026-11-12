@@ -35,9 +35,6 @@ for i in range(105):
     y=rng.uniform(.40,4.48)
     if x>0 and y>3.15: y=rng.uniform(.5,2.7)
     scatter(paper,'SM_C1_ScatteredPaper_%03d'%i,(x,y,.025+rng.uniform(0,.018)),rng.uniform(-math.pi,math.pi),rng.uniform(.45,1.05))
-for i in range(8):
-    obj=scatter(paper,'SM_C1_SuspendedPage_%02d'%i,(rng.uniform(-.7,.7),rng.uniform(1.8,3.4),rng.uniform(.75,1.45)),rng.uniform(-math.pi,math.pi),.8)
-    obj.rotation_euler.x=rng.uniform(.2,.8)
 for i in range(16):
     scatter(book,'SM_C1_FallenBook_%02d'%i,(rng.choice([-1,1])*rng.uniform(.65,1.6),rng.uniform(.65,2.65),.05),rng.uniform(-math.pi,math.pi),rng.uniform(.75,1.1))
 # Duplicate the complete curved chair, rotate as a group about its seat pivot.

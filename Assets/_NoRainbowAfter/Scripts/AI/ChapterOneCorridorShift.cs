@@ -20,15 +20,25 @@ namespace NoRainbowAfter.AI
         private FirstPersonMotor motor;
         private NavMeshDataInstance instance;
         private bool shifting;
+        private ObjectiveTracker objectives;
         private void Start()
         {
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
+            objectives=GetComponent<ObjectiveTracker>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
             if(Corridor != null) Corridor.SetActive(false);
         }
         private void OnDestroy() { if(instance.valid) instance.Remove(); }
         private void LateUpdate()
         {
+            if(objectives != null && director != null)
+            {
+                if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
+                else if(director.BeatIndex>=6) objectives.SetChapterGuidance("Chapter 1 selesai",player.IsHiding ? "Bayangan itu telah pergi. Tekan E untuk keluar dari lemari." : "Bayangan itu telah pergi.");
+                else if(player.IsHiding) objectives.SetChapterGuidance("Tetap bersembunyi","Tunggu sampai langkahnya menjauh. Tekan E untuk keluar dari lemari.");
+                else if(director.BeatIndex>=4) objectives.SetChapterGuidance("Lolos dari bayangan","Cari lemari dan tekan E untuk bersembunyi, atau klik kiri saat bayangan dekat untuk melawan.");
+                else objectives.SetChapterGuidance("Cari jalan keluar","Berjalan ke ujung lorong.");
+            }
             if(director == null || player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return;
             if(!OwnsPlayer && !shifting && director.BeatIndex>=3 && motor.transform.position.z>=5.75f) StartCoroutine(Shift());
             if(CanBegin) director.SamplePosition(6.5f);

@@ -5,12 +5,13 @@ User-authorized revision to T04/T05/T06/T07: longer, varied horror corridors, no
 ## Playable sequence
 
 1. Start MasterGameplay (or New Game). Read the book with E. Leave the room, then return.
-2. A short blackout reveals a disordered room: 105 scattered sheets, 8 suspended pages, 16 fallen books, overturned chair and displaced bag. The desk and overtime slip remain reachable. Solid fallen furniture has mesh collision; paper decoration does not block movement.
+2. A short blackout reveals a disordered room: 105 scattered sheets on the floor, 16 fallen books, overturned chair and displaced bag. Floating pages were removed following user feedback. The desk and overtime slip remain reachable. Solid fallen furniture has mesh collision; paper decoration does not block movement.
 3. Read the overtime slip and close inspection with Esc. Cross the room doorway: a short blackout transfers Raka into the extended horror corridor.
-4. Explore the entrance arm, main crossing and east stretch. Encounter is gated until the east stretch (world x >= 79.8), giving roughly 30m of exploration before the monster appears ahead.
+4. Explore the entrance arm, main crossing and east stretch, following the HUD hint **Berjalan ke ujung lorong**. Encounter is gated until the east stretch (world x >= 79.8), giving roughly 30m of exploration before the monster appears ahead and the objective changes to **Lolos dari bayangan** with wardrobe/Fight instructions.
 5. E on a wardrobe enters it; the player can look through the door opening. E exits from inside regardless of gaze direction. Pause/inspection block exit input. An obstructed exit keeps the player concealed rather than placing them inside another solid.
 6. Entering unseen and remaining inside for 6 seconds triggers monster departure and one Hide resolution. Entering within a clear, close monster sightline is detected and does not grant a free Hide. Existing Fight remains available outside wardrobes.
-7. First capture grants 3 seconds to escape while the monster recovers, with screen/subtitle feedback. Second capture uses the existing checkpoint fade; clue IDs remain intact. Returning to the corridor after recovery permits another attempt.
+7. Capture plays a 1.15-second procedural animation: the monster reaches with its arms and leans forward, while the FPP camera turns toward it and shakes during the struggle. First capture then releases controls and grants 3 seconds to escape while the monster recovers. Red screen edges intensify during the grab and remain softly pulsing after release. Second capture plays the grab before the checkpoint fade; clue IDs remain intact and the red border clears on recovery. Returning to the corridor permits another attempt.
+8. Successful Hide or Fight now shows **Chapter 1 selesai**. The Chapter 2 transition cinematic is still pending; this UI makes the currently implemented endpoint explicit.
 
 ## Route and assets
 
@@ -34,3 +35,7 @@ Hide triggers the established `EncounterResponse.Hide` callback once and records
 - Final Windows build succeeded with 0 errors and 1 pre-baked collision warning concerning the existing `SM_ENV_T02_Ramp`. Collision pre-baking is enabled for the new environment models. A standalone smoke run completed using the existing benchmark harness (`C1Expansion_StandaloneSmoke.json`); it exercises the baseline scenarios, so its FPS values are not a benchmark of the expanded corridor.
 
 No push. Unrelated staged Raka assets, recovery files and user project-setting changes are excluded from the Chapter 1 commit.
+
+## Follow-up feedback pass
+
+Removed all 8 floating room pages from the `.blend`, exported FBX, and generator after user feedback. The room uses grounded clutter. Five updated integration tests passed (`Docs/QA/C1Feedback_Tests.json`), including the new grab state, retained red border, pause freeze, restored controls, second-capture checkpoint, preserved clue, and the corridor objective hint. Current captures are in `Docs/QA/C1Feedback/`; earlier screenshots with floating pages document the superseded visual pass. Grab animation is procedural on the existing placeholder model; it is not a new rigged animation clip or an integration of the separately staged Raka hero asset.
