@@ -1,0 +1,137 @@
+{
+  "result": {
+    "success": true,
+    "message": "Test job status retrieved.",
+    "error": null,
+    "data": {
+      "job_id": "e178faba13ba4f3db4236242cac9784b",
+      "status": "succeeded",
+      "mode": "PlayMode",
+      "started_unix_ms": 1794583320528,
+      "finished_unix_ms": 1794583358510,
+      "last_update_unix_ms": 1794583358510,
+      "progress": {
+        "completed": 10,
+        "total": 10,
+        "current_test_full_name": null,
+        "current_test_started_unix_ms": null,
+        "last_finished_test_full_name": "NoRainbowAfter.Tests.ChapterOneExpansionTests.WardrobeHideDespawnsMonster_AndRecordsHideOnce",
+        "last_finished_unix_ms": 1794583358496,
+        "stuck_suspected": false,
+        "editor_is_focused": false,
+        "run_in_background": false,
+        "focus_nudge_attempts": null,
+        "focus_nudge_limit": null,
+        "focus_nudge_status": null,
+        "blocked_reason": null,
+        "failures_so_far": [],
+        "failures_capped": false
+      },
+      "error": null,
+      "result": {
+        "mode": "PlayMode",
+        "summary": {
+          "total": 10,
+          "passed": 10,
+          "failed": 0,
+          "skipped": 0,
+          "durationSeconds": 37.1030761,
+          "resultState": "Passed"
+        },
+        "results": [
+          {
+            "name": "AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit",
+            "state": "Passed",
+            "durationSeconds": 2.4958721,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue",
+            "state": "Passed",
+            "durationSeconds": 5.6285952,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue",
+            "state": "Passed",
+            "durationSeconds": 5.8398875,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut",
+            "state": "Passed",
+            "durationSeconds": 2.136304,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "MonsterFollowsNavigationAroundCorners",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.MonsterFollowsNavigationAroundCorners",
+            "state": "Passed",
+            "durationSeconds": 2.1534699,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit",
+            "state": "Passed",
+            "durationSeconds": 2.2098932,
+            "message": null,
+            "stackTrace": null,
+            "output": "[NRA] Physical extended-route traversal: 78.5m\r\n"
+          },
+          {
+            "name": "RepairedFloorAndPerimeterPreventFallingAtReturnJunction",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.RepairedFloorAndPerimeterPreventFallingAtReturnJunction",
+            "state": "Passed",
+            "durationSeconds": 2.1525125,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "RoomChangesOnReturn_AndSlipOpensExtendedRoute",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.RoomChangesOnReturn_AndSlipOpensExtendedRoute",
+            "state": "Passed",
+            "durationSeconds": 2.1447566,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges",
+            "state": "Passed",
+            "durationSeconds": 2.165913,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          },
+          {
+            "name": "WardrobeHideDespawnsMonster_AndRecordsHideOnce",
+            "fullName": "NoRainbowAfter.Tests.ChapterOneExpansionTests.WardrobeHideDespawnsMonster_AndRecordsHideOnce",
+            "state": "Passed",
+            "durationSeconds": 10.1550018,
+            "message": null,
+            "stackTrace": null,
+            "output": ""
+          }
+        ]
+      }
+    },
+    "hint": null
+  }
+}

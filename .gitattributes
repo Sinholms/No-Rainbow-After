@@ -7,6 +7,7 @@
 *.asset text eol=lf whitespace=-blank-at-eol
 *.meta text eol=lf whitespace=-blank-at-eol
 *.mat text eol=lf whitespace=-blank-at-eol
+*.controller text eol=lf whitespace=-blank-at-eol
 *.shader text eol=lf
 # Preserve upstream font license whitespace verbatim.
 **/OFL.txt text eol=lf whitespace=-blank-at-eol

@@ -1,0 +1,25 @@
+{
+  "meshes": 9,
+  "triangles": 45842,
+  "bones": 17,
+  "clips": [
+    "Approach_Reveal",
+    "Despawn",
+    "Fight_Reaction",
+    "Hide_Pass",
+    "Idle_Breath",
+    "Pursue",
+    "Search_Cover",
+    "Walk_Lurch"
+  ],
+  "textureResolution": 2048,
+  "maps": [
+    "BaseColor",
+    "Normal",
+    "Roughness"
+  ],
+  "status": "Generated reference-directed model, 2K baked BaseColor/Normal/Roughness, Generic rig, 8 basic in-place motion studies; gameplay swap pending",
+  "weightedVertices": 24267,
+  "unweightedVertices": 0,
+  "optimization": "Continuous body decimated to 12 percent after bake; UV and skin groups retained"
+}

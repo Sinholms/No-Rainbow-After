@@ -51,9 +51,13 @@ namespace NoRainbowAfter.Editor
             foreach(var spot in manifest.wardrobes)
             {
                 if(root.Find("Wardrobe_"+spot.id)==null)InstallWardrobe(root,new Vector3(spot.position[0],spot.position[1],spot.position[2]),spot.yaw,wood,spot.id);
-                if(root.Find("WardrobeLight_"+spot.id)!=null)continue;
-                var lamp=new GameObject("WardrobeLight_"+spot.id);lamp.transform.SetParent(root,false);lamp.transform.localPosition=new Vector3(spot.position[0],2.2f,spot.position[2]);
-                var light=lamp.AddComponent<Light>();light.type=LightType.Point;light.color=new Color(.95f,.7f,.4f);light.intensity=1.25f;light.range=3.5f;
+                var wardrobe=root.Find("Wardrobe_"+spot.id);
+                wardrobe.localPosition=new Vector3(spot.position[0],spot.position[1],spot.position[2]);
+                wardrobe.localRotation=Quaternion.Euler(0,spot.yaw,0);
+                var lamp=root.Find("WardrobeLight_"+spot.id);
+                if(lamp==null){lamp=new GameObject("WardrobeLight_"+spot.id).transform;lamp.SetParent(root,false);lamp.gameObject.AddComponent<Light>();}
+                lamp.localPosition=new Vector3(spot.position[0],2.2f,spot.position[2]);
+                var light=lamp.GetComponent<Light>();light.type=LightType.Point;light.color=new Color(.95f,.7f,.4f);light.intensity=.7f;light.range=3.5f;
             }
             foreach(var wardrobe in root.GetComponentsInChildren<HidingWardrobe>(true))
             {

@@ -1,5 +1,23 @@
 # Chapter 1 expansion — 12 November 2026
 
+## Current layout revision — 13 November 2026
+
+### Follow-up: plain elbows, side wardrobes and faulty ceiling lamps
+
+The three enlarged corner bays have been replaced by corridor-width elbows. The same three wardrobes now fit against the side walls at the marked locations in the user's annotated overhead image: local (11, 0, 0.12), (34.37, 0, 5.2), and (25.5, 0, 10.58), facing into the walkway. Narrow wall apertures and backing walls fit the cabinets, like the existing east wardrobe. There are still five wardrobes total. The perimeter floor, collision and navigation are rebuilt from the revised manifest.
+
+Seventeen visible twin-tube ceiling fixtures add dim warm-neutral illumination over a low steady fill. Each independently starts a short blink sequence after a random **1–2 second** pause. Every on-to-off and off-to-on edge emits seven small sparks, a 45ms local flash, and a quiet spatial electrical crackle. Individual dark pulses last 90–220ms; neighboring lamps are not synchronized. The transition discharge follows the user's clarification: it occurs on both light-state edges, rather than being a separate random fault event. The fixed-seed timing does not modify Unity's global random stream.
+
+`CorridorFaultyLight` controls light, tube emission, particles and audio together. Disabling the corridor clears sparks/audio and resets the fixture; player pause freezes the scheduling. No realtime shadows are added. The short electrical tick WAV is synthesized original noise. Install with `CorridorLightingInstaller.Install()` after regenerating geometry and calling the corridor repair installer. Capture and test reports for this pass are under `Docs/QA/C1Lighting*`.
+
+The horror corridor now has one winding route. The branching imported hub and its side rooms were removed and replaced with matching textured corridor sections. An entrance elbow connects to the east stretch, then the route turns through the three existing wardrobe corners and ends on the south return leg. A full-height textured mesh wall with collision seals the old return-to-main connection at local x=18.6, z=0.7. The side walls along the replaced hub are visible mesh geometry, not invisible blockers. The former loop descriptions below document the earlier layout.
+
+All five wardrobes remain. The backing floor and perimeter manifest now follow only the retained route and wardrobe bays. Navigation has been rebuilt. Encounter, capture, hiding response and chapter completion behavior are preserved.
+
+To reproduce from the repaired source, run `BlenderSources/Environment/simplify_c1_corridor.py` and then `ChapterOneExpansionInstaller.RepairCorridor()` on saved MasterGameplay. The current Blender source is `HC3_Linear.blend`. The generator uses `HC3_Repaired.blend` as its baseline and does not overwrite it or the user's edited `HC3_Extended.blend`.
+
+All nine ChapterOneExpansionTests passed, including physical traversal, monster navigation, hiding/completion, corner wardrobe access, floor/perimeter, arrival narration, capture/checkpoint recovery, and a new rendered-wall/closed-shortcut check. Reports and screenshots: `Docs/QA/C1Linear_Tests.json`, `Docs/QA/C1Linear_Build.json`, `Docs/QA/C1Linear/`.
+
 User-authorized revision to T04/T05/T06/T07: longer, varied horror corridors, no warehouse/library room; strongly disordered dorm room; E to hide in wardrobes; first capture permits escape. Ending script remains in progress.
 
 ## Playable sequence

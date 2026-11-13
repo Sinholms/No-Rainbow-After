@@ -1,0 +1,40 @@
+{
+  "asset": "Assets/_NoRainbowAfter/Art/Prefabs/Characters/ACT_Shadow_Raka.prefab",
+  "validation": "Unity Editor asset inspection after Prepare Raka Generated Asset",
+  "result": "passed",
+  "import": {
+    "model": "Assets/_NoRainbowAfter/Art/Models/Characters/ACT_Shadow_Raka.fbx",
+    "rig": "Generic",
+    "avatarValid": true,
+    "avatarHuman": false,
+    "skinnedMeshRenderers": 9,
+    "rendererBoundsCenter": [0.0, 1.13, 0.12],
+    "rendererBoundsExtents": [0.52, 1.17, 0.30],
+    "rendererBoundsHeight": 2.34
+  },
+  "animations": {
+    "count": 8,
+    "controllerDefaultState": "Idle_Breath",
+    "rootMotion": false,
+    "clips": {
+      "Idle_Breath": { "loop": true, "state": true },
+      "Walk_Lurch": { "loop": true, "state": true },
+      "Pursue": { "loop": true, "state": true },
+      "Search_Cover": { "loop": true, "state": true },
+      "Fight_Reaction": { "loop": false, "state": true },
+      "Hide_Pass": { "loop": true, "state": true },
+      "Approach_Reveal": { "loop": false, "state": true },
+      "Despawn": { "loop": false, "state": true }
+    }
+  },
+  "materials": {
+    "namedRakaMaterialsAssigned": 9,
+    "smoothnessConstants": { "skin": 0.25, "cloth": 0.18, "hair": 0.35 }
+  },
+  "console": {
+    "finalErrors": 0,
+    "finalWarnings": 0,
+    "note": "An initial attempt reported missing clips because FBX take names were prefixed; names are now normalized and the import was rerun successfully."
+  },
+  "sceneChanges": 0
+}

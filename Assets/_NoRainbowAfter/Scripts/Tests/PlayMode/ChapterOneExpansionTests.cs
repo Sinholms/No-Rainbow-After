@@ -150,6 +150,27 @@ namespace NoRainbowAfter.Tests
             }
             Assert.That(distance,Is.LessThanOrEqualTo(2.8f),"Monster got stuck at "+monster.transform.position);
         }
+        [UnityTest] public IEnumerator LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut()
+        {
+            yield return Load();yield return Expand();monster.enabled=false;
+            // Both sides of the former branching hub are now continuous rendered walls.
+            foreach(float x in new[]{62f,65.6f,67.3f,69.6f,73.6f,77.6f,78.6f})
+            foreach(var direction in new[]{Vector3.forward,Vector3.back})
+            {
+                RaycastHit hit;
+                Assert.That(Physics.Raycast(new Vector3(x,1.3f,-1.65f),direction,out hit,1.5f,~0,QueryTriggerInteraction.Ignore),Is.True,"Open side branch at "+x);
+                Assert.That(hit.collider.GetComponent<MeshRenderer>(),Is.Not.Null,"Branch sealed only by invisible collision at "+x);
+            }
+            RaycastHit end;
+            Assert.That(Physics.Raycast(new Vector3(78.6f,1.3f,2f),Vector3.back,out end,2f,~0,QueryTriggerInteraction.Ignore),Is.True);
+            Assert.That(end.collider.name,Is.EqualTo("HC3_ReturnEnd_FullWall"));
+            Assert.That(end.collider.GetComponent<MeshRenderer>(),Is.Not.Null);
+            var path=new NavMeshPath();
+            Assert.That(NavMesh.CalculatePath(new Vector3(78.6f,0,2f),new Vector3(78.6f,0,-1.65f),NavMesh.AllAreas,path),Is.True);
+            Assert.That(path.status,Is.EqualTo(NavMeshPathStatus.PathComplete));
+            float length=0;for(int i=1;i<path.corners.Length;i++)length+=Vector3.Distance(path.corners[i-1],path.corners[i]);
+            Assert.That(length,Is.GreaterThan(45f),"Old loop shortcut is still open.");
+        }
         [UnityTest] public IEnumerator RepairedFloorAndPerimeterPreventFallingAtReturnJunction()
         {
             yield return Load();yield return Expand();monster.enabled=false;player.enabled=false;
@@ -191,6 +212,41 @@ namespace NoRainbowAfter.Tests
             yield return null;yield return null;
             Assert.That(world.FallRecoveryCount,Is.EqualTo(1));Assert.That(motor.transform.position.y,Is.GreaterThan(-.2f));
             Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));Assert.That(player.IsTransitionLocked,Is.False);
+        }
+        [UnityTest] public IEnumerator SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges()
+        {
+            yield return Load();yield return Expand();monster.enabled=false;
+            Assert.That(world.Corridor.GetComponentsInChildren<Transform>(true).Any(t=>t.name.StartsWith("HC3_Bay")),Is.False,"Old corner recesses must be removed.");
+            var expected=new[]{new Vector3(11,0,.12f),new Vector3(34.37f,0,5.2f),new Vector3(25.5f,0,10.58f)};
+            int index=0;
+            foreach(var id in new[]{"CornerA","CornerB","CornerC"})
+            {
+                var wardrobe=world.Corridor.transform.Find("Wardrobe_"+id);
+                Assert.That(Vector3.Distance(wardrobe.localPosition,expected[index++]),Is.LessThan(.02f));
+                var exit=wardrobe.TransformPoint(new Vector3(0,.08f,-1.35f));
+                var path=new NavMeshPath();Assert.That(NavMesh.CalculatePath(world.Entry,exit,NavMesh.AllAreas,path),Is.True,id);
+                Assert.That(path.status,Is.EqualTo(NavMeshPathStatus.PathComplete),id);
+            }
+            var lamps=world.Corridor.GetComponentsInChildren<CorridorFaultyLight>();Assert.That(lamps.Length,Is.EqualTo(17));
+            var fixture=lamps[0];
+            Assert.That(fixture.Crackle.clip,Is.Not.Null);Assert.That(fixture.Crackle.spatialBlend,Is.EqualTo(1));
+            int count=fixture.TransitionCount;
+            fixture.SetPowered(false);
+            Assert.That(fixture.Lamp.intensity,Is.Zero);Assert.That(fixture.Flash.enabled,Is.True);
+            fixture.SetPowered(true);
+            Assert.That(fixture.Lamp.intensity,Is.GreaterThan(0));
+            Assert.That(fixture.TransitionCount-count,Is.EqualTo(2));
+            Assert.That(fixture.SparkBurstCount,Is.EqualTo(fixture.TransitionCount),"Both off->on and on->off must discharge.");
+            float gap=0,maxGap=0;bool sawOff=false;
+            for(int i=0;i<1200;i++)
+            {
+                int before=fixture.TransitionCount;fixture.Tick(.02f);gap+=.02f;
+                sawOff|=!fixture.Powered;
+                if(before!=fixture.TransitionCount){maxGap=Mathf.Max(maxGap,gap);gap=0;}
+            }
+            Assert.That(sawOff,Is.True);Assert.That(maxGap,Is.InRange(1f,2.05f));
+            Assert.That(fixture.SparkBurstCount,Is.EqualTo(fixture.TransitionCount));
+            Assert.That(fixture.TransitionCount,Is.GreaterThan(10));
         }
     }
 }
