@@ -1,0 +1,6 @@
+C1_ShadowMotion|Hit_Final 1.2
+C1_ShadowMotion|Hit_knockback 0.8333334
+C1_ShadowMotion|Rest 0.03333334
+C1_ShadowMotion|Grab_Player 1.166667
+C1_ShadowMotion|Hit_Chest 0.5333334
+C1_ShadowMotion|Hit_to_the_chest 0.3333333

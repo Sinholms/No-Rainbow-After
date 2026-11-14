@@ -72,8 +72,8 @@ namespace NoRainbowAfter.Editor
         {
             var root = new GameObject("Player_Raka_FPP");
             var cc = root.AddComponent<CharacterController>();
-            cc.height = 1.8f;
-            cc.center = new Vector3(0, 0.9f, 0);
+            cc.height = 1.7f;
+            cc.center = new Vector3(0, 0.85f, 0);
             cc.radius = 0.28f;
             cc.skinWidth = 0.025f;
             cc.stepOffset = 0.25f;
@@ -81,7 +81,7 @@ namespace NoRainbowAfter.Editor
             cc.minMoveDistance = 0;
             var camera = new GameObject("ViewCamera", typeof(Camera), typeof(AudioListener));
             camera.transform.SetParent(root.transform, false);
-            camera.transform.localPosition = new Vector3(0, 1.65f, 0);
+            camera.transform.localPosition = new Vector3(0, 1.58f, 0);
             camera.tag = "MainCamera";
             var view = camera.GetComponent<Camera>();
             view.fieldOfView = 75;

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="21" result="Passed" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.1577219">
+  <test-suite type="TestSuite" id="1079" name="No rainbow after" fullname="No rainbow after" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.157722" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="SetUpFixture" id="1089" name="NoRainbowAfter.PlayModeTests.dll" fullname="NarrativeStorageIsolation" classname="NarrativeStorageIsolation" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.146273" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="9024" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1153" name="NoRainbowAfter" fullname="NoRainbowAfter" runstate="Runnable" testcasecount="45" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.128336" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1154" name="Tests" fullname="NoRainbowAfter.Tests" runstate="Runnable" testcasecount="45" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.126604" total="21" passed="21" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1099" name="ChapterOneExpansionTests" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:49Z" duration="42.046152" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1109" name="AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" methodname="AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1369377515" result="Passed" start-time="2026-11-14 10:47:07Z" end-time="2026-11-14 10:47:10Z" duration="3.096096" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1110" name="ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" methodname="ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1135661282" result="Passed" start-time="2026-11-14 10:47:10Z" end-time="2026-11-14 10:47:16Z" duration="5.579302" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1104" name="FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" methodname="FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1591915069" result="Passed" start-time="2026-11-14 10:47:16Z" end-time="2026-11-14 10:47:22Z" duration="5.786750" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1107" name="LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" methodname="LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="225024514" result="Passed" start-time="2026-11-14 10:47:22Z" end-time="2026-11-14 10:47:24Z" duration="2.213409" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1106" name="MonsterFollowsNavigationAroundCorners" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.MonsterFollowsNavigationAroundCorners" methodname="MonsterFollowsNavigationAroundCorners" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="977023975" result="Passed" start-time="2026-11-14 10:47:24Z" end-time="2026-11-14 10:47:26Z" duration="2.075081" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1103" name="MonsterRequiresThreeSeparateHits" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.MonsterRequiresThreeSeparateHits" methodname="MonsterRequiresThreeSeparateHits" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="795206300" result="Passed" start-time="2026-11-14 10:47:26Z" end-time="2026-11-14 10:47:28Z" duration="2.093893" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1105" name="PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" methodname="PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1125763997" result="Passed" start-time="2026-11-14 10:47:28Z" end-time="2026-11-14 10:47:30Z" duration="2.087374" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[NRA] Physical extended-route traversal: 78.5m
+]]></output>
+            </test-case>
+            <test-case id="1108" name="RepairedFloorAndPerimeterPreventFallingAtReturnJunction" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RepairedFloorAndPerimeterPreventFallingAtReturnJunction" methodname="RepairedFloorAndPerimeterPreventFallingAtReturnJunction" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1889373979" result="Passed" start-time="2026-11-14 10:47:30Z" end-time="2026-11-14 10:47:32Z" duration="2.102548" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1102" name="RiggedHitAndGrabStayGroundedAndReset" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RiggedHitAndGrabStayGroundedAndReset" methodname="RiggedHitAndGrabStayGroundedAndReset" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1801445626" result="Passed" start-time="2026-11-14 10:47:32Z" end-time="2026-11-14 10:47:34Z" duration="2.059548" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1100" name="RoomChangesOnReturn_AndSlipOpensExtendedRoute" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RoomChangesOnReturn_AndSlipOpensExtendedRoute" methodname="RoomChangesOnReturn_AndSlipOpensExtendedRoute" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="998724253" result="Passed" start-time="2026-11-14 10:47:34Z" end-time="2026-11-14 10:47:37Z" duration="2.095963" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1111" name="SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" methodname="SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1495426944" result="Passed" start-time="2026-11-14 10:47:37Z" end-time="2026-11-14 10:47:39Z" duration="2.059763" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1101" name="WardrobeHideDespawnsMonster_AndRecordsHideOnce" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.WardrobeHideDespawnsMonster_AndRecordsHideOnce" methodname="WardrobeHideDespawnsMonster_AndRecordsHideOnce" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="160467101" result="Passed" start-time="2026-11-14 10:47:39Z" end-time="2026-11-14 10:47:49Z" duration="10.776658" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1123" name="FirstPersonMotorTests" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.077331" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1125" name="CharacterControllerStopsAtWallAndStaysOnFloor" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.CharacterControllerStopsAtWallAndStaysOnFloor" methodname="CharacterControllerStopsAtWallAndStaysOnFloor" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="494481799" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.027928" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1129" name="CrouchCannotStandInsideLowRoofAndRecoversAfterExit" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.CrouchCannotStandInsideLowRoofAndRecoversAfterExit" methodname="CrouchCannotStandInsideLowRoofAndRecoversAfterExit" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="2105197292" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.007552" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1126" name="DiagonalMovementHasSameSpeedAsForward" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.DiagonalMovementHasSameSpeedAsForward" methodname="DiagonalMovementHasSameSpeedAsForward" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="1260555645" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.004903" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1132" name="EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded" methodname="EyeStaysFirstPersonWithoutHeadbobAndViewSettingsAreBounded" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="1076439957" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.003763" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1128" name="HoldingSprintWhileIdleDoesNotUseStamina" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.HoldingSprintWhileIdleDoesNotUseStamina" methodname="HoldingSprintWhileIdleDoesNotUseStamina" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="1040736848" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.004510" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1131" name="MouseDeltaIsFrameRateIndependentAndPitchIsClamped" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.MouseDeltaIsFrameRateIndependentAndPitchIsClamped" methodname="MouseDeltaIsFrameRateIndependentAndPitchIsClamped" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="1613004950" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.004103" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1124" name="RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn" methodname="RestoreRejectsBlockedSpawnAndResetsPoseAtClearSpawn" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="407017649" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.003262" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1127" name="SprintLastsFiveSecondsThenWalksAndRecharges" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.SprintLastsFiveSecondsThenWalksAndRecharges" methodname="SprintLastsFiveSecondsThenWalksAndRecharges" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="56109994" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.009353" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1130" name="StandingDoesNotAutomaticallyCrouchIntoLowPassage" fullname="NoRainbowAfter.Tests.FirstPersonMotorTests.StandingDoesNotAutomaticallyCrouchIntoLowPassage" methodname="StandingDoesNotAutomaticallyCrouchIntoLowPassage" classname="NoRainbowAfter.Tests.FirstPersonMotorTests" runstate="Runnable" seed="669721489" result="Passed" start-time="2026-11-14 10:47:49Z" end-time="2026-11-14 10:47:49Z" duration="0.007123" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/sinholms/AppData/LocalLow/DefaultCompany/No rainbow after\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -23,6 +23,10 @@ namespace NoRainbowAfter.AI
         private float phase;
         private float stoopBlend;
         private bool initialized;
+        private ShadowMotionPlayback motion;
+        private bool finalHit;
+        public float HitDuration(bool final) => motion != null ? motion.HitDuration(final) : .52f;
+        public void SetHitVariant(bool final) { finalHit = final; }
         private Transform[] grabArms;
         private Vector3[] armPositions;
         private Quaternion[] armRotations;
@@ -62,6 +66,13 @@ namespace NoRainbowAfter.AI
                 upperPivot.localRotation = Quaternion.identity;
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
             }
+            motion = visualWrapper != null ? ShadowMotionPlayback.Attach(visualWrapper) : null;
+            if (motion != null)
+            {
+                upperPivot = motion.Spine;
+                upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
+                renderers = motion.GetComponentsInChildren<Renderer>(true);
+            }
             initialized = true;
             if(visualWrapper != null)
             {
@@ -84,6 +95,7 @@ namespace NoRainbowAfter.AI
         {
             EnsureInitialized();
             phase = 0f;
+            motion?.ResetPose();
             RestoreArms();
             stoopBlend = ComputeTargetStoop(ignoredPlayerRoot);
             ApplyPosture(0f, 0f, 0f, Vector3.zero);
@@ -99,6 +111,16 @@ namespace NoRainbowAfter.AI
             EnsureInitialized();
             if (visualWrapper == null || !visualWrapper.gameObject.activeSelf) return;
             RestoreArms();
+            if (motion != null)
+            {
+                motion.ResetPose();
+                if (state == ShadowEncounterState.FightResolved)
+                {
+                    motion.SampleHit(stateProgressNormalized, finalHit);
+                    visualWrapper.localPosition = wrapperBaseLocalPos;
+                    return;
+                }
+            }
 
             float dt = Mathf.Max(0f, deltaTime);
             phase += dt * (state == ShadowEncounterState.Pursue ? Mathf.Lerp(2.2f, 5.4f, moveSpeedNormalized) : 1.5f);
@@ -158,6 +180,7 @@ namespace NoRainbowAfter.AI
         public void AnimateGrab(float progress)
         {
             EnsureInitialized();RestoreArms();
+            if (motion != null) { motion.SampleGrab(progress); return; }
             float reach=Mathf.Sin(Mathf.Clamp01(progress)*Mathf.PI);
             ApplyPosture(18*reach,Mathf.Sin(progress*28)*2*reach,Mathf.Sin(progress*36)*3*reach,new Vector3(0,-.07f*reach,.18f*reach));
             if(grabArms == null)return;

@@ -150,7 +150,7 @@ namespace NoRainbowAfter.Tests
             Assert.That(encounter.CanFightRightNow(), Is.True, "Unobstructed close aim must enable contextual Fight.");
             Assert.That(encounter.IsFightPromptVisible, Is.True);
 
-            // Spam-click left mouse button 5 times across frames: must enter FightResolved once and resolve C1-05/C1-06 once.
+            // Rapid clicks count as one hit during recoil.
             for (int i = 0; i < 5; i++)
             {
                 ClickLeftMouse();
@@ -160,11 +160,19 @@ namespace NoRainbowAfter.Tests
             Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.FightResolved));
             Assert.That(encounter.BlackoutAlpha, Is.GreaterThan(0.01f), "Fight feedback pulse should be active.");
 
+            Assert.That(encounter.SuccessfulHits, Is.EqualTo(1));
+            for (int hit = 2; hit <= 3; hit++)
+            {
+                yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 1f);
+                AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
+                ClickLeftMouse();
+                Assert.That(encounter.SuccessfulHits, Is.EqualTo(hit));
+            }
             yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 1.5f);
 
             CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
             Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Fight));
-            Assert.That(transitions, Is.EqualTo(1));
+            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
         }
 
         [UnityTest]
@@ -212,7 +220,7 @@ namespace NoRainbowAfter.Tests
 
             CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
             Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Hide));
-            Assert.That(transitions, Is.EqualTo(1));
+            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
         }
 
         [UnityTest]
@@ -425,12 +433,17 @@ namespace NoRainbowAfter.Tests
 
             AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
             encounter.TickEncounter(0f);
-            ClickLeftMouse();
+            for (int hit = 1; hit <= 3; hit++)
+            {
+                AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
+                ClickLeftMouse();
+                if (hit < 3) yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 1f);
+            }
             yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 1.5f);
 
             CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
             Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Fight));
-            Assert.That(transitions, Is.EqualTo(1));
+            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
             CollectionAssert.AreEquivalent(new[] { "CLUE_01", "CLUE_02" }, new GameState(tempClueFile).ClueIds);
         }
 

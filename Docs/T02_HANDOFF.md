@@ -26,10 +26,10 @@ Sesuai instruksi pengguna, scene dan viewport yang sedang dikerjakan dibiarkan t
 
 | Setting pada FirstPersonMotor | Default |
 | --- | --- |
-| Walk / sprint / crouch speed | 2.4 / 4.8 / 1.2 m/s |
+| Walk / sprint / crouch speed | 2.4 / 3.4 / 1.2 m/s |
 | Acceleration / gravity | 16 m/s² / -20 m/s² |
-| Standing / crouching capsule | 1.8 / 1.1 m |
-| Camera standing / crouching | 1.65 / 0.95 m lokal dari kaki player |
+| Standing / crouching capsule | 1.7 / 1.1 m |
+| Camera standing / crouching | 1.58 / 0.95 m lokal dari kaki player |
 | Capsule radius / skin / step | 0.28 / 0.025 / 0.25 m |
 | FOV / sensitivitas | 75° / 0.08 derajat per pixel |
 | Batas FOV / sensitivitas | 65–95° / 0.01–0.3 |

@@ -102,6 +102,9 @@ public sealed class NarrativeTests
         Assert.That(director.BeatIndex, Is.EqualTo(4));
         replacement.Callback(response); replacement.Callback(response);
         CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
+        Assert.That(transitions, Is.Zero);
+        Assert.That(director.FinishChapterOne(), Is.True);
+        Assert.That(director.FinishChapterOne(), Is.False);
         Assert.That(transitions, Is.EqualTo(1));
         Assert.That(director.State.Chapter1Response, Is.EqualTo(response));
     }

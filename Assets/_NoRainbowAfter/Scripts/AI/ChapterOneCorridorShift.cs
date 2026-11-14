@@ -1,6 +1,7 @@
 using System.Collections;
 using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
+using NoRainbowAfter.Interaction;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
@@ -29,7 +30,7 @@ namespace NoRainbowAfter.AI
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
             objectives=GetComponent<ObjectiveTracker>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
-            if(Corridor != null) Corridor.SetActive(false);
+            if(Corridor != null) { CreateExitDoor(); Corridor.SetActive(false); }
         }
         private void OnDestroy() { if(instance.valid) instance.Remove(); }
         private void LateUpdate()
@@ -49,12 +50,12 @@ namespace NoRainbowAfter.AI
             if(objectives != null && director != null)
             {
                 if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
-                else if(director.BeatIndex>=6) objectives.SetChapterGuidance("Chapter 1 selesai",player.IsHiding ? "Bayangan itu telah pergi. Tekan E untuk keluar dari lemari." : "Bayangan itu telah pergi.");
+                else if(director.BeatIndex>=6) objectives.SetChapterGuidance("Cari pintu keluar",player.IsHiding ? "Bayangan itu telah pergi. Tekan E untuk keluar dari lemari." : "Temukan pintu keluar di ujung lorong.");
                 else if(player.IsHiding) objectives.SetChapterGuidance("Tetap bersembunyi","Tunggu sampai langkahnya menjauh. Tekan E untuk keluar dari lemari.");
                 else if(director.BeatIndex>=4) objectives.SetChapterGuidance("Lolos dari bayangan","Cari lemari dan tekan E untuk bersembunyi, atau klik kiri saat bayangan dekat untuk melawan.");
                 else objectives.SetChapterGuidance("Cari jalan keluar","Berjalan ke ujung lorong.");
             }
-            if(director == null || player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return;
+            if(director == null || director.ChapterOneFinished || player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return;
             if(!OwnsPlayer && !shifting && director.BeatIndex>=3 && motor.transform.position.z>=5.75f) StartCoroutine(Shift());
             if(CanBegin) director.SamplePosition(6.5f);
         }
@@ -81,6 +82,59 @@ namespace NoRainbowAfter.AI
                 director.RequestNarrativeCue(new NarrativeCue("Raka","Aku harus menemukan jalan keluar dan pergi kerja.",3.6f,"AUD_C1_CORRIDOR_FIND_EXIT"));
             }
         }
+        private void CreateExitDoor()
+        {
+            var door = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            door.name = "C1_ExitDoor";
+            door.transform.SetParent(Corridor.transform, false);
+            door.transform.localPosition = new Vector3(18.6f, 1.1f, 1.02f);
+            door.transform.localScale = new Vector3(1.15f, 2.2f, .12f);
+            var wardrobe = Corridor.GetComponentInChildren<HidingWardrobe>(true);
+            var source = wardrobe != null ? wardrobe.GetComponentInChildren<Renderer>(true) : null;
+            if (source != null) door.GetComponent<Renderer>().sharedMaterial = source.sharedMaterial;
+            door.AddComponent<ChapterOneExitDoor>().Initialize(this, director);
+            var handle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            handle.name = "Handle";
+            handle.transform.SetParent(door.transform, false);
+            handle.transform.localPosition = new Vector3(.35f, -.03f, .7f);
+            handle.transform.localScale = new Vector3(.065f, .035f, .45f);
+            Destroy(handle.GetComponent<Collider>());
+            var lamp = new GameObject("Exit Light");
+            lamp.transform.SetParent(Corridor.transform, false);
+            lamp.transform.localPosition = new Vector3(18.6f, 2.35f, 1.6f);
+            var light = lamp.AddComponent<Light>(); light.type = LightType.Point;
+            light.color = new Color(.75f, .87f, 1f); light.range = 3f; light.intensity = 1.4f;
+        }
+        public void UseExit()
+        {
+            if (!shifting && director != null && director.BeatIndex >= 6 && !director.ChapterOneFinished)
+                StartCoroutine(ExitToChapterTwo());
+        }
+        private IEnumerator ExitToChapterTwo()
+        {
+            shifting = true; player.SetTransitionLocked(true);
+            var root = new GameObject("Chapter transition", typeof(Canvas));
+            var canvas = root.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 50;
+            var panel = new GameObject("Blackout", typeof(RectTransform), typeof(Image)); panel.transform.SetParent(root.transform, false);
+            var rect = (RectTransform)panel.transform; rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero;
+            var image = panel.GetComponent<Image>(); image.color = Color.black; image.raycastTarget = false;
+            yield return new WaitForSeconds(.5f);
+            director.FinishChapterOne();
+            GetComponent<SubtitlePlaceholder>()?.ClearQueuedCues();
+            var titleObject = new GameObject("Chapter complete", typeof(RectTransform), typeof(Text));
+            titleObject.transform.SetParent(root.transform, false);
+            var titleRect = (RectTransform)titleObject.transform;
+            titleRect.anchorMin = titleRect.anchorMax = new Vector2(.5f, .5f);
+            titleRect.sizeDelta = new Vector2(900f, 220f);
+            var title = titleObject.GetComponent<Text>();
+            title.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            title.alignment = TextAnchor.MiddleCenter; title.fontSize = 36;
+            title.color = Color.white; title.raycastTarget = false;
+            title.text = "CHAPTER 1 SELESAI\n\nChapter 2 akan berlanjut\n\nKembali ke menu utama...";
+            yield return new WaitForSeconds(6f);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+
+        }
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {
             NavMeshHit a,b;
@@ -91,4 +145,16 @@ namespace NoRainbowAfter.AI
             return b.position;
         }
     }
+    public sealed class ChapterOneExitDoor : MonoBehaviour, IInteractable
+    {
+        private ChapterOneCorridorShift shift;
+        private ChapterDirector director;
+        public string StableId => "INT_C1_EXIT";
+        public string DisplayName => "Pintu keluar";
+        public string Prompt => director != null && director.BeatIndex >= 6 ? "Buka pintu keluar" : "Pintu terkunci — lolos dari bayangan";
+        public void Initialize(ChapterOneCorridorShift owner, ChapterDirector story) { shift = owner; director = story; }
+        public void SetFocused(bool focused) { }
+        public void Interact(PlayerInteractor interactor) { shift?.UseExit(); }
+    }
+
 }

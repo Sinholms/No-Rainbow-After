@@ -17,16 +17,16 @@ namespace NoRainbowAfter.Player
         [SerializeField] private Camera viewCamera;
         [SerializeField, Range(65, 95)] private float fieldOfView = 75f;
         [SerializeField, Range(0.01f, 0.3f)] private float mouseSensitivity = 0.08f;
-        [SerializeField] private float standingEyeHeight = 1.65f;
+        [SerializeField] private float standingEyeHeight = 1.58f;
         [SerializeField] private float crouchingEyeHeight = 0.95f;
         [Header("Movement in metres per second")]
         [SerializeField, Min(0.1f)] private float walkSpeed = 2.4f;
-        [SerializeField, Min(0.1f)] private float sprintSpeed = 4.8f;
+        [SerializeField, Min(0.1f)] private float sprintSpeed = 3.4f;
         [SerializeField, Min(0.1f)] private float crouchSpeed = 1.2f;
         [SerializeField, Min(0.1f)] private float acceleration = 16f;
         [SerializeField] private float gravity = -20f;
         [Header("Stance")]
-        [SerializeField] private float standingHeight = 1.8f;
+        [SerializeField] private float standingHeight = 1.7f;
         [SerializeField] private float crouchingHeight = 1.1f;
         [SerializeField] private float stanceSpeed = 3.5f;
         [SerializeField] private LayerMask obstructionMask = ~0;

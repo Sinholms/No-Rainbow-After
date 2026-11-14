@@ -1,5 +1,13 @@
 # Asset sources — No Rainbow After
 
+## Chapter 1 hit motion — Quaternius / KinemIQ (CC0)
+
+- Source publisher: https://huggingface.co/datasets/Kinemiq/free-game-animations
+- Original animation: Quaternius Universal Animation Library, CC0 1.0.
+- Conversion: KinemIQ. Original archive and publisher license are in `ThirdPartySources/QuaterniusMotion/`.
+- Used clips: `Hit_to_the_chest` and `Hit_knockback`, retargeted/retimed onto the C1 silhouette. Final collapse and shoulder grab are original additions.
+- Rebuild and provenance: `ThirdPartySources/QuaterniusMotion/README.md`, `Docs/CHAPTER1_MOTION_HANDOFF.md`.
+
 ## Horror Corridor 3 — private coursework adaptation
 
 - Uploader: Katydid (@Katydid.).

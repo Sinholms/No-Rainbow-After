@@ -154,7 +154,14 @@ namespace NoRainbowAfter.Narrative
             Complete("C1-05", "Raka", response == EncounterResponse.Fight ? "Bayangan itu..." : "Sudah pergi?", "c1_resolve");
             if (!isActiveAndEnabled || token != generation) return;
             Complete("C1-06", "", "", "c1_transition");
+        }
+        public bool ChapterOneFinished { get; private set; }
+        public bool FinishChapterOne()
+        {
+            if (State == null || BeatIndex < 6 || ChapterOneFinished) return false;
+            ChapterOneFinished = true;
             ChapterTransitionRequested?.Invoke();
+            return true;
         }
         private void Complete(string id, string speaker, string text, string audio)
         {

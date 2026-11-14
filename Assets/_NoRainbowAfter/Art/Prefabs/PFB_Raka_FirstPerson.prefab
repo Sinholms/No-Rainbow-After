@@ -53,13 +53,13 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.8
+  m_Height: 1.7
   m_Radius: 0.28
   m_SlopeLimit: 45
   m_StepOffset: 0.25
   m_SkinWidth: 0.025
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 0.9, z: 0}
+  m_Center: {x: 0, y: 0.85, z: 0}
 --- !u!114 &1610606193014541849
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75,14 +75,14 @@ MonoBehaviour:
   viewCamera: {fileID: 6607848560877876832}
   fieldOfView: 75
   mouseSensitivity: 0.08
-  standingEyeHeight: 1.65
+  standingEyeHeight: 1.58
   crouchingEyeHeight: 0.95
   walkSpeed: 2.4
-  sprintSpeed: 4.8
+  sprintSpeed: 3.4
   crouchSpeed: 1.2
   acceleration: 16
   gravity: -20
-  standingHeight: 1.8
+  standingHeight: 1.7
   crouchingHeight: 1.1
   stanceSpeed: 3.5
   obstructionMask:
@@ -131,7 +131,7 @@ Transform:
   m_GameObject: {fileID: 6471308746163004898}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.65, z: 0}
+  m_LocalPosition: {x: 0, y: 1.58, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

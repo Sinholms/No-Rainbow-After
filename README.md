@@ -7,7 +7,7 @@ Buka dengan Unity **6000.6.8f1**. Pipeline yang saat ini terpasang adalah **URP 
 Untuk menjalankan proyek, buka `Assets/_NoRainbowAfter/Scenes/Boot.unity` lalu tekan Play. Mulai Baru kini langsung masuk ke kamar kos dan lorong 3D dalam MasterGameplay. WASD/mouse, Shift sprint, Ctrl crouch, Esc pause; environment dibuat di Blender mengikuti `Docs/design.md`.
 Efek pandangan melingkar aktif secara default. Ubah Lebar pandang atau matikan Tepi pandangan melingkar melalui menu pause. Debug lab T02 tetap tersedia di `Assets/_NoRainbowAfter/Scenes/FirstPersonTest.unity`.
 
-Chapter 1 sudah memiliki objective, inspeksi dokumen, perubahan kamar, perpindahan ke koridor horor berkelok, monster pengejar, lima lemari interaktif, dan lampu plafon redup dengan percikan listrik pada setiap perubahan nyala/mati. Tekan E untuk berinteraksi dan bersembunyi. Tangkapan pertama memberi kesempatan kabur; tangkapan berikutnya mengembalikan pemain ke checkpoint. Kelanjutan Chapter 2, prolog sinematik, dan ending masih mengikuti rencana produksi.
+Chapter 1 sudah memiliki objective, inspeksi dokumen, perubahan kamar, perpindahan ke koridor horor berkelok, monster pengejar, lima lemari interaktif, dan lampu plafon redup dengan percikan listrik pada setiap perubahan nyala/mati. Tekan E untuk berinteraksi dan bersembunyi. Tangkapan pertama memberi kesempatan kabur; tangkapan berikutnya mengembalikan pemain ke checkpoint. Monster membutuhkan tiga pukulan yang mengenai sasaran. Setelah mengalahkan atau menghindarinya, gunakan pintu di ujung lorong untuk menyelesaikan Chapter 1; layar penutup akan kembali ke menu utama. Kelanjutan Chapter 2, prolog sinematik, dan ending masih mengikuti rencana produksi.
 
 ## Membuka proyek setelah clone
 

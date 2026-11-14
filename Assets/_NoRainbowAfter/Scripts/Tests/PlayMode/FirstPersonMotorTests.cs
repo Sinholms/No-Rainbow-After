@@ -36,7 +36,7 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor.transform.position, Is.EqualTo(origin));
             Assert.That(motor.Pitch, Is.Zero);
             Assert.That(motor.IsCrouched, Is.False);
-            Assert.That(motor.GetComponent<CharacterController>().height, Is.EqualTo(1.8f).Within(.01f));
+            Assert.That(motor.GetComponent<CharacterController>().height, Is.EqualTo(1.7f).Within(.01f));
         }
 
         [Test]
@@ -68,6 +68,7 @@ namespace NoRainbowAfter.Tests
             var motor = Actor(origin);
             Tick(motor, new FirstPersonFrame { Move = Vector2.up, SprintHeld = true }, 250);
             Assert.That(motor.StaminaSeconds, Is.Zero.Within(0.01f));
+            Assert.That(motor.transform.position.z - origin.z, Is.InRange(16.5f, 17.05f), "Five seconds of the slower sprint should cover about 17 metres.");
             Tick(motor, new FirstPersonFrame { Move = Vector2.up, SprintHeld = true }, 10);
             Assert.That(motor.IsSprinting, Is.False);
             Assert.That(motor.StaminaSeconds, Is.Zero.Within(0.01f));
@@ -105,7 +106,7 @@ namespace NoRainbowAfter.Tests
             cc.enabled = true;
             Physics.SyncTransforms();
             Tick(motor, default, 30);
-            Assert.That(cc.height, Is.EqualTo(1.8f).Within(0.01f));
+            Assert.That(cc.height, Is.EqualTo(1.7f).Within(0.01f));
             Assert.That(motor.IsCrouched, Is.False);
             Assert.That(motor.transform.position.y, Is.InRange(-0.06f, 0.06f));
         }
@@ -144,7 +145,7 @@ namespace NoRainbowAfter.Tests
             var motor = Actor(origin);
             Tick(motor, new FirstPersonFrame { Move = Vector2.up }, 100);
             Assert.That(motor.ViewCamera.transform.parent, Is.EqualTo(motor.transform));
-            Assert.That(motor.ViewCamera.transform.localPosition, Is.EqualTo(new Vector3(0, 1.65f, 0)));
+            Assert.That(motor.ViewCamera.transform.localPosition, Is.EqualTo(new Vector3(0, 1.58f, 0)));
             motor.SetViewSettings(-10, 500);
             Assert.That(motor.MouseSensitivity, Is.EqualTo(0.01f));
             Assert.That(motor.ViewCamera.fieldOfView, Is.EqualTo(95));

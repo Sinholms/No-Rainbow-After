@@ -28,6 +28,8 @@ namespace NoRainbowAfter.Tests
             player=Object.FindFirstObjectByType<FirstPersonPlayer>();motor=player.GetComponent<FirstPersonMotor>();
             director=player.GetComponent<ChapterDirector>();world=player.GetComponent<ChapterOneCorridorShift>();
             monster=Object.FindFirstObjectByType<ShadowEncounterController>();
+            Assert.That(motor.GetComponent<CharacterController>().height, Is.EqualTo(1.7f).Within(.001f));
+            Assert.That(motor.ViewCamera.transform.localPosition.y, Is.EqualTo(1.58f).Within(.001f));
             var type=Type.GetType("NoRainbowAfter.UI.FirstPersonSession, Assembly-CSharp");
             var session=GameObject.Find("UI_FirstPerson").GetComponent(type);
             var method=type.GetMethod("PauseForFocusLoss",BindingFlags.Instance|BindingFlags.NonPublic);
@@ -71,9 +73,88 @@ namespace NoRainbowAfter.Tests
             int transitions=0;director.ChapterTransitionRequested+=()=>transitions++;
             yield return new WaitForSeconds(8f);
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
-            Assert.That(transitions,Is.EqualTo(1));
+            Assert.That(transitions,Is.Zero);
             Assert.That(monster.GetComponent<CharacterController>().enabled,Is.False);
             Assert.That(wardrobe.TryExit(),Is.True);Assert.That(player.IsHiding,Is.False);
+            var door = GameObject.Find("C1_ExitDoor");
+            Assert.That(door, Is.Not.Null);
+            Assert.That(motor.TryRestorePose(new Vector3(78.6f,.1f,2.5f), Quaternion.Euler(0,180,0), false), Is.True);
+            Physics.SyncTransforms();
+            var target = PlayerInteractor.FindTarget(new Ray(motor.ViewCamera.transform.position, motor.ViewCamera.transform.forward), motor.transform);
+            Assert.That(target, Is.Not.Null);
+            Assert.That(target.StableId, Is.EqualTo("INT_C1_EXIT"));
+            target.Interact(player.GetComponent<PlayerInteractor>());
+            yield return new WaitForSeconds(.7f);
+            Assert.That(director.ChapterOneFinished, Is.True);
+            Assert.That(transitions, Is.EqualTo(1));
+        }
+        [UnityTest] public IEnumerator RiggedHitAndGrabStayGroundedAndReset()
+        {
+            yield return Load(); yield return Expand();
+            Assert.That(motor.TryRestorePose(new Vector3(80f,.1f,-1.65f),Quaternion.Euler(0,90,0),false),Is.True);
+            yield return null;
+            var target=monster.transform.position;
+            Assert.That(motor.TryRestorePose(target+Vector3.left*2f,Quaternion.Euler(0,90,0),false),Is.True);
+            motor.ViewCamera.transform.rotation=Quaternion.LookRotation(target+Vector3.up*1.3f-motor.ViewCamera.transform.position);
+            Physics.SyncTransforms();
+            var rig=monster.GetComponentInChildren<ShadowMotionPlayback>(true);
+            Assert.That(rig, Is.Not.Null, "C1 needs the prepared skinned motion asset.");
+            var fore=rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="ForeL");
+            var head=rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="Head");
+            rig.ResetPose();var rest=fore.position;var fixedRoot=monster.transform.position;
+            rig.SampleGrab(.5f);
+            Assert.That(Vector3.Dot(fore.position-rest,monster.transform.forward),Is.GreaterThan(.2f),"Hands must reach forward.");
+            Assert.That(fore.position.y,Is.LessThan(head.position.y),"Elbows must not rise above the head.");
+            rig.ResetPose();Assert.That(Vector3.Distance(rest,fore.position),Is.LessThan(.005f));
+            Assert.That(monster.transform.position,Is.EqualTo(fixedRoot));
+            string output=Environment.GetEnvironmentVariable("NRA_MOTION_CAPTURE");
+            if(!string.IsNullOrEmpty(output))
+            {
+                Time.timeScale=0;
+                typeof(ShadowEncounterController).GetMethod("OnFightRequested",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(monster,null);
+                for(int i=0;i<42;i++) { if(i<28)monster.TickEncounter(.02f); CaptureMotionFrame(motor.ViewCamera,output,"Hit",i); yield return null; }
+                Assert.That(motor.TryRestorePose(target+Vector3.left*1.05f,Quaternion.Euler(0,90,0),false),Is.True);
+                motor.ViewCamera.transform.rotation=Quaternion.LookRotation(target+Vector3.up*1.65f-motor.ViewCamera.transform.position);
+                typeof(ShadowEncounterController).GetMethod("EnterCaught",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(monster,null);
+                for(int i=0;i<58;i++) { monster.TickEncounter(.02f); CaptureMotionFrame(motor.ViewCamera,output,"Grab",i); yield return null; }
+                Time.timeScale=1;
+            }
+        }
+        private static void CaptureMotionFrame(Camera camera,string folder,string clip,int frame)
+        {
+            string path=System.IO.Path.Combine(folder,clip);System.IO.Directory.CreateDirectory(path);
+            var target=new RenderTexture(960,540,24);var pixels=new Texture2D(960,540,TextureFormat.RGB24,false);
+            var previous=RenderTexture.active;var previousTarget=camera.targetTexture;
+            try
+            {
+                camera.targetTexture=target;camera.Render();RenderTexture.active=target;
+                pixels.ReadPixels(new Rect(0,0,960,540),0,0);pixels.Apply();
+                System.IO.File.WriteAllBytes(System.IO.Path.Combine(path,frame.ToString("D3")+".png"),pixels.EncodeToPNG());
+            }
+            finally { camera.targetTexture=previousTarget;RenderTexture.active=previous;Object.DestroyImmediate(pixels);target.Release();Object.DestroyImmediate(target); }
+        }
+        [UnityTest] public IEnumerator MonsterRequiresThreeSeparateHits()
+        {
+            yield return Load(); yield return Expand();
+            Assert.That(motor.TryRestorePose(new Vector3(80f,.1f,-1.65f),Quaternion.Euler(0,90,0),false),Is.True);
+            yield return null;
+            Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Spawn));
+            var target = monster.transform.position;
+            Assert.That(motor.TryRestorePose(target + Vector3.left * 2f, Quaternion.Euler(0,90,0), false), Is.True);
+            motor.ViewCamera.transform.rotation = Quaternion.LookRotation(target + Vector3.up * 1.3f - motor.ViewCamera.transform.position);
+            Physics.SyncTransforms();
+            var attack = typeof(ShadowEncounterController).GetMethod("OnFightRequested", BindingFlags.Instance | BindingFlags.NonPublic);
+            for (int hit=1;hit<=3;hit++)
+            {
+                Assert.That(monster.CanFightRightNow(), Is.True);
+                attack.Invoke(monster,null); attack.Invoke(monster,null);
+                Assert.That(monster.SuccessfulHits,Is.EqualTo(hit));
+                Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.None));
+                float duration=monster.GetComponent<ShadowPlaceholderVisual>().HitDuration(hit>=3);
+                for(int step=0;step<Mathf.CeilToInt(duration/.1f)+1;step++) monster.TickEncounter(.1f);
+                if(hit<3) Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Pursue));
+            }
+            Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Fight));
         }
         [UnityTest] public IEnumerator FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue()
         {
@@ -163,7 +244,7 @@ namespace NoRainbowAfter.Tests
             }
             RaycastHit end;
             Assert.That(Physics.Raycast(new Vector3(78.6f,1.3f,2f),Vector3.back,out end,2f,~0,QueryTriggerInteraction.Ignore),Is.True);
-            Assert.That(end.collider.name,Is.EqualTo("HC3_ReturnEnd_FullWall"));
+            Assert.That(end.collider.name,Is.EqualTo("C1_ExitDoor"));
             Assert.That(end.collider.GetComponent<MeshRenderer>(),Is.Not.Null);
             var path=new NavMeshPath();
             Assert.That(NavMesh.CalculatePath(new Vector3(78.6f,0,2f),new Vector3(78.6f,0,-1.65f),NavMesh.AllAreas,path),Is.True);

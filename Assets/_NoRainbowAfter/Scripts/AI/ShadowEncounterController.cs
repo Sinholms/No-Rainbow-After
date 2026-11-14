@@ -76,6 +76,8 @@ namespace NoRainbowAfter.AI
         private Action<EncounterResponse> activeResolve;
         private Canvas uiCanvas;
         private Text fightPromptLabel;
+        private int successfulHits;
+        public int SuccessfulHits => successfulHits;
         private Image blackoutImage;
 
         private float stateTimer;
@@ -213,6 +215,7 @@ namespace NoRainbowAfter.AI
             if (!isActiveAndEnabled || permanentlyResolved || resolve == null) return;
 
             activeResolve = resolve;
+            successfulHits = 0;
             stateTimer = 0f;
             ResetHideTracking();
             verticalVelocity = 0f;
@@ -545,7 +548,9 @@ namespace NoRainbowAfter.AI
             if (State != ShadowEncounterState.Spawn && State != ShadowEncounterState.Pursue) return;
             if (!CanFightRightNow()) return;
 
-            // Atomic state lock prevents spam-click double resolution and prevents Caught during recoil.
+            // Each accepted hit has a recoil window that prevents spam clicks.
+            successfulHits++;
+            placeholderVisual?.SetHitVariant(successfulHits >= 3);
             stateTimer = 0f;
             currentBlackoutAlpha = 0.22f;
             CueRequested?.Invoke(new NarrativeCue("", "", 0f, "AUD_C1_FIGHT"));
@@ -572,12 +577,16 @@ namespace NoRainbowAfter.AI
         private void TickFightResolved(float dt)
         {
             stateTimer += dt;
-            float t = Mathf.Clamp01(stateTimer / fightFeedbackDuration);
+            float duration = Mathf.Max(fightFeedbackDuration, placeholderVisual != null ? placeholderVisual.HitDuration(successfulHits >= 3) : .52f);
+            float t = Mathf.Clamp01(stateTimer / duration);
             currentBlackoutAlpha = Mathf.Lerp(0.22f, 0f, t);
             placeholderVisual?.TickVisual(ShadowEncounterState.FightResolved, dt, 0f, t, motor.transform);
 
-            if (stateTimer >= fightFeedbackDuration)
-                CompleteSuccessResolution(EncounterResponse.Fight);
+            if (stateTimer >= duration)
+            {
+                if (successfulHits >= 3) CompleteSuccessResolution(EncounterResponse.Fight);
+                else { stateTimer = 0f; SetState(ShadowEncounterState.Pursue); }
+            }
         }
 
         private void TickHideResolved(float dt)
@@ -861,6 +870,7 @@ namespace NoRainbowAfter.AI
 
             if (fightPromptLabel != null)
                 fightPromptLabel.enabled = !paused && !inspecting && CanFightRightNow();
+            if (fightPromptLabel != null) fightPromptLabel.text = "[Klik Kiri] Lawan (" + successfulHits + "/3)";
 
             if (blackoutImage != null)
             {

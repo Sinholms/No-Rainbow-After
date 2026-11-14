@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="20" result="Passed" total="20" passed="20" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-14 10:29:04Z" end-time="2026-11-14 10:29:56Z" duration="52.6811134">
+  <test-suite type="TestSuite" id="1079" name="No rainbow after" fullname="No rainbow after" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-11-14 10:29:04Z" end-time="2026-11-14 10:29:56Z" duration="52.681113" total="20" passed="20" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="SetUpFixture" id="1089" name="NoRainbowAfter.PlayModeTests.dll" fullname="NarrativeStorageIsolation" classname="NarrativeStorageIsolation" runstate="Runnable" testcasecount="60" result="Passed" start-time="2026-11-14 10:29:04Z" end-time="2026-11-14 10:29:56Z" duration="52.668684" total="20" passed="20" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="4348" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestFixture" id="1090" name="NarrativeTests" fullname="NarrativeTests" classname="NarrativeTests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-11-14 10:29:04Z" end-time="2026-11-14 10:29:08Z" duration="3.918111" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1095" name="AtmosphereMovesImportedPaperAndRestoresIt" fullname="NarrativeTests.AtmosphereMovesImportedPaperAndRestoresIt" methodname="AtmosphereMovesImportedPaperAndRestoresIt" classname="NarrativeTests" runstate="Runnable" seed="1829016734" result="Passed" start-time="2026-11-14 10:29:04Z" end-time="2026-11-14 10:29:06Z" duration="2.031240" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1094" name="ClueStorageDeduplicatesAndProtectsUnknownSchema" fullname="NarrativeTests.ClueStorageDeduplicatesAndProtectsUnknownSchema" methodname="ClueStorageDeduplicatesAndProtectsUnknownSchema" classname="NarrativeTests" runstate="Runnable" seed="186512761" result="Passed" start-time="2026-11-14 10:29:06Z" end-time="2026-11-14 10:29:06Z" duration="0.022121" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1091" name="EarlySlipAndDeferredFightRemainOrdered" fullname="NarrativeTests.EarlySlipAndDeferredFightRemainOrdered" methodname="EarlySlipAndDeferredFightRemainOrdered" classname="NarrativeTests" runstate="Runnable" seed="1888021973" result="Passed" start-time="2026-11-14 10:29:06Z" end-time="2026-11-14 10:29:06Z" duration="0.193946" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1092" name="EarlySlipAndDeferredHideRemainOrdered" fullname="NarrativeTests.EarlySlipAndDeferredHideRemainOrdered" methodname="EarlySlipAndDeferredHideRemainOrdered" classname="NarrativeTests" runstate="Runnable" seed="1681688317" result="Passed" start-time="2026-11-14 10:29:06Z" end-time="2026-11-14 10:29:06Z" duration="0.166213" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1093" name="LoopCapPauseAndCheckpointReset" fullname="NarrativeTests.LoopCapPauseAndCheckpointReset" methodname="LoopCapPauseAndCheckpointReset" classname="NarrativeTests" runstate="Runnable" seed="1160731024" result="Passed" start-time="2026-11-14 10:29:06Z" end-time="2026-11-14 10:29:06Z" duration="0.161653" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1098" name="MotorExcursionAcrossDoorwayCountsOnce" fullname="NarrativeTests.MotorExcursionAcrossDoorwayCountsOnce" methodname="MotorExcursionAcrossDoorwayCountsOnce" classname="NarrativeTests" runstate="Runnable" seed="543903413" result="Passed" start-time="2026-11-14 10:29:06Z" end-time="2026-11-14 10:29:07Z" duration="0.760930" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1097" name="ProviderReadinessAndSynchronousResolutionAreExplicit" fullname="NarrativeTests.ProviderReadinessAndSynchronousResolutionAreExplicit" methodname="ProviderReadinessAndSynchronousResolutionAreExplicit" classname="NarrativeTests" runstate="Runnable" seed="1545033574" result="Passed" start-time="2026-11-14 10:29:07Z" end-time="2026-11-14 10:29:07Z" duration="0.178432" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1096" name="SubtitlesSuspendWhileInspectingAndPaused" fullname="NarrativeTests.SubtitlesSuspendWhileInspectingAndPaused" methodname="SubtitlesSuspendWhileInspectingAndPaused" classname="NarrativeTests" runstate="Runnable" seed="181987123" result="Passed" start-time="2026-11-14 10:29:07Z" end-time="2026-11-14 10:29:08Z" duration="0.385745" asserts="0">
+          <properties>
+            <property name="_JOINTYPE" value="UnityCombinatorial" />
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestSuite" id="1153" name="NoRainbowAfter" fullname="NoRainbowAfter" runstate="Runnable" testcasecount="45" result="Passed" start-time="2026-11-14 10:29:08Z" end-time="2026-11-14 10:29:56Z" duration="48.738284" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1154" name="Tests" fullname="NoRainbowAfter.Tests" runstate="Runnable" testcasecount="45" result="Passed" start-time="2026-11-14 10:29:08Z" end-time="2026-11-14 10:29:56Z" duration="48.736537" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1099" name="ChapterOneExpansionTests" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-11-14 10:29:08Z" end-time="2026-11-14 10:29:56Z" duration="48.734508" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1109" name="AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" methodname="AllThreeCornerWardrobesAreReachableAndPermitEntryAndExit" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="22317986" result="Passed" start-time="2026-11-14 10:29:08Z" end-time="2026-11-14 10:29:10Z" duration="2.141051" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1110" name="ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" methodname="ArrivalMonologuesPlayInOrder_AndFallRecoveryPreservesClue" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="645969020" result="Passed" start-time="2026-11-14 10:29:10Z" end-time="2026-11-14 10:29:15Z" duration="5.555031" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1104" name="FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" methodname="FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1259181521" result="Passed" start-time="2026-11-14 10:29:15Z" end-time="2026-11-14 10:29:21Z" duration="5.772682" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1107" name="LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" methodname="LinearRouteSealsOldBranchesWithVisibleWalls_AndHasNoLoopShortcut" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1854045213" result="Passed" start-time="2026-11-14 10:29:21Z" end-time="2026-11-14 10:29:23Z" duration="2.107887" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1106" name="MonsterFollowsNavigationAroundCorners" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.MonsterFollowsNavigationAroundCorners" methodname="MonsterFollowsNavigationAroundCorners" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="2020547113" result="Passed" start-time="2026-11-14 10:29:23Z" end-time="2026-11-14 10:29:25Z" duration="2.103456" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1103" name="MonsterRequiresThreeSeparateHits" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.MonsterRequiresThreeSeparateHits" methodname="MonsterRequiresThreeSeparateHits" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1124746294" result="Passed" start-time="2026-11-14 10:29:25Z" end-time="2026-11-14 10:29:27Z" duration="2.100446" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1105" name="PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" methodname="PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1587970928" result="Passed" start-time="2026-11-14 10:29:27Z" end-time="2026-11-14 10:29:30Z" duration="2.098948" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[NRA] Physical extended-route traversal: 78.5m
+]]></output>
+            </test-case>
+            <test-case id="1108" name="RepairedFloorAndPerimeterPreventFallingAtReturnJunction" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RepairedFloorAndPerimeterPreventFallingAtReturnJunction" methodname="RepairedFloorAndPerimeterPreventFallingAtReturnJunction" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1446533251" result="Passed" start-time="2026-11-14 10:29:30Z" end-time="2026-11-14 10:29:32Z" duration="2.073153" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1102" name="RiggedHitAndGrabStayGroundedAndReset" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RiggedHitAndGrabStayGroundedAndReset" methodname="RiggedHitAndGrabStayGroundedAndReset" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="803440615" result="Passed" start-time="2026-11-14 10:29:32Z" end-time="2026-11-14 10:29:41Z" duration="9.808380" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1100" name="RoomChangesOnReturn_AndSlipOpensExtendedRoute" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RoomChangesOnReturn_AndSlipOpensExtendedRoute" methodname="RoomChangesOnReturn_AndSlipOpensExtendedRoute" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1018543031" result="Passed" start-time="2026-11-14 10:29:41Z" end-time="2026-11-14 10:29:44Z" duration="2.073272" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1111" name="SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" methodname="SideWardrobesReplaceCornerBays_AndEveryLightEdgeDischarges" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1758120741" result="Passed" start-time="2026-11-14 10:29:44Z" end-time="2026-11-14 10:29:46Z" duration="2.119069" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1101" name="WardrobeHideDespawnsMonster_AndRecordsHideOnce" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.WardrobeHideDespawnsMonster_AndRecordsHideOnce" methodname="WardrobeHideDespawnsMonster_AndRecordsHideOnce" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1295807320" result="Passed" start-time="2026-11-14 10:29:46Z" end-time="2026-11-14 10:29:56Z" duration="10.775996" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/sinholms/AppData/LocalLow/DefaultCompany/No rainbow after\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
