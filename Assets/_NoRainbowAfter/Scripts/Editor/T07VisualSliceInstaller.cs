@@ -188,6 +188,8 @@ namespace NoRainbowAfter.Editor
                 temp.SetFloat("_Smoothness", spec.smoothness);
                 temp.SetFloat("_EnvironmentReflections", 1f);
                 temp.SetFloat("_SpecularHighlights", 1f);
+                if (spec.name == "MAT_H_Cabinet" || spec.name.StartsWith("MAT_H_Fan", StringComparison.Ordinal))
+                    temp.SetFloat("_Cull", 0f);
 
                 if (!string.IsNullOrEmpty(spec.texturePrefix))
                 {
@@ -647,7 +649,13 @@ namespace NoRainbowAfter.Editor
                     meshName == "SM_PROP_WorkSlip" ||
                     meshName == "SM_PROP_WorkSlipHeading";
 
-                renderer.gameObject.isStatic = !isMovingLoopPaper;
+                bool isSpinningFanBlade = meshName == "SM_PROP_FanBlade";
+                renderer.gameObject.isStatic = !(isMovingLoopPaper || isSpinningFanBlade);
+                if (isSpinningFanBlade)
+                {
+                    if (renderer.GetComponent<FanBladeSpinner>() == null)
+                        renderer.gameObject.AddComponent<FanBladeSpinner>();
+                }
 
                 var filter = renderer.GetComponent<MeshFilter>();
                 if (filter == null || filter.sharedMesh == null)
@@ -662,9 +670,11 @@ namespace NoRainbowAfter.Editor
                             UnityEngine.Object.DestroyImmediate(col);
                     }
                 }
-                else if (part.collision == "box" && renderer.GetComponent<Collider>() == null)
+                else if (part.collision == "box")
                 {
-                    var box = renderer.gameObject.AddComponent<BoxCollider>();
+                    var box = renderer.GetComponent<BoxCollider>();
+                    if (box == null)
+                        box = renderer.gameObject.AddComponent<BoxCollider>();
                     box.center = filter.sharedMesh.bounds.center;
                     box.size = filter.sharedMesh.bounds.size;
                 }

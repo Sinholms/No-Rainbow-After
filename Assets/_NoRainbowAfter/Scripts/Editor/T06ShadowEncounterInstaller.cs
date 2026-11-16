@@ -18,9 +18,12 @@ namespace NoRainbowAfter.Editor
     {
         private const string ScenePath = "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity";
         private const string ModelPath = "Assets/_NoRainbowAfter/Art/Models/Characters/ACT_001_ShadowPlaceholder_v1.fbx";
+        private const string HeroPrefabPath = "Assets/_NoRainbowAfter/Art/Prefabs/Characters/ACT_Shadow_Raka.prefab";
         private const string MaterialDir = "Assets/_NoRainbowAfter/Art/Materials/Characters/";
         private const string PrefabPath = "Assets/_NoRainbowAfter/Art/Prefabs/PFB_ACT_001_ShadowPlaceholder.prefab";
         private const string SceneInstanceName = "ACT_001_ShadowPlaceholder";
+        private static readonly Vector3 CorridorMonsterSpawn = new Vector3(90f, 0.12f, -1.65f);
+        private static readonly Quaternion CorridorMonsterRotation = Quaternion.Euler(0f, -90f, 0f);
 
         private static readonly Dictionary<string, string> MeshMaterials = new Dictionary<string, string>
         {
@@ -86,6 +89,11 @@ namespace NoRainbowAfter.Editor
             ShadowEncounterController encounter = instance.GetComponent<ShadowEncounterController>();
 
             encounter.Configure(director, player, motor, checkpoint, new[] { leftCover, rightCover }, visual);
+            encounter.EnableFirstEscape();
+            var encounterSo = new SerializedObject(encounter);
+            encounterSo.FindProperty("dormantPosition").vector3Value = CorridorMonsterSpawn;
+            encounterSo.FindProperty("allowFirstEscape").boolValue = true;
+            encounterSo.ApplyModifiedPropertiesWithoutUndo();
             subtitles.Configure(director, player, encounter);
 
             EditorUtility.SetDirty(instance);
@@ -206,6 +214,21 @@ namespace NoRainbowAfter.Editor
                     renderer.receiveShadows = true;
                 }
 
+                if (!File.Exists(HeroPrefabPath))
+                    RakaAssetImport.Prepare();
+                GameObject heroPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(HeroPrefabPath);
+                if (heroPrefab != null)
+                {
+                    var heroInstance = (GameObject)PrefabUtility.InstantiatePrefab(heroPrefab);
+                    heroInstance.name = "ACT_Shadow_Raka";
+                    heroInstance.transform.SetParent(wrapper, false);
+                    heroInstance.transform.localPosition = Vector3.zero;
+                    heroInstance.transform.localRotation = Quaternion.identity;
+                    heroInstance.transform.localScale = Vector3.one;
+                    foreach (MeshRenderer placeholderRenderer in modelInstance.GetComponentsInChildren<MeshRenderer>(true))
+                        placeholderRenderer.enabled = false;
+                }
+
                 if (upperPivot == null)
                     throw new InvalidOperationException("PIV_ShadowUpper missing in " + ModelPath);
 
@@ -258,7 +281,7 @@ namespace NoRainbowAfter.Editor
                 instance.transform.SetParent(chapterRoot, false);
             }
 
-            instance.transform.SetPositionAndRotation(new Vector3(0f, 0.02f, 17.50f), Quaternion.Euler(0f, 180f, 0f));
+            instance.transform.SetPositionAndRotation(CorridorMonsterSpawn, CorridorMonsterRotation);
             return instance;
         }
 
