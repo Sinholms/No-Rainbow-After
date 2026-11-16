@@ -68,6 +68,7 @@ namespace NoRainbowAfter.AI
         private FirstPersonCaptureFeedback captureFeedback;
         private bool grabWillEscape;
         private const float GrabDuration=1.15f;
+        private const float EscapeRecoveryDuration = 3f;
         public float DamageBorderAlpha => captureFeedback != null ? captureFeedback.DamageAlpha : 0f;
         public bool EscapeUsed => escapeUsed;
         public void EnableFirstEscape() => allowFirstEscape = true;
@@ -173,6 +174,7 @@ namespace NoRainbowAfter.AI
 
             activeResolve = null;
             currentBlackoutAlpha = 0f;
+            postCaughtGraceTimer = 0f;
             SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
             if (!permanentlyResolved)
                 SetState(ShadowEncounterState.Dormant);
@@ -215,6 +217,7 @@ namespace NoRainbowAfter.AI
             if (!isActiveAndEnabled || permanentlyResolved || resolve == null) return;
 
             activeResolve = resolve;
+            postCaughtGraceTimer = 0f;
             successfulHits = 0;
             stateTimer = 0f;
             ResetHideTracking();
@@ -310,6 +313,7 @@ namespace NoRainbowAfter.AI
             if (postCaughtGraceTimer > 0f)
             {
                 currentBlackoutAlpha = Mathf.MoveTowards(currentBlackoutAlpha, 0f, dt);
+                placeholderVisual?.AnimateRecovery(1f - postCaughtGraceTimer / EscapeRecoveryDuration);
                 return;
             }
             var wardrobe=HidingWardrobe.Occupied;
@@ -318,13 +322,14 @@ namespace NoRainbowAfter.AI
                 wardrobeHideTime += dt;
                 if(wardrobe.Spotted)
                 {
+                    placeholderVisual?.TickVisual(ShadowEncounterState.Pursue, dt, 0f, 0f, motor.transform, true);
                     if(wardrobeHideTime > 2f) { wardrobe.TryExit(); wardrobe.Release(); EnterCaught(); wardrobeHideTime=0f; }
                     return;
                 }
                 Vector3 search=shiftedWorld != null ? shiftedWorld.MonsterSpawn+Vector3.left*6f : new Vector3(0,0,17);
                 Vector3 next=shiftedWorld != null ? shiftedWorld.Navigate(transform.position,search) : search;
-                MoveAlongFloor(next,searchPassSpeed,dt);
-                placeholderVisual?.TickVisual(ShadowEncounterState.Pursue,dt,.6f,0f,motor.transform);
+                float searchSpeed = MoveAlongFloor(next,searchPassSpeed,dt);
+                placeholderVisual?.TickVisual(ShadowEncounterState.Pursue,dt,searchSpeed / searchPassSpeed,0f,motor.transform,true);
                 if(wardrobeHideTime >= 6f)
                 {
                     stateTimer=0f;
@@ -638,7 +643,7 @@ namespace NoRainbowAfter.AI
             placeholderVisual?.ResetPostureImmediate(motor.transform);
             if(grabWillEscape)
             {
-                postCaughtGraceTimer=3f;
+                postCaughtGraceTimer=EscapeRecoveryDuration;
                 currentBlackoutAlpha=0f;
                 player?.SetTransitionLocked(false);
                 SetState(ShadowEncounterState.Pursue);
@@ -741,6 +746,7 @@ namespace NoRainbowAfter.AI
             captureFeedback?.ResetFeedback();
             if (permanentlyResolved) return;
             activeResolve = null;
+            postCaughtGraceTimer = 0f;
             stateTimer = 0f;
             currentBlackoutAlpha = 0f;
             ResetHideTracking();
