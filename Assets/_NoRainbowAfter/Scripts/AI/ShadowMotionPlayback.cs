@@ -24,12 +24,27 @@ namespace NoRainbowAfter.AI
             if (existing != null) return existing;
             var asset = Resources.Load<GameObject>("C1ShadowMotion");
             if (asset == null) return null;
+            bool hasHeroRaka = false;
+            foreach (var t in wrapper.GetComponentsInChildren<Transform>(true))
+            {
+                if (t.name.StartsWith("ACT_Shadow_Raka")) { hasHeroRaka = true; break; }
+            }
             var originals = wrapper.GetComponentsInChildren<Renderer>(true);
             var instance = Instantiate(asset, wrapper, false);
             foreach (var renderer in instance.GetComponentsInChildren<Renderer>(true))
+            {
+                if (hasHeroRaka)
+                {
+                    renderer.enabled = false;
+                    continue;
+                }
                 foreach (var original in originals)
                     if (renderer.name == original.name) { renderer.sharedMaterials = original.sharedMaterials; break; }
-            foreach (var original in originals) original.enabled = false;
+            }
+            if (!hasHeroRaka)
+            {
+                foreach (var original in originals) original.enabled = false;
+            }
             var playback = instance.GetComponent<ShadowMotionPlayback>();
             playback.ResetPose();
             return playback;

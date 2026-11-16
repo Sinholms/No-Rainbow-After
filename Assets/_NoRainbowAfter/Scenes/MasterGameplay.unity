@@ -743,6 +743,7 @@ GameObject:
   m_Component:
   - component: {fileID: 50073434}
   - component: {fileID: 50073435}
+  - component: {fileID: 50073436}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -830,6 +831,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &50073436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 50073433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!64 &56000768
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -1357,6 +1387,24 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2890323804915696105, guid: ce9a55ae89d273c4eaea826aeac58b64, type: 3}
+--- !u!1 &97881334 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -295129883742238141, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
+  m_PrefabInstance: {fileID: 1669720292}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &97881335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 97881334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cc8a42b229604e43a0cbc94a7907973, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NoRainbowAfter.Quality::NoRainbowAfter.Quality.FanBladeSpinner
+  degreesPerSecond: 960
 --- !u!1 &101858158
 GameObject:
   m_ObjectHideFlags: 0
@@ -4959,6 +5007,7 @@ GameObject:
   m_Component:
   - component: {fileID: 211337607}
   - component: {fileID: 211337608}
+  - component: {fileID: 211337609}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -5046,6 +5095,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &211337609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211337606}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!65 &221009488
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -5264,6 +5342,7 @@ GameObject:
   m_Component:
   - component: {fileID: 240041191}
   - component: {fileID: 240041192}
+  - component: {fileID: 240041193}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -5351,6 +5430,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &240041193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 240041190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &241661130
 GameObject:
   m_ObjectHideFlags: 0
@@ -5589,7 +5697,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -5606,7 +5714,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -18949,6 +19057,7 @@ GameObject:
   m_Component:
   - component: {fileID: 405419000}
   - component: {fileID: 405419001}
+  - component: {fileID: 405419002}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -19036,6 +19145,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &405419002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 405418999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &418581574
 GameObject:
   m_ObjectHideFlags: 0
@@ -19125,6 +19263,7 @@ GameObject:
   m_Component:
   - component: {fileID: 428259521}
   - component: {fileID: 428259522}
+  - component: {fileID: 428259523}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -19212,6 +19351,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &428259523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 428259520}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &435913741
 GameObject:
   m_ObjectHideFlags: 0
@@ -19418,6 +19586,7 @@ GameObject:
   m_Component:
   - component: {fileID: 469384593}
   - component: {fileID: 469384594}
+  - component: {fileID: 469384595}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -19505,6 +19674,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &469384595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 469384592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &476432103 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -2349430073158362667, guid: be61e38da200528459145b79c9e9caba, type: 3}
@@ -20099,7 +20297,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -20116,7 +20314,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -26879,6 +27077,7 @@ GameObject:
   m_Component:
   - component: {fileID: 680980286}
   - component: {fileID: 680980287}
+  - component: {fileID: 680980288}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -26966,6 +27165,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &680980288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680980285}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!64 &681464659
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -28008,8 +28236,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.42, y: 0.38, z: 0.95}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.46000004, y: 0.86000013, z: 0.92}
+  m_Center: {x: 1.71, y: 4.37, z: 0.46}
 --- !u!1 &732537719 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3493616392889740066, guid: be61e38da200528459145b79c9e9caba, type: 3}
@@ -31775,6 +32003,7 @@ GameObject:
   m_Component:
   - component: {fileID: 921549450}
   - component: {fileID: 921549451}
+  - component: {fileID: 921549452}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -31862,6 +32091,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &921549452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 921549449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &925274231
 GameObject:
   m_ObjectHideFlags: 0
@@ -34636,6 +34894,126 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!1001 &945428047
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1995427194}
+    m_Modifications:
+    - target: {fileID: 847516081368314428, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_Name
+      value: ACT_001_ShadowPlaceholder
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.65
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: motor
+      value: 
+      objectReference: {fileID: 1892767505}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1892767504}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: director
+      value: 
+      objectReference: {fileID: 1892767519}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: checkpoint
+      value: 
+      objectReference: {fileID: 1892767511}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: allowFirstEscape
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: placeholderVisual
+      value: 
+      objectReference: {fileID: 945428050}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: coverZones.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: 'coverZones.Array.data[0]'
+      value: 
+      objectReference: {fileID: 68793562}
+    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+      propertyPath: 'coverZones.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1263525810}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+--- !u!4 &945428048 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+  m_PrefabInstance: {fileID: 945428047}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &945428049 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+  m_PrefabInstance: {fileID: 945428047}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc3a1fd7708ddc64a92d4506e3de681d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NoRainbowAfter.AI::NoRainbowAfter.AI.ShadowEncounterController
+--- !u!114 &945428050 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 116711594812458050, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
+  m_PrefabInstance: {fileID: 945428047}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7afb41dddc5fd4345bd12978bd3b5e0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NoRainbowAfter.AI::NoRainbowAfter.AI.ShadowPlaceholderVisual
 --- !u!65 &945467381
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -40050,6 +40428,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1019354094}
   - component: {fileID: 1019354095}
+  - component: {fileID: 1019354096}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -40137,6 +40516,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1019354096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019354093}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1019769471
 GameObject:
   m_ObjectHideFlags: 0
@@ -42931,7 +43339,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -42948,7 +43356,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -46095,6 +46503,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1140389843}
   - component: {fileID: 1140389844}
+  - component: {fileID: 1140389845}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -46182,6 +46591,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1140389845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1140389842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1151848412
 GameObject:
   m_ObjectHideFlags: 0
@@ -46763,27 +47201,6 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.18, y: 0.9, z: 2.7}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!65 &1176415871
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1669720298}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.97, y: 2.07, z: 0.22}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1177727499
 GameObject:
@@ -48185,6 +48602,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1261758277}
   - component: {fileID: 1261758278}
+  - component: {fileID: 1261758279}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -48272,6 +48690,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1261758279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1261758276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1263525808
 GameObject:
   m_ObjectHideFlags: 0
@@ -48781,6 +49228,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1280010257}
   - component: {fileID: 1280010258}
+  - component: {fileID: 1280010259}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -48868,6 +49316,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1280010259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1280010256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1281309972
 GameObject:
   m_ObjectHideFlags: 0
@@ -48989,6 +49466,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1291122365}
   - component: {fileID: 1291122366}
+  - component: {fileID: 1291122367}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -49076,6 +49554,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1291122367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1291122364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!64 &1298338560
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -56482,7 +56989,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1565232258
 Transform:
   m_ObjectHideFlags: 0
@@ -62356,6 +62863,27 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
   m_PrefabInstance: {fileID: 1669720292}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &1629342382
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1669720298}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9827987, y: 1.8589464, z: 0.24441183}
+  m_Center: {x: 1.3156605, y: 1.6993217, z: 0.35435098}
 --- !u!1 &1641627751
 GameObject:
   m_ObjectHideFlags: 0
@@ -62489,126 +63017,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1643655444}
   m_CullTransparentMesh: 1
---- !u!1001 &1648784795
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1995427194}
-    m_Modifications:
-    - target: {fileID: 847516081368314428, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_Name
-      value: ACT_001_ShadowPlaceholder
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.02
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 17.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: -0.00000004371139
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: motor
-      value: 
-      objectReference: {fileID: 1892767505}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: player
-      value: 
-      objectReference: {fileID: 1892767504}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: director
-      value: 
-      objectReference: {fileID: 1892767519}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: checkpoint
-      value: 
-      objectReference: {fileID: 1892767511}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: allowFirstEscape
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: placeholderVisual
-      value: 
-      objectReference: {fileID: 1648784798}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: coverZones.Array.size
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: 'coverZones.Array.data[0]'
-      value: 
-      objectReference: {fileID: 68793562}
-    - target: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-      propertyPath: 'coverZones.Array.data[1]'
-      value: 
-      objectReference: {fileID: 1263525810}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
---- !u!4 &1648784796 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2624468296627363143, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-  m_PrefabInstance: {fileID: 1648784795}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1648784797 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3674067147346132265, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-  m_PrefabInstance: {fileID: 1648784795}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc3a1fd7708ddc64a92d4506e3de681d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: NoRainbowAfter.AI::NoRainbowAfter.AI.ShadowEncounterController
---- !u!114 &1648784798 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 116711594812458050, guid: 040fd0f2ce31f7d4d976038edb2c8cd5, type: 3}
-  m_PrefabInstance: {fileID: 1648784795}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7afb41dddc5fd4345bd12978bd3b5e0f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: NoRainbowAfter.AI::NoRainbowAfter.AI.ShadowPlaceholderVisual
 --- !u!64 &1649465726
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -63176,7 +63584,7 @@ PrefabInstance:
     - target: {fileID: -9127897477792151679, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: ac6dfc83dda95514baf8642083633640, type: 2}
+      objectReference: {fileID: 2100000, guid: b23038161ce6c6d48b3d155862121059, type: 2}
     - target: {fileID: -9127175296592728568, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -63524,7 +63932,7 @@ PrefabInstance:
     - target: {fileID: -6817903714752043190, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: ac6dfc83dda95514baf8642083633640, type: 2}
+      objectReference: {fileID: 2100000, guid: 760b0345984311e4db1118cb2742fd03, type: 2}
     - target: {fileID: -6789732225802423591, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -63628,7 +64036,7 @@ PrefabInstance:
     - target: {fileID: -5905016215033541298, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: e728432cf2e2e3045b6520e0c1ef84bf, type: 2}
+      objectReference: {fileID: 2100000, guid: 98fdc4c2b5ea1c94392252d28ce893b4, type: 2}
     - target: {fileID: -5895388420225302734, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -64288,7 +64696,7 @@ PrefabInstance:
     - target: {fileID: -1285856523752829713, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 43a940e1756aa9b43b63a3ff73303947, type: 2}
+      objectReference: {fileID: 2100000, guid: 81ee19076c30f7949b6f7dfb17c79f25, type: 2}
     - target: {fileID: -1285062640102611454, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -64419,7 +64827,7 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 43a940e1756aa9b43b63a3ff73303947, type: 2}
     - target: {fileID: -295129883742238141, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483647
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -294723656330828989, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -64492,7 +64900,7 @@ PrefabInstance:
     - target: {fileID: 344473976903839469, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: e728432cf2e2e3045b6520e0c1ef84bf, type: 2}
+      objectReference: {fileID: 2100000, guid: 918999ab54d33804a860dee347c5d651, type: 2}
     - target: {fileID: 348007914243564045, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -64588,6 +64996,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_Name
       value: ENV_KosAtmosphere
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 929835607378165799, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
@@ -64708,7 +65120,7 @@ PrefabInstance:
     - target: {fileID: 2027134924065371629, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: e728432cf2e2e3045b6520e0c1ef84bf, type: 2}
+      objectReference: {fileID: 2100000, guid: a861ba51d1d1f584e85a339c7413c5a0, type: 2}
     - target: {fileID: 2030938969289279203, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
@@ -64872,7 +65284,7 @@ PrefabInstance:
     - target: {fileID: 3315476991373289264, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: ac6dfc83dda95514baf8642083633640, type: 2}
+      objectReference: {fileID: 2100000, guid: cbbf8445206b3434eaae500277a3cb78, type: 2}
     - target: {fileID: 3422531680934447511, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -64976,7 +65388,7 @@ PrefabInstance:
     - target: {fileID: 4346512794228445413, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 71aa1c79d7eb08b48a28a31551ed345d, type: 2}
+      objectReference: {fileID: 2100000, guid: b3c936767e9b94f40819b9f70a11d19e, type: 2}
     - target: {fileID: 4363378178414180771, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -65188,7 +65600,7 @@ PrefabInstance:
     - target: {fileID: 5957381499292118294, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: ac6dfc83dda95514baf8642083633640, type: 2}
+      objectReference: {fileID: 2100000, guid: 543eb9398a2bd654b83119c64806165b, type: 2}
     - target: {fileID: 5982358283974346659, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 2147483647
@@ -65336,7 +65748,7 @@ PrefabInstance:
     - target: {fileID: 7526316459716079976, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: e728432cf2e2e3045b6520e0c1ef84bf, type: 2}
+      objectReference: {fileID: 2100000, guid: 851b85f4dbcdb3745a99b2547c2e99e2, type: 2}
     - target: {fileID: 7562823029690316544, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: m_CastShadows
       value: 0
@@ -65512,7 +65924,7 @@ PrefabInstance:
     - target: {fileID: 8678721015017885540, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: e728432cf2e2e3045b6520e0c1ef84bf, type: 2}
+      objectReference: {fileID: 2100000, guid: ff7e31217839af54e81556b6f5d55d7a, type: 2}
     - target: {fileID: 8703980217153512586, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -65677,6 +66089,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7047822719541825944, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1528433705}
+    - targetCorrespondingSourceObject: {fileID: -295129883742238141, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 97881335}
     - targetCorrespondingSourceObject: {fileID: -8616103398537967985, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       insertIndex: -1
       addedObject: {fileID: 720892640}
@@ -65688,7 +66103,7 @@ PrefabInstance:
       addedObject: {fileID: 1801049229}
     - targetCorrespondingSourceObject: {fileID: -3623285383099264456, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1176415871}
+      addedObject: {fileID: 1629342382}
     - targetCorrespondingSourceObject: {fileID: 7819472881172174817, guid: 7d4ef1ac8fa767647b4c715c0a016c95, type: 3}
       insertIndex: -1
       addedObject: {fileID: 3563861}
@@ -73080,7 +73495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: NoRainbowAfter.Narrative::NoRainbowAfter.Narrative.SubtitlePlaceholder
   director: {fileID: 1892767519}
   player: {fileID: 1892767504}
-  encounterCueSource: {fileID: 1648784797}
+  encounterCueSource: {fileID: 945428049}
 --- !u!114 &1892767518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73217,6 +73632,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1904070633}
   - component: {fileID: 1904070634}
+  - component: {fileID: 1904070635}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -73304,6 +73720,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1904070635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1904070632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1909246375
 GameObject:
   m_ObjectHideFlags: 0
@@ -74114,6 +74559,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1956578138}
   - component: {fileID: 1956578139}
+  - component: {fileID: 1956578140}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -74201,6 +74647,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &1956578140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956578137}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1957823616
 GameObject:
   m_ObjectHideFlags: 0
@@ -74632,10 +75107,10 @@ Transform:
   - {fileID: 1567529982}
   - {fileID: 68793561}
   - {fileID: 1263525809}
-  - {fileID: 1648784796}
   - {fileID: 337827147}
   - {fileID: 107392607}
   - {fileID: 1605458492}
+  - {fileID: 945428048}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1996098527 stripped
@@ -77241,6 +77716,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2022250353}
   - component: {fileID: 2022250354}
+  - component: {fileID: 2022250355}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -77328,6 +77804,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &2022250355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022250352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &2025709046
 GameObject:
   m_ObjectHideFlags: 0
@@ -78488,6 +78993,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2118681710}
   - component: {fileID: 2118681711}
+  - component: {fileID: 2118681712}
   m_Layer: 0
   m_Name: Dim downlight
   m_TagString: Untagged
@@ -78575,6 +79081,35 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!114 &2118681712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2118681709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &2131342649
 GameObject:
   m_ObjectHideFlags: 0
@@ -78755,7 +79290,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -78772,7 +79307,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 3
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:

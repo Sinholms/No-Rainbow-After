@@ -327,62 +327,32 @@
     },
     {
       "name": "SM_PROP_BedRail",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedLeg",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedLeg.001",
-      "material": "MAT_H_Metal",
+      "material": "MAT_H_BedFrame",
       "collision": "none"
     },
     {
       "name": "SM_PROP_BedRail.001",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedLeg.002",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedLeg.003",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedCrossbar",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_BedCrossbar.001",
-      "material": "MAT_H_Metal",
+      "material": "MAT_H_BedPillow2",
       "collision": "none"
     },
     {
       "name": "SM_PROP_Mattress",
-      "material": "MAT_H_Cloth",
+      "material": "MAT_H_BedMattress",
       "collision": "box"
     },
     {
       "name": "SM_PROP_WrinkledBlanket",
-      "material": "MAT_H_Cloth",
+      "material": "MAT_H_BedDuvet",
       "collision": "none"
     },
     {
       "name": "SM_PROP_SoftPillow",
-      "material": "MAT_H_Cloth",
+      "material": "MAT_H_BedPillow1",
       "collision": "none"
     },
     {
       "name": "SM_PROP_MattressSeam",
-      "material": "MAT_H_Paper",
+      "material": "MAT_H_BedSheet",
       "collision": "none"
     },
     {
@@ -562,132 +532,27 @@
     },
     {
       "name": "SM_PROP_FanStand",
-      "material": "MAT_H_Wood",
+      "material": "MAT_H_Cabinet",
       "collision": "box"
     },
     {
       "name": "SM_PROP_FanBase",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanNeck",
-      "material": "MAT_H_Metal",
+      "material": "MAT_H_FanBody",
       "collision": "none"
     },
     {
       "name": "SM_PROP_FanCage",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanCage.001",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanCage.002",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanCage.003",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanCageBack",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.001",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.002",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.003",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.004",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.005",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.006",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.007",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.008",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.009",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.010",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.011",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.012",
-      "material": "MAT_H_Metal",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanSpoke.013",
-      "material": "MAT_H_Metal",
+      "material": "MAT_H_Ink",
       "collision": "none"
     },
     {
       "name": "SM_PROP_FanMotor",
-      "material": "MAT_H_Metal",
+      "material": "MAT_H_FanBadge",
       "collision": "none"
     },
     {
       "name": "SM_PROP_FanBlade",
-      "material": "MAT_H_Cloth",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanBlade.001",
-      "material": "MAT_H_Cloth",
-      "collision": "none"
-    },
-    {
-      "name": "SM_PROP_FanBlade.002",
-      "material": "MAT_H_Cloth",
+      "material": "MAT_H_FanBlade",
       "collision": "none"
     },
     {
@@ -1612,6 +1477,176 @@
         0.05,
         0.08
       ]
+    },
+    {
+      "name": "MAT_H_BedFrame",
+      "texturePrefix": "BedFrame",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.03,
+      "smoothness": 0.28,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_BedMattress",
+      "texturePrefix": "BedMattress",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.12,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_BedSheet",
+      "texturePrefix": "BedSheet",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.12,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_BedDuvet",
+      "texturePrefix": "BedDuvet",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.14,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_BedPillow1",
+      "texturePrefix": "BedPillow1",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.12,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_BedPillow2",
+      "texturePrefix": "BedPillow2",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.0,
+      "smoothness": 0.12,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_Cabinet",
+      "texturePrefix": "Cabinet",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.05,
+      "smoothness": 0.32,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_FanBadge",
+      "texturePrefix": "FanBadge",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.35,
+      "smoothness": 0.58,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_FanBlade",
+      "texturePrefix": "FanBlade",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.78,
+      "smoothness": 0.65,
+      "emission": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "MAT_H_FanBody",
+      "texturePrefix": "FanBody",
+      "baseColor": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "metallic": 0.75,
+      "smoothness": 0.62,
+      "emission": [
+        0,
+        0,
+        0
+      ]
     }
   ],
   "lights": [
@@ -1711,8 +1746,8 @@
     0.04,
     1.1
   ],
-  "meshCount": 278,
-  "triangles": 65988,
+  "meshCount": 251,
+  "triangles": 108352,
   "roomMetres": [
     4,
     5,

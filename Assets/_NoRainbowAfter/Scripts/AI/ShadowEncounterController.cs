@@ -43,7 +43,7 @@ namespace NoRainbowAfter.AI
         [SerializeField] private ShadowPlaceholderVisual placeholderVisual;
 
         [Header("Staging & movement (metres, seconds)")]
-        [SerializeField] private Vector3 dormantPosition = new Vector3(0f, 0.02f, 17.5f);
+        [SerializeField] private Vector3 dormantPosition = new Vector3(90f, 0.12f, -1.65f);
         [SerializeField, Min(0.2f)] private float spawnHoldDuration = 1.15f;
         [SerializeField, Min(0.5f)] private float pursueSpeed = 2.15f;
         [SerializeField, Min(0.5f)] private float searchPassSpeed = 2.35f;
