@@ -1,11 +1,11 @@
 {
   "rest_geometry_sha256": "2b3f61b8d729deaa4ef66899366916554f560fb2f88c08232fb2d269d26dcb22",
   "rest_pose_max_delta_m": 2.384185791015625e-07,
-  "loop_seam_max_delta_m": 2.384185791015625e-07,
+  "loop_seam_max_delta_m": 0.0,
   "hair_displacement_frame25_m": {
-    "Hair | fine temple strands": 0.06273714452981949,
-    "Hair | loose tapered wisps": 0.0903405174612999,
-    "Hair | parted crown and heavy locks": 0.023906240239739418
+    "Hair | fine temple strands": 0.10649076849222183,
+    "Hair | loose tapered wisps": 0.153139129281044,
+    "Hair | parted crown and heavy locks": 0.040692489594221115
   },
   "hair_bones_added": 9,
   "existing_actions_preserved": [
@@ -20,5 +20,7 @@
   ],
   "period_frames": 96,
   "fps": 24,
-  "method": "Authored looping bone animation"
+  "method": "Authored looping bone animation",
+  "viewport_rig_enabled": true,
+  "sway_amplitude_multiplier": 1.7
 }

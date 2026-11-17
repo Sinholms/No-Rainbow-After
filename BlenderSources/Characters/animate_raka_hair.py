@@ -142,7 +142,7 @@ def add_hair_sway():
             for segment in range(1, 4):
                 bone = rig.pose.bones[f"{PREFIX}.{label}.{segment}"]
                 phase = label_index * .43 + (segment - 1) * .38
-                amplitude = .022 + segment * .012
+                amplitude = .0374 + segment * .0204
                 sway = amplitude * (math.sin(t - phase) - math.sin(-phase))
                 drift = amplitude * .36 * (math.sin(2 * t - phase) - math.sin(-phase))
                 bone.rotation_euler = (drift, .16 * sway, sway)
@@ -180,7 +180,9 @@ def add_hair_sway():
     assert loop_delta < 1e-6, loop_delta
     scene.frame_set(1)
     rig.select_set(False)
-    rig.hide_set(True)
+    # Keep the driving armature enabled for interactive viewport playback.
+    # Viewport overlays already hide bone outlines from the character preview.
+    rig.hide_set(False)
     scene["raka_hair_sway_version"] = 1
     scene["Hair playback"] = "Space to play frames 1-96. Hair sway | loop is enabled in NLA."
     scene["Hair motion"] = "Authored bone animation with 3 chains. Runtime physics requires game integration."
