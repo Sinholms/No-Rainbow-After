@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="7" result="Failed(Child)" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.7314167">
+  <test-suite type="TestSuite" id="1080" name="No rainbow after" fullname="No rainbow after" runstate="Runnable" testcasecount="61" result="Failed" site="Child" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.731417" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="SetUpFixture" id="1090" name="NoRainbowAfter.PlayModeTests.dll" fullname="NarrativeStorageIsolation" classname="NarrativeStorageIsolation" runstate="Runnable" testcasecount="61" result="Failed" site="Child" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.713832" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="22664" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1155" name="NoRainbowAfter" fullname="NoRainbowAfter" runstate="Runnable" testcasecount="46" result="Failed" site="Child" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.700323" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1156" name="Tests" fullname="NoRainbowAfter.Tests" runstate="Runnable" testcasecount="46" result="Failed" site="Child" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.690460" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1138" name="ShadowEncounterTests" fullname="NoRainbowAfter.Tests.ShadowEncounterTests" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:10Z" duration="7.687051" total="7" passed="0" failed="7" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1145" name="CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance" methodname="CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="1606576567" result="Failed" start-time="2026-11-17 04:48:02Z" end-time="2026-11-17 04:48:05Z" duration="2.615786" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Condition not reached within 2.00s; state=Dormant
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<StepEncounterUntil>d__22.MoveNext () [0x000a0] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:671
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1140" name="FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses" methodname="FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="599330867" result="Failed" start-time="2026-11-17 04:48:05Z" end-time="2026-11-17 04:48:06Z" duration="0.930032" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: Spawn
+  But was:  Dormant
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<VerifyHideInCover>d__10.MoveNext () [0x00171] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:208
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1141" name="FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses" methodname="FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="1723032735" result="Failed" start-time="2026-11-17 04:48:06Z" end-time="2026-11-17 04:48:07Z" duration="0.755255" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: Spawn
+  But was:  Dormant
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<VerifyHideInCover>d__10.MoveNext () [0x00171] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:208
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1139" name="FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution" methodname="FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="1095440921" result="Failed" start-time="2026-11-17 04:48:07Z" end-time="2026-11-17 04:48:07Z" duration="0.300737" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution>d__7.MoveNext () [0x00118] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:88
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1143" name="PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly" methodname="PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="1055815588" result="Failed" start-time="2026-11-17 04:48:07Z" end-time="2026-11-17 04:48:08Z" duration="0.895860" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Condition not reached within 2.00s; state=Dormant
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<StepEncounterUntil>d__22.MoveNext () [0x000a0] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:671
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1144" name="RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats" methodname="RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="2143061852" result="Failed" start-time="2026-11-17 04:48:08Z" end-time="2026-11-17 04:48:09Z" duration="1.204329" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Condition not reached within 8.00s; state=Dormant
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<StepEncounterUntil>d__22.MoveNext () [0x000a0] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:671
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1142" name="StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide" fullname="NoRainbowAfter.Tests.ShadowEncounterTests.StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide" methodname="StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide" classname="NoRainbowAfter.Tests.ShadowEncounterTests" runstate="Runnable" seed="1703396610" result="Failed" start-time="2026-11-17 04:48:09Z" end-time="2026-11-17 04:48:10Z" duration="0.950351" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Condition not reached within 2.00s; state=Dormant
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at NoRainbowAfter.Tests.ShadowEncounterTests+<StepEncounterUntil>d__22.MoveNext () [0x000a0] in D:\GRAVKOM\No rainbow after\Assets\_NoRainbowAfter\Scripts\Tests\PlayMode\ShadowEncounterTests.cs:671
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in .\Library\PackageCache\com.unity.test-framework@ee3fe9477490\UnityEngine.TestRunner\NUnitExtensions\Attributes\TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/sinholms/AppData/LocalLow/DefaultCompany/No rainbow after\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

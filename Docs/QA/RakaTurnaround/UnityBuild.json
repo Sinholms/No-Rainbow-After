@@ -1,0 +1,9 @@
+{
+    "result": "Succeeded",
+    "errors": 0,
+    "warnings": 1,
+    "seconds": 135.5942593,
+    "bytes": 273889601,
+    "renderers": 8,
+    "hairBones": 9
+}

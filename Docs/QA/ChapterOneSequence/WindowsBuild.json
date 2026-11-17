@@ -1,0 +1,6 @@
+{
+  "result": "Succeeded",
+  "player": "Builds/Chapter1Expanded/NoRainbowAfter.exe",
+  "sequence_fix_commit": "7b88b8a",
+  "validation": "25 active-flow tests passed. Seven legacy tests reproduce the same baseline failures."
+}
