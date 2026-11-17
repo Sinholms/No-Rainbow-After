@@ -143,6 +143,82 @@ namespace NoRainbowAfter.Tests
                 Time.timeScale=1;
             }
         }
+        [UnityTest] public IEnumerator RakaHairIsContinuousIndependentAndPausedWithEncounter()
+        {
+            yield return Load();
+            yield return Expand();
+            Assert.That(motor.TryRestorePose(new Vector3(80f, .1f, -1.65f), Quaternion.Euler(0, 90, 0), false), Is.True);
+            yield return null;
+            Time.timeScale = 0f;
+            var playback = monster.GetComponentInChildren<ShadowMotionPlayback>(true);
+            Assert.That(playback, Is.Not.Null);
+            var hair = playback.GetComponentsInChildren<Transform>(true)
+                .Where(bone => bone.name.StartsWith("HairSway.")).ToArray();
+            Assert.That(hair.Length, Is.EqualTo(9));
+            var clip = playback.GetComponent<Animator>().runtimeAnimatorController.animationClips
+                .Single(animation => animation.name == "Hair_Sway");
+            var root = monster.transform.position;
+            playback.ResetPose();
+            playback.ResetHair();
+            var rest = hair.Select(bone => bone.localRotation).ToArray();
+            var previous = rest.ToArray();
+            float maximumStep = 0f;
+            int steps = Mathf.RoundToInt(clip.length * 60f);
+            for (int step = 0; step < steps; step++)
+            {
+                playback.SampleHair(1f / 60f);
+                for (int i = 0; i < hair.Length; i++)
+                {
+                    maximumStep = Mathf.Max(maximumStep, Quaternion.Angle(previous[i], hair[i].localRotation));
+                    previous[i] = hair[i].localRotation;
+                }
+            }
+            Assert.That(maximumStep, Is.InRange(.01f, 2f), "Hair should move continuously at 60 FPS.");
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(rest[i], hair[i].localRotation), Is.LessThan(.05f), "Loop seam must return smoothly.");
+            playback.ResetHair();
+            playback.SampleHair(1f);
+            var oneSecond = hair.Select(bone => bone.localRotation).ToArray();
+            playback.ResetHair();
+            for (int step = 0; step < 60; step++) playback.SampleHair(1f / 60f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(oneSecond[i], hair[i].localRotation), Is.LessThan(.05f));
+            playback.ResetHair();
+            for (int step = 0; step < 30; step++) playback.SampleHair(1f / 30f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(oneSecond[i], hair[i].localRotation), Is.LessThan(.05f), "Sway must be frame-rate independent.");
+            var visual = monster.GetComponent<ShadowPlaceholderVisual>();
+            var beforeReset = hair.Select(bone => bone.localRotation).ToArray();
+            visual.ResetPostureImmediate(motor.transform);
+            visual.TickSecondaryMotion(1f / 60f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(beforeReset[i], hair[i].localRotation), Is.LessThan(2f), "Posture changes must preserve the hair clock.");
+            var spine = playback.Spine.localRotation;
+            playback.SampleHair(.1f);
+            Assert.That(Quaternion.Angle(spine, playback.Spine.localRotation), Is.LessThan(.01f), "Hair clip must not overwrite body bones.");
+            player.SetPaused(true);
+            var frozen = hair.Select(bone => bone.localRotation).ToArray();
+            monster.TickEncounter(.1f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(frozen[i], hair[i].localRotation), Is.LessThan(.01f));
+            player.SetPaused(false);
+            monster.TickEncounter(.1f);
+            Assert.That(hair.Select((bone, i) => Quaternion.Angle(frozen[i], bone.localRotation)).Max(), Is.GreaterThan(.05f));
+            Assert.That(monster.transform.position, Is.EqualTo(root));
+            string output = Environment.GetEnvironmentVariable("NRA_MOTION_CAPTURE");
+            if (!string.IsNullOrEmpty(output))
+            {
+                Vector3 target = monster.transform.position;
+                Assert.That(motor.TryRestorePose(target + Vector3.left * 2.4f, Quaternion.Euler(0, 90, 0), false), Is.True);
+                motor.ViewCamera.transform.rotation = Quaternion.LookRotation(target + Vector3.up * 1.95f - motor.ViewCamera.transform.position);
+                for (int i = 0; i < 48; i++)
+                {
+                    monster.TickEncounter(1f / 12f);
+                    CaptureMotionFrame(motor.ViewCamera, output, "Hair", i);
+                }
+            }
+        }
+
         private static void CaptureMotionFrame(Camera camera,string folder,string clip,int frame)
         {
             string path=System.IO.Path.Combine(folder,clip);System.IO.Directory.CreateDirectory(path);

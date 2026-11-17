@@ -8,7 +8,8 @@ namespace NoRainbowAfter.AI
         public AnimationClip ChestHit, FinalHit, Grab, Rest;
         public Transform Spine;
         public bool IsHero { get; private set; }
-        private AnimationClip walk, pursue, search, hide;
+        private AnimationClip walk, pursue, search, hide, hairSway;
+        private float hairTime;
         private Transform facingRoot, upperLeft, foreLeft, handLeft, upperRight, foreRight, handRight;
         private float loopTime;
         private AnimationClip loopClip;
@@ -88,13 +89,26 @@ namespace NoRainbowAfter.AI
             loopTime += dt;
             Sample(clip, Mathf.Repeat(loopTime, clip.length));
             blendTime += dt;
-            float blend = Mathf.SmoothStep(0f, 1f, blendTime / .12f);
+            float blend = Mathf.SmoothStep(0f, 1f, blendTime / .20f);
             if (blend < 1f)
                 for (int i = 0; i < poseBones.Length; i++)
                 {
                     poseBones[i].localRotation = Quaternion.Slerp(blendRotations[i], poseBones[i].localRotation, blend);
                     poseBones[i].localPosition = Vector3.Lerp(blendPositions[i], poseBones[i].localPosition, blend);
                 }
+        }
+
+        public void SampleHair(float deltaTime)
+        {
+            if (hairSway == null || deltaTime <= 0f) return;
+            hairTime = Mathf.Repeat(hairTime + deltaTime, hairSway.length);
+            hairSway.SampleAnimation(gameObject, hairTime);
+        }
+
+        public void ResetHair()
+        {
+            hairTime = 0f;
+            if (hairSway != null) hairSway.SampleAnimation(gameObject, 0f);
         }
 
         public void SampleRecovery(float progress)
@@ -130,6 +144,7 @@ namespace NoRainbowAfter.AI
                     switch (clip.name)
                     {
                         case "Idle_Breath": hero.Rest = clip; break;
+                        case "Hair_Sway": hero.hairSway = clip; break;
                         case "Walk_Lurch": hero.walk = clip; break;
                         case "Pursue": hero.pursue = clip; break;
                         case "Search_Cover": hero.search = clip; break;

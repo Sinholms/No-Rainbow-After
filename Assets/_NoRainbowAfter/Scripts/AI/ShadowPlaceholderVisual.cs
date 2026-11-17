@@ -103,6 +103,13 @@ namespace NoRainbowAfter.AI
             ApplyPosture(0f, 0f, 0f, Vector3.zero);
         }
 
+        public void TickSecondaryMotion(float deltaTime)
+        {
+            EnsureInitialized();
+            if (visualWrapper != null && visualWrapper.gameObject.activeInHierarchy)
+                motion?.SampleHair(deltaTime);
+        }
+
         public void TickVisual(
             ShadowEncounterState state,
             float deltaTime,

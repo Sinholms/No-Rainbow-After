@@ -1,0 +1,29 @@
+{
+  "source": "BlenderSources\\Characters\\RakaTurnaround\\Raka_Manifestation.blend",
+  "source_rest_geometry_sha256": "2b3f61b8d729deaa4ef66899366916554f560fb2f88c08232fb2d269d26dcb22",
+  "meshes": 8,
+  "bones": 26,
+  "triangles": 235078,
+  "materials": [
+    "Raka_Reference_Skin",
+    "Raka_Reference_Linen",
+    "Raka_Reference_Leather",
+    "Raka_Reference_Paper",
+    "Raka_Reference_Hair",
+    "Raka_Reference_Strands",
+    "Raka_Reference_Lining",
+    "Raka_Reference_Fingers"
+  ],
+  "actions": [
+    "Approach_Reveal",
+    "Despawn",
+    "Fight_Reaction",
+    "Hair_Sway",
+    "Hide_Pass",
+    "Idle_Breath",
+    "Pursue",
+    "Search_Cover",
+    "Walk_Lurch"
+  ],
+  "unweighted_vertices": 0
+}

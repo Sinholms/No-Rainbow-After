@@ -292,6 +292,7 @@ namespace NoRainbowAfter.AI
                     break;
             }
 
+            placeholderVisual?.TickSecondaryMotion(dt);
             RefreshUi();
         }
 
