@@ -21,7 +21,10 @@ namespace NoRainbowAfter.Narrative
         {
             if (director == null || interactor == null || director.State == null) return;
             foreach (string flag in KnownFlags)
+            {
+                if (flag == "objective.overtime" && !director.HasReadOvertimeSlip) continue;
                 if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag)) ObjectiveCompleted?.Invoke(flag);
+            }
             if (!string.IsNullOrEmpty(chapterTitle))
             {
                 if (objective != null) objective.text=chapterTitle;
@@ -33,7 +36,7 @@ namespace NoRainbowAfter.Narrative
             if (director.BeatIndex >= 6) hint.text = "";
             else if (!interactor.Flags.Contains("objective.book")) hint.text = "Ambil buku di meja. Arahkan pandangan ke buku dan tekan E.";
             else if (director.LoopIndex == 0) hint.text = "Telusuri lorong, lalu kembali ke kamar.";
-            else if (!interactor.Flags.Contains("objective.overtime")) hint.text = "Periksa slip lembur di kamar.";
+            else if (!director.HasReadOvertimeSlip) hint.text = "Periksa slip lembur di kamar.";
             else if (director.BeatIndex < 4) hint.text = "Kembali ke lorong.";
             else hint.text = "Hadapi atau hindari sosok di lorong.";
         }

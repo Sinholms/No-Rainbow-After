@@ -1,0 +1,15 @@
+{
+  "current_total": 32,
+  "current_passed": 25,
+  "current_legacy_failures": 7,
+  "baseline_legacy_failures": 7,
+  "legacy_failure_messages_match_baseline": true,
+  "active_flow_suites": [
+    "NarrativeTests",
+    "InteractionSceneTests",
+    "NoRainbowAfter.Tests.ChapterOneExpansionTests"
+  ],
+  "legacy_suite": "NoRainbowAfter.Tests.ShadowEncounterTests",
+  "legacy_assumption": "Monster ready in the original corridor before entering the extended corridor.",
+  "regression_verified": "Early slip attempts and pre-existing overtime flags cannot skip reading the slip after the first corridor return."
+}
