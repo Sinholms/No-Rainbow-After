@@ -8,7 +8,8 @@ namespace NoRainbowAfter.AI
         public AnimationClip ChestHit, FinalHit, Grab, Rest;
         public Transform Spine;
         public bool IsHero { get; private set; }
-        private AnimationClip walk, pursue, search, hide, hairSway;
+        private AnimationClip search, hide, hairSway;
+        private ShadowStride stride;
         private float hairTime;
         private Transform facingRoot, upperLeft, foreLeft, handLeft, upperRight, foreRight, handRight;
         private float loopTime;
@@ -26,6 +27,7 @@ namespace NoRainbowAfter.AI
             var clip = final ? FinalHit : ChestHit;
             if (IsHero)
             {
+                stride.Reset();
                 Sample(clip, Mathf.Clamp01(progress) * clip.length);
                 if (final && Spine != null)
                     Spine.rotation = Quaternion.AngleAxis(-35f * Mathf.SmoothStep(0f, 1f, progress), facingRoot.right) * Spine.rotation;
@@ -65,6 +67,7 @@ namespace NoRainbowAfter.AI
 
         public void ResetPose()
         {
+            stride?.Reset();
             Sample(Rest, 0f);
             loopClip = null;
             loopTime = 0f;
@@ -72,9 +75,7 @@ namespace NoRainbowAfter.AI
 
         public void SampleLoop(ShadowEncounterState state, float dt, float speed, bool searching = false)
         {
-            AnimationClip clip = state == ShadowEncounterState.HideResolved ? hide :
-                searching ? search : state != ShadowEncounterState.Pursue || speed < .05f ? Rest :
-                speed > .45f ? pursue : walk;
+            AnimationClip clip = state == ShadowEncounterState.HideResolved ? hide : searching ? search : Rest;
             if (clip != loopClip)
             {
                 loopClip = clip;
@@ -88,6 +89,10 @@ namespace NoRainbowAfter.AI
             }
             loopTime += dt;
             Sample(clip, Mathf.Repeat(loopTime, clip.length));
+            if (state == ShadowEncounterState.Pursue)
+                stride.Sample(dt, speed > 0f);
+            else
+                stride.Reset();
             blendTime += dt;
             float blend = Mathf.SmoothStep(0f, 1f, blendTime / .20f);
             if (blend < 1f)
@@ -113,12 +118,14 @@ namespace NoRainbowAfter.AI
 
         public void SampleRecovery(float progress)
         {
+            stride?.Reset();
             Sample(IsHero ? ChestHit : Rest, IsHero ? Mathf.Clamp01(progress) * ChestHit.length : 0f);
             loopClip = null;
         }
 
         private void Sample(AnimationClip clip, float time)
         {
+            stride?.RestorePelvis();
             clip.SampleAnimation(gameObject, time);
             // Animation owns only the visible pose. AI remains the sole owner of world movement.
             if (IsHero) transform.SetLocalPositionAndRotation(rootPosition, rootRotation);
@@ -145,8 +152,6 @@ namespace NoRainbowAfter.AI
                     {
                         case "Idle_Breath": hero.Rest = clip; break;
                         case "Hair_Sway": hero.hairSway = clip; break;
-                        case "Walk_Lurch": hero.walk = clip; break;
-                        case "Pursue": hero.pursue = clip; break;
                         case "Search_Cover": hero.search = clip; break;
                         case "Hide_Pass": hero.hide = clip; break;
                         case "Fight_Reaction": hero.ChestHit = hero.FinalHit = clip; break;
@@ -165,7 +170,7 @@ namespace NoRainbowAfter.AI
                         case "Hand.R": hero.handRight = bone; break;
                     }
                 }
-                if (hero.Rest == null || hero.walk == null || hero.pursue == null || hero.search == null ||
+                if (hero.Rest == null || hero.search == null ||
                     hero.hide == null || hero.ChestHit == null || hero.Spine == null || hero.handLeft == null || hero.handRight == null)
                     throw new System.InvalidOperationException("Raka encounter rig is missing required clips or arm bones.");
                 hero.poseBones = hero.GetComponentsInChildren<Transform>(true);
@@ -175,6 +180,7 @@ namespace NoRainbowAfter.AI
                 animator.enabled = false;
                 animator.applyRootMotion = false;
                 hero.ResetPose();
+                hero.stride = new ShadowStride(hero.facingRoot, hero.Spine);
                 return hero;
             }
             var existing = wrapper.GetComponentInChildren<ShadowMotionPlayback>(true);

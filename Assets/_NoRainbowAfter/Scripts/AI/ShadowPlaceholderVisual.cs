@@ -151,6 +151,7 @@ namespace NoRainbowAfter.AI
                     swayRoll = Mathf.Sin(phase * 0.9f) * 1.4f;
                     break;
                 case ShadowEncounterState.Pursue:
+                    if (motion != null && motion.IsHero) break;
                     extraPitch = 5.5f * moveSpeedNormalized + Mathf.Sin(phase * 2f) * 2.8f;
                     swayYaw = Mathf.Sin(phase) * 3.5f * Mathf.Max(0.35f, moveSpeedNormalized);
                     swayRoll = Mathf.Cos(phase) * 3.2f * Mathf.Max(0.35f, moveSpeedNormalized);

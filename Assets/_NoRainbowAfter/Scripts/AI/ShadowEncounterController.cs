@@ -508,7 +508,7 @@ namespace NoRainbowAfter.AI
             if (planarDelta.sqrMagnitude > 0.0004f)
             {
                 Vector3 dir = planarDelta.normalized;
-                horizVel = dir * speed;
+                horizVel = dir * Mathf.Min(speed, planarDelta.magnitude / dt);
                 FaceDirection(dir, dt);
             }
 
