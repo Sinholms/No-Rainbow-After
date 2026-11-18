@@ -58,7 +58,11 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.BeatIndex,Is.EqualTo(3));
             var tracker=player.GetComponent<ObjectiveTracker>();
             var hint=(UnityEngine.UI.Text)typeof(ObjectiveTracker).GetField("hint",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(tracker);
-            Assert.That(hint.text,Is.EqualTo("Berjalan ke ujung lorong."));
+            Assert.That(hint.text,Does.Contain("Berjalan ke ujung lorong"));
+            var stress=player.GetComponent<StressBarometer>();
+            float beforeCorridor=stress.CurrentStress;
+            world.TickCorridorStress(ChapterOneCorridorShift.CorridorStressIntervalSeconds * 2f);
+            Assert.That(stress.CurrentStress,Is.GreaterThan(beforeCorridor),"Corridor exposure must periodically raise Raka's stress.");
         }
         [UnityTest] public IEnumerator WardrobeHideDespawnsMonster_AndRecordsHideOnce()
         {
@@ -70,6 +74,18 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor.TryRestorePose(wardrobe.transform.TransformPoint(new Vector3(0,.08f,-1.35f)),Quaternion.identity,false),Is.True);
             wardrobe.Interact(player.GetComponent<PlayerInteractor>());
             Assert.That(player.IsHiding,Is.True);Assert.That(HidingWardrobe.Occupied,Is.SameAs(wardrobe));
+            var stress=player.GetComponent<StressBarometer>();
+            var breathing=player.GetComponent<BreathingMinigame>();
+            stress.SetStress(76f);
+            float stressBeforeHideTick=stress.CurrentStress;
+            world.TickCorridorStress(ChapterOneCorridorShift.CorridorStressIntervalSeconds * 2f);
+            Assert.That(stress.CurrentStress,Is.EqualTo(stressBeforeHideTick).Within(0.01f),"Hiding in wardrobe pauses corridor stress gain.");
+            Assert.That(breathing.StartBreathing(),Is.True,"Must allow [Tab] breathing inside hiding wardrobe.");
+            for(int i=0;i<15;i++) breathing.Tick(0.10f,true);
+            Assert.That(stress.CurrentStress,Is.LessThan(70f));
+            breathing.StopBreathing();
+            Assert.That(player.IsHiding,Is.True,"Exiting breathing keeps Raka safely hidden until pressing E.");
+
             int transitions=0;director.ChapterTransitionRequested+=()=>transitions++;
             yield return new WaitForSeconds(8f);
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
@@ -84,9 +100,14 @@ namespace NoRainbowAfter.Tests
             Assert.That(target, Is.Not.Null);
             Assert.That(target.StableId, Is.EqualTo("INT_C1_EXIT"));
             target.Interact(player.GetComponent<PlayerInteractor>());
-            yield return new WaitForSeconds(.7f);
+            yield return new WaitForSeconds(1.65f);
             Assert.That(director.ChapterOneFinished, Is.True);
             Assert.That(transitions, Is.EqualTo(1));
+            Assert.That(world.Expanded, Is.False);
+            Assert.That(motor.transform.position.x, Is.LessThan(4f), "Finishing Chapter 1 must return Raka to his dorm room, not MainMenu.");
+            Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, Is.EqualTo("MasterGameplay"));
+            var objLabel = GameObject.Find("TestObjective").GetComponent<UnityEngine.UI.Text>();
+            Assert.That(objLabel.text, Is.EqualTo("Chapter 2 sedang dikembangkan"));
         }
         [UnityTest] public IEnumerator RiggedHitAndGrabStayGroundedAndReset()
         {
@@ -182,10 +203,24 @@ namespace NoRainbowAfter.Tests
             yield return new WaitForSeconds(1.3f);
             Assert.That(monster.CaughtCount,Is.EqualTo(1));
             yield return new WaitForSeconds(1f);
-            Assert.That(motor.transform.position.x,Is.LessThan(4));
+            Assert.That(Vector3.Distance(motor.transform.position, world.Entry), Is.LessThan(0.6f), "Shadow catch must respawn Raka at corridor start, not back in the dorm.");
             Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));
             Assert.That(player.IsTransitionLocked,Is.False);
             Assert.That(monster.DamageBorderAlpha,Is.Zero);
+            var stress=player.GetComponent<StressBarometer>();
+            Assert.That(stress.CurrentStress,Is.EqualTo(100f).Within(0.01f),"Being caught by Shadow must spike stress to 100%.");
+            Assert.That(stress.IsWarningActive,Is.True);
+            Assert.That(world.RequiresBreathRecovery,Is.True);
+            Assert.That(player.IsBreathRecoveryRequired,Is.True,"Player must regulate breath with [Tab] before continuing.");
+            var breathing=player.GetComponent<BreathingMinigame>();
+            Assert.That(breathing.StartBreathing(),Is.True);
+            for(int step=0;step<40 && stress.CurrentStress >= StressBarometer.HighStressWarningThreshold;step++)
+                breathing.Tick(0.10f, breathing.IndicatorValue <= breathing.TargetCenter);
+            breathing.StopBreathing();
+            Assert.That(stress.CurrentStress,Is.LessThan(StressBarometer.HighStressWarningThreshold));
+            world.TickCorridorStress(0.02f);
+            Assert.That(world.RequiresBreathRecovery,Is.False);
+            Assert.That(player.IsBreathRecoveryRequired,Is.False);
         }
         [UnityTest] public IEnumerator PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit()
         {

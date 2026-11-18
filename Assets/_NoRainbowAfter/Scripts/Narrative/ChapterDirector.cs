@@ -105,7 +105,7 @@ namespace NoRainbowAfter.Narrative
         private void RegisterSlip() { slip = true; State?.AddClue("CLUE_02"); AdvanceAfterLoop(); }
         private void Update()
         {
-            if (State == null || playerTransform == null || player == null || player.IsPaused || player.IsInspecting) return;
+            if (State == null || playerTransform == null || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
             if (Mathf.Abs(playerTransform.position.x) > 1.3f) ResetCrossing();
             else SamplePosition(playerTransform.position.z);
             TryBeginEncounter();
@@ -113,8 +113,9 @@ namespace NoRainbowAfter.Narrative
         // Hysteresis requires an excursion into the corridor and a return to the room.
         public void SamplePosition(float z)
         {
-            if (State == null || BeatIndex > 4 || player == null || player.IsPaused || player.IsInspecting) return;
-            if (!outside && z >= thresholdZ + 1f && interactor != null && interactor.Flags.Contains("objective.book"))
+            if (State == null || BeatIndex > 4 || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
+            bool taskReady = interactor != null && (interactor.Flags.Contains("objective.laptop") || interactor.Flags.Contains("objective.book"));
+            if (!outside && z >= thresholdZ + 1f && taskReady)
             {
                 outside = true; armed = true; TryBeginEncounter();
             }
@@ -137,7 +138,7 @@ namespace NoRainbowAfter.Narrative
         }
         private void TryBeginEncounter()
         {
-            if (!isActiveAndEnabled || player == null || player.IsPaused || player.IsInspecting ||
+            if (!isActiveAndEnabled || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop ||
                 (BeatIndex != 3 && BeatIndex != 4) || !outside || encounterBegun || encounter == null || !encounter.IsReady) return;
             encounterBegun = true;
             int token = ++generation;

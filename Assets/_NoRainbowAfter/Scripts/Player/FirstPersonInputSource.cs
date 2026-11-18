@@ -9,8 +9,10 @@ namespace NoRainbowAfter.Player
         private readonly InputActionAsset ownedAsset;
         private readonly InputActionMap gameplay;
         private readonly InputActionMap global;
-        private readonly InputAction move, look, sprint, crouch, pause, interact, fight;
+        private readonly InputAction move, look, sprint, crouch, pause, closeInspect, breathe, interact, fight;
         public event Action PauseRequested;
+        public event Action CloseInspectRequested;
+        public event Action BreatheRequested;
         public event Action InteractRequested;
         public event Action FightRequested;
         public bool GameplayEnabled => gameplay.enabled;
@@ -31,6 +33,10 @@ namespace NoRainbowAfter.Player
             fight.performed += OnFight;
             pause = global.FindAction("Pause", true);
             pause.performed += OnPause;
+            closeInspect = global.FindAction("CloseInspect") ?? global.AddAction("CloseInspect", InputActionType.Button, "<Keyboard>/f");
+            closeInspect.performed += OnCloseInspect;
+            breathe = global.FindAction("Breathe") ?? global.AddAction("Breathe", InputActionType.Button, "<Keyboard>/tab");
+            breathe.performed += OnBreathe;
         }
 
         public void Enable() { global.Enable(); gameplay.Enable(); }
@@ -51,10 +57,14 @@ namespace NoRainbowAfter.Player
         private void OnInteract(InputAction.CallbackContext context) => InteractRequested?.Invoke();
         private void OnFight(InputAction.CallbackContext context) => FightRequested?.Invoke();
         private void OnPause(InputAction.CallbackContext context) => PauseRequested?.Invoke();
+        private void OnCloseInspect(InputAction.CallbackContext context) => CloseInspectRequested?.Invoke();
+        private void OnBreathe(InputAction.CallbackContext context) => BreatheRequested?.Invoke();
 
         public void Dispose()
         {
             pause.performed -= OnPause;
+            closeInspect.performed -= OnCloseInspect;
+            breathe.performed -= OnBreathe;
             interact.performed -= OnInteract;
             fight.performed -= OnFight;
             ownedAsset.Disable();
@@ -75,7 +85,10 @@ namespace NoRainbowAfter.Player
             player.AddAction("Crouch", InputActionType.Button, "<Keyboard>/leftCtrl");
             player.AddAction("Interact", InputActionType.Button, "<Keyboard>/e");
             player.AddAction("Fight", InputActionType.Button, "<Mouse>/leftButton");
-            asset.AddActionMap("Global").AddAction("Pause", InputActionType.Button, "<Keyboard>/escape");
+            var globalMap = asset.AddActionMap("Global");
+            globalMap.AddAction("Pause", InputActionType.Button, "<Keyboard>/escape");
+            globalMap.AddAction("CloseInspect", InputActionType.Button, "<Keyboard>/f");
+            globalMap.AddAction("Breathe", InputActionType.Button, "<Keyboard>/tab");
             return asset;
         }
     }

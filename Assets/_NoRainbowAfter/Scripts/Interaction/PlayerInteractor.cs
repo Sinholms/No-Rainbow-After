@@ -26,18 +26,37 @@ namespace NoRainbowAfter.Interaction
             if (viewCamera == null) viewCamera = GetComponentInChildren<Camera>();
             BuildUi();
         }
-        private void OnEnable() { if (player != null) player.InteractRequested += Interact; if (canvas != null) canvas.enabled = true; }
+        private void OnEnable()
+        {
+            if (player != null)
+            {
+                player.InteractRequested += Interact;
+                player.CloseInspectRequested += OnCloseInspectRequested;
+            }
+            if (canvas != null) canvas.enabled = true;
+        }
         private void OnDisable()
         {
-            if (player != null) { player.InteractRequested -= Interact; CloseInspection(); }
+            if (player != null)
+            {
+                player.InteractRequested -= Interact;
+                player.CloseInspectRequested -= OnCloseInspectRequested;
+                CloseInspection();
+            }
             SetFocus(null);
             if (canvas != null) canvas.enabled = false;
         }
+        private void OnCloseInspectRequested()
+        {
+            if (player != null && !player.IsPaused && !player.IsUsingLaptop && !player.IsBreathing) CloseInspection();
+        }
         private void Update()
         {
-            reticle.enabled = !player.IsPaused && !player.IsInspecting;
-            prompt.enabled = !player.IsPaused && !player.IsInspecting;
-            if (player.IsPaused || player.IsInspecting || viewCamera == null) { SetFocus(null); return; }
+            if (canvas != null) canvas.enabled = !player.IsPaused;
+            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing;
+            reticle.enabled = showWorldUi;
+            prompt.enabled = showWorldUi;
+            if (!showWorldUi || viewCamera == null) { SetFocus(null); return; }
             if (player.IsHiding) { SetFocus(null); prompt.text="[E] Keluar lemari"; return; }
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
         }
@@ -63,7 +82,7 @@ namespace NoRainbowAfter.Interaction
         }
         public void Interact()
         {
-            if (player.IsPaused || player.IsInspecting || player.IsHiding || player.IsTransitionLocked || viewCamera == null) return;
+            if (player.IsPaused || player.IsInspecting || player.IsUsingLaptop || player.IsBreathing || player.IsHiding || player.IsTransitionLocked || viewCamera == null) return;
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
             focused?.Interact(this);
         }
@@ -91,7 +110,7 @@ namespace NoRainbowAfter.Interaction
             overlay.GetComponent<Image>().color = new Color(.015f, .018f, .02f, .95f); overlay.GetComponent<Image>().raycastTarget = false;
             heading = Label(overlay.transform, "Title", "", 38, TextAnchor.MiddleLeft, new Vector2(0, 210), new Vector2(900, 80));
             body = Label(overlay.transform, "Body", "", 30, TextAnchor.UpperLeft, new Vector2(0, -10), new Vector2(900, 340));
-            Label(overlay.transform, "Close", "Esc  Kembali", 23, TextAnchor.MiddleCenter, new Vector2(0, -330), new Vector2(500, 50));
+            Label(overlay.transform, "Close", "[F]  Tutup", 23, TextAnchor.MiddleCenter, new Vector2(0, -330), new Vector2(500, 50));
             overlay.SetActive(false);
         }
         private static Text Label(Transform parent, string name, string value, int size, TextAnchor align, Vector2 position, Vector2 dimensions)

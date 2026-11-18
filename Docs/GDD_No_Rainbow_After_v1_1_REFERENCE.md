@@ -92,7 +92,7 @@ Raka, mahasiswa semester lima, menanggung biaya hidup melalui pekerjaan paruh wa
 
 | Karakter | Peran dramatis | Representasi dalam game |
 | --- | --- | --- |
-| Raka | Protagonis; mahasiswa semester 5, pekerja paruh waktu, tertekan tetapi punya harapan untuk lulus. | FPP; suara napas/monolog; tangan sesekali; siluet dirinya pada monster dan cermin. |
+| Raka | Protagonis; mahasiswa semester 5, pekerja paruh waktu, tertekan tetapi punya harapan untuk lulus. | FPP dengan tubuh fisik Raka ala *MiSide* (`ACT_Raka_StudentBody`: kemeja flanel mahasiswa, celana jeans, sepatu kets) yang tampak saat menunduk; suara napas/monolog; siluet dirinya pada monster. |
 | Ella | Teman kuliah yang disukai Raka; sumber kenangan dan janji wisuda. Tidak hadir sebagai musuh. | Suara prolog, chat satu centang, jejak surat, benda/memori; kebenaran nasibnya hanya di Hidden Ending. |
 | Bayu Kopling | Teman mahasiswa sebagai jangkar realitas; mengirim pesan menanyakan ketidakhadiran. | Kontak WA, notifikasi, dialog singkat opsional, pesan terakhir pada Bad/Hidden. |
 | Keluarga / teman | Mewakili harapan, jarak emosional, dan dukungan yang tidak selalu hadir tepat waktu. | Chat, suara samar, figur latar cutscene wisuda atau foto statis. |
@@ -140,9 +140,10 @@ Explore (mengamati ruang) → Interact (membaca/mengambil benda) → Perceive (a
 | Look | Mouse | Sensitivitas dapat diubah, lock/unlock kursor otomatis. |
 | Walk / Sprint | Left Shift | Tahan untuk sprint; stamina terbatas ketika dikejar. |
 | Crouch | Left Ctrl | Toggle disarankan; ruang sembunyi memiliki volume trigger. |
-| Interact / Inspect | E | Raycast 2,3 m; prompt kontekstual; hold pendek bila perlu. |
+| Interact / Inspect | E | Raycast 2,3 m; buka laptop/dokumen/lemari; prompt kontekstual. |
+| Close Inspect | F | Menutup overlay inspeksi dokumen (slip lembur, buku, pintu) — **bukan `Esc`**. |
 | Fight (kontekstual) | Klik kiri | Hanya aktif di encounter monster, animasi pukul pendek; bukan combat penuh. |
-| Read/Phone | E / tombol UI | Layar baca dokumen/WhatsApp dengan fokus cursor. |
+| Read/Phone/Laptop | E / F / Enter | Layar baca dokumen (tutup `[F]`) / WhatsApp / Minigame ketik Monkeytype di laptop: tekan singkat `Enter` (`< 0,4s`) untuk kirim kalimat; tahan `Enter` (`5 dtk`) untuk keluar dari laptop. |
 | Pause / Back | Esc | Menu Pause, lanjut, sensitivitas, subtitle, kembali menu. |
 | Navigate choices | Mouse / Enter | Pilihan diegetik dengan highlight dan suara umpan balik. |
 
@@ -150,7 +151,8 @@ Explore (mengamati ruang) → Interact (membaca/mengambil benda) → Perceive (a
 
 - Objek relevan memiliki collider, layer Interactable, data ID unik, deskripsi singkat, dan penanda visual sangat halus saat crosshair diarahkan.
 - Interaksi hanya saat jarak 2,3 meter dan tidak terhalang occluder; tidak boleh menembus dinding atau objek besar.
-- Untuk dokumen, kamera transisi ke inspect mode atau tampilkan overlay teks yang mudah dibaca; Esc menutup overlay tanpa bergerak.
+- Untuk dokumen (slip lembur, buku, pintu), kamera transisi ke inspect mode atau tampilkan overlay teks yang mudah dibaca; tombol **`[F]`** menutup overlay dokumen (bukan `Esc`, agar `Esc` tetap khusus untuk Pause).
+- Untuk laptop Raka di meja belajar (`PROP_RakaLaptop`, `INT_LAPTOP`), menekan `[E]` membuka minigame mengetik ala **Monkeytype** bertema tugas kuliah mahasiswa. Pemain mengetik kalimat di layar dan menekan singkat `Enter` (`< 0,4s`) untuk mengirim, dengan timer `18 detik` yang otomatis mengirim input saat waktu habis. Salah ketik atau belum selesai saat waktu habis menaikkan Barometer Stres; untuk keluar dari laptop pemain wajib **menahan `Enter` selama `5 detik`**.
 - Item cerita disimpan sebagai flag atau log jurnal, bukan model 3D yang wajib menempel pada tangan pemain; mengurangi beban animasi dan bug.
 - Door/ChapterGate memeriksa objective flags; jika tertutup, tampilkan alasan singkat dalam monolog alih-alih popup teknis.
 ### 3.4 Sistem stamina, stres, dan kegagalan
@@ -158,6 +160,7 @@ Explore (mengamati ruang) → Interact (membaca/mengambil benda) → Perceive (a
 | Sistem | Perilaku | Batasan & feedback |
 | --- | --- | --- |
 | Sprint | Stamina berkurang selama sprint dan pulih saat berjalan. | MVP: 5 dtk sprint, 4 dtk recharge, delay 1 dtk; angka dapat dituning. |
+| Stress Barometer | Barometer stres berwarna merah di pojok kiri atas HUD, dimulai dari **`50%`** saat game dimulai. | Naik saat typo mengetik di laptop (`+2%`), salah kirim (`+10%`), atau kehabisan waktu (`+15%`); tidak mengunci progres cerita (`no softlock`). |
 | Panic audio | Detak jantung dan napas meningkat di dekat monster. | Audio mixer event-driven; hindari distorsi menyakitkan. |
 | Chase reset | Monster mencapai radius tangkap atau pemain tertahan terlalu lama. | Fade out, pulse audio, respawn checkpoint chapter; bukan game over permanen. |
 | Academic tasks | Tiga kegiatan sederhana dengan timer opsional. | Gagal tugas tidak menghentikan cerita; berakhir pada rangkaian “rebahan seharian”. |
@@ -187,7 +190,7 @@ Prolog audio-only memerlukan rekaman suara original/berizin, tidak memakai audio
 | --- | --- |
 | Ruang | Kamar kos 4 × 5 m dan lorong modular 12–18 m; 2–3 titik persembunyian. |
 | Mood | Kelabu lembap, fluorescent berkedip pelan; distorsi kecil setiap kali kembali ke kamar. |
-| Objective utama | Ambil buku kuliah, identifikasi slip lembur, buka lorong; ketika monster hadir, pilih menghadapi atau bersembunyi. |
+| Objective utama | **"Mengerjakan tugas"** di laptop meja belajar (`PROP_RakaLaptop`), identifikasi slip lembur, jelajahi lorong; ketika monster hadir, pilih menghadapi atau bersembunyi. |
 | Tutorial | WASD/mouse, E, sprint, crouch, checkpoint. |
 | Batas desain | Monster tidak menyerang dengan kekerasan eksplisit; encounter singkat 60–90 detik. |
 | Checkpoint | Awal kamar kos; setelah interaksi slip lembur; sebelum encounter monster. |
@@ -293,7 +296,7 @@ Aturan yang disarankan berikut mengutamakan pilihan klimaks yang sudah ditentuka
 | 2 | ch3Response == Fight atau Hide DAN semua 4 clue ditemukan | HiddenEnding → penutup tragis + pesan “Si Ella udah sadar”. |
 | 3 | ch3Response == Fight atau Hide DAN clue kurang dari 4 | BadEnding → penutup tragis + pesan ketidakhadiran Bayu. |
 
-Ini aturan desain yang ditetapkan agar sistem dapat dikodekan; dapat diubah ketika playtest. Hindari menghitung “nilai depresi”, moralitas, atau kesehatan mental sebagai statistik permainan.
+Ini aturan desain yang ditetapkan agar sistem dapat dikodekan; dapat diubah ketika playtest. **Barometer Stres Merah (`50%` awal)** di pojok kiri atas merefleksikan tekanan akademik Raka secara real-time saat mengetik di laptop (salah ketik/timeout), sementara penentuan cabang ending tetap dikendalikan oleh aksi Chapter 3 (`Approach/Fight/Hide`) dan koleksi 4 Clue tanpa sistem moralitas biner.
 
 ### 5.2 GameState yang disimpan
 
@@ -685,9 +688,11 @@ Subtitle perlu timing dan speaker name. Naskah di atas contoh agar implementasi 
 ### 11.1 Daftar antarmuka
 
 - Main Menu: New Game, Continue (aktif jika save ada), Settings, Credits, Quit.
-- HUD minimal: crosshair (opsional), prompt “[E] Baca / Ambil / Buka”, satu objective line jika pemain lama diam.
+- HUD minimal: crosshair (opsional), **Barometer Stres berwarna merah di pojok kiri atas (`50%` saat mulai, 1 layer tanpa tumpukan; layar memerah & warning berkedip pelan saat `>= 70%`)**, prompt `[E] Baca / Ambil / Kerjakan Tugas`, satu baris objektif utama (**`"Mengerjakan tugas"`** di awal Chapter 1 dan **`"Chapter 2 sedang dikembangkan"`** setelah kembali ke kos).
 - Phone UI: layar kontak, chat Ella, chat Bayu, status pesan satu centang, tombol back; gunakan merek fiktif bila perlu.
-- Document Inspect: perbesaran item dan overlay teks readable; tidak memaksa pemain membaca tekstur 3D yang terlalu kecil.
+- Document Inspect: perbesaran item dan overlay teks readable yang **ditutup dengan tombol `[F]`** (bukan `Esc`).
+- Laptop Typing Minigame: layar ketik ala **Monkeytype** (`5` kalimat, huruf ketikan benar berwarna **kuning**, merah salah, timer **`60` → `30` detik** auto-submit, kirim kalimat via `Enter`, **otomatis keluar setelah 5 kalimat selesai**, dan **`1x klik Tab` untuk keluar manual**).
+- Breathing Minigame (`[Tab]`): latihan napas diegetik (juga dapat diaktifkan di dalam lemari persembunyian) dengan menahan parameter di dalam **bar hijau** (`[Spasi]`/klik kiri), memutar suara tarik/hembus napas sambil kamera mengangguk naik-turun untuk menurunkan Barometer Stres; saat tertangkap *Shadow*, Raka respawn ke **spawn awal koridor dengan stres 100%** dan wajib mengatur napas `[Tab]` sebelum melangkah lagi.
 - Pause/Settings: volume master/voice/ambience/music, sensitivity, FOV, subtitles on/off, reduced camera shake/flashes, quality preset.
 - Content Notice: ringkas dan netral, bisa dilewati setelah dibaca; gunakan bantuan atau hotline yang diverifikasi untuk wilayah rilis.
 - End Card: nama ending, Continue to Credits, Main Menu; opsi replay chapter baru setelah fitur checkpoint siap.
@@ -696,7 +701,7 @@ Subtitle perlu timing dan speaker name. Naskah di atas contoh agar implementasi 
 - Simpan setelah menyelesaikan masing-masing chapter dan checkpoint besar; save file diberi schemaVersion untuk migrasi.
 - Tidak menyimpan posisi pemain saat sedang dikejar; simpan checkpoint ID dan spawn position yang aman.
 - CLUE yang dikumpulkan bersifat monotonic dan tidak hilang saat respawn checkpoint.
-- UI Esc berfungsi di semua menu dan menutup overlay dahulu sebelum pause global.
+- UI **`[F]`** menutup overlay inspect dokumen terlebih dahulu sebelum menekan `Esc` untuk Pause; keluar dari minigame laptop memakai **tahan `Enter` selama 5 detik**.
 - Semua objective punya fallback: jika event tidak terpicu setelah durasi tertentu, tampilkan hint diegetik; jangan menipu progres quest.
 ## 12  Produksi, milestones & pembagian peran
 
@@ -752,7 +757,7 @@ Peran berasal dari pembagian PPT awal dan perlu disesuaikan dengan kapasitas nya
 | ID | Langkah / input | Expected |
 | --- | --- | --- |
 | QA01 | MainMenu→New Game→Prolog | Suara intro, subtitle, cut to kos. |
-| QA02 | C1 ambil buku, interaksi koridor | Loop berubah dan objective tersimpan. |
+| QA02 | C1 kerjakan tugas laptop (Monkeytype) + Stres Barometer 50%, interaksi koridor | Barometer stres merah aktif (mulai 50%, naik saat salah/timeout), loop berubah, objective tersimpan. |
 | QA03 | C1 pilih Fight | Monster resolve, tidak jatuh ke geometry. |
 | QA04 | C1 pilih Hide | Monster pergi dan chapter tetap lanjut. |
 | QA05 | C1 tertangkap monster | Kembali checkpoint, flag clue aman. |
@@ -762,7 +767,7 @@ Peran berasal dari pembagian PPT awal dan perlu disesuaikan dengan kapasitas nya
 | QA09 | C3 pilih Approach | Good + wisuda + surat. |
 | QA10 | C3 Fight, clue < 4 | Bad + pesan Bayu ketidakhadiran. |
 | QA11 | C3 Hide, clue = 4 | Hidden + pesan Ella sudah sadar. |
-| QA12 | Pause saat inspect/phone | Esc menutup overlay sesuai urutan. |
+| QA12 | Tutup inspect / keluar laptop / Atur Napas / Pause / Selesai C1 | Tombol `[F]` menutup inspect dokumen, laptop (`5` kalimat) auto-exit setelah selesai (atau `1x klik Tab` untuk keluar awal), `[Tab]` membuka atur napas bar hijau (menurunkan stres `>= 70%` / `100%` + kamera mengangguk + suara napas), tertangkap Shadow kembali ke spawn awal koridor, selesai C1 kembali ke kos (`Chapter 2 sedang dikembangkan`), `Esc` untuk Pause. |
 | QA13 | Save/load dari Chapter 2 | Task dan clue benar; tidak duplicate trigger. |
 | QA14 | Windows build pada PC target | Tidak crash; full run sampai credits. |
 | QA15 | Blender monster FBX masuk ke Unity, rig dan 8 animasi diuji lewat Animator. | Prefab valid; tanpa T-pose/clip; T06/T11 tetap berfungsi. |
