@@ -91,7 +91,7 @@ namespace NoRainbowAfter.Narrative
 
         private void Update()
         {
-            bool suspended = player != null && (player.IsPaused || player.IsInspecting);
+            bool suspended = player != null && (player.IsPaused || player.IsInspecting || player.IsUsingLaptop);
             if (suspended)
             {
                 RefreshVisibility();
@@ -126,7 +126,7 @@ namespace NoRainbowAfter.Narrative
         private void RefreshVisibility()
         {
             if (subtitleRoot == null) return;
-            bool suspended = player != null && (player.IsPaused || player.IsInspecting);
+            bool suspended = player != null && (player.IsPaused || player.IsInspecting || player.IsUsingLaptop);
             subtitleRoot.SetActive(hasCurrentCue && !suspended);
         }
 

@@ -17,7 +17,7 @@
 | Topic | Final contract |
 |---|---|
 | Title | **NO RAINBOW AFTER**; do not rename to *Purple Rain* or *Selamat!*. |
-| Player view | **FPP only** during gameplay; eye-level Raka viewpoint. Cinematic ending shots may use staged cameras where explicitly specified. |
+| Player view | **FPP only** during gameplay; eye-level Raka viewpoint with visible organic 5-fingered MiSide-style headless student body (`ACT_Raka_StudentBody`, buttoned short-sleeve plaid shirt + chest pocket & pen + lanyard ID + wristwatch + dark trousers + slip-on sneakers) below the camera. Camera gently pitches up/down during the `[Tab]` breathing minigame. Cinematic ending shots may use staged cameras where explicitly specified. |
 | Story | Raka is a financially struggling **5th-semester student**, studies and works, experiences a rainy-night motor crash with **Ella**, a college student he likes. The crash is **audio-only**. |
 | Ella | The player is led to believe she died, but this is **not objectively confirmed**. The **Hidden Ending** reveals: **“Si Ella udah sadar”**. No earlier scene may confirm death as fact. |
 | Chapters | **Prologue** → **C1 Denial & Anger** → **C2 Bargaining & Depression** → **C3 Acceptance** → ending. No revival of the old five-stage structure. |
@@ -27,7 +27,7 @@
 | Clues | `CLUE_01` photo/promised graduation; `CLUE_02` overtime slip; `CLUE_03` old semester-five chat; `CLUE_04` ambiguous post-crash voice recording. Unique IDs persist. |
 | Monster | Shadow of Raka: **human, distorted, drenched, guilty**, not a demon or generic boss. Blurred face, optional **superficial scars / restrained dark blood marks**, never graphic gore. |
 | Scope | No open world, combat-tree, inventory RPG, full procedural levels, ray tracing requirement, or mandatory third-person animation. |
-| Theme | Poverty, barriers to education, grief, and mental health; **SDG 1, SDG 4, SDG 3** through environment and story, never through a numeric 'depression score'. |
+| Theme | Poverty, barriers to education, grief, and mental health; **SDG 1, SDG 4, SDG 3** through environment, tasks, and the **single-layer top-left red Stress Barometer (starts at 50%; red screen & blinking warning at >=70%)** updated during laptop typing (5 sentences, yellow highlights, 60–30s timer, 1x `[Tab]` exit / auto-exit on 5 sentences), periodic corridor stress climb, and calmed via the **`[Tab]` green-bar Breathing Minigame** (including inside wardrobes and after Shadow catch respawn to corridor start at 100% stress); finishing Chapter 1 returns Raka to his dorm with placeholder objective **`"Chapter 2 sedang dikembangkan"`**. |
 
 ### 0.1 What is new in this document?
 
@@ -160,7 +160,7 @@ This is the **planned logical** hierarchy, not a description of the current scen
 | `Dorm_Depression` | C2 | Heavier desaturation; study objects dominate | Phone provides focus light; no full black-out |
 | `Dorm_Ending` | Bad/Hidden | Empty, still, silent room; phone visibly active | Night blue, strong rain; never show means of self-harm |
 
-**Interaction focal points:** book `INT_BOOK`, overtime slip `INT_OVERTIME`, picture `INT_CLUE_01`, notebook `INT_STUDY`, window `INT_WINDOW_RAIN`, door `INT_C1_DOOR`, phone `INT_PHONE`.
+**Interaction focal points:** laptop (`INT_LAPTOP`, Monkeytype typing minigame for *"Mengerjakan tugas"*), book `INT_BOOK`, overtime slip `INT_OVERTIME`, picture `INT_CLUE_01`, notebook `INT_STUDY`, window `INT_WINDOW_RAIN`, door `INT_C1_DOOR`, phone `INT_PHONE`.
 
 **Rule:** heavy environment swaps must NOT destroy saved objects or reset `CLUE_*` flags.
 
@@ -231,7 +231,7 @@ Reuse WB-01 geometry and phone focus. Establish absence with **camera, sound, ro
 - **Role:** 5th-semester student working part-time, physically exhausted and grieving after the crash.
 - **Personality:** responsible and self-demanding, tries to keep routine, struggles to ask for support; allow nuanced expression beyond constant hopelessness.
 - **Visual language:** ordinary budget student clothing, worn backpack, simple analog/digital watch; wet sleeves/hands on rainy sequences. Not a tactical or heroic avatar.
-- **FPP pipeline:** visible body **not required for MVP**; optional `Arms_Raka` and occasional hands for book/phone/letter interactions. Main storytelling uses voice/breath, screen height, footsteps, environmental framing. Do not build a full third-person controller.
+- **FPP body pipeline:** visible **MiSide-style headless student body (`ACT_Raka_StudentBody`)** rigged/animated beneath `ViewCamera` (`1.58 m` eye height, collar capped cleanly below camera) featuring a rolled-sleeve flannel overshirt over dark tee, student ID lanyard, wristwatch, dark jeans, and canvas sneakers so looking down or walking shows grounded physical presence. Main storytelling still uses voice/breath, screen height, footsteps, and environmental framing; do not add a third-person chase camera.
 - **Voice:** Indonesian natural student register; small pauses and controlled breath, not constant screaming.
 - **Story consistency:** Raka **believes** he lost Ella; do not state she objectively died in any neutral narrator text.
 - **Graduation:** use a separate clean torso/portrait or carefully staged hand/robe sequence; no need for full NPC facial rig to prove completion.
@@ -373,7 +373,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 | `PROP_002_NotesStack` | PROP_002 | P0 | academic task A | 3 cards/sheets | `TASK_A_NOTES` |
 | `PROP_002_InternshipForms` | PROP_002 | P0 | academic task B | 3 documents | `TASK_B_INTERNSHIP` |
 | `PROP_002_ScheduleBoard` | PROP_002 | P0 | academic task C | A4 notice | `TASK_C_SCHEDULE` |
-| `PROP_002_Laptop` | PROP_002 | P1 | work and deadline context | ~0.32 m wide | can be noninteractive |
+| `PROP_002_Laptop` | PROP_002 | P0 | `PROP_RakaLaptop` on study desk; Monkeytype typing minigame (`INT_LAPTOP`, `"Mengerjakan tugas"`) | ~0.32 m wide | `[E]` open, tap `Enter` submit, hold `Enter` 5s exit |
 | `PROP_002_Backpack` | PROP_002 | P1 | student everyday life | human-sized bag | decorative |
 | `PROP_003_RakaPhone` | PROP_003 | P0 | Ella/Bayu chat & endings | ~0.15 m long | diegetic overlay |
 | `PROP_004_PhotoFrame` | PROP_004 | P0 | graduation promise | small frame | `CLUE_01`, inspect reverse |
@@ -509,13 +509,13 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 ## 11. First-person UI, text and interaction standards
 
-- **Controls:** implemented WASD move, mouse look, Shift sprint, Ctrl **toggle** crouch, E interact/inspect and Esc close-inspect-before-pause. Contextual left-click Fight remains for T06. Always check existing Input System mapping before adding bindings.
-- **Camera:** eye ≈1.65 m, FOV default 75° and adjustable 65–95°; current head-bob is off. Any later motion effect should be optional.
+- **Controls:** implemented WASD move, mouse look, Shift sprint, Ctrl **toggle** crouch, E interact/inspect, **F close-inspect** (slip/book/door), **Enter (tap < 0.4s submit / hold 5s exit)** in laptop minigame, and Esc Pause. Contextual left-click Fight remains for T06. Always check existing Input System mapping before adding bindings.
+- **Camera:** eye ≈1.58–1.65 m with visible MiSide-style headless FPP student body (`ACT_Raka_StudentBody`), FOV default 75° and adjustable 65–95°; current head-bob is off. Any later motion effect should be optional.
 - **Circular POV — user requirement, implemented:** the world is visible through a centered circle with dark/opaque surroundings and a soft edge. Correct for aspect ratio so the aperture stays circular. Default enabled; radius **0.50 × viewport height**, adjustable **0.45–0.80**, softness **0.11**. Radius is not a percentage of the screen width or a camera FOV change; the present UI label is “Lebar pandang 50%” at default.
 - **POV comfort/UI:** pause provides the effect toggle and radius slider. Preferences `NRA.CircularViewEnabled` / `NRA.CircularViewRadius` override defaults; preserve the user's saved values. Hide the mask while paused, keep HUD/settings readable above it and do not intercept UI raycasts. Camera-follow light supports the atmosphere without replacing ambient/material detail.
 - **Interaction:** raycast max 2.3 m, proper occlusion/layer mask, no interaction through walls.
-- **HUD:** tiny reticle, one `[E]` label, subtitles at bottom, no health bar or numerical mental-health meter.
-- **Inspect:** centered reading surface with zoom or overlay; temporarily lock locomotion; Esc returns focus. Small paper must not become unreadable because of artistic texture grunge.
+- **HUD:** tiny reticle, **top-left red Stress Barometer starting at `50%`**, objective line (**`"Mengerjakan tugas"`** in early C1), one `[E]` label, subtitles at bottom.
+- **Inspect & Laptop Minigame:** document inspect overlay locks locomotion and is closed with **`[F]`** (not `Esc`). Laptop (`INT_LAPTOP`) opens Monkeytype-style typing minigame with college-themed generated sentences and 18s per-sentence countdown timer (auto-submits on timeout; wrong keystrokes/incomplete submit/timeout raise the Stress Barometer); **holding `Enter` for 5 seconds** exits back to FPP. Small paper must not become unreadable because of artistic texture grunge.
 - **Phone:** legible header, thread labels, message list, one-checkmark sent state, back path; no real service logo.
 - **Color/comfort:** current art adds no flicker/flashes or motion blur. Implement future reduce-flashes, subtitle size and volume controls with the relevant tasks; do not claim them complete. FOV/sensitivity and circular POV preferences already persist. Avoid stacking a strong volume vignette over the circular mask.
 - **Content note:** trauma, grief, serious mental-health themes and implied death. Credit/menu help text may point to local support sources, without inventing a crisis number.
