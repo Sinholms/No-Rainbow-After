@@ -1,7 +1,8 @@
 # No Rainbow After — Implementation Tasks for Codex + Unity/Blender MCP
 
 **Companion to:** `GDD_No_Rainbow_After_v1_1.docx`  
-**Priority:** The GDD v1.1 is the source of truth. Original PPT/outline is reference; where documents conflict, the latest storyline and GDD win.  
+**Priority:** [Chapter 2 Plan](CHAPTER2_PLAN.md) governs the Chapter 2 sequence and its handoff to Chapter 3. The GDD v1.1 governs story canon, clues, and ending rules.
+
 **Target:** Windows x64, Unity 6.x, HDRP if GPU permits, first-person psychological horror, 3 chapters, three endings.
 
 ## ID contract — identical to section 9.3 of GDD v1.1
@@ -18,8 +19,8 @@ This is the **only canonical task ID list**. Execute one ID at a time. Never ren
 | T05 | Narrative director + corridor loop | C1-01 sampai C1-06 berlangsung runtut. |
 | T06 | Monster placeholder AI + encounter | Fight, Hide, Caught dapat diuji tanpa gore. |
 | T07 | HDRP visual vertical slice | Keterbacaan item dan FPS pada build Windows teruji. |
-| T08 | Phone/chat Ella & Bayu | Kedua pilihan tersimpan, Ella tidak membalas. |
-| T09 | Tugas akademik + montage | Setiap jalur dapat meneruskan ke Chapter 3. |
+| T08 | Ponsel dan chat Bayu | Setelah inspeksi tas, pesan terkirim sekali dan membuka Chapter 3. |
+| T09 | Laporan berita dan stealth sorotan | Bangun di kos, selesaikan laporan, lalu capai halte dengan checkpoint per segmen. |
 | T10 | Clue registry + foreshadowing | 4 clue unik tersimpan tanpa membocorkan twist. |
 | T11 | Chapter 3 + EndingResolver | Approach Good; Fight/Hide + 4 clue Hidden; lainnya Bad. |
 | T12 | Tiga ending + credits | QA09–QA11 lulus; tanpa representasi metode eksplisit. |
@@ -35,6 +36,7 @@ You are a senior Unity 6 gameplay engineer and technical artist working on No Ra
 Read and follow the attached GDD v1.1. This is a student project, so favor small,
 tested, modular features over massive frameworks. Use current Unity 6 APIs and the
 packages actually installed. Use Unity MCP to inspect the real Editor and scene.
+Use Docs/CHAPTER2_PLAN.md for Chapter 2 gameplay and the handoff to Chapter 3.
 If you cannot access the MCP bridge, report that honestly; do not pretend to edit Unity.
 
 Before ANY task: inspect Unity version, render pipeline, package manifest, current
@@ -150,26 +152,15 @@ Acceptance: all interactables remain visible and performance meets GDD target.
 
 ## Phase 2 — Chapter 2
 
+Use the [Chapter 2 Plan](CHAPTER2_PLAN.md) for the sequence, prototype order, and acceptance tests. Task IDs keep their existing ownership. Block out the stealth section early, then connect the phone and story handoff.
+
 **T08 / Phone and chat**
 
-```text
-Build diegetic phone overlay with Ella and Bayu contact list, Ella's old chat,
-choice Send message / Lock phone, and exactly one checkmark if sent. Do not
-show Ella replying. Save messageEllaSent bool. Provide back navigation and
-controller focus handling. Use original fictional phone UI (not an official WhatsApp trademark/interface copy).
-Acceptance: both choices persist across chapter and reload.
-```
+Build the fictional phone UI for Bayu's earlier messages and the reply after Raka inspects the bag. The reply and Bayu's confirmation open the Chapter 3 objective exactly once. Coordinate inspection of Ella's older chat with `T10`.
 
-**T09 / Academic tasks + montage**
+**T09 / Accident report and spotlight stealth**
 
-```text
-Implement three simple interactive mini tasks: order three notes, choose the
-right internship document, and prioritize a schedule conflict. Track enum
-NotStarted/Succeeded/Failed. No hard timer in Story setting. After all tasks,
-slow movement temporarily and branch to normal transition or bed montage if
-all three fail. In both cases player proceeds to Chapter 3.
-Acceptance: no progression softlock, all-failed path tested.
-```
+Wire the wake-up and report-typing sequence to a single blackout transition at 100% stress. Build the road encounter with visible light footprints, cover occlusion, exposure feedback, and retry at the current segment. Use 2.0 seconds as the playtest baseline. Reach the bus stop and inspect Raka's bag to return to the dorm and unlock the final phone beat.
 
 **T10 / Clues & narrative foreshadowing**
 
@@ -308,9 +299,9 @@ visibility, silhouette legibility and all chapter-ending regressions.
 
 ## Cross-document handoff rules
 
-- **GDD 9.3 and the table above must stay identical.** Do not use the old GDD v1.0 numbering (where T07 meant phone UI).
+- **Keep the task IDs from GDD 9.3.** Use the active Chapter 2 plan for the updated T08–T10 scope and acceptance criteria.
 - T06 = functional greybox monster; T13 = Blender hero monster asset + Unity prefab. They are intentionally separate.
-- T07 = HDRP vertical slice, T08 = Ella/Bayu phone, T11 = ending logic, T12 = ending sequences, T16 = full QA. These IDs are FIXED.
+- T07 = HDRP vertical slice, T08 = phone, T11 = ending logic, T12 = ending sequences, T16 = full QA. These IDs are FIXED.
 - Preview / concept image is a visual reference, **not** a ready-to-use 3D model. Need manual artistic assessment for rigging, face and topology.
 - No tool operation may be claimed complete until Unity/Blender reports actual saved files and validation passes.
 

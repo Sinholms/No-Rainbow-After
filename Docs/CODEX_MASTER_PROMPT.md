@@ -8,13 +8,14 @@
 Docs/
 ├── GDD_No_Rainbow_After_v1_1.docx             # narrative authority
 ├── CODEX_TASKS_No_Rainbow_After_v1_1.md       # canonical T00–T16
+├── CHAPTER2_PLAN.md                            # active Chapter 2 sequence and acceptance
 ├── design.md                                  # world + art + characters + assets
 ├── CODEX_MASTER_PROMPT.md                     # this prompt
 └── References/
     └── rain_soaked_corridor_nightmare.png     # optional monster concept, copy manually if available
 ```
 
-If Codex cannot actually read `.docx`, add the **optional** `GDD_No_Rainbow_After_v1_1_REFERENCE.md` text mirror generated alongside this package. The original DOCX has priority. **Do not infer unreadable document content from filenames.**
+If Codex cannot actually read `.docx`, add the **optional** `GDD_No_Rainbow_After_v1_1_REFERENCE.md` text mirror generated alongside this package. Use the original DOCX for story canon and the [Chapter 2 Plan](CHAPTER2_PLAN.md) for the current playable sequence. **Do not infer unreadable document content from filenames.**
 
 ---
 
@@ -38,9 +39,10 @@ DOCUMENTS — READ FIRST:
    character/monster designs, material/lighting rules, file conventions,
    Blender handoff and FPP shot review. Any *new* size/color/poly figure in
    design.md is a proposed starting value, not a story override.
-Priority if conflict: GDD v1.1 > CODEX_TASKS v1.1 for task IDs/deliverables >
-design.md for art/asset details. Report contradictions rather than silently
-inventing an override. Ignore outdated GDD v1.0 and old 5-stage slide plan.
+4) Docs/CHAPTER2_PLAN.md — active Chapter 2 gameplay and handoff to Chapter 3.
+Use the Chapter 2 plan for that sequence and its acceptance criteria. Use GDD
+v1.1 for story canon, clue IDs and ending rules, CODEX_TASKS for task IDs and
+deliverables, and design.md for art and asset details.
 
 CANON / NON-NEGOTIABLE:
 - The title is NO RAINBOW AFTER.
@@ -59,7 +61,7 @@ CANON / NON-NEGOTIABLE:
 - HIDDEN: Fight/Hide with all four clue flags -> somber ending with Bayu text
   saying Ella has regained consciousness. The hidden truth is not a bonus
   combat scene. The moral/emotional choices are NOT a numerical depression
-  score. Chapter 2 task failure must not cause a softlock.
+  score. Chapter 2 capture retries the current street segment.
 - Monster ACT_Shadow_Raka is a distorted shadow of Raka. It must read as a
   black rain-soaked humanoid with asymmetric elongated limbs, paper fragments,
   subtle chest fissure, blurry/partially human face, optional superficial
@@ -142,8 +144,8 @@ QA, and report actual changed files and blockers. Do not start any later task.
 | T05 | Chapter 1 beats + corridor loop | C1-01..C1-06 pass |
 | T06 | monster PLACEHOLDER and Fight/Hide/Caught | all paths work before final visuals |
 | T07 | HDRP atmosphere vertical slice | FPS and interactable contrast in Windows build |
-| T08 | fictional phone, Ella/Bayu threads | message sent/draft and one check persist |
-| T09 | 3 academic mini-tasks / bed montage | success or failure still reaches C3 |
+| T08 | fictional phone and Bayu reply | after inspecting the bag, the message opens C3 once |
+| T09 | accident report and spotlight stealth | reach the bus stop with cover and per-segment retries |
 | T10 | four unique clues and foreshadowing | exact clue IDs save/load, Ella mystery unspoiled |
 | T11 | final C3 encounter and `EndingResolver` | Good/Bad/Hidden formula + unit tests |
 | T12 | three ending sequences / credits | graduation/letter, Bayu texts, twist |

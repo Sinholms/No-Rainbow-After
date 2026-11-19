@@ -8,7 +8,7 @@
 **Audience:** Game designer, environment artist, technical artist, programmer, Codex agents (Unity MCP; Blender required for 3D asset authoring).\
 **Status:** Operational design specification; **new concrete art/layout values in this file are IMPLEMENTATION PROPOSALS**, not amendments to established story canon.
 
-> **Read this first.** `GDD v1.1` owns **story, narrative invariants, gameplay, ending rules, schedule and task IDs**. `CODEX_TASKS v1.1` owns task execution **T00–T16**. This file owns **how worlds, characters, props, materials, visuals and assets should be designed and handed to Unity**. Explicit user instructions take precedence; the presentation/workflow decisions recorded below do not amend story canon. Otherwise, report conflicts against the GDD before editing the affected feature. Concept art is a **2D reference**, not a finished 3D mesh. Do not claim a feature or asset exists until inspected in the actual Unity/Blender project.
+> **Read this first.** The [Chapter 2 Plan](CHAPTER2_PLAN.md) governs Chapter 2 gameplay and its handoff to Chapter 3. `GDD v1.1` owns **story, narrative invariants, clue IDs, ending rules, schedule and task IDs**. `CODEX_TASKS v1.1` owns task execution **T00–T16**. This file owns **how worlds, characters, props, materials, visuals and assets should be designed and handed to Unity**. Explicit user instructions take precedence. Report other conflicts against the GDD before editing the affected feature. Concept art is a **2D reference**. Verify implementation status in the project.
 
 ---
 
@@ -106,7 +106,7 @@ Boot → MainMenu → MasterGameplay
                           |
                           +-- Root_Prologue    [AudioCrash]
                           +-- Root_Chapter1    [Dorm + LoopedCorridor + ShadowEncounter]
-                          +-- Root_Chapter2    [DormStudy + CampusHint + WorkHint + Phone]
+                          +-- Root_Chapter2    [DormReport + SpotlightRoad + BusStop + Phone]
                           +-- Root_Chapter3    [ConfrontationHall + ShadowFinal]
                           +-- Root_EndingGood  [StudyMontage + GraduationShot + Letter]
                           +-- Root_EndingBad   [EmptyDorm + BayuChat]
@@ -172,19 +172,19 @@ This is the **planned logical** hierarchy, not a description of the current scen
 
 **Loop communication:** use **a single clear anomaly** per loop (moved photo → changed paper → shadow) and keep the exit path readable. Door interaction includes an understated prompt. Limit to 2–3 loops per GDD. Do not spawn the monster while the player has no room to move or hide.
 
-### WB-03 — Study / Internship Desk (C2)
+### WB-03 — Study desk and accident report (C2)
 
-**Purpose:** three short academic tasks in increasingly burdensome atmosphere. Reuse WB-01 desk and perhaps a different camera framing rather than building a new full interior. Include three clearly segmented task objects: **notes**, **internship paperwork**, **schedule**. Movement is heavier, but controls remain responsive and every task can be failed without a progression softlock. No hard timer in Story mode.
+Reuse the WB-01 desk and laptop for the accident report. Stage the bed, task clutter, and older phone messages so players see Raka's routine before the blackout.
 
 **Visual feedback:** documents slide from tidy to disordered; pen, notification light and rustling create focus. UI inspect overlay must make text legible regardless of screen resolution.
 
-### WB-04 — Campus / Work hints (C2, optional modular micro-set)
+### WB-04 — Campus and work context
 
 **Purpose:** communicate pressure from outside Raka’s room without full world construction. Tiny corridor vignette with noticeboard (“Magang”, “Tugas”, “Konsultasi”) and a **fictional** work clock or shift board. Do not name a real university/business without permission. Can be conveyed through photo, sound and one doorway vista if time is limited.
 
-### WB-05 — Crash Memory / Wet Road (mostly audio, optional 3D vignette)
+### WB-05 — Crash site / wet road (C2)
 
-**Purpose:** symbol of fragmented accident, not a playable realistic traffic sequence. A short 4–8 m wet road section, safety barrier, blurred twin headlights, torn umbrella or helmet, rain and distant emergency color cues. **No impact animation or Ella’s injury/body**. During gameplay, use short spatial glimpses in Chapter 3 memory collage rather than a fully simulated road/truck chase.
+Block out a playable street with stationary police cars, solid cover, two Shadow patrol phases, and a bus stop visible from spawn. Tune the layout for first-person readability before detailing wet asphalt, barriers, and rain. Use the [Chapter 2 Plan](CHAPTER2_PLAN.md#2-core-loop-stealth) for the three segments and lighting rules. The plan for the prologue crash is audio-led.
 
 ### WB-06 — Chapter 3 Confrontation Hall
 
@@ -213,7 +213,7 @@ Reuse WB-01 geometry and phone focus. Establish absence with **camera, sound, ro
 | Narrative pressure | Environmental evidence | Suggested interaction/response | GDD relation |
 |---|---|---|---|
 | Economic hardship | repaired shoes, cheap groceries, overtime slip, split rent note, modest room | inspect overtime, glance at work hours | SDG 1, `CLUE_02` |
-| Education barriers | worn textbooks, shared notes, internship forms, packed deadlines | book pickup, 3 academic tasks | SDG 4, C1/C2 |
+| Education barriers | worn textbooks, shared notes, internship forms, packed deadlines | book pickup, laptop report | SDG 4, C1/C2 |
 | Fatigue before crash | watch, shift schedule, untidy notes, tired voice | short fragment in prologue, overtime slip | Accident causal chain |
 | Raka–Ella relationship | graduation photo, subtle shared memory, old chat | inspect photo, old chat, envelope | `CLUE_01`, `CLUE_03` |
 | Fragmented memory | partly audible voice record, blurred wet road lights, repetitive corridor | inspect recording; environmental echo | `CLUE_04`; preserve twist |
@@ -317,7 +317,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 - **8–12 m:** silhouette readable as a person-like threat; facial resemblance **not** legible.
 - **2–3 m:** brief reveal of subtle human face details; make scars visible without close-up gore.
 - **C1:** a few silhouettes/door glimpses, then chase/hide/fight encounter; do not camp at the player's camera.
-- **C2:** no recurring boss fight; use offscreen scrape, wet prints, shadow and ambient motif.
+- **C2:** use the existing rig to read the road with a visible spotlight. Head motion and radio static cue the next sweep. Shadow searches from a fixed point first, then walks a patrol route.
 - **C3:** silhouette waits; central path indicates Approach, cover indicates Hide, range prompt indicates Fight. `EndingResolver` is canonical.
 - **Caught:** blackout + heartbeat + checkpoint. No explicit bodily attack required.
 
@@ -361,7 +361,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 | Asset file ID | Group | Priority | Narrative + use | Approx. dimensions (if useful) | Interact / note |
 |---|---|---|---|---|---|
-| `PROP_001_Bed` | PROP_001 | P0 | makes room believable, depression montage | 0.9×2 m | focus/sleep fade |
+| `PROP_001_Bed` | PROP_001 | P0 | makes room believable, Chapter 2 wake-up | 0.9×2 m | wake-up staging |
 | `PROP_001_PillowBlanket` | PROP_001 | P0 | lived-in softness, changing pose | fits bed | static/deformed mesh |
 | `PROP_001_StudyDesk` | PROP_001 | P0 | study, tasks, phone, letter | ~1.2×0.6×0.75 m | collider |
 | `PROP_001_Chair` | PROP_001 | P0 | signs of night work | ~0.5×0.5×0.9 m | static |
@@ -370,11 +370,8 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 | `PROP_002_Textbook` | PROP_002 | P0 | Chapter 1 take book | ~A5–A4 footprint | `INT_BOOK`, `objective.book` |
 | `PROP_002_Pen` | PROP_002 | P0 | desk and notes story | standard pen | decorative/optional inspect |
 | `PROP_002_OvertimeSlip` | PROP_002 | P0 | exhaustion context | A5 paper | `CLUE_02`, readable |
-| `PROP_002_NotesStack` | PROP_002 | P0 | academic task A | 3 cards/sheets | `TASK_A_NOTES` |
-| `PROP_002_InternshipForms` | PROP_002 | P0 | academic task B | 3 documents | `TASK_B_INTERNSHIP` |
-| `PROP_002_ScheduleBoard` | PROP_002 | P0 | academic task C | A4 notice | `TASK_C_SCHEDULE` |
-| `PROP_002_Laptop` | PROP_002 | P0 | `PROP_RakaLaptop` on study desk; Monkeytype typing minigame (`INT_LAPTOP`, `"Mengerjakan tugas"`) | ~0.32 m wide | `[E]` open, tap `Enter` submit, hold `Enter` 5s exit |
-| `PROP_002_Backpack` | PROP_002 | P1 | student everyday life | human-sized bag | decorative |
+| `PROP_002_Laptop` | PROP_002 | P0 | `PROP_RakaLaptop` on study desk; C1 coursework and C2 accident report | ~0.32 m wide | `[E]` open, `Enter` submit, `Tab` close |
+| `PROP_002_Backpack` | PROP_002 | P0 | Raka's bag and recognizable keychain in the dorm and at the C2 bus stop | human-sized bag | inspect at bus stop to advance the story |
 | `PROP_003_RakaPhone` | PROP_003 | P0 | Ella/Bayu chat & endings | ~0.15 m long | diegetic overlay |
 | `PROP_004_PhotoFrame` | PROP_004 | P0 | graduation promise | small frame | `CLUE_01`, inspect reverse |
 | `PROP_004_EllaHelmet` | PROP_004 | P1 | accident memory | plausible helmet | no graphic damage |
@@ -436,23 +433,20 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 
 ### ITEM-04 / Phone (`PROP_003_RakaPhone`)
 
-- **C2:** player can choose **Send** or **Lock/Draft** for Ella. If sent, show **one checkmark**; **no reply**. Save `messageEllaSent` but don't treat it as mental-health score.
+- **C2:** Bayu's earlier messages establish the passage of time. After Raka inspects the bag and returns to the dorm, sending one reply starts the Chapter 3 handoff.
 - **Old conversation (`CLUE_03`):** semester-five graduation joke/time capsule reference; ambiguity preserved.
 - **Bayu:** C2 reminder/check-in and ending texts, separate from Ella thread.
 - **UX:** entirely fictional messenger UI. Use size-legible typography; avoid brand copyright. Check subtitles and screenreader-friendly text architecture if possible.
 
 ### ITEM-05 / Ambiguous recording (`CLUE_04`)
 
-- **Location:** after or between C2 tasks, with clear opt-in inspect (not an autoplays-every-time jumpscare).
+- **Location:** coordinate the Chapter 2 placement with `T10` after the route blockout. Give the player a clear inspect prompt in a safe area.
 - **Gameplay:** audible and subtitled fragment like **“Ella... masih...”** disrupted by noise; enough to be fair but not an explicit confirmation of survival.
 - **Rule:** never label the file “Ella ICU Alive” or reveal a medical diagnosis in metadata.
 
-### ITEM-06 / Three academic tasks
+### ITEM-06 / Accident report on the laptop
 
-- `TASK_A_NOTES`: choose correct chronological order of three notes; success/fail both progress.
-- `TASK_B_INTERNSHIP`: identify the correct internship document from three; success/fail both progress.
-- `TASK_C_SCHEDULE`: select a reasonable priority among conflicting deadlines/shifts; success/fail both progress.
-- If **all three fail**, use a **bed / passing-time montage**, **then progress to C3**. This is a narrative state, not a humiliation punishment.
+Reuse the laptop. Present the report in short, legible excerpts. The final submission triggers the blackout at 100% stress. See the [Chapter 2 opening](CHAPTER2_PLAN.md#1-alur-yang-dimainkan).
 
 ### ITEM-07 / Ella letter (`PROP_004_EllaLetter`)
 
@@ -471,8 +465,8 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 | Prologue | night slate `#24303C`, wet amber `#B88B5C` | hidden vehicle glow | rain/black screen, emotional audio | voice and promise |
 | C1 Denial | dirty gray `#696C66`, sickly teal `#405954` | fluorescent tube | plaster, damp stain, modest clutter | book, door, photo |
 | C1 Anger | charcoal `#19191C`, muted rust `#703C3A` | flicker, distant warm leak | disturbed shadows, moving paper | silhouette/cover |
-| C2 Bargaining | blue-gray `#3D4C5A`, desaturated sand `#817C70` | desk lamp, phone | paper, reflection from glass | task objects and chat |
-| C2 Depression | storm blue `#253546`, near-black `#181C22` | small task lamp | loss of contrast, longer sound tails | next achievable task |
+| C2 Dorm | blue-gray `#3D4C5A`, desaturated sand `#817C70` | desk lamp, phone | paper, reflection from glass | accident report and Bayu's chat |
+| C2 Road | storm blue `#253546`, near-black `#181C22` | white police headlights, Shadow's sweep | wet pavement, soft red exposure feedback | cover, light boundaries, bus stop |
 | C3 Acceptance | charcoal `#181D22`, pale warm `#BAA083` | rear spill / rim light | layered fog, wet humanoid | central approach lane |
 | Good graduation | faded sunset `#BE936A`, cloud blue `#738395` | soft sky and rims | fine rain, damp ground | letter and congratulations |
 | Bad/Hidden | midnight blue `#17212A`, phone blue `#9CB4BE` | phone screen + cold window | empty room and heavy rain | message content |
@@ -617,8 +611,8 @@ MasterGameplay
 │   ├── HidingZones / ChapterTriggers / Checkpoints
 │   └── ShadowEncounter (T06; final visual from T13)
 ├── Root_Chapter2
-│   ├── StudyTask_A_B_C / PhonePoint / ClueLocations
-│   └── MontageBed / ChapterTriggers / Checkpoints
+│   ├── DormWakeUp / ReportTyping / PhonePoint
+│   └── SpotlightRoad / Checkpoints / BusStop / ClueLocations
 ├── Root_Chapter3
 │   ├── ChoiceApproach / ChoiceFight / ChoiceHide
 │   └── ShadowFinal / ResolveTrigger
@@ -644,8 +638,8 @@ MasterGameplay
 | **T05** | dorm variants, loop anomaly timeline | C1-01..C1-06 in sequence |
 | **T06** | placeholder creature and occluding hide zones | Fight/Hide/Caught all pass |
 | **T07** | one-room HDRP hero art + fog/material studies | clear FPP screenshot + Windows build profile |
-| **T08** | phone mesh and fictional UI/chat style | Ella one-tick/draft and Bayu present; save persists |
-| **T09** | desk tasks, legible papers and montage staging | TASK_A/B/C, all-fail still advances |
+| **T08** | fictional phone UI with Bayu's message and reply | one reply after the bag inspection opens Chapter 3 |
+| **T09** | readable report, police lights, cover, Shadow and bus stop | clear spotlight boundaries and safe retries across all three sections |
 | **T10** | exact `CLUE_01`–`CLUE_04` prop placements | 4 unique clues, no premature spoiler |
 | **T11** | Chapter 3 confrontation composition and affordances | Approach Good; Fight/Hide +4 Hidden, else Bad |
 | **T12** | graduation micro-set, dark dorm, ending text visual | non-graphic 3 endings, letter and messages |
@@ -669,8 +663,8 @@ MasterGameplay
 | `SHOT_03` | corridor 12 m | depth, exit, subtle anomaly | too dense fog |
 | `SHOT_04` | monster C1 8–12 m | distinct distorted humanoid silhouette | facial identity spoiled early |
 | `SHOT_05` | hide niche | visual cover from creature | cover that AI 'sees through' |
-| `SHOT_06` | phone | readable one-tick Ella chat | actual branded UI assets |
-| `SHOT_07` | task papers | readable 3-choice puzzle | tiny font / unnecessary drag complexity |
+| `SHOT_06` | phone | readable Bayu conversation | actual branded UI assets |
+| `SHOT_07` | C2 road, crouched behind a box | visible light boundary, next cover and bus stop direction | fog or reflections hiding the safe route |
 | `SHOT_08` | C3 confrontation | obvious approach lane + hide zone | accidental trigger overlap |
 | `SHOT_09` | monster reveal 2–3 m | faint human likeness + optional scar marks | cartoon boss + graphic gore |
 | `SHOT_10` | graduation | Raka’s completion + warm drizzle | sudden unexplained instant recovery |
@@ -687,7 +681,7 @@ For each shot, keep an **in-game screenshot** at Low and High settings, plus not
 
 | Level | Must deliver | Cut/replace if delayed |
 |---|---|---|
-| **P0 / MVP** | FPP, 4×5 dorm, modular corridor, interactables, looping, T06 silhouette, C2 phone/tasks, 4 clues, C3 response, 3 ending placeholders, functional UI/audio | no cinematic NPC crowd, no complex exterior |
+| **P0 / MVP** | FPP, 4×5 dorm, modular corridor, interactables, looping, T06 silhouette, C2 report/road/phone, 4 clues, C3 response, 3 ending placeholders, functional UI/audio | use one short modular road for C2 |
 | **P1 / vertical slice art** | high-quality hero room, realistic wet PBR materials, ambient lighting/fog, final monster model, letter, graduation micro-set, spatial sound | fewer props rather than unoptimized props |
 | **P2 / stretch** | animated fan, city exterior background, full body Raka/Ella 3D renders, multiple crowd figures, secondary monster variants, extra camera effects | remove first at scope freeze |
 
@@ -749,9 +743,9 @@ validation, and build performance. No graphic gore and no franchise copies.
 **Phone (T08):**
 
 ```text
-Implement only Raka's fictional phone presentation based on Docs/design.md §§7–8.
-Ella thread: send/lock choice, one checkmark if sent, never a reply. Bayu's
-thread is separate. Preserve save flags, exact clues and ending reveal wording.
+Implement Raka's fictional phone presentation using Docs/CHAPTER2_PLAN.md.
+Show Bayu's old messages and the reply after the bag inspection. Coordinate
+Ella's older chat with T10. Preserve exact clue IDs and ending reveal wording.
 No official messaging app logos. Verify font legibility at 1080p and Esc back.
 ```
 
@@ -772,7 +766,7 @@ mental recovery; use few original props/figures and camera-focused composition.
 |---|---|---|
 | Final look of monster face | A early / B late, same rig | after FPP 2–3 m art test |
 | Exact dorm dressing items | listed P0/P1 set | after hero room screenshot |
-| C2 campus/work assets | micro-sets or sound-only vistas | if narrative clarity suffers |
+| C2 road layout | three sections, one short fork and a visible bus stop | after first-person stealth playtest |
 | C3 arena dimensions | ~6×8 m room as proposal | if hide/approach paths conflict |
 | Pipeline | Work in installed URP 17.6.0; original HDRP target remains unresolved, with no migration or final fallback approval inferred | separate pipeline decision informed by Windows profiling before T07 acceptance |
 | Graduation population | silhouette/cropped figures | if Good Ending feels empty |

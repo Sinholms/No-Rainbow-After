@@ -3,6 +3,7 @@
 **Proyek:** No Rainbow After (First-Person Psychological Horror)<br>
 **Target Platform:** PC Windows x64 • Unity 6000.6.8f1 (URP 17.6.0) • Blender 5.2.3 LTS<br>
 **Acuan Utama:**
+- [Rencana aktif Chapter 2 — Di Bawah Sorotan](Docs/CHAPTER2_PLAN.md)
 - [GDD v1.1 Reference](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
 - [Urutan Tugas T00–T16](Docs/CODEX_TASKS_No_Rainbow_After_v1_1.md)
 - [Desain Dunia, Karakter & Aset](Docs/design.md)
@@ -32,7 +33,7 @@ Bertanggung jawab atas seluruh sistem pondasi yang menyentuh input pemain, layar
    - **Barometer Stres Merah (`StressBarometer`):** Membangun HUD Barometer Stres berwarna **merah** satu-layer (`StressBarometerCanvas`) di pojok kiri atas yang dimulai dari **`50%`**, disertai efek layar memerah dan peringatan berkedip pelan saat mencapai **`>= 70%`**. Stres naik saat salah ketik/timeout di laptop, naik berkala di koridor horor, memuncak ke **`100%`** saat tertangkap *Shadow*, dan diturunkan lewat minigame atur napas `[Tab]`.
    - **UI Minigame Laptop Monkeytype (`LaptopTypingMinigame`):** Membangun layar overlay mengetik ala Monkeytype (`5` kalimat) pada laptop meja belajar Raka (huruf benar berwarna **kuning**, merah jika salah, timer progresif **`60` → `30` detik**, kirim `Enter`, keluar `1x [Tab]`, otomatis keluar setelah 5 kalimat selesai).
    - **Minigame Atur Napas (`BreathingMinigame` via `[Tab]`):** Mekanik pengendalian stres (termasuk saat bersembunyi di dalam lemari maupun pemulihan pasca-tertangkap 100%) dengan menahan parameter di dalam **bar hijau** (`[Spasi]`/klik kiri tarik napas, lepas hembus), dilengkapi audio napas sinkron dan anggukan kamera FPP (naik ke atas saat tarik napas, turun ke bawah saat keluar napas).
-   - **Task `T08` (Phone & Chat UI):** Membangun `PhoneUIController` diegetik dengan merek/tampilan fiktif yang menampilkan kontak Ella & Bayu Kopling, chat lama Ella, pilihan **Kirim Pesan** (menampilkan tepat **satu centang** tanpa balasan) atau **Kunci Layar**, serta menyimpan flag `messageEllaSent`.
+   - **Task `T08` (Ponsel dan chat):** Membuat UI chat fiktif untuk pesan lama Bayu dan percakapan setelah Raka menginspeksi tas. Pengiriman pesan akhir harus membuka objektif Chapter 3 satu kali. Koordinasikan chat lama Ella dengan `T10`.
    - **Task `T15` (Audio Mixer, Subtitles & Accessibility):** Membangun `AudioDirector` dengan 5 bus `AudioMixer` (`Master`, `Voice`, `Ambience`, `SFX`, `Music`), fitur *audio ducking* otomatis saat dialog/monolog berjalan, sinkronisasi subtitle (`SubtitlePlaceholder`), serta pengaturan aksesibilitas (volume terpisah, FOV, sensitivitas, *reduce flashes*, skala teks).
    - **Save, Checkpoint & Menu Flow:** Memastikan persistensi data lintas sesi (`GameState`, penyimpanan clue JSON, `PlayerPrefs`), menu utama (`ShellScreen`), dan menu jeda (`FirstPersonSession`).
 2. **Core Loop:**
@@ -52,11 +53,7 @@ Bertanggung jawab atas alur permainan dari Prolog hingga Ending, kecerdasan buat
    - Mengelola `ChapterDirector`, `GameState`, `LoopAtmosphere`, `ObjectiveTracker`, dan `ChapterOneObjective` untuk objektif awal Chapter 1 **`"Mengerjakan tugas"`** (melalui minigame mengetik di laptop `INT_LAPTOP`) serta perpindahan antar-bab (`PrologueRoot` → `Chapter1Root` → `Chapter2Root` → `Chapter3Root` → `EndingsRoot`) di `MasterGameplay.unity`.
    - **Minigame Mengetik Tugas Kuliah ala Monkeytype (`LaptopTypingMinigame`):** Mengimplementasikan generator 5 kalimat bertema kuliah mahasiswa, timer progresif per kalimat (**`60` → `30` detik**) dengan *auto-submit* saat waktu habis, `[Enter]` untuk mengirim kalimat, `1x [Tab]` untuk keluar manual, auto-exit otomatis tepat setelah 5 kalimat selesai, serta penalti kenaikan **Barometer Stres** (`+2%` typo, `+10%` kirim salah/belum selesai, `+15%` waktu habis).
    - **Tekanan Stres Koridor, Respawn Awal Koridor & Transisi Pasca Chapter 1 (`ChapterOneCorridorShift`, `ShadowEncounterController`, `ObjectiveTracker`):** Kenaikan stres berkala di koridor yang mendorong pemain masuk ke `HidingWardrobe` lalu menekan `[Tab]` atur napas; jika tertangkap *Shadow*, pemain respawn di **spawn awal koridor dengan stres 100%** dan wajib mengatur napas terlebih dahulu sebelum dapat melangkah lagi; setelah melewati `INT_C1_EXIT`, Raka kembali ke kamar kos dengan objektif placeholder **`"Chapter 2 sedang dikembangkan"`**.
-   - **Task `T09` (Academic Tasks & Montage):** Mengimplementasikan `AcademicTaskController` untuk 3 tugas mini di Chapter 2:
-     - `TASK_A_NOTES`: Mengurutkan 3 catatan kuliah secara kronologis.
-     - `TASK_B_INTERNSHIP`: Memilih berkas magang yang benar dari 3 dokumen.
-     - `TASK_C_SCHEDULE`: Memilih prioritas pada jadwal kerja & kuliah yang bentrok.
-     - Mengatur efek jalan melambat sementara (*slow walk*) dan percabangan menuju *bed montage* jika ketiga tugas gagal, lalu tetap melanjutkan ke Chapter 3 tanpa softlock.
+   - **Task `T09` (Laporan berita dan stealth sorotan):** Mengerjakan beat bangun, profil laptop Chapter 2, transisi saat stres 100%, patroli Shadow, deteksi sorotan dengan cover, checkpoint per segmen, dan inspeksi tas di halte. Kerjakan blockout bersama Orang 3 dan feedback paparan bersama Orang 1.
    - **Task `T10` (Clue Registry & Foreshadowing):** Mengelola pencatatan unik (`HashSet`) tanpa duplikasi untuk `CLUE_01` s/d `CLUE_04` agar tetap tersimpan saat pemain tertangkap monster, respawn checkpoint, atau memuat ulang sesi.
    - **Task `T11` (Chapter 3 Choice & `EndingResolver`):** Membangun sistem pilihan akhir diegetik yang mengunci input secara atomik (`Fight` dengan klik kiri, `Hide` dengan merunduk di cover, `Approach` dengan berjalan mendekat) serta class C# murni `EndingResolver` beserta unit test NUnit (`EditMode`):
      - `Approach` → **Good Ending**
@@ -84,7 +81,7 @@ Bertanggung jawab atas produksi aset 3D di Blender, tekstur/material PBR, penata
    - **Fisik Tubuh FPP Raka ala *MiSide* (`ACT_Raka_StudentBody` via Blender MCP):**
      - Mengambil referensi dan turnaround mahasiswa kasual lalu memodifikasi aset orisinal organik **`ACT_Raka_StudentBody`** ([`create_raka_student_body.py`](BlenderSources/Characters/create_raka_student_body.py)) dengan *Subdivision Surface*: kemeja lengan pendek kotak-kotak biru-charcoal berkancing + kerah lipat, saku dada kiri dengan pulpen, lanyard biru + ID card putih, lengan anatomis + jam tangan hitam + **tangan 5 jari terartikulasi organik**, celana kain gelap, dan sepatu *slip-on* sol putih tebal, tanpa kepala agar bebas clipping kamera FPP.
    - **3D Props Chapter 2 & Clues (`T14`):**
-     - `PROP_003_RakaPhone` (ponsel Raka), `PROP_004_PhotoFrame` (bingkai foto `CLUE_01`), `PROP_002_NotesStack` (3 kartu catatan), `PROP_002_InternshipForms` (3 dokumen magang), `PROP_002_ScheduleBoard` (jadwal kerja/kuliah), prop perekam suara (`CLUE_04`), serta `PROP_004_LetterEnvelope` & `PROP_004_EllaLetter` (amplop & surat Ella).
+     - Siapkan jalan basah, mobil polisi, box, garis polisi, halte, tas Raka dan gantungannya. Gunakan kembali laptop dan rig Shadow. Koordinasikan ponsel dan prop petunjuk dengan `T08` dan `T10`.
    - **3D Micro-Sets (Prolog, Chapter 3 & Wisuda):**
      - **Set Prolog (`ENV_003`):** Stang motor, kaca spion, lengan Raka, siluet Ella berhelm di boncengan, mobil dari arah berlawanan, dan potongan jalan basah perempatan empat arah.
      - **Set Chapter 3 (`WB-06`):** Ruang konfrontasi ujung lorong (`~6 × 8 m`) dengan 2 titik cover samping dan jalur tengah Approach.
@@ -104,7 +101,7 @@ Bertanggung jawab atas produksi aset 3D di Blender, tekstur/material PBR, penata
 
 | Elemen Proyek | Orang 1 (Systems, UI & Tech) | Orang 2 (Gameplay, AI & Narrative) | Orang 3 (Blender, Art, Level & Story) |
 | :--- | :--- | :--- | :--- |
-| **Koding C#** | FPP Controller, Body Visual, Barometer Stres Merah (`50%`) + `[Tab]` Breathing Minigame, Raycast Interaksi (`E`/`F`), UI Monkeytype/Phone/Inspect/Menu, Save/Prefs, AudioMixer, Quality Presets. | `ChapterDirector`, `LaptopTypingMinigame`, `AcademicTaskController`, `ClueRegistry`, `ShadowEncounterController`, `EndingResolver`, Cutscene Sequencer. | Skrip bantu automasi Blender Python (`BlenderSources/*.py`, `create_raka_laptop.py`, `create_raka_student_body.py`). |
+| **Koding C#** | FPP Controller, Body Visual, Barometer Stres Merah (`50%`) + `[Tab]` Breathing Minigame, Raycast Interaksi (`E`/`F`), UI Monkeytype/Phone/Inspect/Menu, Save/Prefs, AudioMixer, Quality Presets. | `ChapterDirector`, `LaptopTypingMinigame`, encounter sorotan Chapter 2, `ClueRegistry`, `ShadowEncounterController`, `EndingResolver`, Cutscene Sequencer. | Skrip bantu automasi Blender Python (`BlenderSources/*.py`, `create_raka_laptop.py`, `create_raka_student_body.py`). |
 | **Blender & 3D** | Validasi import `.fbx`, collider, `PROP_RakaLaptop`, `ACT_Raka_StudentBody`, dan shader/material URP. | Menyambungkan `Animator`, bone pivot, dan trigger zona ke prefab 3D. | Modeling, sculpting, modifikasi referensi Blender MCP, UV unwrap, baking tekstur PBR, rigging Generic, dan pembuatan 8 animasi. |
 | **Asset 2D & Audio** | Integrasi sprite UI, font, `AudioClip`, dan pengaturan `AudioMixer` bus. | Memicu event audio & subtitle (`IAudioCueSource`) dari state cerita/AI. | Pembuatan desain dokumen 2D, rekaman voice Raka/Ella, serta kurasi/pembuatan SFX & ambience. |
 | **Cerita & Naskah** | Menyajikan teks pada UI Phone, Inspect Overlay, Subtitle, dan Content Notice. | Mengatur urutan kemunculan beat cerita (`C1`–`C3`), syarat 4 clue, dan logika penentu 3 ending. | Menulis naskah dialog, monolog, isi chat Ella/Bayu, surat wisuda, dan storyboard cutscene. |
@@ -114,10 +111,10 @@ Bertanggung jawab atas produksi aset 3D di Blender, tekstur/material PBR, penata
 
 ## 4. Urutan Pengerjaan (Roadmap Sisa Proyek)
 
-### Tahap 1 — Penyelesaian Chapter 2 & Pemolesan Monster (`T08`, `T09`, `T10`, `T13`, `T14`)
-- **Orang 1:** Membangun UI Ponsel diegetik (`T08` — kontak Ella & Bayu, fitur centang satu).
-- **Orang 2:** Membangun 3 mini-task akademik + *bed montage* (`T09`) serta integrasi penuh 4 clue (`T10`).
-- **Orang 3:** Memoles model, material A/B, dan 8 animasi `ACT_Shadow_Raka` (`T13`) di Blender + membuat prop meja belajar & clue Chapter 2 (`T14`).
+### Tahap 1 — Chapter 2: Di Bawah Sorotan (`T08`, `T09`, `T10`, `T13`, `T14`)
+- **Orang 1:** Menyiapkan feedback paparan, profil UI laporan, dan chat Bayu (`T08`).
+- **Orang 2:** Menghubungkan pembuka, stealth, retry, inspeksi tas, dan handoff Chapter 3 (`T09`). Integrasikan petunjuk sesuai `T10`.
+- **Orang 3:** Membuat blockout jalan dan halte, menata box dan lampu mobil, serta memasang sorotan pada rig Shadow yang ada (`T13`, `T14`).
 
 ### Tahap 2 — Chapter 3, Cutscene Prolog & Sistem Audio (`Prolog`, `T11`, `T15`)
 - **Orang 1:** Membangun `AudioDirector`, 5 bus `AudioMixer`, integrasi voice/SFX, subtitle sync, dan menu aksesibilitas (`T15`).
@@ -134,8 +131,8 @@ Bertanggung jawab atas produksi aset 3D di Blender, tekstur/material PBR, penata
 
 | Anggota | Kasus Uji QA yang Dipertanggungjawabkan |
 | :--- | :--- |
-| **Orang 1** | `QA06` (Kirim pesan Ella centang satu & tersimpan), `QA12` (Tombol `F` menutup overlay inspect, tahan `Enter` 5 detik keluar laptop, `Esc` untuk Pause), `QA14` (Build Windows x64 stabil dari Boot hingga Credits + benchmark FPS Low/Medium/High). |
-| **Orang 2** | `QA02` (Minigame mengetik laptop `"Mengerjakan tugas"`, Barometer Stres merah 50% naik saat salah/timeout, & loop koridor C1), `QA03` (C1 Fight), `QA04` (C1 Hide), `QA05` (C1 Caught kembali ke checkpoint tanpa hapus clue), `QA07` (Gagal semua task C2 → bed montage → lanjut C3), `QA08` & `QA13` (Persistensi 4 clue unik saat save/load/respawn), `QA09` (Approach → Good), `QA10` (Fight/Hide < 4 clue → Bad), `QA11` (Fight/Hide = 4 clue → Hidden). |
+| **Orang 1** | `QA06` (chat Bayu terbuka setelah inspeksi tas dan membuka C3 satu kali), `QA12` (Tombol `F` menutup overlay inspect, tahan `Enter` 5 detik keluar laptop, `Esc` untuk Pause), `QA14` (Build Windows x64 stabil dari Boot hingga Credits + benchmark FPS Low/Medium/High). |
+| **Orang 2** | `QA02` (Minigame mengetik laptop `"Mengerjakan tugas"`, Barometer Stres merah 50% naik saat salah/timeout, & loop koridor C1), `QA03` (C1 Fight), `QA04` (C1 Hide), `QA05` (C1 Caught kembali ke checkpoint tanpa hapus clue), `QA07` (selesaikan laporan, lewati sorotan dengan retry per segmen, capai halte), `QA08` & `QA13` (Persistensi 4 clue unik saat save/load/respawn), `QA09` (Approach → Good), `QA10` (Fight/Hide < 4 clue → Bad), `QA11` (Fight/Hide = 4 clue → Hidden). |
 | **Orang 3** | `QA01` (Alur MainMenu → Prolog hujan di perempatan → *hard cut* hitam sebelum tabrakan → masuk kos), `QA15` (Validasi FBX monster `T13`, rig & 8 animasi bebas T-pose/clipping pintu 2,05 m), `QA16` (Keterbacaan siluet monster pada 8–12 m dan wajah samar/luka ringan pada 2–3 m di FPP). |
 
 ---

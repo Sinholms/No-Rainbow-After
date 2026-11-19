@@ -24,7 +24,8 @@ Branch utama adalah **main**. Ambil pembaruan sebelum mulai bekerja dan gunakan 
 
 ## Dokumentasi dan rencana kerja
 
-- [Spesifikasi cerita](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
+- [Rencana aktif Chapter 2 — Di Bawah Sorotan](Docs/CHAPTER2_PLAN.md), termasuk core loop stealth dan transisi ke Chapter 3.
+- [Spesifikasi cerita dan aturan ending — GDD v1.1](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
 - [Urutan tugas T00–T16](Docs/CODEX_TASKS_No_Rainbow_After_v1_1.md)
 - [Desain dunia dan aset](Docs/design.md)
 - [Hasil T01 dan cara menguji](Docs/T01_HANDOFF.md)
