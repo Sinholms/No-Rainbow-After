@@ -104,6 +104,7 @@ namespace NoRainbowAfter.Editor
                     Box(t,"Lentera",x-Mathf.Sign(x)*1.21f,5.26f,z,.47f,.12f,.73f,warm,false);
                     LightAt(t,"Cahaya jalan",x-Mathf.Sign(x)*1.2f,4.99f,z,new Color(1f,.81f,.55f),7f,14);
                 }
+                ChapterTwoStreetArt.Dress(street);
                 PrefabUtility.SaveAsPrefabAsset(root,Destination);
                 AssetDatabase.SaveAssets();
             }
