@@ -55,6 +55,9 @@ namespace NoRainbowAfter.Player
         public bool IsSprinting { get; private set; }
         public float Pitch => pitch;
         public float BreathingPitchOffset => breathingPitchOffset;
+        public float CrouchBlend => controller != null
+            ? 1f - Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height)
+            : (IsCrouched ? 1f : 0f);
 
         private void Awake()
         {

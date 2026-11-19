@@ -114,13 +114,13 @@ namespace NoRainbowAfter.Editor
                 ["MAT_RakaBody_Jeans"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Jeans.mat", urpLit, Color.white, 0f, 0.18f, jeansTex),
                 ["MAT_RakaBody_Skin"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Skin.mat", urpLit, new Color(0.55f, 0.38f, 0.28f), 0f, 0.42f),
                 ["MAT_RakaBody_Lanyard"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Lanyard.mat", urpLit, new Color(0.16f, 0.40f, 0.42f), 0f, 0.22f),
-                ["MAT_RakaBody_Card"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Card.mat", urpLit, new Color(0.84f, 0.86f, 0.84f), 0f, 0.60f),
+                ["MAT_RakaBody_Card"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Card.mat", urpLit, new Color(0.74f, 0.75f, 0.73f), 0f, 0.18f),
                 ["MAT_RakaBody_Watch"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Watch.mat", urpLit, new Color(0.05f, 0.05f, 0.06f), 0.25f, 0.55f),
                 ["MAT_RakaBody_Sneakers"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Sneakers.mat", urpLit, new Color(0.06f, 0.065f, 0.075f), 0f, 0.22f),
                 ["MAT_RakaBody_Sole"] = CreateOrUpdateMaterial(BodyMatDir + "MAT_RakaBody_Sole.mat", urpLit, new Color(0.84f, 0.83f, 0.78f), 0f, 0.30f)
             };
 
-            ConfigureFbxImport(BodyModelPath, mats);
+            ConfigureFbxImport(BodyModelPath, mats, isRiggedCharacter: true);
             return mats;
         }
 
@@ -165,7 +165,7 @@ namespace NoRainbowAfter.Editor
             return mat;
         }
 
-        private static void ConfigureFbxImport(string modelPath, Dictionary<string, Material> materials)
+        private static void ConfigureFbxImport(string modelPath, Dictionary<string, Material> materials, bool isRiggedCharacter = false)
         {
             AssetDatabase.ImportAsset(modelPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             var importer = AssetImporter.GetAtPath(modelPath) as ModelImporter;
@@ -175,7 +175,7 @@ namespace NoRainbowAfter.Editor
             importer.importLights = false;
             importer.importCameras = false;
             importer.importAnimation = false;
-            importer.animationType = ModelImporterAnimationType.None;
+            importer.animationType = isRiggedCharacter ? ModelImporterAnimationType.Generic : ModelImporterAnimationType.None;
             importer.bakeAxisConversion = false;
             foreach (var key in new List<AssetImporter.SourceAssetIdentifier>(importer.GetExternalObjectMap().Keys))
                 importer.RemoveRemap(key);
@@ -358,12 +358,23 @@ namespace NoRainbowAfter.Editor
                 bodyModelInstance.transform.SetParent(bodyGo.transform, false);
 
                 // Preserve FBX axis conversion on bodyModelInstance and rotate wrapper around Y so lanyard faces player forward (+Z).
-                Transform card = FindDeep(bodyGo.transform, "SM_Raka_StudentCard");
-                Transform collar = FindDeep(bodyGo.transform, "SM_Raka_Collar");
-                if (card != null && collar != null &&
-                    bodyGo.transform.InverseTransformPoint(card.position).z < bodyGo.transform.InverseTransformPoint(collar.position).z)
+                Transform lanyard = FindDeep(bodyGo.transform, "Lanyard");
+                Transform chest = FindDeep(bodyGo.transform, "Chest");
+                if (lanyard != null && chest != null &&
+                    bodyGo.transform.InverseTransformPoint(lanyard.position).z < bodyGo.transform.InverseTransformPoint(chest.position).z)
                     bodyGo.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
 
+                foreach (Animator anim in bodyGo.GetComponentsInChildren<Animator>(true))
+                {
+                    anim.enabled = false;
+                    anim.applyRootMotion = false;
+                    EditorUtility.SetDirty(anim);
+                }
+                foreach (SkinnedMeshRenderer smr in bodyGo.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                {
+                    smr.updateWhenOffscreen = true;
+                    EditorUtility.SetDirty(smr);
+                }
                 foreach (Collider c in bodyGo.GetComponentsInChildren<Collider>(true))
                     UnityEngine.Object.DestroyImmediate(c);
                 AssignRendererMaterials(bodyGo, bodyMaterials, ShadowCastingMode.Off);
