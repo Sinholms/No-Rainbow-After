@@ -266,4 +266,106 @@ public class InteractionSceneTests
         interactor.CloseInspection();
     }
 
+    [UnityTest] public IEnumerator CrouchingRakaBodyRigKeepsFeetGroundedAndCameraClearOfLanyardAndChest()
+    {
+        yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");
+        yield return null;
+
+        var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+        var motor = player.GetComponent<FirstPersonMotor>();
+        var body = player.GetComponent<FirstPersonBodyVisual>();
+        var cam = motor.ViewCamera;
+
+        var sessionType = Type.GetType("NoRainbowAfter.UI.FirstPersonSession, Assembly-CSharp");
+        if (sessionType != null)
+        {
+            var session = GameObject.Find("UI_FirstPerson")?.GetComponent(sessionType);
+            var pauseFocus = sessionType.GetMethod("PauseForFocusLoss", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (session != null && pauseFocus != null)
+                player.FocusLost -= (Action)Delegate.CreateDelegate(typeof(Action), session, pauseFocus);
+        }
+        player.enabled = false;
+        player.SetPaused(false);
+        Time.timeScale = 1f;
+
+        Assert.That(body, Is.Not.Null);
+        Assert.That(body.BodyInstance, Is.Not.Null);
+        Assert.That(body.HasArmatureRig, Is.True, "ACT_Raka_StudentBody must use Generic Armature bones.");
+        Assert.That(body.PelvisBone, Is.Not.Null);
+        Assert.That(body.ChestBone, Is.Not.Null);
+        Assert.That(body.LanyardBone, Is.Not.Null);
+        Assert.That(body.LeftFootBone, Is.Not.Null);
+        Assert.That(body.RightFootBone, Is.Not.Null);
+        Assert.That(body.BodyInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length, Is.GreaterThan(0),
+            "Rigged FPP body must render via SkinnedMeshRenderer.");
+
+        // 1) Verify upright Standing pose (0.88m pelvis, ~1.18m chest, grounded feet) before crouching
+        Assert.That(motor.CrouchBlend, Is.LessThan(0.01f));
+        body.ApplyPoseNow(0.02f);
+
+        float leftFootStandRelY = body.LeftFootBone.position.y - player.transform.position.y;
+        float rightFootStandRelY = body.RightFootBone.position.y - player.transform.position.y;
+        Assert.That(leftFootStandRelY, Is.InRange(0.04f, 0.14f), "Standing left foot must remain grounded on floor.");
+        Assert.That(rightFootStandRelY, Is.InRange(0.04f, 0.14f), "Standing right foot must remain grounded on floor.");
+
+        Vector3 pelvisStandLocal = player.transform.InverseTransformPoint(body.PelvisBone.position);
+        Vector3 chestStandLocal = player.transform.InverseTransformPoint(body.ChestBone.position);
+        Vector3 lanyardStandLocal = player.transform.InverseTransformPoint(body.LanyardBone.position);
+        Assert.That(pelvisStandLocal.y, Is.InRange(0.82f, 0.94f), "Standing pelvis rest pose must stay at 0.88m.");
+        Assert.That(chestStandLocal.y, Is.InRange(1.12f, 1.24f), "Standing chest rest pose must stay at ~1.18m.");
+        Assert.That(lanyardStandLocal.y, Is.InRange(1.18f, 1.30f), "Standing lanyard must sit on upright chest (~1.24m).");
+        Assert.That(lanyardStandLocal.z, Is.GreaterThan(chestStandLocal.z + 0.05f),
+            "Standing lanyard must be on front chest (+Z ahead of spine/chest centerline).");
+
+        // 2) Transition to full Crouch and verify true squat heights + camera clearance across 0/45/75 deg pitch
+        motor.Simulate(new FirstPersonFrame { CrouchPressed = true }, 0.02f);
+        for (int i = 0; i < 60; i++)
+            motor.Simulate(default, 0.02f);
+
+        Assert.That(motor.IsCrouched, Is.True);
+        Assert.That(motor.CrouchBlend, Is.GreaterThan(0.99f));
+
+        body.ApplyPoseNow(0.02f);
+
+        float leftFootCrouchRelY = body.LeftFootBone.position.y - player.transform.position.y;
+        float rightFootCrouchRelY = body.RightFootBone.position.y - player.transform.position.y;
+        Assert.That(leftFootCrouchRelY, Is.InRange(0.04f, 0.14f), "Crouched left foot must stay grounded above floor.");
+        Assert.That(rightFootCrouchRelY, Is.InRange(0.04f, 0.14f), "Crouched right foot must stay grounded above floor.");
+
+        Vector3 camLocal = player.transform.InverseTransformPoint(cam.transform.position);
+        Vector3 pelvisCrouchLocal = player.transform.InverseTransformPoint(body.PelvisBone.position);
+        Vector3 chestLocal = player.transform.InverseTransformPoint(body.ChestBone.position);
+        Vector3 lanyardLocal = player.transform.InverseTransformPoint(body.LanyardBone.position);
+        Assert.That(pelvisCrouchLocal.y, Is.InRange(0.32f, 0.44f), "Crouched pelvis must sit at ~0.38m (no double-squat).");
+        Assert.That(chestLocal.y, Is.InRange(0.58f, 0.76f), "Crouched chest must sit naturally at ~0.68m.");
+        Assert.That(lanyardLocal.y, Is.InRange(0.60f, 0.78f), "Crouched lanyard must stay tucked safely below camera.");
+        Assert.That(chestLocal.y, Is.LessThan(camLocal.y - 0.12f), "Chest must sit safely below crouched eye height.");
+        Assert.That(chestLocal.z, Is.LessThan(-0.05f), "Chest must remain behind the crouched camera lens.");
+        Assert.That(lanyardLocal.y, Is.LessThan(camLocal.y - 0.16f), "Lanyard must sit safely below crouched eye height.");
+        Assert.That(lanyardLocal.z, Is.LessThan(-0.05f), "Lanyard must remain behind the crouched camera lens.");
+
+        float[] testPitches = { 0f, 45f, 75f };
+        foreach (float targetPitch in testPitches)
+        {
+            motor.Simulate(new FirstPersonFrame
+            {
+                Look = new Vector2(0f, -(targetPitch - motor.Pitch) / motor.MouseSensitivity)
+            }, 0.02f);
+            body.ApplyPoseNow(0.02f);
+
+            Assert.That(Vector3.Distance(cam.transform.position, body.LanyardBone.position), Is.GreaterThan(0.22f),
+                $"Lanyard must stay clear of camera at pitch {targetPitch}.");
+
+            foreach (Transform bone in new[] { body.LanyardBone, body.ChestBone })
+            {
+                Vector3 vp = cam.WorldToViewportPoint(bone.position);
+                bool blockingCenter = vp.z > 0f && vp.z < 0.25f &&
+                                      vp.x >= 0.15f && vp.x <= 0.85f &&
+                                      vp.y >= 0.15f && vp.y <= 0.85f;
+                Assert.That(blockingCenter, Is.False,
+                    $"Bone {bone.name} must not block center viewport at crouch pitch {targetPitch} (vp={vp}).");
+            }
+        }
+    }
+
 }
