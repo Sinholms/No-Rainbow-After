@@ -147,12 +147,8 @@ namespace NoRainbowAfter.Editor
                 plate.transform.localScale=new Vector3(4.2f,.52f,.08f);
                 plate.GetComponent<Renderer>().sharedMaterial=mats["C2_Petrol"];
                 Object.DestroyImmediate(plate.GetComponent<Collider>());
-                var letters=new GameObject("Nama toko").AddComponent<TextMesh>();
-                letters.transform.SetParent(ground,false);
-                letters.transform.localPosition=plate.transform.localPosition-new Vector3(sign.Item2*.052f,0,0);
-                letters.transform.localRotation=plate.transform.localRotation;
-                letters.anchor=TextAnchor.MiddleCenter;letters.fontSize=82;letters.characterSize=.038f;
-                letters.color=new Color(.81f,.76f,.62f);letters.text=sign.Item1;
+                Lettering(ground,sign.Item1,plate.transform.localPosition-new Vector3(sign.Item2*.052f,0,0),
+                    plate.transform.localRotation,4.17f,.50f,.28f,new Color(.81f,.76f,.62f));
             }
 
             var tar=ground.Find("Two lanes").GetComponent<Renderer>().sharedMaterial;
@@ -186,10 +182,8 @@ namespace NoRainbowAfter.Editor
                 var ribbon=GameObject.CreatePrimitive(PrimitiveType.Cube);
                 ribbon.transform.SetParent(tape,false);ribbon.transform.localScale=new Vector3(2.16f,.125f,.012f);
                 ribbon.GetComponent<Renderer>().sharedMaterial=mats["C2_Mustard"];
-                var writing=new GameObject("Tulisan pita").AddComponent<TextMesh>();
-                writing.transform.SetParent(tape,false);writing.transform.localPosition=new Vector3(0,0,-.012f);
-                writing.fontSize=72;writing.characterSize=.009f;writing.anchor=TextAnchor.MiddleCenter;
-                writing.color=Color.black;writing.text="GARIS POLISI     /     DILARANG MELINTAS";
+                Lettering(tape,"GARIS POLISI     /     DILARANG MELINTAS",new Vector3(0,0,-.012f),
+                    Quaternion.identity,2.12f,.12f,.065f,Color.black);
             }
             var sky=GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sky.name="Langit mendung";sky.transform.SetParent(root,false);
@@ -200,6 +194,26 @@ namespace NoRainbowAfter.Editor
             var skyRenderer=sky.GetComponent<Renderer>();
             skyRenderer.sharedMaterial=skyMat;skyRenderer.shadowCastingMode=ShadowCastingMode.Off;skyRenderer.receiveShadows=false;
             Debug.Log("[C2 art] Eight FBX modules placed. Headlight z = "+lensZ+"; kit yaw = "+yaw);
+        }
+
+        // World-space UI depth-tests against cover. Legacy TextMesh uses an overlay font material.
+        static void Lettering(Transform parent,string value,Vector3 position,Quaternion rotation,
+            float width,float height,float typeHeight,Color color)
+        {
+            const float pixelsPerMetre=200f;
+            var go=new GameObject(value,typeof(RectTransform),typeof(Canvas));
+            var rect=(RectTransform)go.transform;
+            rect.SetParent(parent,false);rect.localPosition=position;rect.localRotation=rotation;
+            rect.sizeDelta=new Vector2(width,height)*pixelsPerMetre;
+            rect.localScale=Vector3.one/pixelsPerMetre;
+            go.GetComponent<Canvas>().renderMode=RenderMode.WorldSpace;
+            var letters=new GameObject("Cetakan",typeof(RectTransform),typeof(UnityEngine.UI.Text));
+            var text=letters.GetComponent<UnityEngine.UI.Text>();var area=text.rectTransform;
+            area.SetParent(rect,false);area.anchorMin=Vector2.zero;area.anchorMax=Vector2.one;
+            area.offsetMin=area.offsetMax=Vector2.zero;
+            text.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");text.text=value;
+            text.alignment=TextAnchor.MiddleCenter;text.fontSize=Mathf.RoundToInt(typeHeight*pixelsPerMetre);
+            text.color=color;text.raycastTarget=false;
         }
 
         static void RemoveVisuals(Transform target)
