@@ -11,6 +11,8 @@ using NoRainbowAfter.Player;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Object=UnityEngine.Object;
@@ -25,9 +27,14 @@ namespace NoRainbowAfter.Tests
         private ChapterOneCorridorShift world;
         private ShadowEncounterController monster;
         private string previousStoragePath, isolatedStorageFolder;
+        private InputSettings.BackgroundBehavior previousBackgroundBehavior;
+        private readonly InputTestFixture inputFixture = new InputTestFixture();
 
         [SetUp] public void IsolateClues()
         {
+            inputFixture.Setup();
+            previousBackgroundBehavior = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             previousStoragePath = ChapterDirector.StoragePathOverride;
             isolatedStorageFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NRA-C1-" + Guid.NewGuid().ToString("N"));
             System.IO.Directory.CreateDirectory(isolatedStorageFolder);
@@ -37,12 +44,17 @@ namespace NoRainbowAfter.Tests
         [TearDown] public void RestoreClueStorage()
         {
             Time.timeScale = 1f;
+            InputSystem.settings.backgroundBehavior = previousBackgroundBehavior;
+            inputFixture.TearDown();
             ChapterDirector.StoragePathOverride = previousStoragePath;
             if (System.IO.Directory.Exists(isolatedStorageFolder)) System.IO.Directory.Delete(isolatedStorageFolder, true);
         }
         private IEnumerator Load()
         {
+            EnsureInputDevices(out _, out _);
             yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");yield return null;
+            var uiModule = Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            if (uiModule != null) { uiModule.UnassignActions(); uiModule.AssignDefaultActions(); }
             player=Object.FindFirstObjectByType<FirstPersonPlayer>();motor=player.GetComponent<FirstPersonMotor>();
             director=player.GetComponent<ChapterDirector>();world=player.GetComponent<ChapterOneCorridorShift>();
             monster=Object.FindFirstObjectByType<ShadowEncounterController>();
@@ -111,16 +123,37 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
             Assert.That(transitions,Is.Zero);
             Assert.That(monster.GetComponent<CharacterController>().enabled,Is.False);
-            Assert.That(wardrobe.TryExit(),Is.True);Assert.That(player.IsHiding,Is.False);
+
+            // From the end of Chapter 1 inside the wardrobe, play the entire session with keyboard and mouse only.
+            EnsureInputDevices(out var keyboard, out var mouse);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsHiding,Is.False);
             var door = GameObject.Find("C1_ExitDoor");
             Assert.That(door, Is.Not.Null);
-            Assert.That(motor.TryRestorePose(new Vector3(78.6f,.1f,2.5f), Quaternion.Euler(0,180,0), false), Is.True);
-            Physics.SyncTransforms();
+            Vector3[] corridorExitStops =
+            {
+                new Vector3(90f, 0f, -1.65f),
+                new Vector3(92.6f, 0f, 10f),
+                new Vector3(82f, 0f, 12.35f),
+                new Vector3(78.6f, 0f, 2.35f)
+            };
+            foreach (Vector3 stop in corridorExitStops)
+            {
+                var path = new NavMeshPath();
+                Assert.That(NavMesh.CalculatePath(motor.transform.position, stop, NavMesh.AllAreas, path), Is.True);
+                Assert.That(path.status, Is.EqualTo(NavMeshPathStatus.PathComplete));
+                foreach (Vector3 corner in path.corners.Skip(1))
+                    yield return WalkToWithKeyboardAndMouse(keyboard, mouse, corner, true, .28f);
+            }
+            yield return LookAtWithMouse(mouse, door.GetComponent<Collider>().bounds.center);
             var target = PlayerInteractor.FindTarget(new Ray(motor.ViewCamera.transform.position, motor.ViewCamera.transform.forward), motor.transform);
             Assert.That(target, Is.Not.Null);
             Assert.That(target.StableId, Is.EqualTo("INT_C1_EXIT"));
-            target.Interact(player.GetComponent<PlayerInteractor>());
-            yield return new WaitForSeconds(1.65f);
+            yield return TapKey(keyboard, Key.E);
+            float wakeDeadline = Time.unscaledTime + 4f;
+            while ((player.IsTransitionLocked || director.State.Chapter2Beat != ChapterTwoBeat.WokeInDorm) && Time.unscaledTime < wakeDeadline)
+                yield return null;
+            yield return null;
             Assert.That(director.ChapterOneFinished, Is.True);
             Assert.That(transitions, Is.EqualTo(1));
             Assert.That(world.Expanded, Is.False);
@@ -131,46 +164,76 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter2"));
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
             Assert.That(player.IsTransitionLocked, Is.False);
-            yield return CompleteChapterTwo(chapterTwoBeats, objLabel);
+            yield return CompleteChapterTwo(keyboard, mouse, chapterTwoBeats, objLabel);
         }
 
-        private IEnumerator CompleteChapterTwo(List<string> beats, UnityEngine.UI.Text objective)
+        private IEnumerator CompleteChapterTwo(Keyboard keyboard, Mouse mouse, List<string> beats, UnityEngine.UI.Text objective)
         {
             var interactions = player.GetComponent<PlayerInteractor>();
             var stress = player.GetComponent<StressBarometer>();
-            var checkpoint = player.GetComponent<DormCheckpoint>();
             var laptop = Object.FindAnyObjectByType<LaptopTypingMinigame>();
             var phone = Object.FindAnyObjectByType<ChapterTwoPhone>();
+            var reflector = GameObject.Find("C2 Star Reflector");
             string[] clues = director.State.ClueIds.ToArray();
             int chapterThreeRequests = 0;
             director.ChapterThreeTransitionRequested += () => chapterThreeRequests++;
+            int objectiveAppearedCount = 0;
+            string previousObjective = objective.text;
+
+            void SampleObjective()
+            {
+                if (objective.text != previousObjective)
+                {
+                    if (objective.text == "Temui Bayu di kampus") objectiveAppearedCount++;
+                    previousObjective = objective.text;
+                }
+            }
 
             var deskApproach = new Vector3(.26f, .04f, 2.67f);
-            Assert.That(motor.TryRestorePose(deskApproach, Quaternion.identity), Is.True);
-            AimAt(phone.GetComponent<Collider>());
-            interactions.Interact();
-            Assert.That(player.IsInspecting, Is.True, "Opening the phone shows Bayu's old messages.");
-            Assert.That(phone.TrySendReply(), Is.False, "The reply becomes available after the bag.");
-            ClosePhone(phone);
+            yield return WalkToWithKeyboardAndMouse(keyboard, mouse, deskApproach, false, .22f);
 
-            AimAt(laptop.GetComponent<Collider>());
-            interactions.Interact();
-            yield return null;
+            if (reflector != null)
+            {
+                yield return LookAtWithMouse(mouse, reflector.GetComponent<Collider>().bounds.center);
+                yield return TapKey(keyboard, Key.E);
+                Assert.That(player.IsInspecting, Is.True, "Star reflector on the desk can be inspected.");
+                yield return TapKey(keyboard, Key.F);
+                Assert.That(player.IsInspecting, Is.False);
+            }
+
+            yield return LookAtWithMouse(mouse, phone.GetComponent<Collider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsInspecting, Is.True, "Opening the phone shows Bayu's old messages.");
+            yield return TapKey(keyboard, Key.Enter);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm), "The reply becomes available after the bag.");
+            yield return TapKey(keyboard, Key.F);
+            Assert.That(player.IsInspecting, Is.False);
+
+            yield return LookAtWithMouse(mouse, laptop.GetComponent<Collider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
             Assert.That(laptop.IsActive, Is.True);
             StringAssert.Contains("kecelakaan", laptop.TargetSentence);
-            SubmitReportSection(laptop);
+            yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence);
+            yield return TapKey(keyboard, Key.Enter);
             string next = laptop.TargetSentence;
-            laptop.ProcessTypedCharacter(next[0]);
-            laptop.Tick(0f, false, tabPressed: true);
-            AimAt(laptop.GetComponent<Collider>());
-            interactions.Interact();
+            InputSystem.QueueTextEvent(keyboard, next[0]);
             yield return null;
+            Assert.That(laptop.CurrentInput, Is.Not.Empty);
+            yield return TapKey(keyboard, Key.Tab);
+            Assert.That(laptop.IsActive, Is.False);
+
+            yield return LookAtWithMouse(mouse, laptop.GetComponent<Collider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(laptop.IsActive, Is.True);
             Assert.That(laptop.CompletedSentences, Is.EqualTo(1));
             Assert.That(laptop.TargetSentence, Is.EqualTo(next));
             Assert.That(laptop.CurrentInput, Is.Empty);
-            for (int i = 0; i < 3; i++) SubmitReportSection(laptop);
-            laptop.Tick(0f, true);
-            laptop.SubmitInput();
+            for (int i = 0; i < 3; i++)
+            {
+                yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence);
+                yield return TapKey(keyboard, Key.Enter);
+            }
+            yield return TapKey(keyboard, Key.Enter);
             Assert.That(laptop.CompletedSentences, Is.EqualTo(4));
             Assert.That(laptop.SubmittedAttempts, Is.EqualTo(4));
             Assert.That(stress.CurrentStress, Is.EqualTo(100f));
@@ -185,67 +248,167 @@ namespace NoRainbowAfter.Tests
             Assert.That(street, Is.Not.Null);
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StreetEntered));
             Assert.That(player.IsTransitionLocked, Is.True, "The street fade keeps control locked after the dorm deactivates.");
-            yield return new WaitForSeconds(.8f);
+            float streetUnlockDeadline = Time.unscaledTime + 3f;
+            while (player.IsTransitionLocked && Time.unscaledTime < streetUnlockDeadline)
+                yield return null;
+            SampleObjective();
             Assert.That(objective.text, Is.EqualTo("Capai halte di seberang garis polisi"));
             Assert.That(stress.OverlayCanvas.enabled, Is.False);
             Assert.That(player.IsTransitionLocked, Is.False);
             Assert.That(street.Bag.Prompt, Is.Null);
-            Assert.That(checkpoint.TryRestore(), Is.True);
-            Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.1f));
+            Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.15f));
 
-            for (int i = 1; i < street.Checkpoints.Length; i++)
+            Vector2[] streetRoute =
             {
-                var marker = street.Checkpoints[i];
-                Assert.That(motor.TryRestorePose(marker.position + marker.forward * .03f, marker.rotation), Is.True);
-                street.CheckProgress();
+                new Vector2(-4.25f, 4f),
+                new Vector2(-4.25f, 18f),
+                new Vector2(-4.1f, 23f),
+                new Vector2(-3.1f, 25f),
+                new Vector2(-3.1f, 32f),
+                new Vector2(0f, 33f),
+                new Vector2(0f, 37.8f),
+                new Vector2(2.5f, 38f)
+            };
+            foreach (Vector2 waypoint in streetRoute)
+            {
+                Vector3 worldWaypoint = street.transform.TransformPoint(new Vector3(waypoint.x, 0f, waypoint.y));
+                yield return WalkToWithKeyboardAndMouse(keyboard, mouse, worldWaypoint, true, .32f);
+                SampleObjective();
             }
-            var safe = street.Shelter.transform;
-            Assert.That(motor.TryRestorePose(safe.TransformPoint(new Vector3(0f, -1.01f, -.92f)), safe.rotation), Is.True);
-            street.CheckProgress();
-            street.CheckProgress();
+            Assert.That(street.AtShelter, Is.True);
+            Assert.That(street.Encounter.CatchCount, Is.EqualTo(0));
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ShelterReached));
-            AimAt(street.Bag.GetComponent<Collider>());
-            interactions.Interact();
+            SampleObjective();
+            Assert.That(objective.text, Is.EqualTo("Periksa tas di halte"));
+
+            yield return LookAtWithMouse(mouse, street.Bag.GetComponent<Collider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
             Assert.That(interactions.IsInspecting, Is.True);
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.BagInspected));
-            interactions.NotifyInteraction("INT_C2_BAG");
             Assert.That(player.IsTransitionLocked, Is.False, "Raka can read the bag inspection before the fade.");
-            interactions.CloseInspection();
-            yield return new WaitForSeconds(1.25f);
+            yield return TapKey(keyboard, Key.F);
+            float returnDeadline = Time.unscaledTime + 4f;
+            while ((player.IsTransitionLocked || director.State.Chapter2Beat != ChapterTwoBeat.ReturnedToDorm) && Time.unscaledTime < returnDeadline)
+            {
+                yield return null;
+                SampleObjective();
+            }
+            yield return null;
+            SampleObjective();
             Assert.That(street.gameObject.activeSelf, Is.False);
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ReturnedToDorm));
             Assert.That(objective.text, Is.EqualTo("Balas pesan Bayu"));
 
-            Assert.That(motor.TryRestorePose(deskApproach, Quaternion.identity), Is.True);
-            AimAt(phone.GetComponent<Collider>());
-            interactions.Interact();
-            Assert.That(phone.TrySendReply(), Is.True);
-            Assert.That(phone.TrySendReply(), Is.False);
-            ClosePhone(phone);
-            yield return null;
+            yield return WalkToWithKeyboardAndMouse(keyboard, mouse, deskApproach, false, .22f);
+            yield return LookAtWithMouse(mouse, phone.GetComponent<Collider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsInspecting, Is.True);
+            var sendButton = phone.GetComponentsInChildren<UnityEngine.UI.Button>(true).Single(b => b.name == "Send");
+            yield return ClickUiButtonWithMouse(keyboard, mouse, sendButton);
+            SampleObjective();
+            yield return ClickUiButtonWithMouse(keyboard, mouse, sendButton);
+            SampleObjective();
+            yield return TapKey(keyboard, Key.F);
+            SampleObjective();
             Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter3"));
             Assert.That(objective.text, Is.EqualTo("Temui Bayu di kampus"));
+            Assert.That(objectiveAppearedCount, Is.EqualTo(1), "Objective 'Temui Bayu di kampus' must appear exactly once.");
             Assert.That(chapterThreeRequests, Is.EqualTo(1));
             CollectionAssert.AreEquivalent(clues, director.State.ClueIds);
             CollectionAssert.AreEqual(new[] { "C2-01", "C2-02", "C2-03", "C2-04", "C2-05", "C2-06", "C2-07" }, beats);
         }
 
-        private void AimAt(Collider target)
+        private static void EnsureInputDevices(out Keyboard keyboard, out Mouse mouse)
         {
-            Physics.SyncTransforms();
-            var eye = motor.ViewCamera.transform;
-            eye.rotation = Quaternion.LookRotation(target.bounds.center - eye.position);
+            keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
+            mouse = Mouse.current ?? InputSystem.AddDevice<Mouse>();
+            InputSystem.EnableDevice(keyboard);
+            InputSystem.EnableDevice(mouse);
+            keyboard.MakeCurrent();
+            mouse.MakeCurrent();
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            InputSystem.Update();
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            InputSystem.Update();
         }
 
-        private static void SubmitReportSection(LaptopTypingMinigame laptop)
+        private static IEnumerator TapKey(Keyboard keyboard, Key key)
         {
-            foreach (char letter in laptop.TargetSentence) laptop.ProcessTypedCharacter(letter);
-            laptop.Tick(0f, true);
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
         }
 
-        private static void ClosePhone(ChapterTwoPhone phone)
+        private static IEnumerator TypeSentenceOnKeyboard(Keyboard keyboard, string sentence)
         {
-            phone.GetComponentsInChildren<UnityEngine.UI.Button>().Single(button => button.name == "Close").onClick.Invoke();
+            for (int i = 0; i < sentence.Length; i++)
+            {
+                InputSystem.QueueTextEvent(keyboard, sentence[i]);
+                if ((i + 1) % 14 == 0) yield return null;
+            }
+            yield return null;
+        }
+
+        private IEnumerator LookAtWithMouse(Mouse mouse, Vector3 targetWorld)
+        {
+            for (int step = 0; step < 6; step++)
+            {
+                Physics.SyncTransforms();
+                Vector3 eye = motor.ViewCamera.transform.position;
+                Vector3 dir = (targetWorld - eye).normalized;
+                float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                float yawDiff = Mathf.DeltaAngle(motor.transform.eulerAngles.y, targetYaw);
+                float targetPitch = -Mathf.Asin(Mathf.Clamp(dir.y, -1f, 1f)) * Mathf.Rad2Deg;
+                float pitchDiff = targetPitch - motor.Pitch;
+                if (Mathf.Abs(yawDiff) < .15f && Mathf.Abs(pitchDiff) < .15f) break;
+                InputSystem.QueueStateEvent(mouse, new MouseState
+                {
+                    delta = new Vector2(yawDiff / motor.MouseSensitivity, -pitchDiff / motor.MouseSensitivity)
+                });
+                yield return null;
+            }
+            InputSystem.QueueStateEvent(mouse, new MouseState { delta = Vector2.zero });
+            yield return null;
+        }
+
+        private IEnumerator WalkToWithKeyboardAndMouse(Keyboard keyboard, Mouse mouse, Vector3 targetWorld, bool sprint, float tolerance)
+        {
+            float elapsed = 0f;
+            while (true)
+            {
+                Vector3 planar = Vector3.ProjectOnPlane(targetWorld - motor.transform.position, Vector3.up);
+                if (planar.magnitude <= tolerance) break;
+                Assert.That(elapsed, Is.LessThan(25f), "Blocked walking toward " + targetWorld + " at " + motor.transform.position);
+                Vector3 dir = planar.normalized;
+                float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                float yawDiff = Mathf.DeltaAngle(motor.transform.eulerAngles.y, targetYaw);
+                float pitchDiff = 0f - motor.Pitch;
+                InputSystem.QueueStateEvent(mouse, new MouseState
+                {
+                    delta = new Vector2(yawDiff / motor.MouseSensitivity, -pitchDiff / motor.MouseSensitivity)
+                });
+                InputSystem.QueueStateEvent(keyboard, sprint ? new KeyboardState(Key.W, Key.LeftShift) : new KeyboardState(Key.W));
+                yield return null;
+                elapsed += Time.deltaTime;
+            }
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState { delta = Vector2.zero });
+            yield return null;
+        }
+
+        private static IEnumerator ClickUiButtonWithMouse(Keyboard keyboard, Mouse mouse, UnityEngine.UI.Button button)
+        {
+            Canvas.ForceUpdateCanvases();
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, button.transform.position);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos }.WithButton(MouseButton.Left, true));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos }.WithButton(MouseButton.Left, false));
+            yield return null;
         }
         [UnityTest] public IEnumerator RiggedHitAndGrabStayGroundedAndReset()
         {

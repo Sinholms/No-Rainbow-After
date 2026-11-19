@@ -2,6 +2,7 @@ using System;
 using NoRainbowAfter.Interaction;
 using NoRainbowAfter.Player;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace NoRainbowAfter.AI
@@ -14,6 +15,7 @@ namespace NoRainbowAfter.AI
         private Func<bool> sendReply;
         private Canvas canvas;
         private GameObject draftPanel, replyPanel;
+        private Button sendButton, closeButton;
         private Mesh starMesh;
         private Material caseMaterial, displayMaterial, reflectorMaterial;
         private bool open, replyAvailable, sent;
@@ -95,6 +97,11 @@ namespace NoRainbowAfter.AI
             canvas.enabled = open && !player.IsPaused;
             draftPanel.SetActive(replyAvailable && !sent);
             replyPanel.SetActive(sent);
+            if (canvas.enabled && EventSystem.current != null)
+            {
+                var target = replyAvailable && !sent ? sendButton : closeButton;
+                if (target != null) EventSystem.current.SetSelectedGameObject(target.gameObject);
+            }
         }
 
         private void BuildUi()
@@ -116,7 +123,7 @@ namespace NoRainbowAfter.AI
             var frame = Panel(backdrop, "Messages", Vector2.zero, new Vector2(776f, 744f), new Color(.056f, .076f, .091f));
             var header = Panel(frame, "Contact", new Vector2(0f, 327f), new Vector2(776f, 90f), new Color(.09f, .13f, .16f));
             Label(header, "Contact Name", "Bayu Kopling", new Vector2(-132f, 0f), new Vector2(440f, 55f), 34, TextAnchor.MiddleLeft);
-            Button(header, "Close", "Tutup [F]", new Vector2(264f, 0f), new Vector2(162f, 48f), Close);
+            closeButton = Button(header, "Close", "Tutup [F]", new Vector2(264f, 0f), new Vector2(162f, 48f), Close);
 
             Message(frame, "Tiga hari lalu", "Ka, lu enggak masuk grafkom? Pak dosen nyariin.", 229f);
             Message(frame, "Kemarin", "Catatan kelas udah gue simpan. Nanti gue kirim.", 120f);
@@ -125,7 +132,7 @@ namespace NoRainbowAfter.AI
             var draft = Panel(frame, "Draft", new Vector2(0f, -227f), new Vector2(704f, 214f), new Color(.09f, .14f, .16f));
             draftPanel = draft.gameObject;
             Label(draft, "Draft Text", Draft, new Vector2(0f, 30f), new Vector2(642f, 94f), 28, TextAnchor.MiddleLeft);
-            Button(draft, "Send", "Kirim balasan", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendReply());
+            sendButton = Button(draft, "Send", "Kirim balasan", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendReply());
 
             var reply = Rect(frame, "New Messages", Vector2.zero, new Vector2(776f, 744f));
             replyPanel = reply.gameObject;
@@ -142,7 +149,7 @@ namespace NoRainbowAfter.AI
             Label(bubble, "Message", message, new Vector2(0f, -12f), new Vector2(550f, 60f), 24, TextAnchor.MiddleLeft);
         }
 
-        private static void Button(Transform parent, string name, string title, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction click)
+        private static Button Button(Transform parent, string name, string title, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction click)
         {
             var panel = Panel(parent, name, position, size, new Color(.19f, .37f, .36f));
             var image = panel.GetComponent<Image>();
@@ -151,6 +158,7 @@ namespace NoRainbowAfter.AI
             button.targetGraphic = image;
             button.onClick.AddListener(click);
             Label(panel, "Label", title, Vector2.zero, size, 22, TextAnchor.MiddleCenter);
+            return button;
         }
 
         private static Text Label(Transform parent, string name, string value, Vector2 position, Vector2 size, int fontSize, TextAnchor alignment)

@@ -25,7 +25,7 @@ namespace NoRainbowAfter.AI
         private AudioSource warning;
         private AudioClip warningClip, radioClip;
         private float clock, visualClock;
-        private bool warned;
+        private bool warned, wasIlluminated;
         private Texture2D hudTexture;
 
         private sealed class Beam
@@ -146,7 +146,17 @@ namespace NoRainbowAfter.AI
         }
 
         public void SetSegment(int index) { Segment = Mathf.Clamp(index, 0, checkpoints.Length - 1); Exposure = 0; warned = false; }
-        public void ResetEncounter() { clock = 0f; Segment = 0; Exposure = 0f; IsIlluminated = false; warned = false; }
+        public void ResetEncounter() { clock = 0f; visualClock = .1f; Segment = 0; Exposure = 0f; IsIlluminated = false; warned = false; wasIlluminated = false; }
+        public bool IsFloorPointVisible(int beamIndex, Vector3 worldPoint, bool legacyThreeDimensionalCone = false)
+        {
+            if (beams == null || beamIndex < 0 || beamIndex >= beams.Length || beams[beamIndex].emitter == null) return false;
+            return ProjectFloor(beams[beamIndex], ref worldPoint) && Visible(beams[beamIndex], worldPoint, legacyThreeDimensionalCone);
+        }
+        public void RebuildFootprints(bool legacyThreeDimensionalCone = false)
+        {
+            if (beams == null) return;
+            foreach (var beam in beams) if (beam.emitter != null) RebuildFootprint(beam, legacyThreeDimensionalCone);
+        }
         private void Update()
         {
             var player = motor != null ? motor.GetComponent<FirstPersonPlayer>() : null;
@@ -157,7 +167,7 @@ namespace NoRainbowAfter.AI
         {
             if (motor == null || checkpoints == null || Segment >= checkpoints.Length || checkpoints[Segment] == null) return false;
             if (!motor.TryRestorePose(checkpoints[Segment].position, checkpoints[Segment].rotation)) return false;
-            clock = 0f; Exposure = 0f; IsIlluminated = false; warned = false;
+            clock = 0f; visualClock = .1f; Exposure = 0f; IsIlluminated = false; warned = false; wasIlluminated = false;
             foreach (var beam in beams)
             {
                 beam.lastCue = -1;
@@ -171,6 +181,7 @@ namespace NoRainbowAfter.AI
                 }
             }
             Physics.SyncTransforms();
+            if (RenderFootprints) RebuildFootprints();
             if (warning != null) warning.Stop();
             return true;
         }
@@ -221,7 +232,14 @@ namespace NoRainbowAfter.AI
                 }
             }
             else { Exposure = Mathf.Max(0f, Exposure - DecayPerSecond * dt); if (Exposure <= 0f) warned = false; }
-            visualClock += dt; if (RenderFootprints && visualClock >= .1f) { visualClock = 0f; foreach (var beam in beams) if (beam.emitter != null) RebuildFootprint(beam); }
+            bool illuminationChanged = wasIlluminated != IsIlluminated;
+            wasIlluminated = IsIlluminated;
+            visualClock += dt;
+            if (RenderFootprints && (illuminationChanged || visualClock >= .04f))
+            {
+                visualClock = 0f;
+                RebuildFootprints();
+            }
         }
 
         private bool SeesPlayer(Beam beam)
@@ -233,11 +251,23 @@ namespace NoRainbowAfter.AI
                    Visible(beam, bottom + Vector3.up * (controller.height * .9f));
         }
 
-        private bool Visible(Beam beam, Vector3 point)
+        private bool Visible(Beam beam, Vector3 point, bool legacyThreeDimensionalCone = false)
         {
             Vector3 delta = point - beam.emitter.position;
             float distance = delta.magnitude;
-            if (distance > beam.range || distance < .001f || Vector3.Angle(beam.emitter.forward, delta) > beam.angle * .5f) return false;
+            if (distance < .001f) return false;
+            if (legacyThreeDimensionalCone)
+            {
+                if (distance > beam.range || Vector3.Angle(beam.emitter.forward, delta) > beam.angle * .5f) return false;
+            }
+            else
+            {
+                Vector3 forward = Vector3.ProjectOnPlane(beam.emitter.forward, Vector3.up).normalized;
+                Vector3 planar = Vector3.ProjectOnPlane(delta, Vector3.up);
+                float planarDistance = planar.magnitude;
+                if (planarDistance > beam.range + .01f || planarDistance < .001f ||
+                    Vector3.Angle(forward, planar) > beam.angle * .5f + .05f) return false;
+            }
             int hitCount = Physics.RaycastNonAlloc(beam.emitter.position, delta / distance, beam.hits, distance, ~0, QueryTriggerInteraction.Ignore);
             if (hitCount >= beam.hits.Length) return false;
             for (int i = 0; i < hitCount; i++)
@@ -250,7 +280,7 @@ namespace NoRainbowAfter.AI
             return true;
         }
 
-        private void RebuildFootprint(Beam beam)
+        private void RebuildFootprint(Beam beam, bool legacyThreeDimensionalCone = false)
         {
             // Polar strips align the mesh edges with the actual cone rather than world axes.
             const int sectors = 32, rings = 18;
@@ -265,8 +295,9 @@ namespace NoRainbowAfter.AI
                 for (int z = 0; z <= rings; z++)
                 {
                     int i = x * (rings + 1) + z;
-                    Vector3 point = origin + direction * (beam.range * z / rings); point.y = floorY;
-                    beam.visible[i] = ProjectFloor(ref point) && Visible(beam, point);
+                    float radius = legacyThreeDimensionalCone ? (beam.range * z / rings) : Mathf.Lerp(.35f, beam.range, (float)z / rings);
+                    Vector3 point = origin + direction * radius; point.y = floorY;
+                    beam.visible[i] = ProjectFloor(beam, ref point, legacyThreeDimensionalCone) && Visible(beam, point, legacyThreeDimensionalCone);
                     beam.points[i] = point;
                 }
             }
@@ -276,30 +307,61 @@ namespace NoRainbowAfter.AI
                 int ic = ia + 1, id = ib + 1;
                 if (!beam.visible[ia] || !beam.visible[ib] || !beam.visible[ic] || !beam.visible[id]) continue;
                 Vector3 a = beam.points[ia], b = beam.points[ib], c = beam.points[ic], d = beam.points[id];
+                if (!legacyThreeDimensionalCone)
+                {
+                    float minY = Mathf.Min(Mathf.Min(a.y, b.y), Mathf.Min(c.y, d.y));
+                    float maxY = Mathf.Max(Mathf.Max(a.y, b.y), Mathf.Max(c.y, d.y));
+                    if (maxY - minY > .06f) continue;
+                }
                 int n = verts.Count;
                 verts.Add(transform.InverseTransformPoint(a)); verts.Add(transform.InverseTransformPoint(b)); verts.Add(transform.InverseTransformPoint(c)); verts.Add(transform.InverseTransformPoint(d));
-                colors.Add(FootprintColor(a, x, z, sectors, rings)); colors.Add(FootprintColor(b, x + 1, z, sectors, rings));
-                colors.Add(FootprintColor(c, x, z + 1, sectors, rings)); colors.Add(FootprintColor(d, x + 1, z + 1, sectors, rings));
+                colors.Add(FootprintColor(a, x, z, sectors, rings, legacyThreeDimensionalCone)); colors.Add(FootprintColor(b, x + 1, z, sectors, rings, legacyThreeDimensionalCone));
+                colors.Add(FootprintColor(c, x, z + 1, sectors, rings, legacyThreeDimensionalCone)); colors.Add(FootprintColor(d, x + 1, z + 1, sectors, rings, legacyThreeDimensionalCone));
                 triangles.Add(n); triangles.Add(n + 2); triangles.Add(n + 1); triangles.Add(n + 1); triangles.Add(n + 2); triangles.Add(n + 3);
             }
             beam.mesh.Clear(); beam.mesh.SetVertices(verts); beam.mesh.SetTriangles(triangles, 0); beam.mesh.SetColors(colors); beam.mesh.RecalculateBounds();
         }
 
-        private Color FootprintColor(Vector3 point, int sector, int ring, int sectors, int rings)
+        private Color FootprintColor(Vector3 point, int sector, int ring, int sectors, int rings, bool legacyThreeDimensionalCone)
         {
             float across = (float)sector / sectors, along = (float)ring / rings;
-            float edge = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(Mathf.Min(across, 1f - across) / .18f));
-            float end = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((1f - along) / .18f));
-            Color color = IsIlluminated && Vector3.Distance(point, motor.transform.position) < 1.8f ? new Color(1f, .12f, .12f) : Color.white;
-            color.a = .22f * edge * end;
+            float fadeWidth = legacyThreeDimensionalCone ? .18f : .12f;
+            float minFade = legacyThreeDimensionalCone ? 0f : .45f;
+            float edge = Mathf.SmoothStep(minFade, 1f, Mathf.Clamp01(Mathf.Min(across, 1f - across) / fadeWidth));
+            float end = Mathf.SmoothStep(minFade, 1f, Mathf.Clamp01((1f - along) / fadeWidth));
+            bool nearPlayer = IsIlluminated && Vector3.Distance(point, motor.transform.position) < 1.8f;
+            Color color = nearPlayer ? new Color(1f, .14f, .14f) : Color.white;
+            color.a = (nearPlayer && !legacyThreeDimensionalCone ? .32f : .22f) * edge * end;
             return color;
         }
 
-        private bool ProjectFloor(ref Vector3 point)
+        private bool ProjectFloor(Beam beam, ref Vector3 point, bool legacyThreeDimensionalCone = false)
         {
-            if (!Physics.Raycast(point + Vector3.up * .35f, Vector3.down, out var hit, 1.5f, ~0, QueryTriggerInteraction.Ignore)) return false;
-            if (hit.collider.transform.IsChildOf(motor.transform) || hit.normal.y < .7f) return false;
-            point.y = hit.point.y + .025f;
+            if (legacyThreeDimensionalCone)
+            {
+                if (!Physics.Raycast(point + Vector3.up * .35f, Vector3.down, out var hit, 1.5f, ~0, QueryTriggerInteraction.Ignore)) return false;
+                if (hit.collider.transform.IsChildOf(motor.transform) || hit.normal.y < .7f) return false;
+                point.y = hit.point.y + .025f;
+                return true;
+            }
+            int hitCount = Physics.RaycastNonAlloc(point + Vector3.up * .45f, Vector3.down, beam.hits, 1.5f, ~0, QueryTriggerInteraction.Ignore);
+            float bestY = float.NegativeInfinity;
+            RaycastHit best = default;
+            bool found = false;
+            for (int i = 0; i < hitCount; i++)
+            {
+                var hit = beam.hits[i];
+                if (hit.collider.transform.IsChildOf(motor.transform) || hit.collider.transform.IsChildOf(beam.emitter) ||
+                    (beam.wrapper != null && hit.collider.transform.IsChildOf(beam.wrapper))) continue;
+                if (hit.point.y > bestY)
+                {
+                    bestY = hit.point.y;
+                    best = hit;
+                    found = true;
+                }
+            }
+            if (!found || best.normal.y < .7f || best.point.y > transform.position.y + .05f) return false;
+            point.y = best.point.y + .025f;
             return true;
         }
 
