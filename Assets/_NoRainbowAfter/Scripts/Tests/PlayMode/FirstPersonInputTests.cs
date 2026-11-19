@@ -102,5 +102,33 @@ namespace NoRainbowAfter.Tests
             Press(mouse.leftButton);
             Assert.That(fightRequests, Is.EqualTo(2));
         }
+
+        [Test]
+        public void CloseInspectUsesFKeyEvenWhenGameplayLocked()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            int closeRequests = 0;
+            source.CloseInspectRequested += () => closeRequests++;
+            Press(keyboard.fKey);
+            Assert.That(closeRequests, Is.EqualTo(1));
+            source.SetGameplayEnabled(false);
+            Release(keyboard.fKey);
+            Press(keyboard.fKey);
+            Assert.That(closeRequests, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void BreatheUsesTabKeyEvenWhenGameplayLocked()
+        {
+            var keyboard = InputSystem.AddDevice<Keyboard>();
+            int breatheRequests = 0;
+            source.BreatheRequested += () => breatheRequests++;
+            Press(keyboard.tabKey);
+            Assert.That(breatheRequests, Is.EqualTo(1));
+            source.SetGameplayEnabled(false);
+            Release(keyboard.tabKey);
+            Press(keyboard.tabKey);
+            Assert.That(breatheRequests, Is.EqualTo(2));
+        }
     }
 }

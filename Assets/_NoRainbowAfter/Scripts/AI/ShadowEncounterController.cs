@@ -251,7 +251,7 @@ namespace NoRainbowAfter.AI
                 return;
             }
 
-            bool suspended = player != null && (player.IsPaused || player.IsInspecting);
+            bool suspended = player != null && (player.IsPaused || player.IsInspecting || player.IsUsingLaptop);
             if (suspended)
             {
                 captureFeedback?.Tick(0f,true,0f);
@@ -550,7 +550,7 @@ namespace NoRainbowAfter.AI
         private void OnFightRequested()
         {
             if (!isActiveAndEnabled || permanentlyResolved || player == null || motor == null) return;
-            if (player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return;
+            if (player.IsPaused || player.IsInspecting || player.IsUsingLaptop || player.IsTransitionLocked) return;
             if (State != ShadowEncounterState.Spawn && State != ShadowEncounterState.Pursue) return;
             if (!CanFightRightNow()) return;
 
@@ -568,7 +568,7 @@ namespace NoRainbowAfter.AI
         {
             if (player == null || motor == null || motor.ViewCamera == null) return false;
             if (player.IsHiding) return false;
-            if (player.IsPaused || player.IsInspecting || player.IsTransitionLocked) return false;
+            if (player.IsPaused || player.IsInspecting || player.IsUsingLaptop || player.IsTransitionLocked) return false;
             if (State != ShadowEncounterState.Spawn && State != ShadowEncounterState.Pursue) return false;
             float visualHeight = placeholderVisual != null ? placeholderVisual.CurrentVisualHeight : 2.15f;
             return ShadowVisibility.CanPlayerFightMonster(
@@ -655,6 +655,8 @@ namespace NoRainbowAfter.AI
         private void BeginCheckpointCaught()
         {
             CaughtCount++;
+            successfulHits = 0;
+            placeholderVisual?.SetHitVariant(false);
             stateTimer = 0f;
             caughtRestoredPose = false;
             ResetHideTracking();
@@ -676,11 +678,14 @@ namespace NoRainbowAfter.AI
                 caughtRestoredPose = true;
                 currentBlackoutAlpha = 1f;
 
-                // Move and disable monster collider BEFORE checkpoint restore so monster never blocks DormSpawn_T04.
+                // Move and disable monster collider BEFORE checkpoint restore so monster never blocks corridor/dorm spawn.
                 SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
                 captureFeedback?.ResetFeedback();
                 RestoreSafeCheckpointPose();
-                CueRequested?.Invoke(new NarrativeCue("Raka", "Napas dulu... aku masih di kamar.", 2.4f, "AUD_C1_CAUGHT"));
+                string caughtLine = shiftedWorld != null && shiftedWorld.Expanded
+                    ? "Stresku memuncak... aku harus mengatur napas dulu sebelum melangkah lagi."
+                    : "Napas dulu... aku harus menenangkan diri.";
+                CueRequested?.Invoke(new NarrativeCue("Raka", caughtLine, 2.8f, "AUD_C1_CAUGHT"));
             }
 
             if (!caughtRestoredPose)
@@ -708,20 +713,36 @@ namespace NoRainbowAfter.AI
             internalCheckpointRestore = true;
             try
             {
-                bool restored = checkpoint != null && checkpoint.TryRestore();
-                if (!restored && motor != null)
+                bool restored = false;
+                if (shiftedWorld != null && shiftedWorld.Expanded)
                 {
-                    Quaternion fallbackRot = Quaternion.Euler(0f, 10f, 0f);
-                    for (int i = 0; i < DormFallbackSpawns.Length; i++)
+                    restored = shiftedWorld.TryRespawnAtCorridorStart();
+                }
+
+                if (!restored)
+                {
+                    restored = checkpoint != null && checkpoint.TryRestore();
+                    if (!restored && motor != null)
                     {
-                        if (motor.TryRestorePose(DormFallbackSpawns[i], fallbackRot))
+                        Quaternion fallbackRot = Quaternion.Euler(0f, 10f, 0f);
+                        for (int i = 0; i < DormFallbackSpawns.Length; i++)
                         {
-                            restored = true;
-                            break;
+                            if (motor.TryRestorePose(DormFallbackSpawns[i], fallbackRot))
+                            {
+                                restored = true;
+                                break;
+                            }
                         }
                     }
+
+                    if (player != null)
+                    {
+                        var barometer = player.GetComponent<StressBarometer>();
+                        barometer?.SetStress(StressBarometer.MaxStress);
+                    }
                 }
-                // Always clear corridor crossing state so encounter waits until player re-enters corridor.
+
+                // Always clear corridor crossing state so encounter waits until player re-enters trigger threshold.
                 director?.ResetCrossing();
             }
             finally

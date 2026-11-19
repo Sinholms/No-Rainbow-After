@@ -87,18 +87,22 @@ Acceptance: scene flow Boot -> MainMenu -> MasterGameplay -> Credits works.
 ```text
 Implement FirstPersonMotor based on CharacterController + Unity Input System:
 WASD, mouse look with cursor lock, LeftShift sprint/stamina (5 seconds initially),
-LeftCtrl crouch, Esc pause, configurable FOV and sensitivity, disable headbob.
+LeftCtrl crouch, Esc pause, F close-inspect, Tab breathing exercise minigame, configurable FOV and sensitivity, disable headbob.
+Include visible organic 5-fingered MiSide-style FPP student body (ACT_Raka_StudentBody) synced to player movement
+and single-layer top-left red Stress Barometer starting at 50% (reducible via [Tab] green-bar breathing with synced breath audio & camera pitch nodding).
 Add a simple test environment and explain how to tune serialized settings.
-Acceptance: all controls work in FIRST PERSON (no third-person camera), player collides, no Console exceptions.
+Acceptance: all controls work in FIRST PERSON (FPP body visible on downward pitch), player collides, no Console exceptions.
 ```
 
 **T03 / Interaction & inspect**
 
 ```text
 Implement IInteractable, PlayerInteractor (camera raycast 2.3m with occlusion),
-interaction prompt and document inspect overlay. Make three test interactables:
-book, work slip, locked door. Each object needs a stable ID and objective flag.
-Acceptance: no interaction through walls; E prompts and overlay work; Esc closes.
+interaction prompt, document inspect overlay closed with [F] (not Esc), and Monkeytype-style
+laptop typing minigame (INT_LAPTOP on study desk PROP_RakaLaptop). Laptop generates 5 college-themed
+sentences (yellow typed highlight, no broken markup tags), scales timers from 60s down to 30s, submits on [Enter] press, auto-submits on timer expiration (raising red Stress
+Barometer on typos/incomplete/timeout; screen turns red & warning blinks at >=70%), auto-exits after 5 completed sentences, and exits on single [Tab] click.
+Acceptance: no interaction through walls; E opens laptop/documents; F closes inspect; 5 sentences auto-exit laptop; 1x [Tab] exits early.
 ```
 
 ## Phase 1 — Chapter 1 vertical slice
@@ -106,17 +110,17 @@ Acceptance: no interaction through walls; E prompts and overlay work; Esc closes
 **T04 / Dorm + corridor greybox**
 
 ```text
-Construct a 4x5m dorm and modular 12-18m corridor using primitives only.
-Include bed, desk, books, doorway, 2 hide spots, CharacterController spawn,
-colliders, initial objective and checkpoint. Set geometry under Chapter1Root.
+Construct a 4x5m dorm and modular 12-18m corridor using primitives/Blender props.
+Include bed, desk, PROP_RakaLaptop, books, doorway, 2 hide spots, CharacterController spawn,
+colliders, initial objective "Mengerjakan tugas" and checkpoint. Set geometry under Chapter1Root.
 Acceptance: playable 5-minute route, no missing collider and no softlock.
 ```
 
 **T05 / Narrative + looping corridor**
 
 ```text
-Implement GameState, ObjectiveTracker, ChapterDirector and C1 LoopAdvance
-(max 3) with small changes to props and light/fog per loop. Add book and work-slip
+Implement GameState, ObjectiveTracker ("Mengerjakan tugas"), ChapterDirector and C1 LoopAdvance
+(max 3) with small changes to props and light/fog per loop. Add laptop/book and work-slip
 objectives, a trigger for ShadowEncounter, an AudioDirector event interface and
 subtitles placeholder. Persist four clue IDs using unique set semantics.
 Acceptance: C1 scripted beats C1-01 to C1-06 execute in order in PlayMode.
@@ -267,14 +271,18 @@ FPP QA:
 Acceptance: QA15 + QA16 pass and prior T06/T11 branch logic still works.
 ```
 
-**T14 / Blender MCP for props**
+**T14 / Blender MCP for props & Raka FPP student body**
 
 ```text
-If Blender MCP is connected, make one original PBR desk as a TEST asset:
-~1.2m wide, bevels, sensible UV, material slots, apply transforms, export
-FBX or glTF as chosen by the project, verify scale/orientation in Unity,
-then create a prefab with proper collider. Do not create all 3D props in one
-batch. Report .blend and export file paths and any manual corrections needed.
+If Blender MCP is connected, search Blender MCP asset libraries for laptop and casual student
+references, then author and customize:
+1) PROP_RakaLaptop (laptop mahasiswa di meja belajar Raka) -> PROP_RakaLaptop.fbx;
+2) ACT_Raka_StudentBody (fisik tubuh FPP Raka ala MiSide organik dengan Subdivision Surface: kemeja
+   kotak-kotak biru-charcoal lengan pendek berkancing, saku+pulpen, lanyard ID card, jam tangan hitam,
+   tangan 5 jari terartikulasi, celana gelap, sepatu slip-on sol putih tanpa kepala agar bebas clipping
+   kamera) -> ACT_Raka_StudentBody.fbx.
+Use bevels, sensible UVs, URP material slots, applied transforms, verify scale/orientation in Unity,
+and wire into MasterGameplay.unity. Report .blend and export file paths.
 ```
 
 **T15 / Audio + accessibility**

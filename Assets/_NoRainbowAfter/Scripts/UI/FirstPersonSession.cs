@@ -103,14 +103,11 @@ namespace NoRainbowAfter.UI
 
         private void TogglePause()
         {
-            var inspection = player.GetComponent<NoRainbowAfter.Interaction.PlayerInteractor>();
-            if (inspection != null && inspection.CloseInspection()) return;
+            // Document inspection is closed with [F], and laptop minigame is exited with 1x [Tab].
             SetPaused(!IsPaused);
         }
         private void PauseForFocusLoss()
         {
-            var inspection = player.GetComponent<NoRainbowAfter.Interaction.PlayerInteractor>();
-            if (inspection != null) inspection.CloseInspection();
             SetPaused(true);
         }
 
