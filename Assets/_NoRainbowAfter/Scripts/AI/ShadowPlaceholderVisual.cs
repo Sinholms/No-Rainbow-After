@@ -24,6 +24,8 @@ namespace NoRainbowAfter.AI
         private float stoopBlend;
         private bool initialized;
         private ShadowMotionPlayback motion;
+        private Animator heroAnimator;
+        private string currentHeroState;
         private bool finalHit;
         public float HitDuration(bool final) => motion != null ? motion.HitDuration(final) : .52f;
         public void SetHitVariant(bool final) { finalHit = final; }
@@ -69,11 +71,19 @@ namespace NoRainbowAfter.AI
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
             }
             motion = visualWrapper != null ? ShadowMotionPlayback.Attach(visualWrapper) : null;
+            if (visualWrapper != null)
+            {
+                foreach (var anim in visualWrapper.GetComponentsInChildren<Animator>(true))
+                {
+                    if (anim.runtimeAnimatorController != null) { heroAnimator = anim; break; }
+                }
+            }
             if (motion != null)
             {
                 upperPivot = motion.Spine;
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
-                renderers = motion.GetComponentsInChildren<Renderer>(true);
+                if (heroAnimator == null)
+                    renderers = motion.GetComponentsInChildren<Renderer>(true);
             }
             initialized = true;
             if(visualWrapper != null)
@@ -121,6 +131,18 @@ namespace NoRainbowAfter.AI
             EnsureInitialized();
             if (visualWrapper == null || !visualWrapper.gameObject.activeSelf) return;
             RestoreArms();
+            if (heroAnimator != null && heroAnimator.isActiveAndEnabled && heroAnimator.runtimeAnimatorController != null)
+            {
+                string desiredState = state == ShadowEncounterState.Spawn ? "Idle_Breath" :
+                    state == ShadowEncounterState.FightResolved ? "Fight_Reaction" :
+                    state == ShadowEncounterState.HideResolved ? "Hide_Pass" :
+                    moveSpeedNormalized > 0.45f ? "Pursue" : "Walk_Lurch";
+                if (currentHeroState != desiredState)
+                {
+                    currentHeroState = desiredState;
+                    heroAnimator.CrossFadeInFixedTime(desiredState, 0.12f, 0);
+                }
+            }
             if (motion != null)
             {
                 if (state == ShadowEncounterState.FightResolved)
