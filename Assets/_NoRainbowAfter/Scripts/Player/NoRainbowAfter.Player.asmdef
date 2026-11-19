@@ -1,6 +1,6 @@
 {
   "name": "NoRainbowAfter.Player",
   "rootNamespace": "NoRainbowAfter.Player",
-  "references": ["Unity.InputSystem"],
+  "references": ["Unity.InputSystem", "Unity.ugui"],
   "autoReferenced": true
 }

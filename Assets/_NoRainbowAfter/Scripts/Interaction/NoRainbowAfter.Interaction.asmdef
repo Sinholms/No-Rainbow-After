@@ -1,1 +1,1 @@
-{"name":"NoRainbowAfter.Interaction","rootNamespace":"NoRainbowAfter.Interaction","references":["NoRainbowAfter.Player","Unity.ugui"],"autoReferenced":true}
+{"name":"NoRainbowAfter.Interaction","rootNamespace":"NoRainbowAfter.Interaction","references":["NoRainbowAfter.Player","Unity.ugui","Unity.InputSystem"],"autoReferenced":true}

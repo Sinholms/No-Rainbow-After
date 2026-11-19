@@ -30,7 +30,7 @@ namespace NoRainbowAfter.AI
             motor.PoseRestored += Release;
             player.InteractRequested += OnExitRequested;
         }
-        private void OnExitRequested() { if(player != null && !player.IsPaused && !player.IsInspecting) TryExit(); }
+        private void OnExitRequested() { if(player != null && !player.IsPaused && !player.IsInspecting && !player.IsBreathing) TryExit(); }
         public bool TryExit()
         {
             if(Occupant == null) { Release(); return true; }

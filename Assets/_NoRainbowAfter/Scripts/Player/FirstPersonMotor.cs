@@ -40,6 +40,7 @@ namespace NoRainbowAfter.Player
         private Vector3 horizontalVelocity;
         private float verticalVelocity;
         private float pitch;
+        private float breathingPitchOffset;
         private float sinceSprint;
         private bool crouchRequested;
         private bool exhausted;
@@ -53,6 +54,7 @@ namespace NoRainbowAfter.Player
         public bool IsCrouched { get; private set; }
         public bool IsSprinting { get; private set; }
         public float Pitch => pitch;
+        public float BreathingPitchOffset => breathingPitchOffset;
 
         private void Awake()
         {
@@ -86,7 +88,7 @@ namespace NoRainbowAfter.Player
             float dt = Mathf.Min(deltaTime, 0.1f);
             transform.Rotate(0f, input.Look.x * mouseSensitivity, 0f, Space.Self);
             pitch = Mathf.Clamp(pitch - input.Look.y * mouseSensitivity, -85f, 85f);
-            viewCamera.transform.localRotation = Quaternion.Euler(pitch, 0, 0);
+            ApplyViewRotation();
 
             if (input.CrouchPressed) crouchRequested = !crouchRequested;
             bool alreadyLow = controller.height < standingHeight - 0.001f;
@@ -156,12 +158,24 @@ namespace NoRainbowAfter.Player
             controller.height = standingHeight;
             controller.center = Vector3.up * (standingHeight * 0.5f);
             controller.enabled = true;
-            horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f;
+            horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f; breathingPitchOffset = 0f;
             crouchRequested = false; IsCrouched = false; IsSprinting = false;
             viewCamera.transform.localRotation = Quaternion.identity;
             UpdateEyeHeight();
             if (notify) PoseRestored?.Invoke();
             return true;
+        }
+
+        public void SetBreathingPitchOffset(float pitchOffsetDegrees)
+        {
+            breathingPitchOffset = Mathf.Clamp(pitchOffsetDegrees, -15f, 15f);
+            ApplyViewRotation();
+        }
+
+        private void ApplyViewRotation()
+        {
+            if (viewCamera != null)
+                viewCamera.transform.localRotation = Quaternion.Euler(Mathf.Clamp(pitch + breathingPitchOffset, -85f, 85f), 0f, 0f);
         }
 
         public void StopMotion()
