@@ -37,6 +37,7 @@ namespace NoRainbowAfter.Narrative
         public GameState State { get; private set; }
         public int LoopIndex { get; private set; }
         public int BeatIndex { get; private set; }
+        public bool HasReadOvertimeSlip => BeatIndex >= 3;
         public bool AwaitingEncounter => (BeatIndex == 3 || BeatIndex == 4) && !encounterBegun && !resolved;
         public bool IsCurrentEncounter(IShadowEncounter candidate) => ReferenceEquals(encounter, candidate);
         // Tests set this before scene load and restore it after the test run.
@@ -44,7 +45,8 @@ namespace NoRainbowAfter.Narrative
         // Environmental monologues use the existing cue stream without advancing story beats.
         public void RequestNarrativeCue(NarrativeCue cue) { if(cue != null) CueRequested?.Invoke(cue); }
 
-        private bool outside, armed, slip, encounterBegun, resolved, bound, pathConfigured;
+        private bool outside, armed, encounterBegun, resolved, bound, pathConfigured;
+        private SceneInteractable overtimeSlip;
         private int generation;
         private IShadowEncounter encounter;
         private string storagePath;
@@ -63,8 +65,14 @@ namespace NoRainbowAfter.Narrative
         private void Start()
         {
             State = new GameState(pathConfigured ? storagePath : StoragePathOverride ?? Path.Combine(Application.persistentDataPath, "clues-v1.json"));
+            foreach (var target in FindObjectsByType<SceneInteractable>(FindObjectsInactive.Include))
+                if (target.gameObject.scene == gameObject.scene && target.StableId == "INT_OVERTIME")
+                {
+                    overtimeSlip = target;
+                    overtimeSlip.SetAvailable(false);
+                    break;
+                }
             Complete("C1-01", "Raka", "Hari ini aku harus berangkat.", "c1_wake");
-            if (interactor != null && interactor.Flags.Contains("objective.overtime")) RegisterSlip();
         }
         private void OnDisable() { Unbind(); generation++; SetEncounter(null); }
         private void Bind()
@@ -102,7 +110,13 @@ namespace NoRainbowAfter.Narrative
             TryBeginEncounter();
         }
         private void OnInteraction(string id) { if (id == "INT_OVERTIME") RegisterSlip(); }
-        private void RegisterSlip() { slip = true; State?.AddClue("CLUE_02"); AdvanceAfterLoop(); }
+        private void RegisterSlip()
+        {
+            if (State == null || BeatIndex != 2 || LoopIndex < 1) return;
+            State.AddClue("CLUE_02");
+            Complete("C1-03", "Raka", "Lembur lagi. Aku hampir lupa.", "c1_slip");
+            TryBeginEncounter();
+        }
         private void Update()
         {
             if (State == null || playerTransform == null || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
@@ -125,17 +139,14 @@ namespace NoRainbowAfter.Narrative
                 if (!armed) return;
                 armed = false;
                 if (BeatIndex < 4 && LoopIndex < 3) { LoopIndex++; State.LoopIndex = LoopIndex; LoopChanged?.Invoke(LoopIndex); }
-                if (BeatIndex == 1) Complete("C1-02", "Raka", "Ada yang berubah di kamar ini.", "c1_loop");
-                AdvanceAfterLoop();
+                if (BeatIndex == 1)
+                {
+                    overtimeSlip?.SetAvailable(true);
+                    Complete("C1-02", "Raka", "Ada yang berubah di kamar ini.", "c1_loop");
+                }
             }
         }
         public void ResetCrossing() { outside = false; armed = false; }
-        private void AdvanceAfterLoop()
-        {
-            if (State == null || BeatIndex != 2 || !slip) return;
-            Complete("C1-03", "Raka", "Lembur lagi. Aku hampir lupa.", "c1_slip");
-            TryBeginEncounter();
-        }
         private void TryBeginEncounter()
         {
             if (!isActiveAndEnabled || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop ||

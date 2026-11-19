@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.6606982">
+  <test-suite type="TestSuite" id="1080" name="No rainbow after" fullname="No rainbow after" runstate="Runnable" testcasecount="61" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.660698" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="SetUpFixture" id="1090" name="NoRainbowAfter.PlayModeTests.dll" fullname="NarrativeStorageIsolation" classname="NarrativeStorageIsolation" runstate="Runnable" testcasecount="61" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.651129" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="12520" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1155" name="NoRainbowAfter" fullname="NoRainbowAfter" runstate="Runnable" testcasecount="46" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.643541" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1156" name="Tests" fullname="NoRainbowAfter.Tests" runstate="Runnable" testcasecount="46" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.642310" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1100" name="ChapterOneExpansionTests" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.637123" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1104" name="RakaHairIsContinuousIndependentAndPausedWithEncounter" fullname="NoRainbowAfter.Tests.ChapterOneExpansionTests.RakaHairIsContinuousIndependentAndPausedWithEncounter" methodname="RakaHairIsContinuousIndependentAndPausedWithEncounter" classname="NoRainbowAfter.Tests.ChapterOneExpansionTests" runstate="Runnable" seed="1398594397" result="Passed" start-time="2026-11-17 04:32:55Z" end-time="2026-11-17 04:33:02Z" duration="6.621746" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/sinholms/AppData/LocalLow/DefaultCompany/No rainbow after\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

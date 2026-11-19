@@ -47,6 +47,8 @@ namespace NoRainbowAfter.AI
 
         private void EnsureInitialized()
         {
+            // Configure is also called by the prefab installer. Runtime rigs must never be baked into that asset.
+            if (!Application.isPlaying) return;
             if (initialized) return;
             if (visualWrapper == null && transform.childCount > 0)
                 visualWrapper = transform.GetChild(0);
@@ -111,12 +113,20 @@ namespace NoRainbowAfter.AI
             ApplyPosture(0f, 0f, 0f, Vector3.zero);
         }
 
+        public void TickSecondaryMotion(float deltaTime)
+        {
+            EnsureInitialized();
+            if (visualWrapper != null && visualWrapper.gameObject.activeInHierarchy)
+                motion?.SampleHair(deltaTime);
+        }
+
         public void TickVisual(
             ShadowEncounterState state,
             float deltaTime,
             float moveSpeedNormalized,
             float stateProgressNormalized,
-            Transform ignoredPlayerRoot = null)
+            Transform ignoredPlayerRoot = null,
+            bool searching = false)
         {
             EnsureInitialized();
             if (visualWrapper == null || !visualWrapper.gameObject.activeSelf) return;
@@ -135,13 +145,14 @@ namespace NoRainbowAfter.AI
             }
             if (motion != null)
             {
-                motion.ResetPose();
                 if (state == ShadowEncounterState.FightResolved)
                 {
                     motion.SampleHit(stateProgressNormalized, finalHit);
                     visualWrapper.localPosition = wrapperBaseLocalPos;
                     return;
                 }
+                if (motion.IsHero) motion.SampleLoop(state, deltaTime, moveSpeedNormalized, searching);
+                else motion.ResetPose();
             }
 
             float dt = Mathf.Max(0f, deltaTime);
@@ -162,6 +173,7 @@ namespace NoRainbowAfter.AI
                     swayRoll = Mathf.Sin(phase * 0.9f) * 1.4f;
                     break;
                 case ShadowEncounterState.Pursue:
+                    if (motion != null && motion.IsHero) break;
                     extraPitch = 5.5f * moveSpeedNormalized + Mathf.Sin(phase * 2f) * 2.8f;
                     swayYaw = Mathf.Sin(phase) * 3.5f * Mathf.Max(0.35f, moveSpeedNormalized);
                     swayRoll = Mathf.Cos(phase) * 3.2f * Mathf.Max(0.35f, moveSpeedNormalized);
@@ -212,6 +224,15 @@ namespace NoRainbowAfter.AI
                 Vector3 shoulder=transform.position+Vector3.up*1.8f+transform.right*(.27f*side);
                 arm.RotateAround(shoulder,transform.right,-72*reach);
             }
+        }
+
+        public void AnimateRecovery(float progress)
+        {
+            EnsureInitialized();
+            RestoreArms();
+            motion?.SampleRecovery(progress);
+            float stagger = Mathf.Sin(Mathf.Clamp01(progress) * Mathf.PI);
+            ApplyPosture(-12f * stagger, 0f, 4f * stagger, Vector3.zero);
         }
 
         private float ComputeTargetStoop(Transform ignoredPlayerRoot)
@@ -268,9 +289,11 @@ namespace NoRainbowAfter.AI
             if (upperPivot != null)
             {
                 float totalPitch = doorwayStoopPitch * stoopBlend + extraPitch;
-                upperPivot.rotation = transform.rotation *
-                    Quaternion.Euler(totalPitch, swayYaw, swayRoll) *
-                    upperRestOffset;
+                if (motion != null)
+                    upperPivot.rotation = transform.rotation * Quaternion.Euler(totalPitch, swayYaw, swayRoll) *
+                        Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
+                else
+                    upperPivot.rotation = transform.rotation * Quaternion.Euler(totalPitch, swayYaw, swayRoll) * upperRestOffset;
             }
         }
     }

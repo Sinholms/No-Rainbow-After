@@ -24,12 +24,12 @@ namespace NoRainbowAfter.Editor
         private static readonly string[] ClipNames =
         {
             "Idle_Breath", "Walk_Lurch", "Pursue", "Search_Cover",
-            "Fight_Reaction", "Hide_Pass", "Approach_Reveal", "Despawn"
+            "Fight_Reaction", "Hide_Pass", "Approach_Reveal", "Despawn", "Hair_Sway"
         };
 
         private static readonly HashSet<string> LoopingClips = new HashSet<string>
         {
-            "Idle_Breath", "Walk_Lurch", "Pursue", "Search_Cover", "Hide_Pass"
+            "Idle_Breath", "Walk_Lurch", "Pursue", "Search_Cover", "Hide_Pass", "Hair_Sway"
         };
 
         [MenuItem("No Rainbow After/Art/Prepare Raka Generated Asset")]
@@ -48,6 +48,7 @@ namespace NoRainbowAfter.Editor
                 .Where(c => !c.name.StartsWith("__preview__", StringComparison.OrdinalIgnoreCase)).ToArray();
             Dictionary<string, AnimationClip> clipsByName = ValidateClips(clips);
             ValidateRigAndMeshes(model);
+            clipsByName["Hair_Sway"] = CreateHairClip(clipsByName["Hair_Sway"]);
 
             Directory.CreateDirectory(MaterialDir);
             Directory.CreateDirectory(PrefabDir);
@@ -72,6 +73,7 @@ namespace NoRainbowAfter.Editor
             importer.importAnimation = true;
             importer.animationType = ModelImporterAnimationType.Generic;
             importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            importer.animationCompression = ModelImporterAnimationCompression.Off;
 
             ModelImporterClipAnimation[] sourceClips = importer.defaultClipAnimations;
             if (sourceClips == null || sourceClips.Length == 0)
@@ -163,6 +165,8 @@ namespace NoRainbowAfter.Editor
                 material.SetTexture("_BumpMap", normalMap);
                 material.SetFloat("_BumpScale", 1f);
                 material.SetFloat("_Metallic", 0f);
+                if (name.StartsWith("Raka_Reference_", StringComparison.Ordinal))
+                    material.SetFloat("_Cull", 0f);
                 material.SetFloat("_Smoothness", smoothness);
                 material.EnableKeyword("_NORMALMAP");
                 string path = MaterialDir + name + ".mat";
@@ -180,6 +184,39 @@ namespace NoRainbowAfter.Editor
             return result;
         }
 
+        private static AnimationClip CreateHairClip(AnimationClip source)
+        {
+            // FBX bakes every bone in each take. Keep only the hair bindings so
+            // secondary motion cannot overwrite walking, flinches, or grab IK.
+            string path = MaterialDir + "Hair_Sway.anim";
+            Directory.CreateDirectory(MaterialDir);
+            var clip = new AnimationClip { name = "Hair_Sway", frameRate = source.frameRate };
+            int curves = 0;
+            foreach (EditorCurveBinding binding in AnimationUtility.GetCurveBindings(source))
+            {
+                string boneName = binding.path.Split('/').Last();
+                if (!boneName.StartsWith("HairSway.", StringComparison.Ordinal) ||
+                    binding.type != typeof(Transform) ||
+                    !binding.propertyName.StartsWith("m_LocalRotation.", StringComparison.Ordinal)) continue;
+                AnimationUtility.SetEditorCurve(clip, binding, AnimationUtility.GetEditorCurve(source, binding));
+                curves++;
+            }
+            if (curves == 0) throw new InvalidOperationException("The hair take contains no HairSway bone curves.");
+            AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(source);
+            settings.loopTime = true;
+            AnimationUtility.SetAnimationClipSettings(clip, settings);
+            AnimationClip existing = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
+            if (existing == null) AssetDatabase.CreateAsset(clip, path);
+            else
+            {
+                EditorUtility.CopySerialized(clip, existing);
+                UnityEngine.Object.DestroyImmediate(clip);
+                EditorUtility.SetDirty(existing);
+                clip = existing;
+            }
+            return clip;
+        }
+
         private static AnimatorController CreateController(Dictionary<string, AnimationClip> clips)
         {
             AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
@@ -194,15 +231,26 @@ namespace NoRainbowAfter.Editor
                         layer.stateMachine.RemoveState(state.state);
             }
 
+            // Rebuild the two layers without leaving stale hair states on reruns.
+            while (controller.layers.Length > 1) controller.RemoveLayer(1);
             AnimatorStateMachine machine = controller.layers[0].stateMachine;
             AnimatorState idle = null;
-            foreach (string clipName in ClipNames)
+            foreach (string clipName in ClipNames.Where(name => name != "Hair_Sway"))
             {
                 AnimatorState state = machine.AddState(clipName);
                 state.motion = clips[clipName];
                 if (clipName == "Idle_Breath") idle = state;
             }
             machine.defaultState = idle;
+            controller.AddLayer("Hair");
+            AnimatorControllerLayer hairLayer = controller.layers[1];
+            hairLayer.defaultWeight = 1f;
+            AnimatorState hair = hairLayer.stateMachine.AddState("Hair_Sway");
+            hair.motion = clips["Hair_Sway"];
+            hairLayer.stateMachine.defaultState = hair;
+            var layers = controller.layers;
+            layers[1] = hairLayer;
+            controller.layers = layers;
             EditorUtility.SetDirty(controller);
             return controller;
         }

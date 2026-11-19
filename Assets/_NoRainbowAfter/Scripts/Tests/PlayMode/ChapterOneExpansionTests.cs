@@ -22,6 +22,22 @@ namespace NoRainbowAfter.Tests
         private ChapterDirector director;
         private ChapterOneCorridorShift world;
         private ShadowEncounterController monster;
+        private string previousStoragePath, isolatedStorageFolder;
+
+        [SetUp] public void IsolateClues()
+        {
+            previousStoragePath = ChapterDirector.StoragePathOverride;
+            isolatedStorageFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NRA-C1-" + Guid.NewGuid().ToString("N"));
+            System.IO.Directory.CreateDirectory(isolatedStorageFolder);
+            ChapterDirector.StoragePathOverride = System.IO.Path.Combine(isolatedStorageFolder, "clues.json");
+        }
+
+        [TearDown] public void RestoreClueStorage()
+        {
+            Time.timeScale = 1f;
+            ChapterDirector.StoragePathOverride = previousStoragePath;
+            if (System.IO.Directory.Exists(isolatedStorageFolder)) System.IO.Directory.Delete(isolatedStorageFolder, true);
+        }
         private IEnumerator Load()
         {
             yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");yield return null;
@@ -119,14 +135,21 @@ namespace NoRainbowAfter.Tests
             motor.ViewCamera.transform.rotation=Quaternion.LookRotation(target+Vector3.up*1.3f-motor.ViewCamera.transform.position);
             Physics.SyncTransforms();
             var rig=monster.GetComponentInChildren<ShadowMotionPlayback>(true);
-            Assert.That(rig, Is.Not.Null, "C1 needs the prepared skinned motion asset.");
-            var fore=rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="ForeL");
+            Assert.That(rig, Is.Not.Null, "C1 needs playback on its visible rig.");
+            Assert.That(rig.IsHero, Is.True, "Reactions must animate the visible Raka model.");
+            Assert.That(monster.GetComponentsInChildren<ShadowMotionPlayback>(true).Length, Is.EqualTo(1), "Do not instantiate a hidden duplicate rig.");
+            Assert.That(rig.GetComponentsInChildren<SkinnedMeshRenderer>().Any(r=>r.enabled), Is.True);
+            var fore=rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="Hand.L");
             var head=rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="Head");
             rig.ResetPose();var rest=fore.position;var fixedRoot=monster.transform.position;
             rig.SampleGrab(.5f);
             Assert.That(Vector3.Dot(fore.position-rest,monster.transform.forward),Is.GreaterThan(.2f),"Hands must reach forward.");
             Assert.That(fore.position.y,Is.LessThan(head.position.y),"Elbows must not rise above the head.");
             rig.ResetPose();Assert.That(Vector3.Distance(rest,fore.position),Is.LessThan(.005f));
+            var spine = rig.Spine.localRotation;
+            monster.GetComponent<ShadowPlaceholderVisual>().TickVisual(ShadowEncounterState.FightResolved, .1f, 0f, .5f, motor.transform);
+            Assert.That(Quaternion.Angle(spine, rig.Spine.localRotation), Is.GreaterThan(2f), "Hit must affect the visible rig.");
+            rig.ResetPose();
             Assert.That(monster.transform.position,Is.EqualTo(fixedRoot));
             string output=Environment.GetEnvironmentVariable("NRA_MOTION_CAPTURE");
             if(!string.IsNullOrEmpty(output))
@@ -141,6 +164,82 @@ namespace NoRainbowAfter.Tests
                 Time.timeScale=1;
             }
         }
+        [UnityTest] public IEnumerator RakaHairIsContinuousIndependentAndPausedWithEncounter()
+        {
+            yield return Load();
+            yield return Expand();
+            Assert.That(motor.TryRestorePose(new Vector3(80f, .1f, -1.65f), Quaternion.Euler(0, 90, 0), false), Is.True);
+            yield return null;
+            Time.timeScale = 0f;
+            var playback = monster.GetComponentInChildren<ShadowMotionPlayback>(true);
+            Assert.That(playback, Is.Not.Null);
+            var hair = playback.GetComponentsInChildren<Transform>(true)
+                .Where(bone => bone.name.StartsWith("HairSway.")).ToArray();
+            Assert.That(hair.Length, Is.EqualTo(9));
+            var clip = playback.GetComponent<Animator>().runtimeAnimatorController.animationClips
+                .Single(animation => animation.name == "Hair_Sway");
+            var root = monster.transform.position;
+            playback.ResetPose();
+            playback.ResetHair();
+            var rest = hair.Select(bone => bone.localRotation).ToArray();
+            var previous = rest.ToArray();
+            float maximumStep = 0f;
+            int steps = Mathf.RoundToInt(clip.length * 60f);
+            for (int step = 0; step < steps; step++)
+            {
+                playback.SampleHair(1f / 60f);
+                for (int i = 0; i < hair.Length; i++)
+                {
+                    maximumStep = Mathf.Max(maximumStep, Quaternion.Angle(previous[i], hair[i].localRotation));
+                    previous[i] = hair[i].localRotation;
+                }
+            }
+            Assert.That(maximumStep, Is.InRange(.01f, 2f), "Hair should move continuously at 60 FPS.");
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(rest[i], hair[i].localRotation), Is.LessThan(.05f), "Loop seam must return smoothly.");
+            playback.ResetHair();
+            playback.SampleHair(1f);
+            var oneSecond = hair.Select(bone => bone.localRotation).ToArray();
+            playback.ResetHair();
+            for (int step = 0; step < 60; step++) playback.SampleHair(1f / 60f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(oneSecond[i], hair[i].localRotation), Is.LessThan(.05f));
+            playback.ResetHair();
+            for (int step = 0; step < 30; step++) playback.SampleHair(1f / 30f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(oneSecond[i], hair[i].localRotation), Is.LessThan(.05f), "Sway must be frame-rate independent.");
+            var visual = monster.GetComponent<ShadowPlaceholderVisual>();
+            var beforeReset = hair.Select(bone => bone.localRotation).ToArray();
+            visual.ResetPostureImmediate(motor.transform);
+            visual.TickSecondaryMotion(1f / 60f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(beforeReset[i], hair[i].localRotation), Is.LessThan(2f), "Posture changes must preserve the hair clock.");
+            var spine = playback.Spine.localRotation;
+            playback.SampleHair(.1f);
+            Assert.That(Quaternion.Angle(spine, playback.Spine.localRotation), Is.LessThan(.01f), "Hair clip must not overwrite body bones.");
+            player.SetPaused(true);
+            var frozen = hair.Select(bone => bone.localRotation).ToArray();
+            monster.TickEncounter(.1f);
+            for (int i = 0; i < hair.Length; i++)
+                Assert.That(Quaternion.Angle(frozen[i], hair[i].localRotation), Is.LessThan(.01f));
+            player.SetPaused(false);
+            monster.TickEncounter(.1f);
+            Assert.That(hair.Select((bone, i) => Quaternion.Angle(frozen[i], bone.localRotation)).Max(), Is.GreaterThan(.05f));
+            Assert.That(monster.transform.position, Is.EqualTo(root));
+            string output = Environment.GetEnvironmentVariable("NRA_MOTION_CAPTURE");
+            if (!string.IsNullOrEmpty(output))
+            {
+                Vector3 target = monster.transform.position;
+                Assert.That(motor.TryRestorePose(target + Vector3.left * 2.4f, Quaternion.Euler(0, 90, 0), false), Is.True);
+                motor.ViewCamera.transform.rotation = Quaternion.LookRotation(target + Vector3.up * 1.95f - motor.ViewCamera.transform.position);
+                for (int i = 0; i < 48; i++)
+                {
+                    monster.TickEncounter(1f / 12f);
+                    CaptureMotionFrame(motor.ViewCamera, output, "Hair", i);
+                }
+            }
+        }
+
         private static void CaptureMotionFrame(Camera camera,string folder,string clip,int frame)
         {
             string path=System.IO.Path.Combine(folder,clip);System.IO.Directory.CreateDirectory(path);
@@ -189,17 +288,31 @@ namespace NoRainbowAfter.Tests
             Assert.That(player.IsTransitionLocked,Is.True);
             yield return new WaitForSeconds(.3f);
             Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.01f));
+            var rig = monster.GetComponentInChildren<ShadowMotionPlayback>(true);
+            var hand = rig.GetComponentsInChildren<Transform>().Single(t=>t.name=="Hand.L");
             player.SetPaused(true);
             var frozen= motor.ViewCamera.transform.localRotation;
+            var frozenHand = hand.position;
             monster.TickEncounter(.1f);
+            yield return null;
+            Assert.That(Vector3.Distance(hand.position, frozenHand), Is.LessThan(.001f), "Visible rig must freeze during pause.");
             Assert.That(motor.ViewCamera.transform.localRotation,Is.EqualTo(frozen));
             player.SetPaused(false);
             yield return new WaitForSeconds(1.1f);
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Pursue));
             Assert.That(player.IsTransitionLocked,Is.False);
             Assert.That(monster.DamageBorderAlpha,Is.GreaterThan(.01f),"Red injury border persists after the first escape.");
-            caught.Invoke(monster,null);
+            Time.timeScale = 0f;
+            var stopped = monster.transform.position;
+            var recoveryPose = rig.Spine.localRotation;
+            for (int i=0;i<10;i++) monster.TickEncounter(.1f);
+            Assert.That(Vector3.Distance(stopped,monster.transform.position),Is.LessThan(.001f), "Grace period gives time to escape.");
+            Assert.That(Quaternion.Angle(recoveryPose,rig.Spine.localRotation),Is.GreaterThan(1f), "Recovery animates instead of freezing.");
+            for (int i=0;i<25;i++) monster.TickEncounter(.1f);
+            Assert.That(Vector3.Distance(stopped,monster.transform.position),Is.GreaterThan(.2f), "Monster must physically resume pursuit after recovery.");
+            for (int i=0;i<100 && monster.State!=ShadowEncounterState.Grabbed;i++) monster.TickEncounter(.1f);
             Assert.That(monster.State,Is.EqualTo(ShadowEncounterState.Grabbed));
+            Time.timeScale = 1f;
             yield return new WaitForSeconds(1.3f);
             Assert.That(monster.CaughtCount,Is.EqualTo(1));
             yield return new WaitForSeconds(1f);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using NoRainbowAfter.Interaction;
 using NoRainbowAfter.Player;
+using NoRainbowAfter.Narrative;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -225,8 +226,27 @@ public class InteractionSceneTests
         player.transform.position = new Vector3(.7f, .04f, 2.6f);
         controller.enabled = true;
         var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(x => x.StableId == "INT_OVERTIME");
+        var director = player.GetComponent<ChapterDirector>();
+        player.SetPaused(false);
         var camera = player.GetComponentInChildren<Camera>();
         var interactor = player.GetComponent<PlayerInteractor>();
+        var laptop = Object.FindAnyObjectByType<LaptopTypingMinigame>();
+        Physics.SyncTransforms();
+        var laptopCenter = laptop.GetComponent<Collider>().bounds.center;
+        camera.transform.rotation = Quaternion.LookRotation(laptopCenter - camera.transform.position);
+        interactor.Interact();
+        Assert.That(laptop.IsActive, Is.True, "The laptop must be reachable from the study desk.");
+        yield return null;
+        for (int i = 0; i < LaptopTypingMinigame.RequiredSentencesForObjective; i++)
+        {
+            foreach (char character in laptop.TargetSentence) laptop.ProcessTypedCharacter(character);
+            laptop.Tick(.05f, enterPressed: true);
+        }
+        Assert.That(interactor.Flags.Contains("objective.laptop"), Is.True);
+        Assert.That(slip.Prompt, Is.Null, "Finishing the laptop task alone must not unlock the slip.");
+        director.SamplePosition(6.1f);
+        director.SamplePosition(4.4f);
+        yield return new WaitForSeconds(1f);
         Physics.SyncTransforms();
         Vector3 point = slip.GetComponent<Collider>().bounds.center;
         Assert.That(PlayerInteractor.FindTarget(new Ray(camera.transform.position, (point - camera.transform.position).normalized), player.transform), Is.SameAs(slip), "Standing ray should reach slip past the player's own capsule.");

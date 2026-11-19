@@ -47,11 +47,11 @@ public sealed class NarrativeTests
     private const string Scene = "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity";
     [TearDown] public void RestoreTime() { Time.timeScale = 1f; }
 
-    [UnityTest] public IEnumerator EarlySlipAndDeferredFightRemainOrdered()
+    [UnityTest] public IEnumerator BlockedEarlySlipAndDeferredFightRemainOrdered()
     {
         yield return RunEncounter(EncounterResponse.Fight);
     }
-    [UnityTest] public IEnumerator EarlySlipAndDeferredHideRemainOrdered()
+    [UnityTest] public IEnumerator BlockedEarlySlipAndDeferredHideRemainOrdered()
     {
         yield return RunEncounter(EncounterResponse.Hide);
     }
@@ -77,7 +77,9 @@ public sealed class NarrativeTests
         int transitions = 0; director.ChapterTransitionRequested += () => transitions++;
         var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(x => x.StableId == "INT_OVERTIME");
         slip.Interact(interactor);
-        Assert.That(director.State.HasClue("CLUE_02"), Is.True);
+        Assert.That(interactor.Flags.Contains("objective.overtime"), Is.False);
+        Assert.That(interactor.IsInspecting, Is.False);
+        Assert.That(slip.Prompt, Is.Null);
         Assert.That(director.BeatIndex, Is.EqualTo(1));
         interactor.CloseInspection();
         director.SamplePosition(6.1f); director.SamplePosition(4.4f);
@@ -86,7 +88,18 @@ public sealed class NarrativeTests
         book.Interact(interactor); interactor.CloseInspection();
         director.SamplePosition(5.1f); director.SamplePosition(4.9f);
         Assert.That(director.LoopIndex, Is.Zero, "Doorway jitter is not a trip.");
-        director.SamplePosition(6.1f); director.SamplePosition(4.4f);
+        slip.Interact(interactor);
+        Assert.That(interactor.Flags.Contains("objective.overtime"), Is.False, "Reading the book alone must not unlock the slip.");
+        director.SamplePosition(6.1f);
+        Assert.That(slip.Prompt, Is.Null, "The player must return to the room first.");
+        director.SamplePosition(4.4f);
+        CollectionAssert.AreEqual(new[] { "C1-01", "C1-02" }, beats);
+        Assert.That(slip.Prompt, Is.Not.Null);
+        Assert.That(director.HasReadOvertimeSlip, Is.False);
+        slip.Interact(interactor);
+        Assert.That(interactor.IsInspecting, Is.True);
+        interactor.CloseInspection();
+        Assert.That(director.State.HasClue("CLUE_02"), Is.True);
         CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03" }, beats);
         Assert.That(director.AwaitingEncounter, Is.True);
         var old = new Encounter { IsReady = true };
@@ -108,6 +121,37 @@ public sealed class NarrativeTests
         Assert.That(transitions, Is.EqualTo(1));
         Assert.That(director.State.Chapter1Response, Is.EqualTo(response));
     }
+    [UnityTest] public IEnumerator EarlyOvertimeFlagCannotSkipReadingAfterFirstReturn()
+    {
+        yield return SceneManager.LoadSceneAsync(Scene); yield return null;
+        var player = Object.FindAnyObjectByType<FirstPersonPlayer>(); player.SetPaused(false);
+        var director = player.GetComponent<ChapterDirector>();
+        var interactor = player.GetComponent<PlayerInteractor>();
+        var tracker = player.GetComponent<ObjectiveTracker>();
+        var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(target => target.StableId == "INT_OVERTIME");
+        // Older or externally supplied flags must not replay an out-of-order read.
+        interactor.Flags.Set("objective.overtime");
+        interactor.NotifyInteraction("INT_OVERTIME");
+        interactor.Flags.Set("objective.book");
+        yield return null;
+        Assert.That(tracker.IsCompleted("objective.overtime"), Is.False);
+        director.SamplePosition(6.1f); director.SamplePosition(4.4f);
+        Assert.That(director.BeatIndex, Is.EqualTo(2));
+        Assert.That(director.HasReadOvertimeSlip, Is.False);
+        yield return null;
+        var hint = (UnityEngine.UI.Text)typeof(ObjectiveTracker)
+            .GetField("hint", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(tracker);
+        Assert.That(hint.text, Is.EqualTo("Periksa slip lembur di kamar."));
+        Assert.That(tracker.IsCompleted("objective.overtime"), Is.False);
+        slip.Interact(interactor); interactor.CloseInspection();
+        yield return null;
+        Assert.That(director.BeatIndex, Is.EqualTo(3));
+        Assert.That(tracker.IsCompleted("objective.overtime"), Is.True);
+        Assert.That(hint.text, Is.EqualTo("Kembali ke lorong."));
+        slip.Interact(interactor); interactor.CloseInspection();
+        Assert.That(director.BeatIndex, Is.EqualTo(3), "Rereading must not repeat the story beat.");
+    }
+
     [UnityTest] public IEnumerator LoopCapPauseAndCheckpointReset()
     {
         yield return SceneManager.LoadSceneAsync(Scene); yield return null;
@@ -202,8 +246,8 @@ public sealed class NarrativeTests
         var audio = new List<string>(); director.CueRequested += cue => audio.Add(cue.AudioCueId);
         interactor.Flags.Set("objective.book");
         var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(x => x.StableId == "INT_OVERTIME");
-        slip.Interact(interactor); interactor.CloseInspection();
         director.SamplePosition(6.1f); director.SamplePosition(4.4f);
+        slip.Interact(interactor); interactor.CloseInspection();
         director.SamplePosition(6.1f);
         Assert.That(director.AwaitingEncounter, Is.True);
         Assert.That(audio, Does.Not.Contain("AUD_C1_SHADOW"));

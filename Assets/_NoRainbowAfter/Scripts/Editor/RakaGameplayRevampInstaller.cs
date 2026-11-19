@@ -213,7 +213,7 @@ namespace NoRainbowAfter.Editor
 
             var laptopGo = new GameObject("PROP_RakaLaptop");
             laptopGo.transform.SetParent(chapterRoot, false);
-            laptopGo.transform.position = new Vector3(1.03f, 0.803f, 3.53f);
+            laptopGo.transform.position = new Vector3(0.86f, 0.803f, 3.53f);
             laptopGo.transform.rotation = Quaternion.identity;
 
             var laptopVisual = (GameObject)PrefabUtility.InstantiatePrefab(laptopModel, scene);
