@@ -38,6 +38,17 @@ namespace NoRainbowAfter.Tests
                     var image = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
                     image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); image.Apply();
                     System.IO.File.WriteAllBytes("Captures/ChapterTwo/blockout.png", image.EncodeToPNG());
+                    Object.Destroy(image);
+                    var view = motor.ViewCamera.transform;
+                    Vector3 oldPosition = view.localPosition; Quaternion oldRotation = view.localRotation;
+                    Transform source = street.Lamps[2];
+                    view.position = source.position + source.forward * 2.2f;
+                    view.LookAt(source.position);
+                    motor.ViewCamera.Render(); RenderTexture.active = rt;
+                    image = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+                    image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); image.Apply();
+                    System.IO.File.WriteAllBytes("Captures/ChapterTwo/shadow-light.png", image.EncodeToPNG());
+                    view.localPosition = oldPosition; view.localRotation = oldRotation;
                     motor.ViewCamera.targetTexture = oldTarget; RenderTexture.active = oldActive;
                     Object.Destroy(image); Object.Destroy(rt);
                 }

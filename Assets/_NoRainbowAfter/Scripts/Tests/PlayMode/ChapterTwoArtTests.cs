@@ -30,6 +30,16 @@ namespace NoRainbowAfter.Tests
             Assert.IsTrue(motor.TryRestorePose(stance,street.transform.rotation,false));
             encounter.ManualTick(.05f);
             Assert.IsTrue(encounter.IsIlluminated,"The standing head is above the low crate");
+            float beforePause=encounter.Exposure;
+            Quaternion lampRotation=street.Lamps[2].rotation;
+            encounter.AutoTick=true;
+            player.SetPaused(true);
+            yield return null;
+            yield return null;
+            Assert.AreEqual(beforePause,encounter.Exposure);
+            Assert.That(Quaternion.Angle(lampRotation,street.Lamps[2].rotation),Is.LessThan(.001f));
+            player.SetPaused(false);
+            encounter.AutoTick=false;
             motor.Simulate(new FirstPersonFrame{CrouchPressed=true},.08f);
             for(int i=0;i<6;i++) motor.Simulate(default,.08f);
             encounter.ManualTick(.05f);

@@ -35,6 +35,7 @@ namespace NoRainbowAfter.AI
             public ShadowMotionPlayback motion;
             public Vector3 patrolOrigin, patrolOffset;
             public Quaternion baseRotation;
+            public Quaternion animatedHeadPose;
             public float yaw, period;
             public int lastCue = -1;
             public readonly RaycastHit[] hits = new RaycastHit[32];
@@ -47,7 +48,7 @@ namespace NoRainbowAfter.AI
             public Material material;
             public MeshFilter filter;
             public GameObject slit;
-            public Light light;
+            public Light light, glow;
         }
 
         public void Configure(FirstPersonMotor player, Transform[] emitters, Transform[] shadowWrappers, Transform[] segmentCheckpoints)
@@ -65,9 +66,17 @@ namespace NoRainbowAfter.AI
                     beam.actor = beam.wrapper.parent != null ? beam.wrapper.parent : beam.wrapper;
                     beam.patrolOrigin = beam.actor.position;
                     beam.motion = ShadowMotionPlayback.Attach(beam.wrapper);
-                    // Keep the authored beam direction and position while making it follow the visible head.
+                    // On the Raka rig the front fold of Raka_Linen is 11 cm up and 15 cm
+                    // forward of the Head joint. Bind after sampling the loaded rig's rest pose.
                     foreach (var bone in beam.wrapper.GetComponentsInChildren<Transform>(true))
-                        if (bone.name == "Head") { beam.head = bone; beam.emitter.SetParent(bone, true); break; }
+                    {
+                        if (bone.name != "Head") continue;
+                        beam.head = bone;
+                        beam.animatedHeadPose = bone.localRotation;
+                        beam.emitter.position = bone.position + beam.actor.TransformVector(new Vector3(0f,.107f,.152f));
+                        beam.emitter.SetParent(bone, true);
+                        break;
+                    }
                 }
                 beam.baseRotation = beam.emitter.localRotation;
                 if (beam.head != null)
@@ -75,8 +84,8 @@ namespace NoRainbowAfter.AI
                     beam.slit = GameObject.CreatePrimitive(PrimitiveType.Quad);
                     beam.slit.name = "Blindfold light slit";
                     beam.slit.transform.SetParent(beam.emitter, false);
-                    beam.slit.transform.localPosition = Vector3.forward * .025f;
-                    beam.slit.transform.localScale = new Vector3(.11f, .018f, 1f);
+                    beam.slit.transform.localPosition = Vector3.forward * .004f;
+                    beam.slit.transform.localScale = new Vector3(.082f, .008f, 1f);
                     Destroy(beam.slit.GetComponent<Collider>());
                 }
                 beam.light = beam.emitter.GetComponent<Light>();
@@ -84,6 +93,12 @@ namespace NoRainbowAfter.AI
                 beam.light.enabled = true; beam.light.type = LightType.Spot; beam.light.color = Color.white;
                 beam.light.range = Range; beam.light.spotAngle = ConeAngle; beam.light.intensity = 2f;
                 beam.light.shadows = LightShadows.Soft;
+                if (beam.wrapper == null)
+                {
+                    var glowObject = new GameObject("Headlamp glow"); glowObject.transform.SetParent(beam.emitter, false);
+                    beam.glow = glowObject.AddComponent<Light>(); beam.glow.type = LightType.Point;
+                    beam.glow.range = 1.4f; beam.glow.intensity = .6f; beam.glow.color = new Color(1f, .88f, .7f);
+                }
                 var footprint = new GameObject("Spotlight floor footprint");
                 footprint.transform.SetParent(transform, false);
                 beam.filter = footprint.AddComponent<MeshFilter>();
@@ -149,7 +164,11 @@ namespace NoRainbowAfter.AI
                 if (beam.actor != null) beam.actor.position = beam.patrolOrigin;
                 if (beam.motion != null) beam.motion.ResetPose();
                 if (beam.emitter != null && beam.head == null) beam.emitter.localRotation = beam.baseRotation * Quaternion.Euler(0f, -beam.yaw, 0f);
-                if (beam.head != null) beam.head.localRotation *= Quaternion.Euler(0f, -beam.yaw, 0f);
+                if (beam.head != null)
+                {
+                    beam.animatedHeadPose = beam.head.localRotation;
+                    beam.head.rotation = Quaternion.AngleAxis(-beam.yaw, beam.actor.up) * beam.head.rotation;
+                }
             }
             Physics.SyncTransforms();
             if (warning != null) warning.Stop();
@@ -166,6 +185,7 @@ namespace NoRainbowAfter.AI
                 float phase = beam.period > 0 ? Mathf.PingPong(clock / beam.period * 2f, 1f) : .5f;
                 if (beam.wrapper != null)
                 {
+                    if (beam.head != null) beam.head.localRotation = beam.animatedHeadPose;
                     if (beam.yaw > 0f && beam.period > 0f)
                     {
                         int cue = Mathf.FloorToInt((clock + .18f) / (beam.period * .5f));
@@ -179,7 +199,11 @@ namespace NoRainbowAfter.AI
                         beam.motion.SampleHair(dt);
                     }
                 }
-                if (beam.head != null) beam.head.localRotation *= Quaternion.Euler(0f, (phase * 2f - 1f) * beam.yaw, 0f);
+                if (beam.head != null)
+                {
+                    beam.animatedHeadPose = beam.head.localRotation;
+                    beam.head.rotation = Quaternion.AngleAxis((phase * 2f - 1f) * beam.yaw, beam.actor.up) * beam.head.rotation;
+                }
                 else beam.emitter.localRotation = beam.baseRotation * Quaternion.Euler(0f, (phase * 2f - 1f) * beam.yaw, 0f);
             }
             Physics.SyncTransforms();
@@ -254,11 +278,21 @@ namespace NoRainbowAfter.AI
                 Vector3 a = beam.points[ia], b = beam.points[ib], c = beam.points[ic], d = beam.points[id];
                 int n = verts.Count;
                 verts.Add(transform.InverseTransformPoint(a)); verts.Add(transform.InverseTransformPoint(b)); verts.Add(transform.InverseTransformPoint(c)); verts.Add(transform.InverseTransformPoint(d));
-                Color color = IsIlluminated && Vector3.Distance(c, motor.transform.position) < 2f ? new Color(1f,.12f,.12f) : Color.white;
-                colors.Add(color); colors.Add(color); colors.Add(color); colors.Add(color);
+                colors.Add(FootprintColor(a, x, z, sectors, rings)); colors.Add(FootprintColor(b, x + 1, z, sectors, rings));
+                colors.Add(FootprintColor(c, x, z + 1, sectors, rings)); colors.Add(FootprintColor(d, x + 1, z + 1, sectors, rings));
                 triangles.Add(n); triangles.Add(n + 2); triangles.Add(n + 1); triangles.Add(n + 1); triangles.Add(n + 2); triangles.Add(n + 3);
             }
             beam.mesh.Clear(); beam.mesh.SetVertices(verts); beam.mesh.SetTriangles(triangles, 0); beam.mesh.SetColors(colors); beam.mesh.RecalculateBounds();
+        }
+
+        private Color FootprintColor(Vector3 point, int sector, int ring, int sectors, int rings)
+        {
+            float across = (float)sector / sectors, along = (float)ring / rings;
+            float edge = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(Mathf.Min(across, 1f - across) / .18f));
+            float end = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((1f - along) / .18f));
+            Color color = IsIlluminated && Vector3.Distance(point, motor.transform.position) < 1.8f ? new Color(1f, .12f, .12f) : Color.white;
+            color.a = .22f * edge * end;
+            return color;
         }
 
         private bool ProjectFloor(ref Vector3 point)
@@ -271,12 +305,12 @@ namespace NoRainbowAfter.AI
 
         private void OnDisable()
         {
-            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) beam.filter.gameObject.SetActive(false); if (beam.light != null) beam.light.enabled = false; if (beam.slit != null) beam.slit.SetActive(false); }
+            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) beam.filter.gameObject.SetActive(false); if (beam.light != null) beam.light.enabled = false; if (beam.glow != null) beam.glow.enabled = false; if (beam.slit != null) beam.slit.SetActive(false); }
             if (warning != null) warning.Stop();
         }
         private void OnEnable()
         {
-            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) beam.filter.gameObject.SetActive(true); if (beam.light != null) beam.light.enabled = true; if (beam.slit != null) beam.slit.SetActive(true); }
+            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) beam.filter.gameObject.SetActive(true); if (beam.light != null) beam.light.enabled = true; if (beam.glow != null) beam.glow.enabled = true; if (beam.slit != null) beam.slit.SetActive(true); }
         }
         private void OnGUI()
         {
@@ -289,7 +323,7 @@ namespace NoRainbowAfter.AI
 
         private void OnDestroy()
         {
-            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) Destroy(beam.filter.gameObject); if (beam.mesh != null) Destroy(beam.mesh); if (beam.material != null) Destroy(beam.material); if (beam.slit != null) Destroy(beam.slit); }
+            if (beams != null) foreach (var beam in beams) { if (beam.filter != null) Destroy(beam.filter.gameObject); if (beam.glow != null) Destroy(beam.glow.gameObject); if (beam.mesh != null) Destroy(beam.mesh); if (beam.material != null) Destroy(beam.material); if (beam.slit != null) Destroy(beam.slit); }
             if (warningClip != null) Destroy(warningClip); if (radioClip != null) Destroy(radioClip); if (hudTexture != null) Destroy(hudTexture);
         }
     }
