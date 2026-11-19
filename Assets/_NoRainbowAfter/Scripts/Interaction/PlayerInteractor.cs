@@ -53,7 +53,7 @@ namespace NoRainbowAfter.Interaction
         private void Update()
         {
             if (canvas != null) canvas.enabled = !player.IsPaused;
-            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing;
+            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing && !player.IsTransitionLocked;
             reticle.enabled = showWorldUi;
             prompt.enabled = showWorldUi;
             if (!showWorldUi || viewCamera == null) { SetFocus(null); return; }

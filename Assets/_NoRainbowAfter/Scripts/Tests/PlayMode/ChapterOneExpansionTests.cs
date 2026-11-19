@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NoRainbowAfter.AI;
 using NoRainbowAfter.Interaction;
+using NoRainbowAfter.Level;
 using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
 using NUnit.Framework;
@@ -103,6 +105,8 @@ namespace NoRainbowAfter.Tests
             Assert.That(player.IsHiding,Is.True,"Exiting breathing keeps Raka safely hidden until pressing E.");
 
             int transitions=0;director.ChapterTransitionRequested+=()=>transitions++;
+            var chapterTwoBeats = new List<string>();
+            director.BeatCompleted += beat => { if (beat.StartsWith("C2-", StringComparison.Ordinal)) chapterTwoBeats.Add(beat); };
             yield return new WaitForSeconds(8f);
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
             Assert.That(transitions,Is.Zero);
@@ -123,7 +127,125 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor.transform.position.x, Is.LessThan(4f), "Finishing Chapter 1 must return Raka to his dorm room, not MainMenu.");
             Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, Is.EqualTo("MasterGameplay"));
             var objLabel = GameObject.Find("TestObjective").GetComponent<UnityEngine.UI.Text>();
-            Assert.That(objLabel.text, Is.EqualTo("Chapter 2 sedang dikembangkan"));
+            Assert.That(objLabel.text, Is.EqualTo("Kerjakan tugas di laptop"));
+            Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter2"));
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
+            Assert.That(player.IsTransitionLocked, Is.False);
+            yield return CompleteChapterTwo(chapterTwoBeats, objLabel);
+        }
+
+        private IEnumerator CompleteChapterTwo(List<string> beats, UnityEngine.UI.Text objective)
+        {
+            var interactions = player.GetComponent<PlayerInteractor>();
+            var stress = player.GetComponent<StressBarometer>();
+            var checkpoint = player.GetComponent<DormCheckpoint>();
+            var laptop = Object.FindAnyObjectByType<LaptopTypingMinigame>();
+            var phone = Object.FindAnyObjectByType<ChapterTwoPhone>();
+            string[] clues = director.State.ClueIds.ToArray();
+            int chapterThreeRequests = 0;
+            director.ChapterThreeTransitionRequested += () => chapterThreeRequests++;
+
+            var deskApproach = new Vector3(.26f, .04f, 2.67f);
+            Assert.That(motor.TryRestorePose(deskApproach, Quaternion.identity), Is.True);
+            AimAt(phone.GetComponent<Collider>());
+            interactions.Interact();
+            Assert.That(player.IsInspecting, Is.True, "Opening the phone shows Bayu's old messages.");
+            Assert.That(phone.TrySendReply(), Is.False, "The reply becomes available after the bag.");
+            ClosePhone(phone);
+
+            AimAt(laptop.GetComponent<Collider>());
+            interactions.Interact();
+            yield return null;
+            Assert.That(laptop.IsActive, Is.True);
+            StringAssert.Contains("kecelakaan", laptop.TargetSentence);
+            SubmitReportSection(laptop);
+            string next = laptop.TargetSentence;
+            laptop.ProcessTypedCharacter(next[0]);
+            laptop.Tick(0f, false, tabPressed: true);
+            AimAt(laptop.GetComponent<Collider>());
+            interactions.Interact();
+            yield return null;
+            Assert.That(laptop.CompletedSentences, Is.EqualTo(1));
+            Assert.That(laptop.TargetSentence, Is.EqualTo(next));
+            Assert.That(laptop.CurrentInput, Is.Empty);
+            for (int i = 0; i < 3; i++) SubmitReportSection(laptop);
+            laptop.Tick(0f, true);
+            laptop.SubmitInput();
+            Assert.That(laptop.CompletedSentences, Is.EqualTo(4));
+            Assert.That(laptop.SubmittedAttempts, Is.EqualTo(4));
+            Assert.That(stress.CurrentStress, Is.EqualTo(100f));
+            Assert.That(stress.OverlayCanvas.enabled, Is.True);
+            Assert.That(player.IsTransitionLocked, Is.True);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ReportSubmitted));
+
+            float entryDeadline = Time.unscaledTime + 4f;
+            while (director.State.Chapter2Beat == ChapterTwoBeat.ReportSubmitted && Time.unscaledTime < entryDeadline)
+                yield return null;
+            var street = Object.FindAnyObjectByType<ChapterTwoStreet>();
+            Assert.That(street, Is.Not.Null);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StreetEntered));
+            Assert.That(player.IsTransitionLocked, Is.True, "The street fade keeps control locked after the dorm deactivates.");
+            yield return new WaitForSeconds(.8f);
+            Assert.That(objective.text, Is.EqualTo("Capai halte di seberang garis polisi"));
+            Assert.That(stress.OverlayCanvas.enabled, Is.False);
+            Assert.That(player.IsTransitionLocked, Is.False);
+            Assert.That(street.Bag.Prompt, Is.Null);
+            Assert.That(checkpoint.TryRestore(), Is.True);
+            Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.1f));
+
+            for (int i = 1; i < street.Checkpoints.Length; i++)
+            {
+                var marker = street.Checkpoints[i];
+                Assert.That(motor.TryRestorePose(marker.position + marker.forward * .03f, marker.rotation), Is.True);
+                street.CheckProgress();
+            }
+            var safe = street.Shelter.transform;
+            Assert.That(motor.TryRestorePose(safe.TransformPoint(new Vector3(0f, -1.01f, -.92f)), safe.rotation), Is.True);
+            street.CheckProgress();
+            street.CheckProgress();
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ShelterReached));
+            AimAt(street.Bag.GetComponent<Collider>());
+            interactions.Interact();
+            Assert.That(interactions.IsInspecting, Is.True);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.BagInspected));
+            interactions.NotifyInteraction("INT_C2_BAG");
+            Assert.That(player.IsTransitionLocked, Is.False, "Raka can read the bag inspection before the fade.");
+            interactions.CloseInspection();
+            yield return new WaitForSeconds(1.25f);
+            Assert.That(street.gameObject.activeSelf, Is.False);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ReturnedToDorm));
+            Assert.That(objective.text, Is.EqualTo("Balas pesan Bayu"));
+
+            Assert.That(motor.TryRestorePose(deskApproach, Quaternion.identity), Is.True);
+            AimAt(phone.GetComponent<Collider>());
+            interactions.Interact();
+            Assert.That(phone.TrySendReply(), Is.True);
+            Assert.That(phone.TrySendReply(), Is.False);
+            ClosePhone(phone);
+            yield return null;
+            Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter3"));
+            Assert.That(objective.text, Is.EqualTo("Temui Bayu di kampus"));
+            Assert.That(chapterThreeRequests, Is.EqualTo(1));
+            CollectionAssert.AreEquivalent(clues, director.State.ClueIds);
+            CollectionAssert.AreEqual(new[] { "C2-01", "C2-02", "C2-03", "C2-04", "C2-05", "C2-06", "C2-07" }, beats);
+        }
+
+        private void AimAt(Collider target)
+        {
+            Physics.SyncTransforms();
+            var eye = motor.ViewCamera.transform;
+            eye.rotation = Quaternion.LookRotation(target.bounds.center - eye.position);
+        }
+
+        private static void SubmitReportSection(LaptopTypingMinigame laptop)
+        {
+            foreach (char letter in laptop.TargetSentence) laptop.ProcessTypedCharacter(letter);
+            laptop.Tick(0f, true);
+        }
+
+        private static void ClosePhone(ChapterTwoPhone phone)
+        {
+            phone.GetComponentsInChildren<UnityEngine.UI.Button>().Single(button => button.name == "Close").onClick.Invoke();
         }
         [UnityTest] public IEnumerator RiggedHitAndGrabStayGroundedAndReset()
         {

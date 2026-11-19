@@ -169,7 +169,8 @@ namespace NoRainbowAfter.AI
         {
             captureFeedback?.ResetFeedback();
             UnbindEvents();
-            if (player != null && player.IsTransitionLocked)
+            if (player != null && player.IsTransitionLocked &&
+                (State == ShadowEncounterState.Grabbed || State == ShadowEncounterState.Caught))
                 player.SetTransitionLocked(false);
 
             activeResolve = null;

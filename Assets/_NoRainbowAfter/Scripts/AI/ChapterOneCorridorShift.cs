@@ -28,6 +28,7 @@ namespace NoRainbowAfter.AI
         private NavMeshDataInstance instance;
         private bool shifting;
         private ObjectiveTracker objectives;
+        private ChapterTwoFlow chapterTwo;
         private bool arrivalNarrated;
         private Vector3 lastSafePosition;
         private float corridorStressTimer;
@@ -37,6 +38,7 @@ namespace NoRainbowAfter.AI
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
             stressBarometer=GetComponent<StressBarometer>();
             objectives=GetComponent<ObjectiveTracker>();
+            chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
             if(Corridor != null) { CreateExitDoor(); Corridor.SetActive(false); }
         }
@@ -56,10 +58,9 @@ namespace NoRainbowAfter.AI
                 }
                 TickCorridorStress(Time.deltaTime);
             }
-            if(objectives != null && director != null)
+            if(objectives != null && director != null && !director.ChapterOneFinished)
             {
-                if(director.ChapterOneFinished) objectives.SetChapterGuidance("Chapter 2 sedang dikembangkan","Chapter 1 selesai. Tekan [TAB] untuk atur napas atau [ESC] untuk jeda.");
-                else if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
+                if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
                 else if(RequiresBreathRecovery) objectives.SetChapterGuidance("Atur napas terlebih dahulu","Stres memuncak 100%! Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan.");
                 else if(director.BeatIndex>=6) objectives.SetChapterGuidance("Cari pintu keluar",player.IsHiding ? "Bayangan itu telah pergi. Tekan E untuk keluar dari lemari." : "Temukan pintu keluar di ujung lorong.");
                 else if(player.IsHiding) objectives.SetChapterGuidance("Tetap bersembunyi","Tekan [TAB] untuk atur napas. Tunggu langkah menjauh lalu tekan E untuk keluar.");
@@ -167,26 +168,12 @@ namespace NoRainbowAfter.AI
         }
         private IEnumerator ExitToChapterTwo()
         {
-            shifting = true; player.SetTransitionLocked(true);
-            var root = new GameObject("Chapter transition", typeof(Canvas));
-            var canvas = root.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 50;
-            var panel = new GameObject("Blackout", typeof(RectTransform), typeof(Image)); panel.transform.SetParent(root.transform, false);
-            var rect = (RectTransform)panel.transform; rect.anchorMin = Vector2.zero; rect.anchorMax = Vector2.one; rect.offsetMin = rect.offsetMax = Vector2.zero;
-            var image = panel.GetComponent<Image>(); image.color = Color.black; image.raycastTarget = false;
-            yield return new WaitForSeconds(.45f);
-            director.FinishChapterOne();
-            GetComponent<SubtitlePlaceholder>()?.ClearQueuedCues();
-            var titleObject = new GameObject("Chapter complete", typeof(RectTransform), typeof(Text));
-            titleObject.transform.SetParent(root.transform, false);
-            var titleRect = (RectTransform)titleObject.transform;
-            titleRect.anchorMin = titleRect.anchorMax = new Vector2(.5f, .5f);
-            titleRect.sizeDelta = new Vector2(960f, 240f);
-            var title = titleObject.GetComponent<Text>();
-            title.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            title.alignment = TextAnchor.MiddleCenter; title.fontSize = 36;
-            title.color = Color.white; title.raycastTarget = false;
-            title.text = "CHAPTER 1 SELESAI\n\nKembali ke kamar kos...\n(Chapter 2 sedang dikembangkan)";
-
+            shifting = true;
+            yield return chapterTwo.WakeFromChapterOne(LeaveCorridor);
+            shifting = false;
+        }
+        private void LeaveCorridor()
+        {
             HidingWardrobe.Occupied?.Release();
             RequiresBreathRecovery = false;
             player.SetBreathRecoveryRequired(false);
@@ -194,17 +181,7 @@ namespace NoRainbowAfter.AI
             if (Corridor != null) Corridor.SetActive(false);
             Expanded = false;
             Physics.SyncTransforms();
-
-            var checkpoint = GetComponent<DormCheckpoint>();
-            if (checkpoint == null || !checkpoint.TryRestore())
-                motor.TryRestorePose(new Vector3(0.15f, 0.04f, 1.1f), Quaternion.Euler(0f, 10f, 0f));
             director.ResetCrossing();
-
-            yield return new WaitForSeconds(0.95f);
-            Destroy(root);
-            player.SetTransitionLocked(false);
-            shifting = false;
-            objectives?.SetChapterGuidance("Chapter 2 sedang dikembangkan", "Chapter 1 selesai. Tekan [TAB] untuk atur napas atau [ESC] untuk jeda.");
         }
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {

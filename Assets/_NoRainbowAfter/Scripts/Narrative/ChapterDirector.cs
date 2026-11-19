@@ -34,6 +34,7 @@ namespace NoRainbowAfter.Narrative
         public event Action<int> LoopChanged;
         public event Action<string> BeatCompleted;
         public event Action ChapterTransitionRequested;
+        public event Action ChapterThreeTransitionRequested;
         public GameState State { get; private set; }
         public int LoopIndex { get; private set; }
         public int BeatIndex { get; private set; }
@@ -173,6 +174,17 @@ namespace NoRainbowAfter.Narrative
             if (State == null || BeatIndex < 6 || ChapterOneFinished) return false;
             ChapterOneFinished = true;
             ChapterTransitionRequested?.Invoke();
+            return true;
+        }
+        public bool AdvanceChapterTwo(ChapterTwoBeat next)
+        {
+            if (!ChapterOneFinished || State == null || State.ActiveChapter == "Chapter3" ||
+                (int)next != (int)State.Chapter2Beat + 1 || next > ChapterTwoBeat.RepliedToBayu) return false;
+
+            State.Chapter2Beat = next;
+            State.ActiveChapter = next == ChapterTwoBeat.RepliedToBayu ? "Chapter3" : "Chapter2";
+            BeatCompleted?.Invoke($"C2-{(int)next:00}");
+            if (next == ChapterTwoBeat.RepliedToBayu) ChapterThreeTransitionRequested?.Invoke();
             return true;
         }
         private void Complete(string id, string speaker, string text, string audio)

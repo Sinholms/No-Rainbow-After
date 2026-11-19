@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using NoRainbowAfter.Player;
 using UnityEngine;
@@ -66,10 +67,16 @@ namespace NoRainbowAfter.Interaction
 
         private int sentenceIndex;
         private int openedFrame = -1;
+        private string[] reportSections;
+        private bool retryReportTransition;
+        private GameObject timerTrack;
+        private AudioSource typingSource;
+        private AudioClip typingClip;
 
         public string StableId => "INT_LAPTOP";
         public string DisplayName => "Laptop Raka";
-        public string Prompt => "Kerjakan Tugas";
+        public string Prompt => IsReportComplete ? (retryReportTransition ? "Lanjutkan" : null)
+            : IsReport ? "Salin laporan kecelakaan" : "Kerjakan Tugas";
 
         public bool IsActive { get; private set; }
         public string TargetSentence { get; private set; } = string.Empty;
@@ -78,9 +85,24 @@ namespace NoRainbowAfter.Interaction
         public float RemainingTime { get; private set; } = SentenceTimeLimit;
         public int CompletedSentences { get; private set; }
         public int SubmittedAttempts { get; private set; }
+        public bool IsReportComplete => IsReport && CompletedSentences >= reportSections.Length;
+        private bool IsReport => reportSections != null;
+        private int RequiredSentences => reportSections?.Length ?? RequiredSentencesForObjective;
 
         public event Action<bool> SessionStateChanged;
         public event Action<bool> SentenceSubmitted;
+        public event Action ReportContinueRequested;
+
+        public void ConfigureReport(IReadOnlyList<string> sections)
+        {
+            if (IsReport || sections == null || sections.Count == 0 || IsActive) return;
+            reportSections = new string[sections.Count];
+            for (int i = 0; i < sections.Count; i++) reportSections[i] = sections[i];
+            CompletedSentences = 0;
+            SubmittedAttempts = 0;
+        }
+
+        public void SetReportTransitionRetry(bool available) => retryReportTransition = available;
 
         private void Awake()
         {
@@ -97,6 +119,7 @@ namespace NoRainbowAfter.Interaction
         {
             UnhookTextInput();
             if (overlayCanvas != null) Destroy(overlayCanvas.gameObject);
+            if (typingClip != null) Destroy(typingClip);
         }
 
         public void SetFocused(bool focused) { }
@@ -104,6 +127,11 @@ namespace NoRainbowAfter.Interaction
         public void Interact(PlayerInteractor interactor)
         {
             if (interactor == null || IsActive) return;
+            if (IsReportComplete)
+            {
+                if (retryReportTransition) ReportContinueRequested?.Invoke();
+                return;
+            }
             activeInteractor = interactor;
             player = interactor.GetComponent<FirstPersonPlayer>();
             stressBarometer = interactor.GetComponent<StressBarometer>();
@@ -115,8 +143,9 @@ namespace NoRainbowAfter.Interaction
 
         public void OpenLaptop()
         {
+            if (IsActive || IsReportComplete) return;
             BuildUi();
-            if (CompletedSentences >= RequiredSentencesForObjective)
+            if (!IsReport && CompletedSentences >= RequiredSentencesForObjective)
                 CompletedSentences = 0;
             IsActive = true;
             openedFrame = Time.frameCount;
@@ -128,9 +157,11 @@ namespace NoRainbowAfter.Interaction
                 player.BreatheRequested += OnTabCloseRequested;
             }
             LoadNextSentence();
+            if (IsReport) PrepareTypingSound();
             HookTextInput();
             if (feedbackLabel != null)
-                feedbackLabel.text = "Ketik 5 kalimat tugas dengan tepat. Tekan [ENTER] untuk kirim, tekan [TAB] untuk keluar.";
+                feedbackLabel.text = IsReport ? "Salin bagian berita yang tampil."
+                    : "Ketik 5 kalimat tugas dengan tepat. Tekan [ENTER] untuk kirim, tekan [TAB] untuk keluar.";
             RefreshUi();
             SessionStateChanged?.Invoke(true);
         }
@@ -142,6 +173,7 @@ namespace NoRainbowAfter.Interaction
             if (player != null)
                 player.BreatheRequested -= OnTabCloseRequested;
             UnhookTextInput();
+            if (typingSource != null) typingSource.Stop();
             if (panelRoot != null) panelRoot.SetActive(false);
             if (overlayCanvas != null) overlayCanvas.enabled = false;
             player?.SetUsingLaptop(false);
@@ -160,6 +192,7 @@ namespace NoRainbowAfter.Interaction
             if (player != null && player.IsPaused)
             {
                 if (overlayCanvas != null) overlayCanvas.enabled = false;
+                if (typingSource != null && typingSource.isPlaying) typingSource.Stop();
                 return;
             }
             if (overlayCanvas != null && !overlayCanvas.enabled) overlayCanvas.enabled = true;
@@ -187,8 +220,8 @@ namespace NoRainbowAfter.Interaction
             }
 
             float dt = Mathf.Max(0f, deltaTime);
-            RemainingTime -= dt;
-            if (RemainingTime <= 0f)
+            if (!IsReport) RemainingTime -= dt;
+            if (!IsReport && RemainingTime <= 0f)
             {
                 SubmitInput(fromTimeout: true);
                 if (!IsActive) return;
@@ -213,6 +246,7 @@ namespace NoRainbowAfter.Interaction
                 if (CurrentInput.Length > 0)
                 {
                     CurrentInput = CurrentInput.Substring(0, CurrentInput.Length - 1);
+                    PlayTypingSound();
                     RefreshUi();
                 }
                 return;
@@ -225,6 +259,7 @@ namespace NoRainbowAfter.Interaction
             bool isCorrect = idx < TargetSentence.Length &&
                              char.ToLowerInvariant(c) == char.ToLowerInvariant(TargetSentence[idx]);
             CurrentInput += c;
+            PlayTypingSound();
 
             if (!isCorrect)
             {
@@ -249,18 +284,26 @@ namespace NoRainbowAfter.Interaction
             if (exactMatch)
             {
                 CompletedSentences++;
-                MarkObjectiveProgress();
+                if (IsReportComplete)
+                {
+                    stressBarometer?.SetStress(StressBarometer.MaxStress);
+                    CloseLaptop();
+                    ReportContinueRequested?.Invoke();
+                    SentenceSubmitted?.Invoke(true);
+                    return;
+                }
+                if (!IsReport) MarkObjectiveProgress();
                 SentenceSubmitted?.Invoke(true);
 
-                // Auto-exit once 3 sentences are completed so player does not have to manually hold Enter afterwards.
-                if (CompletedSentences >= RequiredSentencesForObjective)
+                if (CompletedSentences >= RequiredSentences)
                 {
                     CloseLaptop();
                     return;
                 }
 
                 if (feedbackLabel != null)
-                    feedbackLabel.text = $"<color=#8BE78B>Kalimat terkirim tepat waktu! ({CompletedSentences}/{RequiredSentencesForObjective})</color>";
+                    feedbackLabel.text = IsReport ? "<color=#8BE78B>Bagian tersalin.</color>"
+                        : $"<color=#8BE78B>Kalimat terkirim tepat waktu! ({CompletedSentences}/{RequiredSentences})</color>";
             }
             else
             {
@@ -292,20 +335,49 @@ namespace NoRainbowAfter.Interaction
 
         private void LoadNextSentence()
         {
+            CurrentInput = string.Empty;
+            if (IsReport)
+            {
+                TargetSentence = reportSections[CompletedSentences];
+                CurrentSentenceTimeLimit = RemainingTime = 0f;
+                return;
+            }
             string baseSentence = CollegeSentenceBank[sentenceIndex % CollegeSentenceBank.Length];
+            TargetSentence = baseSentence;
             if (sentenceIndex >= CollegeSentenceBank.Length)
             {
                 string extra = RandomTopicSuffixes[(sentenceIndex / CollegeSentenceBank.Length) % RandomTopicSuffixes.Length];
-                TargetSentence = baseSentence + " " + extra;
-            }
-            else
-            {
-                TargetSentence = baseSentence;
+                TargetSentence += " " + extra;
             }
             sentenceIndex++;
-            CurrentInput = string.Empty;
             CurrentSentenceTimeLimit = GetTimeLimitForSentence(CompletedSentences);
             RemainingTime = CurrentSentenceTimeLimit;
+        }
+
+        private void PrepareTypingSound()
+        {
+            if (typingClip != null) return;
+            const int sampleRate = 22050;
+            var samples = new float[2205];
+            var noise = new System.Random(34);
+            for (int i = 0; i < samples.Length; i++)
+            {
+                float seconds = i / (float)sampleRate;
+                float click = (float)(noise.NextDouble() * 2 - 1) * Mathf.Exp(-seconds * 128f);
+                float resonance = Mathf.Sin(seconds * 2f * Mathf.PI * 620f) * Mathf.Exp(-seconds * 68f);
+                samples[i] = (click * .5f + resonance * .18f) * Mathf.Clamp01(i / 8f);
+            }
+            typingClip = AudioClip.Create("Report keystroke", samples.Length, 1, sampleRate, false);
+            typingClip.SetData(samples, 0);
+            typingSource = gameObject.AddComponent<AudioSource>();
+            typingSource.playOnAwake = false;
+            typingSource.volume = .25f;
+            typingSource.clip = typingClip;
+        }
+
+        private void PlayTypingSound()
+        {
+            if (IsReport && typingSource != null) typingSource.Play();
         }
 
         private void OnTextInput(char ch)
@@ -339,10 +411,12 @@ namespace NoRainbowAfter.Interaction
 
             if (headerLabel != null)
             {
-                string doneNote = CompletedSentences >= RequiredSentencesForObjective ? "  [TUGAS SELESAI]" : "";
-                headerLabel.text = $"TUGAS KULIAH — MENGETIK LAPORAN  ({CompletedSentences}/{RequiredSentencesForObjective}){doneNote}";
+                string title = IsReport ? "BERITA KECELAKAAN" : "TUGAS KULIAH — MENGETIK LAPORAN";
+                headerLabel.text = $"{title}  ({CompletedSentences}/{RequiredSentences})";
             }
 
+            timerLabel.enabled = !IsReport;
+            if (timerTrack.activeSelf == IsReport) timerTrack.SetActive(!IsReport);
             if (timerLabel != null)
                 timerLabel.text = $"Sisa waktu: {Mathf.Max(0f, RemainingTime):F1} dtk";
             if (timerFill != null)
@@ -420,6 +494,7 @@ namespace NoRainbowAfter.Interaction
                 new Vector2(0f, 250f), new Vector2(600f, 36f));
             var tTrack = CreateRect("TimerTrack", panelRoot.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 215f), new Vector2(960f, 10f));
+            timerTrack = tTrack.gameObject;
             tTrack.gameObject.AddComponent<Image>().color = new Color(0.14f, 0.17f, 0.19f, 1f);
             timerFill = CreateRect("TimerFill", tTrack, Vector2.zero, Vector2.one, new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
             timerFill.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.69f, 0.25f, 1f);
