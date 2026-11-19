@@ -10,8 +10,11 @@ Matched closely against the user's character turnaround reference (FRONT, SIDE, 
 - Tailored dark charcoal-black slim trousers with subtle knee drape + open folded ankle hems
 - Rounded minimalist matte-black slip-on sneakers with thick off-white platform rubber soles
 
-Exports hierarchy with FPP animation pivots intact:
-  ACT_Raka_StudentBody -> TorsoPivot, Left/RightArmPivot, Left/RightLegPivot, Left/RightKneePivot
+Exports a real 17-bone Generic Armature rig (ACT_Raka_StudentBody) with smooth
+skin weights + FPP-safe collar/lanyard geometry + Stand_Idle & Crouch_Idle actions:
+  Root -> Pelvis -> Spine -> Chest -> Lanyard
+  Chest -> UpperArm.L/R -> Forearm.L/R -> Hand.L/R
+  Pelvis -> Thigh.L/R -> Shin.L/R -> Foot.L/R
 Faces -Y in Blender (+Z forward in Unity after prefab wrapper orientation).
 """
 import math
@@ -270,9 +273,9 @@ def build_shirt_collar(col, mat_flannel, parent, torso_origin):
     front_angle = -math.pi * 0.5
     gap_half = 0.22
     r_profiles = [
-        (0.072, 0.066, 1.344, 0.0),
-        (0.078, 0.072, 1.383, 0.0),
-        (0.097, 0.089, 1.336, 0.023),
+        (0.072, 0.066, 1.332, 0.0),
+        (0.078, 0.072, 1.360, 0.0),
+        (0.097, 0.089, 1.320, 0.023),
     ]
     start_ang = front_angle + gap_half
     end_ang = front_angle + math.tau - gap_half
@@ -302,7 +305,7 @@ def build_front_placket_and_buttons(col, mat_flannel, mat_button, parent, torso_
         (0.980, -0.105),
         (1.120, -0.117),
         (1.240, -0.123),
-        (1.335, -0.100),
+        (1.330, -0.098),
     ]
     rings = []
     for z, cy_front in chest_profile:
@@ -371,34 +374,34 @@ def build_chest_pocket_and_pen(col, mat_flannel, mat_watch, mat_metal, parent, t
 
 def build_lanyard_and_id_card(col, mat_lanyard, mat_metal, mat_card, parent, torso_origin):
     strap_L = [
-        ((0.044, -0.025, 1.376), 0.0070, 0.0022),
-        ((0.068, -0.068, 1.356), 0.0075, 0.0022),
-        ((0.056, -0.106, 1.310), 0.0075, 0.0022),
-        ((0.031, -0.124, 1.245), 0.0072, 0.0022),
-        ((0.004, -0.126, 1.188), 0.0068, 0.0022),
+        ((0.048, -0.022, 1.344), 0.0068, 0.0018),
+        ((0.066, -0.066, 1.322), 0.0072, 0.0018),
+        ((0.054, -0.104, 1.280), 0.0072, 0.0018),
+        ((0.028, -0.119, 1.225), 0.0068, 0.0018),
+        ((0.004, -0.120, 1.178), 0.0065, 0.0018),
     ]
     strap_R = [
-        ((-0.044, -0.025, 1.376), 0.0070, 0.0022),
-        ((-0.068, -0.068, 1.356), 0.0075, 0.0022),
-        ((-0.056, -0.106, 1.310), 0.0075, 0.0022),
-        ((-0.031, -0.124, 1.245), 0.0072, 0.0022),
-        ((-0.004, -0.126, 1.188), 0.0068, 0.0022),
+        ((-0.048, -0.022, 1.344), 0.0068, 0.0018),
+        ((-0.066, -0.066, 1.322), 0.0072, 0.0018),
+        ((-0.054, -0.104, 1.280), 0.0072, 0.0018),
+        ((-0.028, -0.119, 1.225), 0.0068, 0.0018),
+        ((-0.004, -0.120, 1.178), 0.0065, 0.0018),
     ]
     build_spline_tube(col, "SM_Raka_Lanyard_L", strap_L, mat_lanyard, parent, offset=torso_origin, sides=12, subdiv=2)
     build_spline_tube(col, "SM_Raka_Lanyard_R", strap_R, mat_lanyard, parent, offset=torso_origin, sides=12, subdiv=2)
 
     clip_pts = [
-        ((0.0, -0.127, 1.192), 0.0062, 0.0040),
-        ((0.0, -0.129, 1.172), 0.0050, 0.0036),
-        ((0.0, -0.129, 1.158), 0.0058, 0.0036),
+        ((0.0, -0.121, 1.182), 0.0056, 0.0032),
+        ((0.0, -0.122, 1.166), 0.0046, 0.0028),
+        ((0.0, -0.122, 1.152), 0.0052, 0.0028),
     ]
     build_spline_tube(col, "SM_Raka_LanyardClip", clip_pts, mat_metal, parent, offset=torso_origin, sides=10, subdiv=1)
 
-    hw, hd = 0.026, 0.0022
+    hw, hd = 0.025, 0.0018
     card_rings = []
-    for cz in [1.078, 1.092, 1.132, 1.156]:
-        cy = -0.128 - (cz - 1.078) * 0.025
-        w_scale = 0.90 if (cz == 1.078 or cz == 1.156) else 1.0
+    for cz in [1.074, 1.088, 1.128, 1.150]:
+        cy = -0.121 - (cz - 1.074) * 0.015
+        w_scale = 0.90 if (cz == 1.074 or cz == 1.150) else 1.0
         card_rings.append([
             (-hw * w_scale, cy - hd, cz),
             (0.0, cy - hd * 1.10, cz),
@@ -639,6 +642,10 @@ def build_student_body():
         bpy.data.objects.remove(obj, do_unlink=True)
     for col in list(bpy.data.collections):
         bpy.data.collections.remove(col)
+    for block_coll in (bpy.data.meshes, bpy.data.armatures, bpy.data.actions):
+        for item in list(block_coll):
+            if item.users == 0:
+                block_coll.remove(item)
 
     scene = bpy.context.scene
     scene.unit_settings.system = "METRIC"
@@ -655,27 +662,20 @@ def build_student_body():
     mat_jeans = make_material("MAT_RakaBody_Jeans", (1.0, 1.0, 1.0), roughness=0.86, image=jeans_img)
     mat_skin = make_material("MAT_RakaBody_Skin", (0.55, 0.38, 0.28), roughness=0.55)
     mat_lanyard = make_material("MAT_RakaBody_Lanyard", (0.14, 0.34, 0.48), roughness=0.76)
-    mat_card = make_material("MAT_RakaBody_Card", (0.90, 0.91, 0.90), roughness=0.40)
+    mat_card = make_material("MAT_RakaBody_Card", (0.74, 0.75, 0.73), roughness=0.78)
     mat_watch = make_material("MAT_RakaBody_Watch", (0.035, 0.04, 0.045), roughness=0.42, metallic=0.25)
     mat_sneaker = make_material("MAT_RakaBody_Sneakers", (0.055, 0.06, 0.068), roughness=0.78)
     mat_sole = make_material("MAT_RakaBody_Sole", (0.85, 0.84, 0.79), roughness=0.68)
 
-    root = bpy.data.objects.new("ACT_Raka_StudentBody", None)
-    col.objects.link(root)
+    zero_offset = (0.0, 0.0, 0.0)
 
-    torso_origin = (0.0, 0.0, 0.88)
-    torso_pivot = bpy.data.objects.new("TorsoPivot", None)
-    col.objects.link(torso_pivot)
-    torso_pivot.parent = root
-    torso_pivot.location = torso_origin
-
-    # Dark neck cap below camera near-clip (z max = 1.375m)
+    # Dark neck cap kept safely below collar top & camera near-clip (z_max = 1.345m)
     inner_neck = [
-        sample_ellipse_ring(0.0, -0.008, 1.30, 0.095, 0.080, sides=24),
-        sample_ellipse_ring(0.0, -0.010, 1.35, 0.072, 0.066, sides=24),
-        sample_ellipse_ring(0.0, -0.010, 1.375, 0.060, 0.055, sides=24),
+        sample_ellipse_ring(0.0, -0.008, 1.300, 0.095, 0.080, sides=24),
+        sample_ellipse_ring(0.0, -0.010, 1.330, 0.072, 0.066, sides=24),
+        sample_ellipse_ring(0.0, -0.010, 1.345, 0.058, 0.053, sides=24),
     ]
-    loft_rings(col, "SM_Raka_InnerTee", inner_neck, mat_tee, torso_pivot, offset=torso_origin, cap_end=True, subdiv=1)
+    loft_rings(col, "SM_Raka_InnerTee", inner_neck, mat_tee, None, offset=zero_offset, cap_end=True, subdiv=1)
 
     # Tailored short-sleeve collared plaid shirt draping cleanly OVER trouser waist (solidified subtle hem edge)
     shirt_rings = [
@@ -684,40 +684,29 @@ def build_student_body():
         sample_ellipse_ring(0.0, -0.004, 1.020, 0.160, 0.107, sides=32, crease_amp=0.006, chest_shape=0.4),
         sample_ellipse_ring(0.0, -0.008, 1.150, 0.177, 0.114, sides=32, crease_amp=0.005, chest_shape=0.9),
         sample_ellipse_ring(0.0, -0.010, 1.268, 0.188, 0.116, sides=32, chest_shape=1.0),
-        sample_ellipse_ring(0.0, -0.010, 1.335, 0.152, 0.095, sides=32),
-        sample_ellipse_ring(0.0, -0.010, 1.364, 0.082, 0.072, sides=32),
+        sample_ellipse_ring(0.0, -0.010, 1.320, 0.152, 0.095, sides=32),
+        sample_ellipse_ring(0.0, -0.010, 1.342, 0.082, 0.072, sides=32),
     ]
-    loft_rings(col, "SM_Raka_FlannelBody", shirt_rings, mat_flannel, torso_pivot,
-               offset=torso_origin, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
+    loft_rings(col, "SM_Raka_FlannelBody", shirt_rings, mat_flannel, None,
+               offset=zero_offset, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
 
-    build_shirt_collar(col, mat_flannel, torso_pivot, torso_origin)
-    build_front_placket_and_buttons(col, mat_flannel, mat_watch, torso_pivot, torso_origin)
-    build_chest_pocket_and_pen(col, mat_flannel, mat_watch, mat_card, torso_pivot, torso_origin)
-    build_lanyard_and_id_card(col, mat_lanyard, mat_card, mat_card, torso_pivot, torso_origin)
+    build_shirt_collar(col, mat_flannel, None, zero_offset)
+    build_front_placket_and_buttons(col, mat_flannel, mat_watch, None, zero_offset)
+    build_chest_pocket_and_pen(col, mat_flannel, mat_watch, mat_card, None, zero_offset)
+    build_lanyard_and_id_card(col, mat_lanyard, mat_card, mat_card, None, zero_offset)
 
     # Sloped natural sleeves + unified quad-manifold forearms/5-finger hands + flush dorsal wristwatch
     for side_sign, sname in [(1, "Left"), (-1, "Right")]:
-        sh_world = (side_sign * 0.194, -0.008, 1.290)
-        arm_pivot = bpy.data.objects.new(f"{sname}ArmPivot", None)
-        col.objects.link(arm_pivot)
-        arm_pivot.parent = torso_pivot
-        arm_pivot.location = (
-            sh_world[0] - torso_origin[0],
-            sh_world[1] - torso_origin[1],
-            sh_world[2] - torso_origin[2],
-        )
-
-        # Tailored natural shoulder drape dropping cleanly from shoulder seam (solid outer plaid sleeve wrapping bicep)
         sleeve_rings = [
             sample_ellipse_ring(side_sign * 0.224, -0.015, 1.102, 0.055, 0.054, sides=24),  # crisp short sleeve cuff edge
             sample_ellipse_ring(side_sign * 0.212, -0.012, 1.175, 0.058, 0.058, sides=24, crease_amp=0.008),
             sample_ellipse_ring(side_sign * 0.178, -0.010, 1.245, 0.058, 0.062, sides=24),  # smooth deltoid shoulder emergence
             sample_ellipse_ring(side_sign * 0.130, -0.008, 1.275, 0.052, 0.066, sides=24),  # nested deeply inside upper torso armhole
         ]
-        loft_rings(col, f"SM_Raka_Sleeve_{sname}", sleeve_rings, mat_flannel, arm_pivot,
-                   offset=sh_world, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
+        loft_rings(col, f"SM_Raka_Sleeve_{sname}", sleeve_rings, mat_flannel, None,
+                   offset=zero_offset, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
 
-        build_unified_arm_and_hand(col, sname, side_sign, arm_pivot, sh_world, mat_skin)
+        build_unified_arm_and_hand(col, sname, side_sign, None, zero_offset, mat_skin)
 
         # Sleek flush matte-black circular wristwatch on dorsal/outer Left wrist (+X in Blender = real Left in Unity)
         if side_sign > 0:
@@ -727,8 +716,8 @@ def build_student_body():
                 sample_ellipse_ring(wx, wy, wz, 0.0255, 0.0320, sides=24),
                 sample_ellipse_ring(wx, wy, wz + 0.009, 0.0235, 0.0305, sides=24),
             ]
-            loft_rings(col, "SM_Raka_WatchStrap", strap_rings, mat_watch, arm_pivot,
-                       offset=sh_world, cap_start=False, cap_end=False, subdiv=2)
+            loft_rings(col, "SM_Raka_WatchStrap", strap_rings, mat_watch, None,
+                       offset=zero_offset, cap_start=False, cap_end=False, subdiv=2)
 
             dial_cx = wx + 0.023
             dial_cy = wy + 0.004
@@ -738,83 +727,294 @@ def build_student_body():
                     (dial_cx + d_out, dial_cy + r * math.cos(a), wz + r * math.sin(a))
                     for a in [k * math.tau / 20 for k in range(20)]
                 ])
-            loft_rings(col, "SM_Raka_WatchDial", dial_rings, mat_watch, arm_pivot,
-                       offset=sh_world, cap_start=True, cap_end=True, subdiv=1)
+            loft_rings(col, "SM_Raka_WatchDial", dial_rings, mat_watch, None,
+                       offset=zero_offset, cap_start=True, cap_end=True, subdiv=1)
 
-    # Trouser pelvis seated cleanly UNDER the shirt hem (no hard cylinder sticking outside shirt!)
+    # Trouser pelvis seated cleanly UNDER the shirt hem
     pelvis_rings = [
         sample_ellipse_ring(0.0, 0.002, 0.725, 0.144, 0.095, sides=32),
         sample_ellipse_ring(0.0, 0.001, 0.785, 0.146, 0.096, sides=32),
         sample_ellipse_ring(0.0, 0.000, 0.845, 0.138, 0.092, sides=32),
     ]
-    loft_rings(col, "SM_Raka_JeansWaist", pelvis_rings, mat_jeans, root,
-               offset=(0.0, 0.0, 0.0), cap_start=True, cap_end=False, subdiv=2)
+    loft_rings(col, "SM_Raka_JeansWaist", pelvis_rings, mat_jeans, None,
+               offset=zero_offset, cap_start=True, cap_end=False, subdiv=2)
 
-    # Slim-straight organic trousers (shirt drapes completely over upper thigh tops) + minimalist slip-on sneakers
+    # Slim-straight organic trousers + minimalist slip-on sneakers (soles resting at Z = 0.000m)
     for side_sign, sname in [(1, "Left"), (-1, "Right")]:
         hip_x = side_sign * 0.086
-        hip_world = (hip_x, 0.0, 0.88)
-        leg_pivot = bpy.data.objects.new(f"{sname}LegPivot", None)
-        col.objects.link(leg_pivot)
-        leg_pivot.parent = root
-        leg_pivot.location = hip_world
-
         thigh_rings = [
-            sample_ellipse_ring(hip_x, -0.010, 0.440, 0.063, 0.066, sides=24, crease_amp=0.014),
-            sample_ellipse_ring(hip_x, -0.008, 0.560, 0.068, 0.073, sides=24, crease_amp=0.012),
+            sample_ellipse_ring(hip_x, -0.010, 0.435, 0.063, 0.067, sides=24, crease_amp=0.012),
+            sample_ellipse_ring(hip_x, -0.008, 0.560, 0.069, 0.074, sides=24, crease_amp=0.012),
             sample_ellipse_ring(hip_x, -0.002, 0.720, 0.074, 0.081, sides=24, crease_amp=0.010),
-            sample_ellipse_ring(hip_x, 0.000, 0.835, 0.068, 0.076, sides=24),  # nested completely inside shirt tail!
+            sample_ellipse_ring(hip_x, 0.000, 0.835, 0.068, 0.076, sides=24),
         ]
-        loft_rings(col, f"SM_Raka_Thigh_{sname}", thigh_rings, mat_jeans, leg_pivot,
-                   offset=hip_world, cap_start=False, cap_end=False, subdiv=2, uv_scale=2.2)
-
-        knee_world = (hip_x, -0.010, 0.48)
-        knee_pivot = bpy.data.objects.new(f"{sname}KneePivot", None)
-        col.objects.link(knee_pivot)
-        knee_pivot.parent = leg_pivot
-        knee_pivot.location = (0.0, knee_world[1] - hip_world[1], knee_world[2] - hip_world[2])
+        loft_rings(col, f"SM_Raka_Thigh_{sname}", thigh_rings, mat_jeans, None,
+                   offset=zero_offset, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
 
         shin_rings = [
-            sample_ellipse_ring(hip_x, -0.008, 0.092, 0.053, 0.056, sides=24, crease_amp=0.016),  # crisp ankle break cuff
+            sample_ellipse_ring(hip_x, -0.008, 0.092, 0.053, 0.056, sides=24, crease_amp=0.016),
             sample_ellipse_ring(hip_x, -0.007, 0.200, 0.056, 0.058, sides=24, crease_amp=0.014),
             sample_ellipse_ring(hip_x, -0.008, 0.360, 0.061, 0.064, sides=24, crease_amp=0.014),
-            sample_ellipse_ring(hip_x, -0.010, 0.515, 0.062, 0.065, sides=24, crease_amp=0.014),  # nested cleanly inside thigh
+            sample_ellipse_ring(hip_x, -0.010, 0.455, 0.060, 0.063, sides=24, crease_amp=0.010),
+            sample_ellipse_ring(hip_x, -0.010, 0.505, 0.052, 0.054, sides=24),
         ]
-        loft_rings(col, f"SM_Raka_Shin_{sname}", shin_rings, mat_jeans, knee_pivot,
-                   offset=knee_world, cap_start=True, cap_end=False, subdiv=2, uv_scale=2.2)
+        loft_rings(col, f"SM_Raka_Shin_{sname}", shin_rings, mat_jeans, None,
+                   offset=zero_offset, cap_start=True, cap_end=True, subdiv=2, uv_scale=2.2)
 
-        build_organic_sneaker(col, sname, hip_x, mat_sneaker, mat_sole, knee_pivot, knee_world)
+        build_organic_sneaker(col, sname, hip_x, mat_sneaker, mat_sole, None, zero_offset)
 
+    # CRITICAL ORDER: convert all Solidify/Subsurf geometry modifiers BEFORE binding the Armature modifier.
     bpy.ops.object.select_all(action="DESELECT")
-    for obj in list(col.objects):
-        if obj.type == "MESH" and len(obj.modifiers) > 0:
+    mesh_objects = [obj for obj in list(col.objects) if obj.type == "MESH"]
+    for obj in mesh_objects:
+        if len(obj.modifiers) > 0:
             bpy.context.view_layer.objects.active = obj
             obj.select_set(True)
             bpy.ops.object.convert(target="MESH")
             obj.select_set(False)
 
+    # Build 17-bone Generic Armature (matching ACT_Shadow_Raka project conventions)
+    arm_data = bpy.data.armatures.new("ACT_Raka_StudentBody_Armature")
+    rig = bpy.data.objects.new("ACT_Raka_StudentBody", arm_data)
+    col.objects.link(rig)
+    bpy.context.view_layer.objects.active = rig
+    rig.select_set(True)
+    bpy.ops.object.mode_set(mode="EDIT")
+
+    bone_rest_heads = {}
+
+    def add_bone(bname, head_pt, tail_pt, parent_name=None):
+        eb = arm_data.edit_bones.new(bname)
+        eb.head = head_pt
+        eb.tail = tail_pt
+        eb.use_connect = False
+        if parent_name:
+            eb.parent = arm_data.edit_bones[parent_name]
+        bone_rest_heads[bname] = Vector(head_pt)
+        return eb
+
+    add_bone("Root", (0.0, 0.0, 0.0), (0.0, 0.0, 0.20), None)
+    add_bone("Pelvis", (0.0, 0.0, 0.88), (0.0, 0.0, 0.99), "Root")
+    add_bone("Spine", (0.0, 0.0, 0.99), (0.0, -0.006, 1.18), "Pelvis")
+    add_bone("Chest", (0.0, -0.006, 1.18), (0.0, -0.010, 1.35), "Spine")
+    add_bone("Lanyard", (0.0, -0.114, 1.24), (0.0, -0.121, 1.08), "Chest")
+
+    for side_sign, sfx in [(1, "L"), (-1, "R")]:
+        add_bone(f"UpperArm.{sfx}", (side_sign * 0.194, -0.008, 1.280), (side_sign * 0.233, -0.022, 1.015), "Chest")
+        add_bone(f"Forearm.{sfx}", (side_sign * 0.233, -0.022, 1.015), (side_sign * 0.236, -0.052, 0.858), f"UpperArm.{sfx}")
+        add_bone(f"Hand.{sfx}", (side_sign * 0.236, -0.052, 0.858), (side_sign * 0.231, -0.058, 0.720), f"Forearm.{sfx}")
+        add_bone(f"Thigh.{sfx}", (side_sign * 0.086, 0.000, 0.880), (side_sign * 0.086, -0.010, 0.480), "Pelvis")
+        add_bone(f"Shin.{sfx}", (side_sign * 0.086, -0.010, 0.480), (side_sign * 0.086, -0.008, 0.092), f"Thigh.{sfx}")
+        add_bone(f"Foot.{sfx}", (side_sign * 0.086, -0.008, 0.092), (side_sign * 0.086, -0.155, 0.030), f"Shin.{sfx}")
+
+    bpy.ops.object.mode_set(mode="OBJECT")
+    for pb in rig.pose.bones:
+        pb.rotation_mode = "QUATERNION"
+
+    # Assign normalized smooth vertex weights across every mesh and bind Armature modifier
+    def assign_chain_weights(mesh_obj, coords, names, breaks):
+        groups = {n: (mesh_obj.vertex_groups.get(n) or mesh_obj.vertex_groups.new(name=n)) for n in names}
+        prev = np.ones(len(coords), dtype=np.float32)
+        for i, bname in enumerate(names):
+            if i < len(breaks):
+                lo, hi = breaks[i]
+                nxt = np.clip((coords - lo) / (hi - lo), 0.0, 1.0)
+            else:
+                nxt = np.zeros(len(coords), dtype=np.float32)
+            w = np.clip(prev - nxt, 0.0, 1.0)
+            grp = groups[bname]
+            for idx in np.flatnonzero(w > 1e-4):
+                grp.add([int(idx)], float(w[idx]), "REPLACE")
+            prev = nxt
+
+    def assign_single_bone(mesh_obj, bone_name):
+        grp = mesh_obj.vertex_groups.new(name=bone_name)
+        n_verts = len(mesh_obj.data.vertices)
+        if n_verts > 0:
+            grp.add(list(range(n_verts)), 1.0, "REPLACE")
+
+    for obj in mesh_objects:
+        oname = obj.name
+        zs = np.array([v.co.z for v in obj.data.vertices], dtype=np.float32)
+        xs = np.array([v.co.x for v in obj.data.vertices], dtype=np.float32)
+
+        if oname in ("SM_Raka_FlannelBody", "SM_Raka_ButtonPlacket") or oname.startswith("SM_Raka_Button_"):
+            assign_chain_weights(obj, zs, ["Pelvis", "Spine", "Chest"], [(0.92, 1.04), (1.13, 1.24)])
+        elif oname in ("SM_Raka_InnerTee", "SM_Raka_Collar", "SM_Raka_ShirtPocket", "SM_Raka_PocketPen", "SM_Raka_PenClip"):
+            assign_single_bone(obj, "Chest")
+        elif oname in ("SM_Raka_Lanyard_L", "SM_Raka_Lanyard_R"):
+            assign_chain_weights(obj, zs, ["Lanyard", "Chest"], [(1.22, 1.28)])
+        elif oname in ("SM_Raka_LanyardClip", "SM_Raka_StudentCard"):
+            assign_single_bone(obj, "Lanyard")
+        elif oname.startswith("SM_Raka_Sleeve_"):
+            sfx = "L" if oname.endswith("_Left") else "R"
+            assign_chain_weights(obj, np.abs(xs), ["Chest", f"UpperArm.{sfx}"], [(0.145, 0.195)])
+        elif oname.startswith("SM_Raka_Forearm_"):
+            sfx = "L" if oname.endswith("_Left") else "R"
+            assign_chain_weights(obj, zs, [f"Hand.{sfx}", f"Forearm.{sfx}", f"UpperArm.{sfx}"], [(0.845, 0.875), (0.995, 1.045)])
+        elif oname in ("SM_Raka_WatchStrap", "SM_Raka_WatchDial"):
+            assign_single_bone(obj, "Forearm.L")
+        elif oname == "SM_Raka_JeansWaist":
+            grp_p = obj.vertex_groups.new(name="Pelvis")
+            grp_l = obj.vertex_groups.new(name="Thigh.L")
+            grp_r = obj.vertex_groups.new(name="Thigh.R")
+            w_p = np.clip((zs - 0.73) / (0.80 - 0.73), 0.0, 1.0)
+            t_l = np.clip((xs + 0.04) / 0.08, 0.0, 1.0)
+            for idx in range(len(xs)):
+                wp = float(w_p[idx])
+                rem = 1.0 - wp
+                wl = rem * float(t_l[idx])
+                wr = rem * (1.0 - float(t_l[idx]))
+                if wp > 1e-4:
+                    grp_p.add([idx], wp, "REPLACE")
+                if wl > 1e-4:
+                    grp_l.add([idx], wl, "REPLACE")
+                if wr > 1e-4:
+                    grp_r.add([idx], wr, "REPLACE")
+        elif oname.startswith("SM_Raka_Thigh_"):
+            sfx = "L" if oname.endswith("_Left") else "R"
+            assign_chain_weights(obj, zs, [f"Shin.{sfx}", f"Thigh.{sfx}", "Pelvis"], [(0.455, 0.515), (0.785, 0.835)])
+        elif oname.startswith("SM_Raka_Shin_"):
+            sfx = "L" if oname.endswith("_Left") else "R"
+            assign_chain_weights(obj, zs, [f"Foot.{sfx}", f"Shin.{sfx}", f"Thigh.{sfx}"], [(0.095, 0.125), (0.455, 0.505)])
+        elif oname.startswith("SM_Raka_SneakerUpper_") or oname.startswith("SM_Raka_SneakerSole_"):
+            sfx = "L" if oname.endswith("_Left") else "R"
+            assign_single_bone(obj, f"Foot.{sfx}")
+        else:
+            raise RuntimeError(f"Unmapped mesh object for rigging: {oname}")
+
+        obj.parent = rig
+        mod = obj.modifiers.new("Armature", "ARMATURE")
+        mod.object = rig
+
+    unweighted = sum(1 for o in mesh_objects for v in o.data.vertices if not v.groups)
+    assert unweighted == 0, f"Found {unweighted} unweighted vertices across Raka rig!"
+
+    # Author Stand_Idle and Crouch_Idle reference actions for QA and FBX Generic rig verification
+    rig.animation_data_create()
+
+    def clear_pose():
+        for pb in rig.pose.bones:
+            pb.matrix_basis.identity()
+        bpy.context.view_layer.update()
+
+    def key_pose_action(act_name, pose_fn):
+        act = bpy.data.actions.new(act_name)
+        act.use_fake_user = True
+        rig.animation_data.action = act
+        clear_pose()
+        pose_fn()
+        for frame in (1, 10):
+            scene.frame_set(frame)
+            for pb in rig.pose.bones:
+                pb.keyframe_insert(data_path="location", frame=frame)
+                pb.keyframe_insert(data_path="rotation_quaternion", frame=frame)
+        return act
+
+    def solve_crouch_pose():
+        # Match Unity FirstPersonBodyVisual crouch pose: Pelvis drops -0.50m and shifts +0.04m back (+Y in Blender)
+        pb_pelvis = rig.pose.bones["Pelvis"]
+        rot_x = lambda deg: Matrix.Rotation(math.radians(deg), 3, "X")
+        rot_y = lambda deg: Matrix.Rotation(math.radians(deg), 3, "Y")
+
+        def pose_bone_world(bname, head_pt, rot3):
+            pb = rig.pose.bones[bname]
+            base = pb.bone.matrix_local.to_3x3()
+            mat3 = rot3 @ base
+            mat4 = mat3.to_4x4()
+            mat4.translation = Vector(head_pt)
+            pb.matrix = mat4
+            bpy.context.view_layer.update()
+
+        pelvis_head = bone_rest_heads["Pelvis"] + Vector((0.0, 0.04, -0.50))
+        pose_bone_world("Pelvis", pelvis_head, Matrix.Identity(3))
+
+        spine_head = pelvis_head + (bone_rest_heads["Spine"] - bone_rest_heads["Pelvis"])
+        pose_bone_world("Spine", spine_head, rot_x(7.0))
+
+        chest_rot = rot_x(14.0)
+        chest_head = rig.pose.bones["Chest"].matrix.translation.copy()
+        pose_bone_world("Chest", chest_head, chest_rot)
+
+        lanyard_head = rig.pose.bones["Lanyard"].matrix.translation.copy()
+        pose_bone_world("Lanyard", lanyard_head, rot_x(20.0))
+
+        for side_sign, sfx in [(1, "L"), (-1, "R")]:
+            ua = rig.pose.bones[f"UpperArm.{sfx}"].matrix.translation.copy()
+            arm_rot = chest_rot @ rot_x(10.0) @ rot_y(-side_sign * 8.0)
+            pose_bone_world(f"UpperArm.{sfx}", ua, arm_rot)
+            fa = rig.pose.bones[f"Forearm.{sfx}"].matrix.translation.copy()
+            fore_rot = arm_rot @ rot_x(-28.0)
+            pose_bone_world(f"Forearm.{sfx}", fa, fore_rot)
+            ha = rig.pose.bones[f"Hand.{sfx}"].matrix.translation.copy()
+            pose_bone_world(f"Hand.{sfx}", ha, fore_rot)
+
+            # Analytical 2-bone leg IK keeping sneaker soles flat at Z = 0.000m (ankle at rest Z = 0.092m)
+            hip = rig.pose.bones[f"Thigh.{sfx}"].matrix.translation.copy()
+            upper_len = (bone_rest_heads[f"Shin.{sfx}"] - bone_rest_heads[f"Thigh.{sfx}"]).length
+            lower_len = (bone_rest_heads[f"Foot.{sfx}"] - bone_rest_heads[f"Shin.{sfx}"]).length
+            stagger = 0.04 if sfx == "L" else -0.04
+            ankle_target = Vector((
+                bone_rest_heads[f"Foot.{sfx}"].x,
+                bone_rest_heads[f"Foot.{sfx}"].y - (0.12 + stagger),
+                bone_rest_heads[f"Foot.{sfx}"].z,
+            ))
+            delta = ankle_target - hip
+            reach = max(abs(upper_len - lower_len) + 0.002, min(delta.length, upper_len + lower_len - 0.002))
+            axis = delta.normalized()
+            ankle_target = hip + axis * reach
+            along = (upper_len * upper_len - lower_len * lower_len + reach * reach) / (2.0 * reach)
+            pole_raw = Vector((side_sign * 0.10, -1.0, 0.0))
+            pole = (pole_raw - axis * pole_raw.dot(axis)).normalized()
+            knee = hip + axis * along + pole * math.sqrt(max(0.0, upper_len * upper_len - along * along))
+
+            pb_thigh = rig.pose.bones[f"Thigh.{sfx}"]
+            pb_shin = rig.pose.bones[f"Shin.{sfx}"]
+            cur_thigh_vec = (pb_shin.matrix.translation - pb_thigh.matrix.translation).normalized()
+            q_thigh = cur_thigh_vec.rotation_difference((knee - hip).normalized())
+            pb_thigh.matrix = Matrix.Translation(hip) @ (q_thigh.to_matrix() @ pb_thigh.matrix.to_3x3()).to_4x4()
+            bpy.context.view_layer.update()
+
+            pb_foot = rig.pose.bones[f"Foot.{sfx}"]
+            cur_shin_vec = (pb_foot.matrix.translation - pb_shin.matrix.translation).normalized()
+            q_shin = cur_shin_vec.rotation_difference((ankle_target - knee).normalized())
+            pb_shin.matrix = Matrix.Translation(knee) @ (q_shin.to_matrix() @ pb_shin.matrix.to_3x3()).to_4x4()
+            bpy.context.view_layer.update()
+
+            pose_bone_world(f"Foot.{sfx}", ankle_target, Matrix.Identity(3))
+
+    act_stand = key_pose_action("Stand_Idle", lambda: None)
+    act_crouch = key_pose_action("Crouch_Idle", solve_crouch_pose)
+
+    # Restore Stand_Idle rest pose before saving .blend & exporting FBX
+    rig.animation_data.action = act_stand
+    clear_pose()
+    scene.frame_set(1)
+
     bpy.ops.wm.save_as_mainfile(filepath=str(BLEND_PATH), compress=True)
 
     bpy.ops.object.select_all(action="DESELECT")
-    for obj in col.objects:
+    rig.select_set(True)
+    for obj in mesh_objects:
         obj.select_set(True)
-    bpy.context.view_layer.objects.active = root
+    bpy.context.view_layer.objects.active = rig
 
     bpy.ops.export_scene.fbx(
         filepath=str(EXPORT_FBX),
         use_selection=True,
-        object_types={"EMPTY", "MESH"},
+        object_types={"ARMATURE", "MESH"},
         apply_unit_scale=True,
         apply_scale_options="FBX_SCALE_UNITS",
         axis_forward="-Z",
         axis_up="Y",
         bake_space_transform=False,
         use_mesh_modifiers=True,
+        mesh_smooth_type="FACE",
         add_leaf_bones=False,
         bake_anim=False,
         path_mode="AUTO",
     )
-    print(f"EXPORTED_RAKA_BODY_ORGANIC_V2: {EXPORT_FBX}")
+    print(f"EXPORTED_RAKA_BODY_RIGGED_V3: {EXPORT_FBX} meshes={len(mesh_objects)} bones={len(arm_data.bones)} unweighted={unweighted}")
 
 
 if __name__ == "__main__":
