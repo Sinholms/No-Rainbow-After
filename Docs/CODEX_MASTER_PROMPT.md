@@ -15,7 +15,7 @@ Docs/
     └── rain_soaked_corridor_nightmare.png     # optional monster concept, copy manually if available
 ```
 
-If Codex cannot actually read `.docx`, add the **optional** `GDD_No_Rainbow_After_v1_1_REFERENCE.md` text mirror generated alongside this package. Use the original DOCX for story canon and the [Chapter 2 Plan](CHAPTER2_PLAN.md) for the current playable sequence. **Do not infer unreadable document content from filenames.**
+If Codex cannot actually read `.docx`, add the **optional** `GDD_No_Rainbow_After_v1_1_REFERENCE.md` text mirror generated alongside this package. Use the original DOCX for story canon and [Bizarre Edition](CHAPTER2_PLAN.md) for the planned Chapter 2 sequence and ending condition. **Do not infer unreadable document content from filenames.**
 
 ---
 
@@ -40,9 +40,10 @@ DOCUMENTS — READ FIRST:
    Blender handoff and FPP shot review. Any *new* size/color/poly figure in
    design.md is a proposed starting value, not a story override.
 4) Docs/CHAPTER2_PLAN.md — active Chapter 2 gameplay and handoff to Chapter 3.
-Use the Chapter 2 plan for that sequence and its acceptance criteria. Use GDD
-v1.1 for story canon, clue IDs and ending rules, CODEX_TASKS for task IDs and
-deliverables, and design.md for art and asset details.
+Use Bizarre Edition for the sequence, shared corridor door, proposed Ella
+message condition, and acceptance criteria. Use GDD v1.1 for remaining story
+canon and clue IDs, CODEX_TASKS for task IDs and deliverables, and design.md
+for art and asset details.
 
 CANON / NON-NEGOTIABLE:
 - The title is NO RAINBOW AFTER.
@@ -56,12 +57,14 @@ CANON / NON-NEGOTIABLE:
   death before this revelation.
 - GOOD: the Chapter 3 response Approach -> a believable passage of time,
   gradual return to study, graduation in soft rain/sunset, early Ella letter.
-- BAD: Fight/Hide with fewer than all four CLUE_01...CLUE_04 -> tragic implied
-  absence and Bayu's messages, without showing a self-harm method or body.
-- HIDDEN: Fight/Hide with all four clue flags -> somber ending with Bayu text
-  saying Ella has regained consciousness. The hidden truth is not a bonus
-  combat scene. The moral/emotional choices are NOT a numerical depression
-  score. Chapter 2 capture retries the current street segment.
+- Under the Bizarre Edition proposal, Fight/Hide with all four clues and the
+  message to Ella sent leads to HIDDEN. Bayu's message reveals that Ella has
+  regained consciousness.
+- Other Fight/Hide combinations lead to BAD under the proposal. Convey the
+  tragedy through Raka's absence and Bayu's messages without showing a
+  self-harm method or body.
+- The moral/emotional choices are NOT a numerical depression score. Chapter 2
+  capture retries the current crossing.
 - Monster ACT_Shadow_Raka is a distorted shadow of Raka. It must read as a
   black rain-soaked humanoid with asymmetric elongated limbs, paper fragments,
   subtle chest fissure, blurry/partially human face, optional superficial
@@ -144,8 +147,8 @@ QA, and report actual changed files and blockers. Do not start any later task.
 | T05 | Chapter 1 beats + corridor loop | C1-01..C1-06 pass |
 | T06 | monster PLACEHOLDER and Fight/Hide/Caught | all paths work before final visuals |
 | T07 | HDRP atmosphere vertical slice | FPS and interactable contrast in Windows build |
-| T08 | fictional phone and Bayu reply | after inspecting the bag, the message opens C3 once |
-| T09 | accident report and spotlight stealth | reach the bus stop with cover and per-segment retries |
+| T08 | optional phone and Ella chat | optional message displays one checkmark and records the choice |
+| T09 | essay, overtime, shared exit and police spotlights | reach the bus via the crash site after crossing the corridor door |
 | T10 | four unique clues and foreshadowing | exact clue IDs save/load, Ella mystery unspoiled |
 | T11 | final C3 encounter and `EndingResolver` | Good/Bad/Hidden formula + unit tests |
 | T12 | three ending sequences / credits | graduation/letter, Bayu texts, twist |

@@ -1,6 +1,6 @@
-# Di Bawah Sorotan — Verifikasi & Playtest Chapter 2
+# Di Bawah Sorotan — Arsip QA Chapter 2
 
-Branch `chapter2` berangkat dari checkpoint `d703909` (yang sudah memuat penggabungan rig first-person dari `origin/main` pada `f75bdb5`). Dokumen ini memisahkan **hasil verifikasi otomatis/teknis** dari **observasi playtest pemain manusia baru** (yang saat ini berstatus **tertunda** dan telah disiapkan bersama build Windows mandiri di `Builds/Chapter2Playtest/NoRainbowAfter.exe`).
+Hasil pengujian prototipe Di Bawah Sorotan pada `1c02650`, dengan baseline `d703909` dan penggabungan rig first-person dari `origin/main` pada `f75bdb5`. Pengujian ini mencakup build lokal `Builds/Chapter2Playtest/NoRainbowAfter.exe`. Plan dan kriteria uji untuk revisi ada di [Chapter 2 Bizarre Edition](../../CHAPTER2_PLAN.md).
 
 ---
 
@@ -80,45 +80,11 @@ Pengujian urutan percobaan (`ChapterTwoTimedRouteTests.cs` dan `ChapterTwoRouteT
 
 ---
 
-## 4. Protokol & Lembar Observasi Playtest Pemain Baru (Status: Tertunda)
-
-> **Status Observasi Manusia**: **TERTUNDA** (belum ada pemain manusia baru pada sesi uji ini; seluruh pemeriksaan teknis dan build Windows mandiri telah disiapkan agar sesi playtest buta dapat langsung dijalankan).
-
-### Build Windows yang Siap Dimainkan
-- Executable mandiri: `Builds/Chapter2Playtest/NoRainbowAfter.exe` (`StandaloneWindows64`).
-- Kontrol: `W/A/S/D` bergerak, `Mouse` melihat, `Left Shift` lari, `C` / `Left Ctrl` jongkok, `E` interaksi, `F` foto objek inspeksi, `Tab` tutup perangkat/inspeksi, `Esc` pause.
-
-### Protokol Playtest Buta (Blind Playtest)
-1. **Persiapan Tanpa Spoiler (Ambang Default `2,0 detik`)**:
-   - Jangan beri tahu pemain letak cover, fungsi jongkok di peti rendah, maupun ritme aman lampu sebelum Percobaan #1 dimulai.
-2. **Saat Baru Tiba di Spawn Jalan Malam `(-3.2, 0.0, -39.5)`**:
-   - Minta pemain berhenti sejenak dan **menunjuk tujuan akhir** yang menurutnya harus dicapai dari posisi awal. Catat apakah pemain langsung mengenali papan **HALTE PASAR 04** di ujung jalan.
-3. **Observasi Selama Percobaan (`2,0 detik`)**:
-   - Biarkan pemain memilih sendiri rutenya pada percobaan bebas pertama, lalu minta ia mencoba rute alternatif (Jalur Tengah dan Jalur Trotoar) pada percobaan berikutnya.
-   - Catat segmen, rute, posisi tertangkap, jumlah percobaan, dan apakah pemain sempat bereaksi (mundur atau jongkok) saat vignette merah, bar paparan, dan dengung peringatan mulai muncul.
-4. **Wawancara Pasca-Percobaan**:
-   - *Apa yang pertama kali membuatmu merasa sedang terdeteksi?*
-   - *Mengapa menurutmu tadi kamu tertangkap atau berhasil lolos?*
-   - *Bagaimana kamu menentukan kapan saat yang aman untuk meninggalkan cover?*
-5. **Uji Lanjutan pada Ambang `1,5 detik` (Setelah Baseline `2,0 detik` Terbaca)**:
-   - Setelah pemain menyelesaikan kedua rute pada `2,0 detik`, uji layout yang sama pada `1,5 detik` dan catat urutan percobaannya (mengingat pemain sudah mulai menghafal letak cover dan ritme sapuan).
-
-### Lembar Catatan Playtest Manusia (Untuk Diisi Saat Playtest)
-
-| No. Urut Percobaan | Ambang (`2,0s` / `1,5s`) | Rute (`Tengah` / `Trotoar`) | Mengenali Halte dari Spawn? (`Ya`/`Tidak`) | Segmen & Posisi Gagal/Tertangkap | Jumlah Percobaan hingga Lolos | Penyebab Gagal / Lolos Menurut Pemain | Sempat Bereaksi terhadap Peringatan Merah/Bunyi? | Cara Pemain Memilih Waktu Meninggalkan Cover |
-| :---: | :---: | --- | :---: | --- | :---: | --- | :---: | --- |
-| 1 | `2,0 s` (Buta) | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* |
-| 2 | `2,0 s` | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* |
-| 3 | `1,5 s` (Hafal) | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* |
-| 4 | `1,5 s` (Hafal) | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* | *Tertunda* |
-
----
-
-## 5. Jawaban atas Lima Pertanyaan Evaluasi Chapter 2
+## 4. Jawaban atas Lima Pertanyaan Evaluasi Chapter 2
 
 1. **Apakah pemain mengenali halte dari spawn?**
    - **Secara teknis/visual**: **Ya.** Dari titik spawn `(-3.20, 0.00, -39.50)`, papan **HALTE PASAR 04** yang menyala terang berada tepat di tengah koridor pandang (`dot = 0,994` terhadap arah hadap awal kamera) dengan garis pandang (`line-of-sight`) bebas hambatan di atas peti-peti kayu ([Jalan.jpg](Jalan.jpg)).
-   - **Dari sudut pandang pemain manusia baru**: **Masih tertunda** verifikasi lisan pada percobaan buta pertama (apakah pemain langsung menunjuk Halte Pasar tanpa membaca petunjuk tambahan).
+   - **Dari sudut pandang pemain manusia baru**: percobaan buta belum dilakukan pada prototipe ini.
 2. **Bagian mana yang paling sering membuat tertangkap?**
    - **Segmen A (`Peti rendah A` → `Peti tinggi A`, puncak paparan `1,32 s`)**: Memiliki durasi paparan puncak tertinggi (`1,32 s` pada traversal normal) dan menjebak pemain yang berhenti sambil **berdiri** di belakang `Peti rendah A` (tinggi peti `0,95 m`, sehingga kepala pada `1,57 m` tetap terkena lampu `Patroli depan warung` kecuali pemain jongkok).
    - **Segmen C pada Jalur Trotoar (`Peti trotoar C0` → `Peti trotoar C3`, puncak paparan `1,20 s`, paparan kontinu tanpa berhenti `2,56 s`)**: Zona persilangan dua lampu (`Shadow berpatroli` + `Patroli dekat halte`) pasti menangkap pemain (`2,56 s > 2,00 s`) bila pemain mencoba berlari langsung di sepanjang trotoar tanpa berhenti menunggu sapuan di balik `Peti trotoar C3` / `Barikade C2`.
@@ -128,11 +94,11 @@ Pengujian urutan percobaan (`ChapterTwoTimedRouteTests.cs` dan `ChapterTwoRouteT
 4. **Durasi paparan mana yang didukung hasil uji?**
    - **Ambang `2,0 detik` didukung penuh sebagai default.** Pada `2,0 detik`, pemain memiliki margin reaksi `0,68 s – 1,00 s` setelah terkena tepi sorotan untuk mundur atau jongkok ke balik cover. Pada `1,5 detik`, margin aman di Segmen A tinggal `0,18 s` (`1,32 s / 1,50 s`) dan di Segmen C trotoar tinggal `0,30 s` (`1,20 s / 1,50 s`), yang terlalu menghukum bagi pemain baru yang belum menghafal pola sapuan.
 5. **Apa yang masih belum terverifikasi?**
-   - Observasi subjektif dari **pemain manusia baru (blind playtester)** menggunakan `Builds/Chapter2Playtest/NoRainbowAfter.exe`: (a) konfirmasi penunjukan Halte Pasar dari spawn tanpa arahan, (b) intuisi pemain baru untuk jongkok di balik `Peti rendah A`, (c) persepsi kejelasan kerucut lantai merah + audio setelah perbaikan penyelarasan `Visible()`, dan (d) kurva belajar manusia dari percobaan buta `2,0 detik` ke `1,5 detik`.
+   - Hasil teknis mencakup traversal dan deteksi. Respons pemain manusia baru belum tercatat pada prototipe ini.
 
 ---
 
-## 6. Regresi & Perbandingan terhadap Baseline
+## 5. Regresi & Perbandingan terhadap Baseline
 
 * **9 Tes Integrasi Chapter 2 (`Editor PlayMode` & `Windows Player x64`)**:
   - **Unity Editor PlayMode**: **9/9 Lulus** ([PlayMode.xml](PlayMode.xml)) — sesuai baseline `9/9`, kini mencakup sesi penuh keyboard+mouse dari akhir Chapter 1 hingga Chapter 3, uji keselarasan lantai sapuan samping, uji persilangan dua lampu, dan telemetri urutan percobaan `2,0 s` vs `1,5 s`.

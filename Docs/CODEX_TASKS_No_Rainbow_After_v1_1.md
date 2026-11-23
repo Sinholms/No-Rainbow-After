@@ -1,7 +1,7 @@
 # No Rainbow After — Implementation Tasks for Codex + Unity/Blender MCP
 
 **Companion to:** `GDD_No_Rainbow_After_v1_1.docx`  
-**Priority:** [Chapter 2 Plan](CHAPTER2_PLAN.md) governs the Chapter 2 sequence and its handoff to Chapter 3. The GDD v1.1 governs story canon, clues, and ending rules.
+**Priority:** [Bizarre Edition](CHAPTER2_PLAN.md) governs the Chapter 2 sequence, shared corridor exit, handoff to Chapter 3, and proposed Ella message condition. Use GDD v1.1 for the remaining story canon and clue IDs.
 
 **Target:** Windows x64, Unity 6.x, HDRP if GPU permits, first-person psychological horror, 3 chapters, three endings.
 
@@ -19,10 +19,10 @@ This is the **only canonical task ID list**. Execute one ID at a time. Never ren
 | T05 | Narrative director + corridor loop | C1-01 sampai C1-06 berlangsung runtut. |
 | T06 | Monster placeholder AI + encounter | Fight, Hide, Caught dapat diuji tanpa gore. |
 | T07 | HDRP visual vertical slice | Keterbacaan item dan FPS pada build Windows teruji. |
-| T08 | Ponsel dan chat Bayu | Setelah inspeksi tas, pesan terkirim sekali dan membuka Chapter 3. |
-| T09 | Laporan berita dan stealth sorotan | Bangun di kos, selesaikan laporan, lalu capai halte dengan checkpoint per segmen. |
+| T08 | Ponsel opsional dan chat Ella | Pesan terkirim sekali dengan satu centang. Keputusan dicatat untuk ending. |
+| T09 | Esai, lembur dan TKP | Cabang kasur/lembur, pintu lorong bersama, dua polisi statis, dan naik bus di halte. |
 | T10 | Clue registry + foreshadowing | 4 clue unik tersimpan tanpa membocorkan twist. |
-| T11 | Chapter 3 + EndingResolver | Approach Good; Fight/Hide + 4 clue Hidden; lainnya Bad. |
+| T11 | Chapter 3 + EndingResolver | Uji Approach, serta kombinasi Fight/Hide, clue, dan pesan Ella sesuai plan aktif. |
 | T12 | Tiga ending + credits | QA09–QA11 lulus; tanpa representasi metode eksplisit. |
 | T13 | Monster hero asset Blender -> Unity | Rig/animasi valid, tampak jelas pada FPP, performa terukur. |
 | T14 | Blender prop pipeline & modular art | Aset Blender masuk Unity dengan orientasi/material benar. |
@@ -36,7 +36,7 @@ You are a senior Unity 6 gameplay engineer and technical artist working on No Ra
 Read and follow the attached GDD v1.1. This is a student project, so favor small,
 tested, modular features over massive frameworks. Use current Unity 6 APIs and the
 packages actually installed. Use Unity MCP to inspect the real Editor and scene.
-Use Docs/CHAPTER2_PLAN.md for Chapter 2 gameplay and the handoff to Chapter 3.
+Use Docs/CHAPTER2_PLAN.md for the shared corridor exit, Chapter 2 gameplay, and the handoff to Chapter 3.
 If you cannot access the MCP bridge, report that honestly; do not pretend to edit Unity.
 
 Before ANY task: inspect Unity version, render pipeline, package manifest, current
@@ -125,6 +125,8 @@ Implement GameState, ObjectiveTracker ("Mengerjakan tugas"), ChapterDirector and
 (max 3) with small changes to props and light/fog per loop. Add laptop/book and work-slip
 objectives, a trigger for ShadowEncounter, an AudioDirector event interface and
 subtitles placeholder. Persist four clue IDs using unique set semantics.
+For the shared door revision, use the normal corridor exit threshold for the
+Chapter 1 horror transition after the work-slip gate.
 Acceptance: C1 scripted beats C1-01 to C1-06 execute in order in PlayMode.
 ```
 
@@ -152,15 +154,15 @@ Acceptance: all interactables remain visible and performance meets GDD target.
 
 ## Phase 2 — Chapter 2
 
-Use the [Chapter 2 Plan](CHAPTER2_PLAN.md) for the sequence, prototype order, and acceptance tests. Task IDs keep their existing ownership. Block out the stealth section early, then connect the phone and story handoff.
+Use [Bizarre Edition](CHAPTER2_PLAN.md) for the sequence, prototype order, and acceptance tests. Keep the task IDs.
 
 **T08 / Phone and chat**
 
-Build the fictional phone UI for Bayu's earlier messages and the reply after Raka inspects the bag. The reply and Bayu's confirmation open the Chapter 3 objective exactly once. Coordinate inspection of Ella's older chat with `T10`.
+Place the optional phone beside the laptop. Allow the player to send Ella one message with a single checkmark or leave without sending. Pass that choice to `T11`. Coordinate Ella's old chat with `T10`.
 
-**T09 / Accident report and spotlight stealth**
+**T09 / Coursework, overtime and police spotlights**
 
-Wire the wake-up and report-typing sequence to a single blackout transition at 100% stress. Build the road encounter with visible light footprints, cover occlusion, exposure feedback, and retry at the current segment. Use 2.0 seconds as the playtest baseline. Reach the bus stop and inspect Raka's bag to return to the dorm and unlock the final phone beat.
+Wire the essay to the stay-in-bed and overtime branches. Crossing the open door at the end of the normal corridor leads to the horror corridor in Chapter 1 and the crash site in Chapter 2. Use two stationary police officers with readable flashlight sweeps, cover, and a safe retry. Boarding the bus hands off to Chapter 3.
 
 **T10 / Clues & narrative foreshadowing**
 
@@ -180,9 +182,9 @@ Acceptance: clue count 0-4 is accurate after save/load and respawn.
 Implement Chapter3 encounter with three mutually exclusive and diegetic
 responses: Fight (click), Hide (crouch/cover), Approach (walk into trigger).
 Atomic choice lock prevents accidental double triggers.
-Use a pure C# EndingResolver:
+Prototype the Bizarre Edition conditions in a pure C# EndingResolver:
 - Approach -> Good
-- Fight OR Hide with all CLUE_01...CLUE_04 -> Hidden
+- Fight OR Hide with all CLUE_01...CLUE_04 and Ella message sent -> Hidden
 - Fight OR Hide otherwise -> Bad
 - No response -> None
 Do not use any numeric depression or moral health score.
@@ -199,7 +201,8 @@ asking where he is and why he missed class; imply tragedy without showing
 method, body, or instruments. HIDDEN uses similar non-graphic atmosphere
 but the key new Bayu message reads 'Si Ella udah sadar'. Provide subtitles,
 credits transition and restart. No copyrighted songs or copied assets.
-Acceptance: QA09-QA11 from GDD pass in Windows build.
+Acceptance: Run the GDD ending cases in the Windows build with the
+message and clue combinations in Bizarre Edition.
 ```
 
 ## Phase 4 — Monster production, Blender props and polish
@@ -299,7 +302,7 @@ visibility, silhouette legibility and all chapter-ending regressions.
 
 ## Cross-document handoff rules
 
-- **Keep the task IDs from GDD 9.3.** Use the active Chapter 2 plan for the updated T08–T10 scope and acceptance criteria.
+- **Keep the task IDs from GDD 9.3.** Use the active Chapter 2 plan for the updated T08–T11 scope and acceptance criteria.
 - T06 = functional greybox monster; T13 = Blender hero monster asset + Unity prefab. They are intentionally separate.
 - T07 = HDRP vertical slice, T08 = phone, T11 = ending logic, T12 = ending sequences, T16 = full QA. These IDs are FIXED.
 - Preview / concept image is a visual reference, **not** a ready-to-use 3D model. Need manual artistic assessment for rigging, face and topology.

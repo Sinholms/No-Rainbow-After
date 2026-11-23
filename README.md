@@ -7,7 +7,7 @@ Buka dengan Unity **6000.6.8f1**. Pipeline yang saat ini terpasang adalah **URP 
 Untuk menjalankan proyek, buka `Assets/_NoRainbowAfter/Scenes/Boot.unity` lalu tekan Play. Mulai Baru kini langsung masuk ke kamar kos dan lorong 3D dalam MasterGameplay. Kontrol FPP: `WASD`/mouse untuk bergerak dan melihat (termasuk tubuh fisik FPP Raka berjari-5 ala *MiSide* yang tampak saat menunduk), `Shift` sprint, `Ctrl` crouch, `E` berinteraksi, `Tab` minigame atur napas untuk menurunkan stres (atau `1x klik Tab` untuk keluar dari laptop), `F` menutup layar inspeksi dokumen (slip lembur, buku, pintu), `Enter` mengirim ketikan tugas pada laptop (otomatis keluar setelah 5 kalimat selesai), dan `Esc` untuk Pause; environment dan prop dibuat di Blender mengikuti `Docs/design.md`.
 Efek pandangan melingkar aktif secara default. Ubah Lebar pandang atau matikan Tepi pandangan melingkar melalui menu pause. Debug lab T02 tetap tersedia di `Assets/_NoRainbowAfter/Scenes/FirstPersonTest.unity`.
 
-Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres berwarna merah di pojok kiri atas** (mulai dari `50%`; layar memerah + peringatan berkedip pelan saat mencapai `>= 70%`), **minigame mengetik tugas kuliah ala Monkeytype** (`5` kalimat, huruf ketikan kuning, timer `60–30 detik`, kirim dengan `Enter`, keluar dengan `1x klik Tab`, otomatis keluar setelah 5 kalimat selesai) di laptop meja belajar (`PROP_RakaLaptop`), **kenaikan stres berkala di lorong horor** yang mendorong Raka bersembunyi di lemari (`E`) lalu menekan **`[Tab]` atur napas di bar hijau**, sistem **tertangkap Shadow** (pelarian pertama masih diberi kesempatan kabur; tertangkap berikutnya mengembalikan Raka ke **spawn awal koridor dengan stres 100%** sehingga wajib mengatur napas dengan `[Tab]` sebelum melangkah lagi), serta pintu keluar ujung lorong yang memulangkan Raka kembali ke kos dengan objektif **"Chapter 2 sedang dikembangkan"**. Kelanjutan Chapter 2, prolog sinematik, dan ending masih mengikuti rencana produksi.
+Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres berwarna merah di pojok kiri atas** (mulai dari `50%`; layar memerah + peringatan berkedip pelan saat mencapai `>= 70%`), **minigame mengetik tugas kuliah ala Monkeytype** (`5` kalimat, huruf ketikan kuning, timer `60–30 detik`, kirim dengan `Enter`, keluar dengan `1x klik Tab`, otomatis keluar setelah 5 kalimat selesai) di laptop meja belajar (`PROP_RakaLaptop`), **kenaikan stres berkala di lorong horor** yang mendorong Raka bersembunyi di lemari (`E`) lalu menekan **`[Tab]` atur napas di bar hijau**, sistem **tertangkap Shadow** (pelarian pertama masih diberi kesempatan kabur; tertangkap berikutnya mengembalikan Raka ke **spawn awal koridor dengan stres 100%** sehingga wajib mengatur napas dengan `[Tab]` sebelum melangkah lagi), serta pintu keluar ujung lorong yang memulangkan Raka ke kos. Alur Chapter 2 aktif mengikuti rencana Bizarre Edition di bawah ini.
 
 ## Membuka proyek setelah clone
 
@@ -24,15 +24,14 @@ Branch utama adalah **main**. Ambil pembaruan sebelum mulai bekerja dan gunakan 
 
 ## Dokumentasi dan rencana kerja
 
-- [Rencana aktif Chapter 2 — Di Bawah Sorotan](Docs/CHAPTER2_PLAN.md), termasuk core loop stealth dan transisi ke Chapter 3.
-- [Spesifikasi cerita dan aturan ending — GDD v1.1](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
+- [Rencana aktif Chapter 2 — Bizarre Edition](Docs/CHAPTER2_PLAN.md), termasuk pintu keluar lorong untuk Chapter 1 dan 2, esai, HP Ella, serta jalur ke halte.
+- [Referensi cerita dan clue — GDD v1.1](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
 - [Urutan tugas T00–T16](Docs/CODEX_TASKS_No_Rainbow_After_v1_1.md)
 - [Desain dunia dan aset](Docs/design.md)
 - [Hasil T01 dan cara menguji](Docs/T01_HANDOFF.md)
 - [Menu sinematik imagegen dan hasil pengujian](Docs/MENU_ART_HANDOFF.md)
 - [T02 kontrol first person dan aset Blender](Docs/T02_HANDOFF.md)
 - [Revisi environment horror dan POV melingkar](Docs/KOS_ATMOSPHERE_HANDOFF.md)
-- [Pembagian tugas tim dan roadmap](PEMBAGIAN_TUGAS_KERJA.md)
 - [Rencana cutscene prolog](Docs/PROLOGUE_CUTSCENE.md)
 - [Panduan tugas Codex](Docs/CODEX_MASTER_PROMPT.md)
 - [Interaksi dan inspeksi T03](Docs/T03_HANDOFF.md)

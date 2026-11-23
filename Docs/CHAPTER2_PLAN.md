@@ -1,64 +1,71 @@
-# Chapter 2 — Di Bawah Sorotan
+# Chapter 2 — Bizarre Edition
 
-**Rencana produksi aktif · 19 November 2026**
+**Rencana produksi aktif · 23 November 2026**
 
-Raka bangun di kos, menyalin berita kecelakaan yang melibatkan seorang pemuda dan seorang pemudi, lalu masuk ke jalan yang terasa seperti TKP dalam berita. Pemain harus mencapai **halte di seberang garis polisi** dengan membaca sorotan Shadow dan lampu mobil. Di halte, Raka mengenali tasnya sendiri. Chapter 3 dimulai dengan janji untuk menemui Bayu dan membicarakan kaitan Raka dengan kecelakaan itu.
-
-Dokumen ini menjadi acuan implementasi Chapter 2 dan transisinya ke Chapter 3. GDD v1.1 tetap menjadi acuan identitas karakter, misteri Ella, ID petunjuk, dan aturan ending.
+Setelah kembali ke kos di akhir Chapter 1, Raka masih harus mengerjakan esai kuliah dan berangkat lembur. Pintu ujung lorong membawanya ke jalan pasar yang berubah menjadi TKP kecelakaan. Ia harus melewati dua polisi yang berjaga untuk mencapai halte dan naik bus menuju tempat kerja.
 
 ## 1. Alur yang dimainkan
 
-| Bagian | Tujuan pemain | Hasil |
-| --- | --- | --- |
-| Bangun di kos | **Kerjakan tugas di laptop.** Raka bangun di ranjang seusai Chapter 1. Tugas yang terbengkalai dan chat Bayu dari hari-hari sebelumnya bisa dilihat di kamar. | Pemain mendapat konteks sebelum masuk ke adegan horor. |
-| Ketik berita | Salin satu laporan kecelakaan dua anak muda yang dibagi menjadi bagian pendek. Isi berita fokus pada lokasi dan kejadian. Nasib kedua orang masih belum jelas. | Saat bagian terakhir dikirim dengan benar, stres naik ke **100%**, bunyi ketikan terputus, lalu layar gelap dan Raka berpindah ke sisi jalan. Trigger berjalan sekalipun pemain mengetik tanpa salah. |
-| Seberangi jalan | **Capai halte di seberang garis polisi.** Halte terlihat dari posisi awal. Gunakan box, jongkok, dan celah di antara sapuan lampu. | Pemain melewati tiga segmen dan tiba di zona aman di halte. |
-| Periksa tas di halte | Kenali tas Raka lewat gantungan yang sempat terlihat di kos. | Kepemilikan tas memperdalam misteri soal keterlibatan Raka. Setelah inspeksi, kembali ke kos. |
-| Balas Bayu | Raka bisa menulis *“Besok bisa ketemu? Ada yang mau gue ceritain soal kecelakaan itu.”* Bayu menyepakati satu tempat bertemu. | Chapter 2 selesai. Objektif pembuka Chapter 3 adalah **Temui Bayu di kampus**. Pertemuan itu menjadi jembatan menuju konfrontasi Chapter 3. |
+| Beat | Yang dialami pemain |
+| --- | --- |
+| Bangun di kos | Raka bangun di pinggir kasur. Langkahnya lambat dan berat. Objektif pertama adalah **Kerjakan esai di laptop**. HP fisik terlihat di samping laptop dan bisa ditemukan sendiri. |
+| Ketik esai | Monkeytype berisi potongan esai kuliah tentang kecelakaan yang baru terjadi. Pemain mengetik ulang bagian esai yang disiapkan Raka. Hasil tugas menentukan apakah hari berlanjut. |
+| Diminta lembur lagi | Jika ada bagian yang berhasil, permintaan lembur dari tempat kerja muncul di layar laptop setelah sesi selesai. Objektif berubah menjadi **Berangkat lembur**. Raka berjalan melewati lorong sampai pintu ujung. |
+| Balik ke kasur | Jika seluruh bagian gagal, Raka kembali ke kasur. Gunakan fade dan perubahan cahaya dari siang ke malam untuk menunjukkan bahwa ia rebahan seharian. Percobaan bab berakhir dan pemain bisa mengulang dari bangun di kos. |
+| Pintu lorong → TKP | Setelah membuka dan melewati ambang pintu ujung, Raka mendengar sirene. Pemain mendadak berada di sisi aman jalan pasar, melihat mobil dan pantulan rotator dari kilasan sebelum Raka pingsan di prolog. Objektif menjadi **Capai halte dan naik bus**. |
+| TKP → bus | Dua polisi bertubuh besar menyapu jalur dengan senter dari pos masing-masing. Raka memakai cover dan jeda sapuan untuk tiba di halte. Pemain berinteraksi untuk naik bus menuju tempat kerja. Beat naik bus menutup Chapter 2 dan memicu handoff ke Chapter 3 satu kali. |
 
-## 2. Core loop stealth
+Gerakan berat berlaku saat jalan di kos, lorong, dan TKP. Mulai dengan **sekitar 75% kecepatan jalan normal** sebagai angka prototipe. Pakai langkah yang lebih pelan dan berat serta sedikit jeda saat mulai bergerak. Pertahankan respons kamera dan pastikan Raka berhenti dengan responsif. Batasi juga kecepatan sprint dalam profil bab ini. Uji jarak antar-cover saat jalan dan jongkok agar rute bisa diselesaikan tanpa sprint.
 
-**Baca arah sorotan → pilih cover atau jalur → jongkok dan pindah saat ada celah → cari posisi untuk membaca sorotan berikutnya.**
+### Pintu keluar yang dipakai dua chapter
 
-| Segmen | Susunan ancaman | Keputusan yang diuji |
-| --- | --- | --- |
-| A — Mobil polisi | Satu mobil diam dengan lampu depan menyala. Cover pertama terlihat jelas dari spawn. | Dari posisi berdiri, lihat sorotan dan cover. Jongkok untuk melewati bagian dengan box rendah. |
-| B — Shadow berjaga | Shadow berdiri dan menyapu jalan dengan pola tetap. Kepala mulai menoleh dan statis radio terdengar sebelum sapuan beralih. | Baca arah berikutnya. Pilih kapan meninggalkan cover dan menyeberang. |
-| C — Shadow berpatroli | Shadow berjalan sambil menyapu jalan. Sorotannya sesekali menyilang dengan lampu mobil. | Pilih jalur pendek yang terbuka atau jalur memutar dengan cover tambahan. Kedua jalur menuju halte. |
+- Ganti dinding buntu di ujung lorong kos normal, sesuai titik pada foto referensi, dengan kusen dan daun pintu yang bisa dibuka. Beri bukaan yang cukup untuk kapsul pemain, collider yang mengikuti daun pintu, dan sedikit ruang pijak di seberang ambang.
+- **Chapter 1:** setelah syarat cerita slip lembur terpenuhi, Raka menyusuri lorong kos, menekan **E** untuk membuka pintu, lalu melangkah keluar. Pemicu lama berdasarkan posisi di lorong diganti dengan penyeberangan ambang ini. Tujuan perpindahan adalah titik masuk koridor horor Chapter 1. Pintu yang mengakhiri encounter koridor horor tetap merupakan pintu terpisah.
+- **Chapter 2:** pintu fisik yang sama terkunci sampai sesi esai menghasilkan permintaan lembur. Setelah pintu dibuka, Raka melangkah melewati ambang untuk berpindah ke posisi aman di TKP.
+- Tekan **E** hanya membuka daun pintu. Transisi berjalan satu kali saat Raka menyeberang dari sisi lorong ketika pintu sudah terbuka dan syarat bab terpenuhi. Pemain bisa membuka pintu, berhenti, atau mundur tanpa berpindah. Jaga arah pandang saat muncul di tujuan agar terasa seperti meneruskan langkah yang sama.
 
-Susun map secara linear menuju halte, dengan satu percabangan pendek di segmen C. Pada tiap checkpoint, beri pemain satu tempat aman yang memungkinkan ia melihat ancaman dan cover berikutnya. Ubah jarak cover, arah sapuan, dan persilangan lampu untuk menaikkan tekanan.
+### Esai dan kondisi gagal
 
-## 3. Aturan sorotan dan tangkapan
+- **Usulan prototipe:** tiga potongan pendek yang membentuk esai. Gunakan paragraf pembuka, refleksi tentang kecelakaan, dan penutup. Teks boleh menggemakan motif hujan, cahaya biru, atau suara yang terasa familier. Nasib Ella tetap tersirat lewat informasi yang belum lengkap.
+- Setiap bagian punya satu hasil akhir. Pemain boleh memperbaiki salah ketik dan mencoba Enter lagi selama waktu tersisa. Bagian yang belum lolos ketika waktunya habis dicatat gagal, lalu sesi berlanjut ke bagian berikutnya. Menutup laptop atau pause menahan progres dan waktu tersisa. Membuka lagi melanjutkan bagian yang sama.
+- **0/3 berhasil** memicu adegan rebahan. **1/3 sampai 3/3 berhasil** memicu permintaan lembur setelah semua bagian selesai dinilai. Durasi bagian ditentukan setelah uji mengetik. Hasil ini mengatur alur hari Raka. Pilihan ending global dibaca terpisah.
 
-- **Sorotan putih** di aspal menunjukkan arah, lebar, dan batas jarak cahaya. Bentuknya mengikuti kepala Shadow atau arah lampu depan mobil. Cahaya dari kedua sumber memakai aturan paparan yang sama.
-- **Cover** memutus pandangan langsung ke tubuh Raka. Lampu mengenai Raka ketika ia berada dalam sudut dan jarak cahaya serta tubuhnya terlihat. Berdiri bisa membuat kepala terlihat di atas box rendah. Jongkok menurunkan tubuh sampai terlindung. Petunjuk visual dan deteksi harus sepakat pada posisi tersebut.
-- **Peringatan merah** muncul pada area cahaya di dekat Raka saat ia tersorot. Bunyi singkat dan indikator paparan yang mulai terisi memberi peringatan saat pandangan pemain mengarah ke depan. Hindari kedipan cepat.
-- **Timer tangkapan** habis saat paparan terkumpul sampai **2,0 detik**. Saat keluar dari semua sorotan, indikator turun cepat. Dua lampu yang mengenai Raka bersamaan tetap mengisi satu indikator pada laju yang sama. Saat pause, sapuan dan indikator berhenti.
-- **Respawn** membawa Raka ke awal segmen aktif saat indikator penuh. Checkpoint berada di balik cover, indikator kembali kosong, dan petunjuk yang sudah diperiksa tetap tercatat. Urutan setelah laporan tersimpan untuk retry encounter, sehingga retry dimulai langsung di jalan.
-- **Uji 2,0 detik sebagai baseline** untuk seluruh bab. Coba **1,5 detik** jika pemain baru bisa membaca peringatan dan peluang kabur pada 2,0 detik sudah terasa longgar. Uji dua durasi di layout yang sama. Jika pemain berkali-kali tertangkap karena cover di luar jangkauan atau sorotan pertama datang dari luar layar tanpa peringatan, benahi layout dan sinyal sebelum memperpendek timer.
+### HP Ella dan Hidden Ending
 
-## 4. Shadow Raka dan SDG 3
+- Ponsel diletakkan di samping laptop dan tersedia selama Raka masih di kos, sebelum maupun sesudah esai. Interaksi normal dengan benda bisa membuka chat jika pemain mengarah langsung ke HP. Pemain menemukannya tanpa objektif, notifikasi yang memancing, penanda, atau teks **Buka HP**.
+- Pemain bisa membaca chat Ella, memilih **Kirim**, atau menutup ponsel dan melanjutkan hari. Pesan baru, misalnya *“El, maaf. Aku masih pengen ngobrol.”*, tetap tampil dengan **satu centang** tanpa balasan. Catat pilihan hanya saat pemain mengirim pesan, satu kali per percobaan.
+- Pembacaan chat lama tetap bisa memberi `CLUE_03` jika pemain melihat bagian yang relevan. Status kirim adalah flag cerita tersendiri. Flag bertahan saat retry di TKP dan ketika bab berikutnya dimuat. Memulai ulang percobaan Chapter 2 dari kasur mengulang pilihan kirim untuk percobaan baru.
+- **Usulan aturan ending:** pertahankan `Approach` → **Good**. Untuk `Fight` atau `Hide`, **Hidden** membutuhkan semua empat clue yang sudah ditetapkan serta pesan Ella yang dikirim. Jika syarat itu belum lengkap, hasilnya **Bad**. Pembedaan ini membuat keputusan mengirim berpengaruh tanpa menampilkan syarat Hidden kepada pemain. Beat rebahan adalah akhir hari di Chapter 2, terpisah dari tiga ending global.
 
-Gunakan rig dan siluet `ACT_Shadow_Raka` yang sudah ada. Shadow mendongak, statis radio masuk, lalu sorotan muncul dari sela kain penutup matanya. Rig, sumber sorotan, dan arah area putih harus bergerak bersama. Sorotan mewakili perasaan Raka sedang diperiksa dan takut disalahkan. Tanda kesehariannya muncul lebih dulu, lewat tugas yang terbengkalai, pesan yang ia biarkan selama berhari-hari, dan hal yang dulu ia nikmati tetapi kini sulit ia mulai.
+## 2. Encounter TKP
 
-Stres 100% menandai perpindahan dari laptop ke jalan. Selama stealth, pakai indikator paparan sebagai peringatan utama dan hentikan efek layar stres dari adegan laporan. Di penutup, pemain menggerakkan Raka untuk menghubungi orang yang ia percaya dan menyampaikan satu kebutuhan yang konkret. Ini mengaitkan desain dengan promosi kesehatan mental dan kesejahteraan pada Target 3.4. [PBB — SDG 3](https://sdgs.un.org/goals/goal3) · [WHO — Depresi](https://www.who.int/news-room/fact-sheets/detail/depression)
+Pakai jalan pasar, halte, mobil patroli, dan cover yang sudah tersedia sebagai dasar. Posisi dua polisi ditentukan saat blockout berdasarkan jalur berjalan dan collider map.
 
-Referensi desain adalah pembacaan patroli dari *Assassin’s Creed* dan ketegangan saat berlindung dari *Little Nightmares*. Bentuk Shadow, map jalan, suara, dan UI dibuat untuk *No Rainbow After*. [Ubisoft — Stealth](https://news.ubisoft.com/en-gb/article/1hges9IWLOmNAFpiavYmKl) · [Bandai Namco — Little Nightmares](https://en.bandainamcoent.eu/little-nightmares/news/escape-your-childhood-fears-little-nightmares-available-today-on-ios-and)
+| Titik | Penempatan dan fungsi |
+| --- | --- |
+| Spawn | Di sisi jalan yang terlindung dengan pandangan langsung ke papan halte. Pemain sempat melihat polisi pertama, sorot senter, dan cover berikutnya sebelum terpapar. |
+| Polisi 1 | Di tepi jalan dekat fasad ruko atau pagar solid, menghadap lintasan menuju cover pertama. Belakang pos rapat ke batas map dan sisi luarnya tersambung ke penghalang. |
+| Polisi 2 | Di tepi berlawanan, mendekati akses halte, dengan belakang membelakangi pagar atau barikade yang menutup celah trotoar. Sorotannya menjaga lintasan terakhir menuju halte. |
+| Halte | Titik aman setelah penyeberangan kedua. Pemain melihat bus atau tanda keberangkatannya, lalu **Naik bus** lewat interaksi. |
 
-## 5. Urutan pengerjaan
+- **Tepat dua polisi diam di pos.** Kaki tetap di tempat sepanjang encounter. Bahu, kepala, dan tangan boleh bergerak terbatas untuk memperlihatkan arah sapuan senter. Bentuk tubuh lebih tinggi dan besar dari manusia biasa, dengan seragam terbaca dalam siluet. Gunakan prototipe siluet sederhana untuk uji jalur sebelum membuat aset final.
+- **Senter polisi adalah sumber deteksi.** Pakai ulang cakupan sorotan, oklusi cover, indikator paparan, dan retry yang sudah tersedia. Mulai dari ambang tangkap **2 detik** sebagai baseline uji, lalu sesuaikan bersama lebar sapuan dan jarak cover untuk gerakan lambat. Saat tertangkap, pemain kembali ke cover aman sebelum lintasan aktif. Checkpoint mempertahankan hasil esai dan pilihan HP.
+- **Mobil polisi menjadi dekorasi.** Rotator dan refleksi boleh menyala untuk suasana. Tempatkan mobil di luar lintasan cover utama. Putus hubungan lampu mobil dengan deteksi, meter paparan, dan checkpoint.
+- **Tutup jalan pintas dengan geometri nyata.** Sambungkan belakang pos ke dinding atau pagar, dan tutup celah di ujung trotoar dengan barikade. Uji sambil merapat ke kedua sisi jalan, menyusup di belakang badan polisi, dan jongkok di sela collider. Rute utama tetap memberi cover sebelum setiap lintasan senter dan jeda yang cukup untuk berpindah.
+- **Sirene terus terdengar dari pintu sampai naik bus.** Kenalkan motif yang sama lewat kilasan polisi di prolog. Di TKP, sirene terdengar terus dan rotator memantul di aspal basah. Bedakan bunyi peringatan pendek ketika tersorot agar tetap terbaca di atas sirene.
 
-1. **Blockout stealth (`T09`, Orang 2 + Orang 3).** Buat jalur A–C, cover, spawn aman, dan halte dalam scene kerja. Pastikan bisa mencapai halte dengan kontrol FPP saat ini. Mulai dari lampu mobil statis, kemudian Shadow berjaga, lalu patroli dan persilangan cahaya.
-2. **Deteksi, feedback, dan retry (`T09`, Orang 2 + Orang 1).** Gunakan arah, sudut, jangkauan, dan occlusion yang sama untuk deteksi dan penanda lantai. Deteksi tetap konsisten pada kualitas grafis berbeda. Terapkan indikator paparan, pause, dan respawn per segmen. Lakukan playtest sebelum memoles aset.
-3. **Sambungkan pembuka (`T09`, Orang 2 + Orang 1).** Jadikan kembalinya Raka ke kos sesudah `INT_C1_EXIT` sebagai titik sambung. Mulai beat bangun setelah transisi kos selesai. Pakai ulang UI `LaptopTypingMinigame` dengan konfigurasi berita Chapter 2. Menutup laptop menyimpan bagian yang sudah selesai dalam sesi ini. Saat laporan tuntas, kunci trigger satu kali, pindahkan pemain, dan aktifkan kontrol setelah fade. Jaga lima kalimat, timer, dan penalti laptop Chapter 1.
-4. **Sambungkan ending (`T08`/`T10`, Orang 1 + Orang 2).** Rakit chat fiktif Bayu, inspeksi tas, dan permintaan transisi Chapter 3. Gunakan `ChapterDirector` dan `GameState` sebagai titik integrasi. `GameState.ActiveChapter` saat ini masih tetap `Chapter1`, jadi tambah routing bab aktif dan beri pemilik yang jelas untuk HUD objektif setelah transisi. Pertahankan `CLUE_01`–`CLUE_04` dan penyimpanan yang sudah ada. Tas menjadi pemicu cerita. Penempatan chat lama Ella dan rekaman ambigu tetap bagian dari `T10`.
-5. **Poles dan jalankan regresi (seluruh tim).** Poles Shadow, mobil, box, aspal dan halte setelah alur bisa dimainkan. Gunakan prefab visual Shadow yang ada dengan perilaku khusus Chapter 2, sehingga `ShadowMotionPlayback` tetap menjadi pemutar pose rig. Integrasikan scene kerja ke alur utama dan uji Chapter 1, Chapter 2, serta handoff Chapter 3.
+## 3. Urutan implementasi
 
-## 6. Kriteria selesai
+1. **Pintu dan alur kos.** Buat pintu bersama di ujung lorong normal. Di `ChapterOneCorridorShift`, pindahkan pemicu masuk koridor horor ke ambangnya. Beri `LaptopTypingMinigame` profil esai Chapter 2 dan hubungkan hasil ke adegan kasur atau permintaan lembur lewat `ChapterTwoFlow` dan `ChapterDirector`. Arahkan penyeberangan pintu saat Chapter 2 ke TKP. Setel profil langkah lewat kontrol FPP yang ada.
+2. **Blockout TKP sampai bus.** Ubah `ChapterTwoStreet` dan builder prefab jalan untuk dua pos statis di tepi, batas fisik, cover, dan interaksi naik bus. Di `ChapterTwoSpotlightEncounter`, gunakan kembali deteksi senter dan retry. Uji rute sebelum memasang aset final.
+3. **HP dan handoff ending.** Pakai ulang UI `ChapterTwoPhone` untuk chat Ella. Simpan keputusan dalam state cerita. Teruskan flag dan clue ke kontrak ending. Tas di halte boleh menjadi properti atau petunjuk opsional. Pastikan keempat ID clue masih bisa ditemukan di jalur cerita, termasuk jika petunjuk dari inspeksi tas lama perlu dipindahkan. Naik bus menjadi satu-satunya pemicu handoff bab dari halte.
+4. **Audio, visual, dan playtest.** Cocokkan kilasan polisi prolog dengan mobil, rotator, dan sirene di TKP. Poles siluet penjaga, langkah berat, dan bus setelah layout bisa dimainkan. Untuk prototipe, bus cukup terlihat di halte dan transisi boleh berakhir dengan fade setelah pemain naik. Lokasi pembuka Chapter 3 setelah perjalanan bus ditentukan saat merancang bab itu.
 
-- Dari alur normal Chapter 1, pemain kembali ke kos, bangun, mengirim laporan, melihat stres mencapai 100%, lalu tiba di jalan. Keluar dan membuka kembali laptop memulihkan bagian laporan yang sudah selesai. Menekan Enter berulang hanya memicu satu transisi.
-- Sorotan terbaca dari posisi berdiri dan jongkok pada build Windows. Uji batas luar cone, belakang box tinggi, berdiri dan jongkok di box rendah, sorotan yang datang dari samping, dua lampu bersamaan, dan pause saat indikator terisi.
-- Pemain bisa menyelesaikan ketiga segmen, termasuk kedua jalur segmen C. Tertangkap mengulang segmen aktif dalam kondisi aman. Halte, inspeksi tas, dan kirim chat hanya memicu progres satu kali.
-- Pemain baru bisa menunjuk tujuan dari spawn, menjelaskan penyebab tertangkap, dan menyebut tindakan Raka setelah mencapai halte. Catat segmen dan alasan yang paling sering membuat pemain gagal sebelum memilih timer final.
-- Tes regresi Chapter 1 mencakup laptop, slip lembur, Shadow, lemari, atur napas, respawn, dan kembali ke kos. Handoff Chapter 3 mempertahankan petunjuk yang sudah ditemukan dan membuka objektif pembukanya.
+## 4. Kriteria siap dimainkan
 
-**Setelah playtest**, tetapkan durasi paparan, kecepatan putar Shadow, jarak box, dan panjang jalur memutar. Selaraskan naskah laporan dan balasan Bayu dengan kronologi cerita sebelum rekaman atau finalisasi UI.
+- Dari akhir Chapter 1, pemain dapat langsung mengerjakan esai. Tutup lalu buka laptop untuk memeriksa progres. Lulus sempurna, lulus sebagian, dan gagal semua menghasilkan cabang yang tepat. Nol keberhasilan menunjukkan Raka rebahan sampai malam dan menyediakan percobaan ulang.
+- Pemain bisa melewati HP tanpa mendapat arahan untuk membukanya. Jika membuka HP dan menutupnya, flag kirim tetap kosong. Jika mengirim, pesan hanya muncul sekali dengan satu centang. Retry jalan mempertahankan flag tersebut.
+- Jalur esai yang lanjut ke lembur mengembalikan kontrol untuk berjalan ke pintu. Uji pintu sebelum syarat bab terpenuhi, membuka lalu mundur, dan mencoba melewati pintu tertutup. Melewati ambang saat pintu terbuka memicu koridor horor di Chapter 1 atau TKP di Chapter 2, masing-masing satu kali.
+- Dari spawn TKP, pemain bisa melihat halte. Dalam playtest, cek apakah sirene dan mobil polisi dikenali sebagai kilasan dari prolog.
+- Tepat dua polisi mempertahankan posisi. Kedua senter bereaksi sesuai arah dan cover. Lewat belakang polisi, menempel batas map, dan menyusuri trotoar tidak memberi rute pintas. Rute dengan cover dapat diselesaikan sambil memakai kecepatan Chapter 2. Lampu mobil tidak mengisi indikator paparan.
+- Pemain bisa mencapai halte dan naik bus sekali tanpa membuka HP atau memeriksa tas. Uji handoff dengan kedua pilihan pesan, kombinasi clue lengkap dan tidak lengkap, serta pemulihan kontrol di akhir transisi. Lakukan regresi laptop, lorong, dan Shadow Chapter 1 di jalur normal.
