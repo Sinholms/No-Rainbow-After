@@ -35,9 +35,10 @@ Gerakan berat berlaku saat jalan di kos, lorong, dan TKP. Mulai dengan **sekitar
 Foto Raka dan Ella ada dalam bingkai di meja kos, di sebelah kanan HP dekat lampu. Saat diperiksa, pemain melihat fotonya dan tulisan Ella “Wisuda bareng, ya.” yang memberi `CLUE_01`.
 
 - Ponsel diletakkan di samping laptop dan tersedia selama Raka masih di kos, sebelum maupun sesudah esai. Interaksi normal dengan benda bisa membuka chat jika pemain mengarah langsung ke HP. Pemain menemukannya tanpa objektif, notifikasi yang memancing, penanda, atau teks **Buka HP**.
-- Pemain bisa membaca chat Ella, memilih **Kirim** atau **Jangan kirim**. Pilihan **Jangan kirim** menutup ponsel. Pemain bisa membukanya lagi selama masih di kos. Pesan baru, misalnya *“El, maaf. Aku masih pengen ngobrol.”*, tetap tampil dengan **satu centang** tanpa balasan. Catat pilihan hanya saat pemain mengirim pesan, satu kali per percobaan.
-- Pembacaan chat lama tetap bisa memberi `CLUE_03` jika pemain melihat bagian yang relevan. Status kirim adalah flag cerita tersendiri. Flag bertahan saat retry di TKP dan ketika bab berikutnya dimuat. Memulai ulang percobaan Chapter 2 dari kasur mengulang pilihan kirim untuk percobaan baru.
-- **Usulan aturan ending:** pertahankan `Approach` → **Good**. Untuk `Fight` atau `Hide`, **Hidden** membutuhkan semua empat clue yang sudah ditetapkan serta pesan Ella yang dikirim. Jika syarat itu belum lengkap, hasilnya **Bad**. Pembedaan ini membuat keputusan mengirim berpengaruh tanpa menampilkan syarat Hidden kepada pemain. Beat rebahan adalah akhir hari di Chapter 2, terpisah dari tiga ending global.
+- Ella masih di rumah sakit. Raka belum tahu apakah Ella masih hidup, dan HP tidak mengungkap kondisi Ella. Saat membuka kontak Ella, pemain hanya melihat draf permintaan maaf dan rasa rindu dari Raka.
+- **Kirim** menampilkan satu pesan dari Raka dengan **satu centang**. Pesan sudah terkirim, tetapi belum sampai ke HP Ella. Tidak ada riwayat pesan dari Ella atau balasan. **Jangan kirim** menutup ponsel. Pemain bisa membukanya lagi selama masih di kos.
+- Draf Raka mengingat janji untuk wisuda bersama dan memberi `CLUE_03` ketika dibaca. Status kirim adalah flag cerita tersendiri yang dicatat satu kali per percobaan. Flag bertahan saat retry di TKP dan ketika bab berikutnya dimuat. Memulai ulang percobaan Chapter 2 dari kasur mengulang pilihan kirim untuk percobaan baru.
+- **Usulan aturan ending:** pertahankan `Approach` → **Good**. Untuk `Fight` atau `Hide`, **Hidden** membutuhkan semua empat clue yang sudah ditetapkan serta pesan yang Raka kirim ke Ella. Jika syarat itu belum lengkap, hasilnya **Bad**. Pembedaan ini membuat keputusan mengirim berpengaruh tanpa menampilkan syarat Hidden kepada pemain. Beat rebahan adalah akhir hari di Chapter 2, terpisah dari tiga ending global.
 
 ## 2. Encounter TKP
 
@@ -66,7 +67,7 @@ Pakai jalan pasar, halte, mobil patroli, dan cover yang sudah tersedia sebagai d
 ## 4. Kriteria siap dimainkan
 
 - Dari akhir Chapter 1, pemain dapat langsung mengerjakan esai. Tutup lalu buka laptop untuk memeriksa progres. Lulus sempurna, lulus sebagian, dan gagal semua menghasilkan cabang yang tepat. Nol keberhasilan menunjukkan Raka rebahan sampai malam dan menyediakan percobaan ulang.
-- Pemain bisa melewati HP tanpa mendapat arahan untuk membukanya. Jika membuka HP dan menutupnya, flag kirim tetap kosong. Jika mengirim, pesan hanya muncul sekali dengan satu centang. Retry jalan mempertahankan flag tersebut.
+- Pemain bisa melewati HP tanpa mendapat arahan untuk membukanya. Jika membuka HP dan menutupnya, flag kirim tetap kosong. Sebelum mengirim, hanya draf Raka yang terlihat. Jika mengirim, hanya ada satu pesan dari Raka dengan satu centang dan tanpa balasan. Retry jalan mempertahankan flag tersebut.
 - Jalur esai yang lanjut ke lembur mengembalikan kontrol untuk berjalan ke pintu. Uji pintu sebelum syarat bab terpenuhi, membuka lalu mundur, dan mencoba melewati pintu tertutup. Melewati ambang saat pintu terbuka memicu koridor horor di Chapter 1 atau TKP di Chapter 2, masing-masing satu kali.
 - Dari spawn TKP, pemain bisa melihat halte. Dalam playtest, cek apakah sirene dan mobil polisi dikenali sebagai kilasan dari prolog.
 - Tepat dua polisi mempertahankan posisi. Kedua senter bereaksi sesuai arah dan cover. Lewat belakang polisi, menempel batas map, dan menyusuri trotoar tidak memberi rute pintas. Rute dengan cover dapat diselesaikan sambil memakai kecepatan Chapter 2. Lampu mobil tidak mengisi indikator paparan.

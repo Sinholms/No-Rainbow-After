@@ -24,7 +24,7 @@
 | Good | C3 **Approach** → Raka slowly returns to academic life → **graduation** in light rain/sunset → mysterious early letter from Ella. |
 | Bad | Under the Bizarre Edition proposal, C3 **Fight or Hide** without both Hidden prerequisites → tragic **implied** absence; phone receives Bayu’s concerned messages. No depiction of a method or body. |
 | Hidden | Under the Bizarre Edition proposal, C3 **Fight or Hide** with **CLUE_01–CLUE_04 collected** and **Ella message sent** → Bayu message says **Ella regained consciousness**. Twist, not an explicit happy outcome. |
-| Clues | `CLUE_01` photo/promised graduation; `CLUE_02` overtime slip; `CLUE_03` old semester-five chat; `CLUE_04` ambiguous post-crash voice recording. Unique IDs persist. |
+| Clues | `CLUE_01` photo/promised graduation; `CLUE_02` overtime slip; `CLUE_03` graduation promise in Raka's draft; `CLUE_04` ambiguous post-crash voice recording. Unique IDs persist. |
 | Monster | Shadow of Raka: **human, distorted, drenched, guilty**, not a demon or generic boss. Blurred face, optional **superficial scars / restrained dark blood marks**, never graphic gore. |
 | Scope | No open world, combat-tree, inventory RPG, full procedural levels, ray tracing requirement, or mandatory third-person animation. |
 | Theme | Poverty, barriers to education, grief, and mental health; **SDG 1, SDG 4, SDG 3** through environment, tasks, and the **single-layer top-left red Stress Barometer (starts at 50%; red screen & blinking warning at >=70%)** updated during laptop typing (5 sentences, yellow highlights, 60–30s timer, 1x `[Tab]` exit / auto-exit on 5 sentences), periodic corridor stress climb, and calmed via the **`[Tab]` green-bar Breathing Minigame** (including inside wardrobes and after Shadow catch respawn to corridor start at 100% stress); finishing Chapter 1 returns Raka to his dorm. |
@@ -215,7 +215,7 @@ Reuse WB-01 geometry and phone focus. Establish absence with **camera, sound, ro
 | Economic hardship | repaired shoes, cheap groceries, overtime slip, split rent note, modest room | inspect overtime, glance at work hours | SDG 1, `CLUE_02` |
 | Education barriers | worn textbooks, shared notes, internship forms, packed deadlines | book pickup, laptop report | SDG 4, C1/C2 |
 | Fatigue before crash | watch, shift schedule, untidy notes, tired voice | short fragment in prologue, overtime slip | Accident causal chain |
-| Raka–Ella relationship | graduation photo, subtle shared memory, old chat | inspect photo, old chat, envelope | `CLUE_01`, `CLUE_03` |
+| Raka–Ella relationship | graduation photo and Raka's unsent apology | inspect photo, phone draft, envelope | `CLUE_01`, `CLUE_03` |
 | Fragmented memory | partly audible voice record, blurred wet road lights, repetitive corridor | inspect recording; environmental echo | `CLUE_04`; preserve twist |
 | Social withdrawal | unanswered but not malicious chats, missing attendance messages | phone notifications from Bayu | Bayu / ending |
 | Hope without easy cure | clearer routine, realistic time skip, graduation in drizzle | observe graduation and read letter | Good Ending |
@@ -434,7 +434,7 @@ The monster is **Raka turned into the shape of his guilt**, not a separate speci
 ### ITEM-04 / Phone (`PROP_003_RakaPhone`)
 
 - **C2:** place the optional phone beside the laptop without an objective or prompt to open it. Keep a single checkmark on the message if the player sends it to Ella.
-- **Old conversation (`CLUE_03`):** semester-five graduation joke/time capsule reference; ambiguity preserved.
+- **Raka's draft (`CLUE_03`):** Raka apologizes, says he misses Ella, and remembers their graduation promise. The Chapter 2 thread has no messages from Ella. Raka does not know whether Ella is alive, and the phone never reveals her condition.
 - **Bayu:** maintain a separate thread for the ending texts.
 - **UX:** entirely fictional messenger UI. Use size-legible typography; avoid brand copyright. Check subtitles and screenreader-friendly text architecture if possible.
 
@@ -744,8 +744,8 @@ validation, and build performance. No graphic gore and no franchise copies.
 
 ```text
 Implement Raka's fictional phone presentation using Docs/CHAPTER2_PLAN.md.
-Show Ella's old chat and the optional single-checkmark message. Coordinate
-clue registration with T10. Preserve exact clue IDs and ending reveal wording.
+Show only Raka's draft and his optional outgoing message with one checkmark.
+Coordinate clue registration with T10. Preserve the ending reveal wording.
 Use a fictional UI. Verify font legibility at 1080p and closing with F.
 ```
 

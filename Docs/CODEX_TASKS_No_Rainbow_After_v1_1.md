@@ -158,7 +158,7 @@ Use [Bizarre Edition](CHAPTER2_PLAN.md) for the sequence, prototype order, and a
 
 **T08 / Phone and chat**
 
-Place the optional phone beside the laptop. Allow the player to send Ella one message with a single checkmark or leave without sending. Pass that choice to `T11`. Coordinate Ella's old chat with `T10`.
+Place the optional phone beside the laptop. Allow the player to send Ella one message with a single checkmark or leave without sending. Pass that choice to `T11`. Give `CLUE_03` through the graduation promise in Raka's draft. The thread has no messages from Ella.
 
 **T09 / Coursework, overtime and police spotlights**
 
@@ -168,7 +168,7 @@ Wire the essay to the stay-in-bed and overtime branches. Crossing the open door 
 
 ```text
 Place CLUE_01 photo with graduation promise, CLUE_02 work slip, CLUE_03
-semester-five chat, CLUE_04 ambiguous partial post-crash voice recording.
+graduation promise in Raka's draft, CLUE_04 ambiguous post-crash recording.
 Provide inspected UI and tracking without duplicate registrations. Never
 state Ella is dead as objective fact. Keep CLUE_04 fair but non-spoiling.
 Acceptance: clue count 0-4 is accurate after save/load and respawn.

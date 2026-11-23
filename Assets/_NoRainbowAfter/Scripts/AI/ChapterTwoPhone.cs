@@ -9,12 +9,12 @@ namespace NoRainbowAfter.AI
 {
     public sealed class ChapterTwoPhone : MonoBehaviour, IHiddenInteractable
     {
-        private const string Draft = "El, maaf. Aku masih pengen ngobrol.";
+        private const string Draft = "El, maaf ya. Aku kangen denger suara kamu. Aku masih ingat janji kita buat wisuda bareng.";
         private FirstPersonPlayer player;
         private Func<bool> sendMessage;
-        private Action readOldChat;
+        private Action onDraftRead;
         private Canvas canvas;
-        private GameObject draftPanel, replyPanel;
+        private GameObject draftPanel, sentPanel;
         private Button declineButton, closeButton;
         private Material caseMaterial, displayMaterial;
         private bool open, sent;
@@ -24,7 +24,7 @@ namespace NoRainbowAfter.AI
         public string Prompt => null;
         public void SetFocused(bool focused) { }
 
-        public static ChapterTwoPhone Create(Transform laptop, FirstPersonPlayer owner, Func<bool> onSend, Action onRead)
+        public static ChapterTwoPhone Create(Transform laptop, FirstPersonPlayer owner, Func<bool> onSend, Action onReadDraft)
         {
             var prop = new GameObject("C2 Raka Phone", typeof(BoxCollider), typeof(ChapterTwoPhone));
             prop.transform.SetParent(laptop.parent, false);
@@ -35,7 +35,7 @@ namespace NoRainbowAfter.AI
             var phone = prop.GetComponent<ChapterTwoPhone>();
             phone.player = owner;
             phone.sendMessage = onSend;
-            phone.readOldChat = onRead;
+            phone.onDraftRead = onReadDraft;
             phone.BuildProps();
             return phone;
         }
@@ -47,7 +47,7 @@ namespace NoRainbowAfter.AI
             open = true;
             player.SetInspecting(true);
             player.CloseInspectRequested += Close;
-            readOldChat?.Invoke();
+            onDraftRead?.Invoke();
             RefreshUi();
         }
 
@@ -95,7 +95,7 @@ namespace NoRainbowAfter.AI
         {
             canvas.enabled = open && !player.IsPaused;
             draftPanel.SetActive(!sent);
-            replyPanel.SetActive(sent);
+            sentPanel.SetActive(sent);
             if (canvas.enabled && EventSystem.current != null)
             {
                 var target = !sent ? declineButton : closeButton;
@@ -124,28 +124,21 @@ namespace NoRainbowAfter.AI
             Label(header, "Contact Name", "Ella", new Vector2(-132f, 0f), new Vector2(440f, 55f), 34, TextAnchor.MiddleLeft);
             closeButton = Button(header, "Close", "Tutup [F]", new Vector2(264f, 0f), new Vector2(162f, 48f), Close);
 
-            Message(frame, "Ella  ·  Semester 5", "Kalau tugasnya numpuk, besok kita lihat catatannya bareng.", 216f);
-            Message(frame, "Ella  ·  Semester 5", "Jangan lupa. Kita wisuda bareng, ya.", 94f);
-
             var draft = Panel(frame, "Draft", new Vector2(0f, -227f), new Vector2(704f, 214f), new Color(.09f, .14f, .16f));
             draftPanel = draft.gameObject;
-            Label(draft, "Draft Text", Draft, new Vector2(0f, 30f), new Vector2(642f, 94f), 28, TextAnchor.MiddleLeft);
+            Label(draft, "Draft Text", Draft, new Vector2(0f, 30f), new Vector2(642f, 100f), 28, TextAnchor.MiddleLeft);
             declineButton = Button(draft, "DoNotSend", "Jangan kirim", new Vector2(-110f, -60f), new Vector2(240f, 54f), Close);
             declineButton.image.color = new Color(.13f, .19f, .22f);
             Button(draft, "Send", "Kirim", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendMessage());
 
-            var reply = Rect(frame, "New Messages", Vector2.zero, new Vector2(776f, 744f));
-            replyPanel = reply.gameObject;
-            Message(reply, "Raka  ·  ✓", Draft, -137f, outgoing: true);
-        }
-
-        private static void Message(Transform parent, string name, string message, float y, bool outgoing = false)
-        {
-            var bubble = Panel(parent, name, new Vector2(outgoing ? 53f : -53f, y), new Vector2(598f, 102f),
-                outgoing ? new Color(.115f, .223f, .22f) : new Color(.105f, .143f, .169f));
-            var time = Label(bubble, "Sender", name, new Vector2(0f, 32f), new Vector2(550f, 28f), 19, TextAnchor.MiddleLeft);
-            time.color = new Color(.61f, .75f, .77f);
-            Label(bubble, "Message", message, new Vector2(0f, -12f), new Vector2(550f, 60f), 24, TextAnchor.MiddleLeft);
+            var bubble = Panel(frame, "Sent Message", new Vector2(53f, -254f), new Vector2(598f, 168f),
+                new Color(.115f, .223f, .22f));
+            sentPanel = bubble.gameObject;
+            var sender = Label(bubble, "Sender", "Raka", new Vector2(0f, 58f), new Vector2(550f, 28f), 19, TextAnchor.MiddleLeft);
+            sender.color = new Color(.61f, .75f, .77f);
+            Label(bubble, "Message", Draft, new Vector2(0f, 6f), new Vector2(550f, 76f), 24, TextAnchor.MiddleLeft);
+            var status = Label(bubble, "Send Status", "✓", new Vector2(252f, -56f), new Vector2(46f, 25f), 20, TextAnchor.MiddleRight);
+            status.color = new Color(.61f, .75f, .77f);
         }
 
         private static Button Button(Transform parent, string name, string title, Vector2 position, Vector2 size, UnityEngine.Events.UnityAction click)

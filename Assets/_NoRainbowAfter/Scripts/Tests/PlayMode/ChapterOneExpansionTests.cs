@@ -238,6 +238,9 @@ namespace NoRainbowAfter.Tests
             Assert.That(player.IsInspecting, Is.True);
             Assert.That(director.State.HasClue("CLUE_03"), Is.True);
             Assert.That(director.State.EllaMessageSent, Is.False);
+            var draft = phone.GetComponentsInChildren<UnityEngine.UI.Text>();
+            Assert.That(draft.Any(t => t.name == "Sender"), Is.False, "The thread is empty before Raka sends.");
+            Assert.That(draft.Single(t => t.name == "Draft Text").text, Does.Contain("maaf").And.Contain("kangen"));
             var decline = GameObject.Find("DoNotSend").GetComponent<UnityEngine.UI.Button>();
             Assert.That(decline.GetComponentInChildren<UnityEngine.UI.Text>().text, Is.EqualTo("Jangan kirim"));
             yield return ClickUiButtonWithMouse(keyboard, mouse, decline);
@@ -249,7 +252,10 @@ namespace NoRainbowAfter.Tests
             yield return ClickUiButtonWithMouse(keyboard, mouse, GameObject.Find("Send").GetComponent<UnityEngine.UI.Button>());
             Assert.That(director.State.EllaMessageSent, Is.True);
             Assert.That(phone.TrySendMessage(), Is.False);
-            Assert.That(phone.GetComponentsInChildren<UnityEngine.UI.Text>().Count(t => t.text.Contains("✓")), Is.EqualTo(1));
+            var sentText = phone.GetComponentsInChildren<UnityEngine.UI.Text>();
+            Assert.That(sentText.Where(t => t.name == "Sender").Select(t => t.text), Is.EqualTo(new[] { "Raka" }));
+            Assert.That(sentText.Count(t => t.text == "✓"), Is.EqualTo(1));
+            Assert.That(sentText.Any(t => t.name == "Draft Text"), Is.False);
             yield return TapKey(keyboard, Key.F);
 
             laptop.Interact(interactions);
