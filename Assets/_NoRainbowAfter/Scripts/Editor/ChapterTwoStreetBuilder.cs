@@ -13,6 +13,9 @@ namespace NoRainbowAfter.Editor
         private const string MatDir = Art + "/Materials/ChapterTwo";
         private const string Destination = "Assets/_NoRainbowAfter/Resources/ChapterTwoStreet.prefab";
 
+        internal const float CordonZ = 46f;
+        internal const float RoadEndZ = 134f;
+
         [MenuItem("No Rainbow After/Chapter 2/Rebuild Street")]
         public static void Build()
         {
@@ -34,18 +37,24 @@ namespace NoRainbowAfter.Editor
                 var warm = Material("Warm lightbox", "FFE4AD", .45f, 1.1f);
 
                 var ground = Node(t, "Jalan", 0, 0, 0);
-                Box(ground, "Two lanes", 0,-.18f,19, 9.6f,.36f,46,tar);
+                const float roadStart = -4f;
+                float roadLength = RoadEndZ - roadStart;
+                float roadMiddle = (roadStart + RoadEndZ) * .5f;
+                Box(ground, "Two lanes", 0,-.18f,roadMiddle, 9.6f,.36f,roadLength,tar);
                 for (int side = -1; side <= 1; side += 2)
                 {
-                    Box(ground, "Trotoar", side*5.8f,-.06f,19,2,.36f,46,concrete);
+                    Box(ground, "Trotoar", side*5.8f,-.06f,roadMiddle,2,.36f,roadLength,concrete);
+                    // The shoulders carry the ground beneath the more widely spaced roadside buildings.
+                    const float shoulderStart = CordonZ + 2f;
+                    Box(ground, "Bahu jalan raya", side*18.8f,-.16f,(RoadEndZ+shoulderStart)*.5f,
+                        28f,.38f,RoadEndZ-shoulderStart,concrete,false);
                     for (int z = -3; z < 42; z += 2)
                         Box(ground, "Kerb joint", side*4.87f,.126f,z,.14f,.008f,1.92f,concrete,false);
-                    Box(ground, "Edge line", side*4.53f,.008f,19,.08f,.01f,45,stripe,false);
-                    Box(ground, "Batas gang", side*6.92f,2.1f,19,.25f,4.2f,46,wall);
+                    Box(ground, "Edge line", side*4.53f,.008f,roadMiddle,.08f,.01f,roadLength,stripe,false);
+                    Box(ground, "Batas gang", side*6.92f,2.1f,(CordonZ+roadStart)*.5f,.25f,4.2f,CordonZ-roadStart+.4f,wall);
                 }
-                for (int z = -1; z < 38; z += 5)
+                for (int z = -1; z < RoadEndZ - 2; z += 5)
                     Box(ground,"Lane marking",0,.008f,z,.12f,.012f,2.3f,stripe,false);
-                Box(ground,"Ujung jalan",0,2,42,14,4,.35f,wall);
                 Box(ground,"Di belakang warung",0,2,-4,14,4,.35f,wall);
 
                 var shop = Node(t,"Warung", -6.56f,.12f,3.8f,90);
@@ -55,7 +64,14 @@ namespace NoRainbowAfter.Editor
                 Box(shop,"Papan nama",0,2.84f,.35f,5.9f,.52f,.11f,sand);
                 Sign(shop,"WARUNG  SRI",0,2.86f,.42f,.34f,ink.color,180);
                 LightAt(shop, "Lampu warung", 0,2.65f,1.0f,new Color(1,.72f,.42f), 3f,8);
-                var stop = Node(t,"Halte",2.55f,0,38.65f);
+                var halteSign = Node(ground, "Rambu halte", 6.05f, .12f, 35.5f);
+                Box(halteSign,"Tiang rambu",0,1.37f,0,.055f,2.74f,.055f,ink,false);
+                Box(halteSign,"Papan halte",0,2.61f,0,1.06f,.61f,.07f,teal,false);
+                ChapterTwoStreetArt.Lettering(halteSign, "HALTE", new Vector3(0,2.69f,-.04f),
+                    Quaternion.identity,1f,.29f,.24f,new Color(.95f,.91f,.75f));
+                ChapterTwoStreetArt.Lettering(halteSign, "PASAR  04", new Vector3(0,2.45f,-.04f),
+                    Quaternion.identity,1f,.19f,.13f,new Color(.95f,.91f,.75f));
+                var stop = Node(t,"Halte",5.60f,.12f,38.65f,90f);
                 Box(stop,"Plinth",0,.07f,0,5.45f,.14f,2.85f,concrete);
                 Box(stop,"Rear panel",0,1.3f,1.12f,5.1f,2.35f,.18f,teal);
                 Box(stop,"Bench",0,.56f,.55f,3.8f,.20f,.52f,timber);
@@ -109,6 +125,21 @@ namespace NoRainbowAfter.Editor
                     lamp.innerSpotAngle = 68f;
                     lamp.transform.localRotation = Quaternion.LookRotation(new Vector3(-Mathf.Sign(x)*.38f,-1f,0f));
                 }
+                for (int i = 0; i < 6; i++)
+                {
+                    float side = i % 2 == 0 ? -1f : 1f;
+                    float z = 45f + i * 14f;
+                    var pole = Node(ground, "PJU jalan raya", side * 5.85f, 0, z);
+                    Box(pole, "Tiang", 0,3.2f,0, .115f,6.4f,.115f,ink,false);
+                    Box(pole, "Lengan", -side*.68f,6.35f,0, 1.45f,.085f,.10f,ink,false);
+                    Box(pole, "Lampu", -side*1.34f,6.28f,0, .46f,.11f,.63f,warm,false);
+                    var lamp = LightAt(pole, "Cahaya aspal", -side*1.34f,6.16f,0,
+                        i % 3 == 0 ? new Color(1f,.74f,.45f) : new Color(.66f,.81f,.87f), 22f,19f);
+                    lamp.type = LightType.Spot;
+                    lamp.spotAngle = 105f;
+                    lamp.transform.localRotation = Quaternion.LookRotation(new Vector3(-side*.48f,-1,0));
+                }
+                AddCordon(ground, sand, ink, concrete);
                 ChapterTwoStreetArt.Dress(street);
                 street.GazePivots = System.Array.ConvertAll(street.Lamps, lamp =>
                     lamp.parent.Find("ACT_TKPSentry/Sentry gaze") ??
@@ -118,6 +149,27 @@ namespace NoRainbowAfter.Editor
                 AssetDatabase.SaveAssets();
             }
             finally { Object.DestroyImmediate(root); }
+        }
+
+        static void AddCordon(Transform ground, Material tape, Material steel, Material concrete)
+        {
+            var line = Node(ground, "Garis polisi jalan raya", 0, 0, CordonZ);
+            const float spacing = 3.45f;
+            for (int i = -2; i <= 2; i++)
+            {
+                float x = i * spacing;
+                float height = i % 2 == 0 ? 1.22f : 1.10f;
+                Box(line, "Kaki tiang", x,.13f,0, .34f,.26f,.34f,concrete,false);
+                Box(line, "Tiang pengikat", x,height*.5f,0, .055f,height+.12f,.055f,steel,false);
+                if (i == 2) break;
+                float rise = i % 2 == 0 ? -.12f : .12f;
+                var span = Node(line, "Rentang pita", x+spacing*.5f,height+rise*.5f,0);
+                span.localRotation = Quaternion.Euler(0,0,Mathf.Atan2(rise,spacing)*Mathf.Rad2Deg);
+                Box(span,"Pita kuning",0,0,0, spacing+.012f,.15f,.018f,tape,false);
+                ChapterTwoStreetArt.Lettering(span, "///   GARIS POLISI   ///   DILARANG MELINTAS   ///",
+                    new Vector3(0,0,-.013f), Quaternion.identity, spacing-.05f,.15f,.10f,Color.black);
+            }
+            ColliderAt(line, "Batas pita", new Vector3(0,2,0), new Vector3(14f,4f,.15f));
         }
 
         static Transform Car(Transform t,string name,float x,float z,float yaw,Material metal,Material glass)
@@ -184,7 +236,7 @@ namespace NoRainbowAfter.Editor
 
         private static void AddBus(ChapterTwoStreet street, Transform root, Material trim, Material warm)
         {
-            var bus = Node(root, "Bus terakhir", -2.60f, 0f, 38.62f);
+            var bus = Node(root, "Bus terakhir", 2.78f, 0f, 38.62f);
             var model = PlaceModel("PROP_TKPShuttle", "Front windshield", bus);
             model.localRotation *= Quaternion.Euler(0f, 180f, 0f);
             Box(bus, "Lantai kabin", 0, .48f, 0, 2.32f, .50f, 5.78f, trim, false);
@@ -199,11 +251,11 @@ namespace NoRainbowAfter.Editor
             var door = ColliderAt(bus, "Pintu bus", new Vector3(1.21f, 1.20f, -1.64f), new Vector3(.12f, 2.40f, 1.13f));
             street.BusDoor = door.gameObject.AddComponent<ChapterTwoBusDoor>();
             street.BusSeat = Node(bus, "Lorong kabin bus", 0, .734f, .05f, 180f);
-            var queueLight = LightAt(root.Find("Halte"), "Lampu antre", -2.37f, 2.72f, -.98f,
+            var queueLight = LightAt(root.Find("Halte"), "Lampu antre", 1.6f, 2.72f, -.98f,
                 new Color(.78f,.88f,.79f), 8.5f, 8f);
             queueLight.type = LightType.Spot;
             queueLight.spotAngle = 105f;
-            queueLight.transform.localRotation = Quaternion.LookRotation(new Vector3(-1f,-.54f,-.95f));
+            queueLight.transform.localRotation = Quaternion.LookRotation(new Vector3(.10f,-.64f,-1f));
             LightAt(bus, "Lampu kabin", 0, 2.35f, 0, new Color(.91f, .94f, .85f), 2.3f, 4f);
             Box(bus, "Panel rute", 0, 2.37f, -2.98f, 1.44f, .20f, .022f, trim, false);
             ChapterTwoStreetArt.Lettering(bus, "04   PASAR  -  TERMINAL", new Vector3(0, 2.37f, -3.004f),

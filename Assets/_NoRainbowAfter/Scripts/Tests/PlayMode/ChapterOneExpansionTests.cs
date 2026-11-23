@@ -299,7 +299,7 @@ namespace NoRainbowAfter.Tests
 
             int handoffs = 0;
             director.ChapterThreeTransitionRequested += () => handoffs++;
-            Vector3 stop = street.transform.TransformPoint(new Vector3(.55f, .19f, 37.82f));
+            Vector3 stop = street.Shelter.transform.TransformPoint(new Vector3(1.1f, -.98f, -.74f));
             Assert.That(motor.TryRestorePose(stop, Quaternion.identity), Is.True);
             street.CheckProgress();
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ShelterReached));

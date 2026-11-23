@@ -78,7 +78,7 @@ namespace NoRainbowAfter.Tests
             Vector2[] waypoints =
             {
                 new(-3.55f, 10.9f), new(3.85f, 11.1f), new(3.85f, 21.9f),
-                new(-3.82f, 21.9f), new(-3.82f, 33.8f), new(.55f, 33.8f), new(.55f, 37.82f)
+                new(-3.82f, 21.9f), new(-3.82f, 42.9f), new(5.42f, 42.9f), new(5.42f, 38.6f)
             };
             foreach (var waypoint in waypoints)
             {
@@ -88,6 +88,19 @@ namespace NoRainbowAfter.Tests
             }
 
             Assert.That(street.AtShelter, Is.True);
+            // The ribbon runs wall-to-wall beyond the stop, including both pavements.
+            Transform cordon = street.transform.Find("Jalan/Garis polisi jalan raya");
+            Assert.That(cordon, Is.Not.Null);
+            foreach (float x in new[] { -6.49f, 0f, 6.49f })
+            {
+                Vector3 start = cordon.TransformPoint(new Vector3(x, .19f, -1.4f));
+                Assert.That(motor.TryRestorePose(start, cordon.rotation, false), Is.True);
+                for (int i = 0; i < 80; i++)
+                    motor.Simulate(new FirstPersonFrame { Move = Vector2.up, CrouchPressed = x < 0 && i == 0 }, .033f);
+                Assert.That(cordon.InverseTransformPoint(motor.transform.position).z,
+                    Is.InRange(-.65f, -.12f), "Police line at x=" + x);
+            }
+            Assert.That(street.TryRestoreCheckpoint(), Is.True);
             Assert.That(street.TryBoard(), Is.True);
             Assert.That(street.TryBoard(), Is.False);
             Assert.That(Vector3.Distance(motor.transform.position, street.BusSeat.position), Is.LessThan(.05f));

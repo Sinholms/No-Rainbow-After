@@ -193,11 +193,11 @@ namespace NoRainbowAfter.Editor
                     Place("BetonPolisi",prop,Vector3.zero,Vector3.one);
             }
             foreach (Transform curb in ground)
-                if(curb.name=="Trotoar" || curb.name=="Kerb joint" || curb.name=="Batas gang" || curb.name=="Ujung jalan")
+                if(curb.name=="Trotoar" || curb.name=="Kerb joint" || curb.name=="Batas gang")
                     RemoveVisuals(curb);
             for(int side=-1;side<=1;side+=2)
             {
-                for(int z=-3;z<42;z+=2)
+                for(int z=-3;z<ChapterTwoStreetBuilder.CordonZ+2;z+=2)
                     Place("Trotoar",ground,new Vector3(side*5.8f,0,z),Vector3.one,side<0?180:0);
                 for(int i=0;i<9;i++)
                 {
@@ -214,9 +214,15 @@ namespace NoRainbowAfter.Editor
                     }
                 }
             }
-            // Shop row beyond the intersection gives the shelter a silhouette above the traffic closure.
-            for(int i=-2;i<=2;i++)
-                Place("RukoPasar",ground,new Vector3(i*5.65f,0,45f),new Vector3(1,1.0f+.13f*(i%2),1),180);
+            // Beyond the cordon, setbacks and gaps open the market onto a longer street.
+            for (int side = -1; side <= 1; side += 2)
+                for (int i = 0; i < 8; i++)
+                {
+                    float z = 49f + 8.2f * i + (side > 0 ? 2.7f : 0f);
+                    float setback = 8.7f + (i % 3) * 1.2f;
+                    Place("RukoPasar", ground, new Vector3(side * setback,0,z),
+                        new Vector3(1.15f,.78f + (i % 3)*.17f,1f), -90f*side);
+                }
             // The end wall still closes the road behind the spawn, dressed as another bank of shutters.
             RemoveVisuals(ground.Find("Di belakang warung"));
             for (int i = -1; i <= 1; i++)
@@ -280,7 +286,7 @@ namespace NoRainbowAfter.Editor
             var wetMap=AssetDatabase.LoadAssetAtPath<Texture2D>(Kit+"/WetAsphalt.png");
             tar.SetColor("_BaseColor",Color.white);
             tar.SetTexture("_BaseMap",wetMap);
-            tar.SetTextureScale("_BaseMap",new Vector2(2.2f,10.54f));
+            tar.SetTextureScale("_BaseMap",new Vector2(2.2f,ground.Find("Two lanes").localScale.z * (2.2f / 9.6f)));
             tar.SetTexture("_BumpMap",AssetDatabase.LoadAssetAtPath<Texture2D>(Kit+"/WetAsphaltNormal.png"));
             tar.SetFloat("_BumpScale",.34f);
             tar.SetFloat("_Smoothness",.83f);
@@ -290,24 +296,6 @@ namespace NoRainbowAfter.Editor
             EditorUtility.SetDirty(tar);
             AddStreetLight(root);
             AddCables(root,mats["C2_Ink"]);
-            // The tape closes the kerbs, leaving the central opening and the walkway to the shelter.
-            foreach(float x in new[]{-5.52f,5.60f})
-            {
-                var tape=new GameObject("Garis polisi").transform;
-                tape.SetParent(root,false);tape.localPosition=new Vector3(x,.89f,35.5f);
-                foreach(float dx in new[]{-1.07f,1.07f})
-                {
-                    var post=GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                    post.transform.SetParent(tape,false);post.transform.localPosition=new Vector3(dx,-.36f,0);
-                    post.transform.localScale=new Vector3(.05f,.53f,.05f);
-                    post.GetComponent<Renderer>().sharedMaterial=mats["C2_Steel"];
-                }
-                var ribbon=GameObject.CreatePrimitive(PrimitiveType.Cube);
-                ribbon.transform.SetParent(tape,false);ribbon.transform.localScale=new Vector3(2.16f,.125f,.012f);
-                ribbon.GetComponent<Renderer>().sharedMaterial=mats["C2_Mustard"];
-                Lettering(tape,"GARIS POLISI     /     DILARANG MELINTAS",new Vector3(0,0,-.012f),
-                    Quaternion.identity,2.12f,.12f,.065f,Color.black);
-            }
             var sky=GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sky.name="Langit mendung";sky.transform.SetParent(root,false);
             sky.transform.localPosition=new Vector3(0,0,19);sky.transform.localScale=Vector3.one*128;
