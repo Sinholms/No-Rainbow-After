@@ -159,7 +159,7 @@ namespace NoRainbowAfter.Editor
             else
             {
                 Label("CreditsHeading", content, "KREDIT", new Vector2(-480, 16), new Vector2(660, 44), 27, Ink);
-                Label("CreditsBody", content, "No Rainbow After\nProyek game mahasiswa\n\nDibuat dengan Unity\nDaftar kontributor dan atribusi aset akan dilengkapi.", new Vector2(-480, -112), new Vector2(660, 196), 23, Muted);
+                Label("CreditsBody", content, "No Rainbow After\nProyek game mahasiswa\n\nDibuat dengan Unity\nWajah polisi diadaptasi dari Infinite, 3D Head Scan\nLee Perry-Smith / Infinite-Realities (CC BY 3.0)", new Vector2(-480, -112), new Vector2(660, 196), 23, Muted);
                 primary = Button("MainMenuButton", content, "Kembali ke Menu", -270);
             }
             Set(serialized, "primaryButton", primary);

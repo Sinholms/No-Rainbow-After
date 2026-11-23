@@ -38,6 +38,15 @@ namespace NoRainbowAfter.Editor
                     : (color.name=="C2_Concrete" || color.name=="C2_Plaster" || color.name=="C2_Aggregate" ||
                         color.name.StartsWith("C2_Paver",StringComparison.Ordinal)) ? "MineralSurface" : null;
                 if(texture!=null) mat.SetTexture("_BaseMap",AssetDatabase.LoadAssetAtPath<Texture2D>(Kit+"/"+texture+".png"));
+                if (color.name == "C2 Sentry Raincoat" || color.name == "C2 Sentry Vest")
+                    SetSurfaceNormal(mat, "Cloth", .27f);
+                if (color.name == "C2 Sentry Skin")
+                {
+                    mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Kit + "/SentryFace.jpg"));
+                    mat.SetTexture("_BumpMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Kit + "/SentryFaceNormal.jpg"));
+                    mat.SetFloat("_BumpScale", .55f);
+                    mat.EnableKeyword("_NORMALMAP");
+                }
                 if (color.glow > 0f)
                 {
                     mat.globalIlluminationFlags=MaterialGlobalIlluminationFlags.RealtimeEmissive;
@@ -75,6 +84,14 @@ namespace NoRainbowAfter.Editor
                 importer.SaveAndReimport();
             }
             return result;
+        }
+
+        static void SetSurfaceNormal(Material material, string surface, float strength)
+        {
+            var path = ChapterTwoStreetBuilder.Art + "/Textures/KosAtmosphere/" + surface + "_Normal.png";
+            material.SetTexture("_BumpMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
+            material.SetFloat("_BumpScale", strength);
+            material.EnableKeyword("_NORMALMAP");
         }
 
         public static void Dress(ChapterTwoStreet street)

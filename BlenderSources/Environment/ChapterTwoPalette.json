@@ -2,14 +2,14 @@
   "materials": [
     {
       "name": "C2 Sentry Raincoat",
-      "hex": "414E54",
+      "hex": "84786A",
       "smooth": 0.38,
       "metal": 0,
       "glow": 0
     },
     {
       "name": "C2 Sentry Vest",
-      "hex": "303946",
+      "hex": "323B42",
       "smooth": 0.38,
       "metal": 0,
       "glow": 0
@@ -23,7 +23,7 @@
     },
     {
       "name": "C2 Sentry Skin",
-      "hex": "514C43",
+      "hex": "E7D7CB",
       "smooth": 0.34,
       "metal": 0,
       "glow": 0

@@ -24,10 +24,10 @@ def paint(name, rgb, roughness=.62, metallic=0):
     surface.inputs["Metallic"].default_value = metallic
     return mat
 
-coat = paint("C2 Sentry Raincoat", (.078, .104, .117))
+coat = paint("C2 Sentry Raincoat", (.231, .188, .144))
 vest = paint("C2 Sentry Vest", (.048, .06, .078))
 rubber = paint("C2 Rubber", (.026, .036, .047), .38)
-skin = paint("C2 Sentry Skin", (.093, .088, .075))
+skin = paint("C2 Sentry Skin", (.407, .216, .147))
 gold = paint("C2 Tarnished Brass", (.65, .48, .185), .46, .48)
 trim = paint("C2 Reflective Tape", (.48, .56, .57), .4)
 glass = paint("C2 Smoked Bus Glass", (.078, .19, .215), .24, .25)
@@ -80,69 +80,13 @@ def export(name, objects):
                             apply_unit_scale=True, bake_anim=False,
                             add_leaf_bones=False, use_mesh_modifiers=True)
 
-for side in (-1, 1):
-    x = side * .22
-    box("Long tread boot", (x, .125, .14), (.28, .48, .28), rubber, .05)
-    box("Boot sole", (x, .13, .043), (.30, .50, .086), vest, .015)
-    limb("Trouser calf", (x, -.015, .24), (x, .015, .68), .113, .138, vest)
-    limb("Trouser thigh", (x, .015, .65), (side*.17, -.035, 1.24), .139, .172, coat)
-    box("Shin guard", (x, .109, .49), (.18, .09, .31), rubber)
-    box("Reflective cuff", (x, .125, .32), (.19, .034, .055), trim, .006)
-box("Duty belt", (0, -.025, 1.25), (.68, .43, .13), rubber, .04)
-box("Belt clasp", (0, .201, 1.25), (.16, .056, .105), gold)
-box("Uniform torso", (0, -.048, 1.59), (.73, .47, .75), coat, .115)
-
-# Open coat with an irregular hanging hem and repeated damp folds.
-vertices, faces = [], []
-sectors = 30
-for height, width, depth in ((.84, .39, .245), (1.23, .34, .235), (1.62, .39, .24), (1.955, .34, .20)):
-    for i in range(sectors + 1):
-        angle = .48 + (math.tau - .96) * i / sectors
-        fold = .012 * math.cos(10 * angle + 2 * height)
-        hemdrop = .062 * math.sin(angle * 3) + .03 * math.sin(angle * 11) if height < 1 else 0
-        vertices.append(((width + fold) * math.sin(angle), (depth + fold) * math.cos(angle) - .056,
-                         height + hemdrop))
-for row in range(3):
-    for i in range(sectors):
-        a = row * (sectors + 1) + i
-        faces.append((a, a + 1, a + sectors + 2, a + sectors + 1))
-mesh = bpy.data.meshes.new("Uneven raincoat drape")
-mesh.from_pydata(vertices, [], faces)
-drape = bpy.data.objects.new("Hanging raincoat", mesh)
-bpy.context.collection.objects.link(drape)
-finish(drape, drape.name, coat)
-for face in mesh.polygons:
-    face.use_smooth = True
-drape.modifiers.new("Shaped folds", "SUBSURF").levels = 1
-drape.modifiers.new("Coat thickness", "SOLIDIFY").thickness = .016
-box("Armoured chest", (0, .098, 1.71), (.64, .34, .55), vest, .078)
-box("Back panel", (0, -.293, 1.71), (.51, .12, .50), vest, .047)
-box("Collar", (0, -.015, 1.978), (.46, .36, .16), rubber, .041)
-for side in (-1, 1):
-    ellipsoid("Angular shoulder", (side*.397, -.022, 1.88), (.205, .22, .183), coat)
-    elbow = (side*.50, .06, 1.53 if side<0 else 1.47)
-    hand = (side*.25, .51, 1.59) if side<0 else (.49, .255, 1.18)
-    limb("Raincoat sleeve", (side*.427, -.028, 1.86), elbow, .148, .114, coat)
-    limb("Bent sleeve", elbow, hand, .118, .083, coat)
-    ellipsoid("Leather glove", hand, (.082, .097, .089), rubber)
-    if side > 0:
-        for finger in range(4):
-            x = hand[0] + (finger - 1.5) * .032
-            tip = hand[2] - (.195 - abs(finger - 1.5) * .026)
-            limb("Long gloved finger", (x, hand[1]+.012, hand[2]-.044),
-                 (x-.021, hand[1]+.043, tip), .020, .015, rubber, 9)
-    box("Shoulder stripe", (side*.403, .147, 1.937), (.215, .08, .048), trim, .011)
-    box("Vest pocket", (side*.198, .28, 1.56), (.23, .105, .19), rubber, .028)
-box("Shield badge", (-.178, .277, 1.89), (.125, .057, .139), gold, .026)
-box("Uniform nameplate", (.17, .273, 1.883), (.208, .03, .042), trim, .007)
-box("Vertical coat seam", (0, .282, 1.735), (.027, .042, .41), coat, .005)
-limb("Neck", (0, -.025, 1.965), (0, -.01, 2.151), .106, .107, skin)
-ellipsoid("Long face", (0, .014, 2.205), (.142, .138, .23), skin)
-box("Shadow below the brim", (0, .123, 2.247), (.243, .068, .101), rubber, .022)
-box("Cap crown", (0, -.014, 2.405), (.36, .35, .13), vest, .058)
-box("Cap brim", (0, .133, 2.358), (.35, .29, .047), rubber, .02)
-box("Cap badge", (0, .167, 2.416), (.071, .027, .058), gold, .011)
-limb("Flashlight handle", (-.25, .445, 1.60), (-.25, .58, 1.60), .051, .058, rubber)
+# The sentry is authored in metres facing +Y. Its cap brim is the Unity orientation marker.
+import sys
+sys.dont_write_bytecode = True
+from sys import path as module_path
+module_path.insert(0, str(source))
+from chapter_two_uniform import build_sentry
+build_sentry(root, coat, vest, rubber, skin, gold, trim, paint("C2_SmokedGlass", (.032,.046,.057), .19, .43), box, limb, ellipsoid)
 sentry = list(bpy.context.scene.objects)
 export("ACT_TKPSentry", sentry)
 

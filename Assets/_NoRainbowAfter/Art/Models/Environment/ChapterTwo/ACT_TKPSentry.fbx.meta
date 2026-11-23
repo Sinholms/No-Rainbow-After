@@ -34,6 +34,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: C2 Tarnished Brass
     second: {fileID: 2100000, guid: 7a9c93e5d7c652749a7e129ccbb7605a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: C2_SmokedGlass
+    second: {fileID: 2100000, guid: ead9cc1e3e7d5ca49b036903a6d95cd1, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -33,6 +33,6 @@ Use case: illustration-story. A single in-world printed photo texture for the In
 
 </details>
 
-The Chapter 2 sentry, shuttle, siren and heavy footstep are original project assets. The Blender source is [ChapterTwoBizarre.blend](../BlenderSources/Environment/ChapterTwoBizarre.blend). The [Blender build script](../BlenderSources/Environment/create_chapter_two_bizarre.py) exports the FBX files and synthesizes both WAVs.
+The Chapter 2 police uniform, shuttle, siren and heavy footstep are original project assets. The officer’s face adapts *Infinite, 3D Head Scan* by Lee Perry-Smith / Infinite-Realities. The scan was trimmed and fitted to the uniform and its photographic color and tangent-space normal maps were adapted to URP. [Source files](https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/LeePerrySmith) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The Blender source is [ChapterTwoBizarre.blend](../BlenderSources/Environment/ChapterTwoBizarre.blend). The [Blender build script](../BlenderSources/Environment/create_chapter_two_bizarre.py) exports the FBX files and synthesizes both WAVs.
 
 Room disarray reuses original No Rainbow After furniture and papers, arranged in Blender. Hiding wardrobes and corridor connection geometry are original project additions. These additions do not resolve the provenance uncertainty of the downloaded corridor.

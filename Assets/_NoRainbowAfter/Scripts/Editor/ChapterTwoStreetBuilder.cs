@@ -145,11 +145,33 @@ namespace NoRainbowAfter.Editor
 
             var art = PlaceModel("ACT_TKPSentry", "Cap brim", post);
             art.localScale = new Vector3(1.11f, x > 0 ? 1.12f : 1.20f, 1.11f);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(art);
             var aim = Node(post, "Senter", -.28f, 1.60f * art.localScale.y, .69f);
             aim.localRotation = Quaternion.Euler(10f, 0f, 0f);
-            Box(aim, "Kepala senter", 0, 0, -.035f, .125f, .125f, .23f, flashlight, false);
-            Box(aim, "Lensa senter", 0, 0, .085f, .092f, .092f, .019f, lens, false);
+            TorchRing(aim, "Kepala senter", -.053f, .062f, .133f, flashlight);
+            TorchRing(aim, "Bibir reflektor", .018f, .067f, .027f, flashlight);
+            TorchRing(aim, "Lensa senter", .033f, .054f, .007f, lens);
+
+            // The inspection lamp gives the visor and jacket a grazing highlight from the street.
+            Box(post, "Tiang lampu pos", -.64f, 1.62f, -.36f, .055f, 3.24f, .055f, fence, false);
+            Box(post, "Siku lampu", -.64f, 3.22f, .46f, .055f, .055f, 1.69f, fence, false);
+            Box(post, "Kap lampu pos", -.64f, 3.17f, 1.25f, .26f, .12f, .27f, flashlight, false);
+            Box(post, "Kaca lampu pos", -.64f, 3.10f, 1.25f, .20f, .038f, .21f, lens, false);
+            LightAt(post, "Lampu pemeriksaan", -.64f, 3.06f, 1.25f,
+                new Color(.90f, .85f, .69f), 4.2f, 5.5f);
             return aim;
+        }
+
+        private static void TorchRing(Transform aim, string name, float z, float radius, float depth, Material material)
+        {
+            var part = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            part.name = name;
+            part.transform.SetParent(aim, false);
+            part.transform.localPosition = Vector3.forward * z;
+            part.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            part.transform.localScale = new Vector3(radius * 2f, depth * .5f, radius * 2f);
+            part.GetComponent<Renderer>().sharedMaterial = material;
+            Object.DestroyImmediate(part.GetComponent<Collider>());
         }
 
         private static void AddBus(ChapterTwoStreet street, Transform root, Material trim, Material warm)
