@@ -11,6 +11,17 @@ Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres ber
 
 **Chapter 2 Bizarre Edition** dimulai saat Raka kembali ke kos. Ketik esai di laptop, lalu buka dan lewati pintu di ujung lorong saat diminta lembur. Di TKP, baca sorotan dua polisi dan berlindung menuju Halte Pasar. Tekan **E** di pintu bus untuk naik.
 
+Untuk tes per bab, buka satu scene dari folder `Assets/_NoRainbowAfter/Scenes` dan tekan **Play**.
+
+| Scene | Mulai dari |
+| --- | --- |
+| `MasterGameplay` | Alur cerita lengkap yang tersedia. Lewat **Mulai Baru** dari menu, Raka mulai dengan kilasan prolog. |
+| `Chapter1` | Raka di kos pada awal bab pertama. |
+| `Chapter2` | Raka bangun di kos dengan esai dan HP Ella siap dimainkan. |
+| `Chapter3` | Raka di kabin bus, titik masuk Chapter 3 yang tersedia saat ini. |
+
+Ketiga scene tes memuat aset yang sama dari `MasterGameplay`. Clue yang dikumpulkan saat tes berlaku sampai sesi Play berakhir.
+
 ## Membuka proyek setelah clone
 
 1. Pasang Git dan Unity Editor **6000.6.8f1** melalui Unity Hub (Windows Build Support untuk membuat build Windows).
