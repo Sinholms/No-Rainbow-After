@@ -36,10 +36,13 @@ namespace NoRainbowAfter.Tests
             foreach (var lamp in street.Lamps)
             {
                 Vector3 fixedPost = lamp.parent.position;
+                var head = street.GazePivots.Single(pivot => pivot.IsChildOf(lamp.parent));
+                Quaternion initialGaze = head.rotation;
                 Quaternion initialAim = lamp.localRotation;
                 encounter.ManualTick(1f);
                 Assert.That(lamp.parent.position, Is.EqualTo(fixedPost));
                 Assert.That(Quaternion.Angle(initialAim, lamp.localRotation), Is.GreaterThan(.1f));
+                Assert.That(Quaternion.Angle(initialGaze, head.rotation), Is.GreaterThan(.1f));
                 Assert.That(lamp.parent.GetComponentsInChildren<MeshRenderer>().Length, Is.GreaterThan(15));
 
                 Vector3 pos = street.transform.InverseTransformPoint(fixedPost);

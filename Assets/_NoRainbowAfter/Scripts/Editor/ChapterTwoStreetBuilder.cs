@@ -110,6 +110,9 @@ namespace NoRainbowAfter.Editor
                     lamp.transform.localRotation = Quaternion.LookRotation(new Vector3(-Mathf.Sign(x)*.38f,-1f,0f));
                 }
                 ChapterTwoStreetArt.Dress(street);
+                street.GazePivots = System.Array.ConvertAll(street.Lamps, lamp =>
+                    lamp.parent.Find("ACT_TKPSentry/Sentry gaze") ??
+                    throw new InvalidDataException("Missing neck pivot on " + lamp.parent.name));
                 AddBus(street, t, ink, warm);
                 PrefabUtility.SaveAsPrefabAsset(root,Destination);
                 AssetDatabase.SaveAssets();

@@ -8,6 +8,7 @@ namespace NoRainbowAfter.AI
     public sealed class ChapterTwoStreet : MonoBehaviour
     {
         public Transform[] Lamps, Checkpoints;
+        public Transform[] GazePivots;
         public Transform PatrolCar, BusSeat;
         public BoxCollider Shelter;
         public SceneInteractable Bag;
@@ -58,7 +59,7 @@ namespace NoRainbowAfter.AI
             Bag.SetAvailable(false);
             BusDoor.Bind(this);
             Encounter = gameObject.AddComponent<ChapterTwoSpotlightEncounter>();
-            Encounter.Configure(target, Lamps, Checkpoints);
+            Encounter.Configure(target, Lamps, Checkpoints, GazePivots);
             Encounter.ConfigureBeam(0, 42f, 14f);
             Encounter.ConfigureBeam(1, 42f, 14f);
             Encounter.ConfigureSweep(0, 27f, 7.6f);

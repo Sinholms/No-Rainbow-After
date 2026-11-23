@@ -30,7 +30,9 @@ namespace NoRainbowAfter.AI
 
         private sealed class Beam
         {
-            public Transform emitter;
+            public Transform emitter, gaze;
+            public Quaternion restingGaze;
+            public Vector3 gazeAxis;
             public float range, angle;
             public Quaternion baseRotation;
             public float yaw, period, phaseOffset;
@@ -46,7 +48,7 @@ namespace NoRainbowAfter.AI
             public Light light;
         }
 
-        public void Configure(FirstPersonMotor player, Transform[] emitters, Transform[] segmentCheckpoints)
+        public void Configure(FirstPersonMotor player, Transform[] emitters, Transform[] segmentCheckpoints, Transform[] gazePivots = null)
         {
             motor = player;
             checkpoints = segmentCheckpoints;
@@ -57,6 +59,12 @@ namespace NoRainbowAfter.AI
                 beams[i] = beam; beam.range = Range; beam.angle = ConeAngle;
                 if (beam.emitter == null) continue;
                 beam.baseRotation = beam.emitter.localRotation;
+                if (gazePivots != null && i < gazePivots.Length && gazePivots[i] != null)
+                {
+                    beam.gaze = gazePivots[i];
+                    beam.restingGaze = beam.gaze.localRotation;
+                    beam.gazeAxis = beam.gaze.parent.InverseTransformDirection(Vector3.up);
+                }
                 beam.light = beam.emitter.GetComponent<Light>();
                 if (beam.light == null) beam.light = beam.emitter.gameObject.AddComponent<Light>();
                 beam.light.enabled = true; beam.light.type = LightType.Spot; beam.light.color = Color.white;
@@ -165,7 +173,10 @@ namespace NoRainbowAfter.AI
                 float phase = beam.period > 0f
                     ? Mathf.PingPong((clock + beam.phaseOffset) / beam.period * 2f, 1f)
                     : .5f;
-                beam.emitter.localRotation = beam.baseRotation * Quaternion.Euler(0f, (phase * 2f - 1f) * beam.yaw, 0f);
+                float yaw = (phase * 2f - 1f) * beam.yaw;
+                beam.emitter.localRotation = beam.baseRotation * Quaternion.Euler(0f, yaw, 0f);
+                if (beam.gaze != null)
+                    beam.gaze.localRotation = Quaternion.AngleAxis(yaw * .81f, beam.gazeAxis) * beam.restingGaze;
             }
         }
 

@@ -45,8 +45,7 @@ def tailoring(name, sections, material, folds=0, count=36, follow=False, creases
         tangent = (path[min(i+1, len(path)-1)] - path[max(i-1, 0)]).normalized()
         if not follow:
             tangent = Vector((0, 0, 1))
-        across = Vector((1, 0, 0))
-        across = (across - tangent * across.dot(tangent)).normalized()
+        across = Vector((0, 1, 0)).cross(tangent).normalized()
         depth = tangent.cross(across)
         for j in range(count):
             a = j * math.tau / count
@@ -282,4 +281,12 @@ def build_sentry(root, coat, navy, leather, skin, brass, silver, lens, box, rod,
     brim.modifiers.new("Bound edge","SOLIDIFY").thickness=.006
     cloth_patch("Cap escutcheon",[(-.026,.186,2.291),(.026,.186,2.291),(.022,.171,2.26),
                  (0,.161,2.25),(-.022,.171,2.26)],brass)
+    head_parts=set(bpy.context.scene.objects)-before
+    pivot=bpy.data.objects.new("Sentry gaze",None)
+    bpy.context.collection.objects.link(pivot)
+    pivot.location=(0,-.02,1.936)
+    bpy.context.view_layer.update()
+    for part in head_parts:
+        part.parent=pivot
+        part.matrix_parent_inverse=pivot.matrix_world.inverted()
     rod("Flashlight grip",(-.25,.445,1.6),(-.25,.577,1.6),.037,.044,leather,24)

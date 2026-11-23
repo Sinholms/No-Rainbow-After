@@ -206,7 +206,8 @@ for parts in groups.values():
     if len(parts) > 1:
         bpy.ops.object.join()
     shells.append(parts[0])
-export("PROP_TKPShuttle", window_panes + shells)
+if "--sentry-update" not in sys.argv:
+    export("PROP_TKPShuttle", window_panes + shells)
 for shell in shells:
     bpy.data.objects.remove(shell, do_unlink=True)
 

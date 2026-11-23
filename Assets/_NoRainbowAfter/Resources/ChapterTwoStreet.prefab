@@ -835,6 +835,9 @@ MonoBehaviour:
   Checkpoints:
   - {fileID: 1058149906736255486}
   - {fileID: 2789950520658378622}
+  GazePivots:
+  - {fileID: 8347904744572268099}
+  - {fileID: 8955808850251568613}
   PatrolCar: {fileID: 8089094459954798106}
   BusSeat: {fileID: 3572182211213504869}
   Shelter: {fileID: 203239455009376796}
@@ -20650,4 +20653,14 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1d778e44fc2c20240bda1e3a4e2fb35d, type: 3}
   m_PrefabInstance: {fileID: 9172533528190906402}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8347904744572268099 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 306945675781364669, guid: 1d778e44fc2c20240bda1e3a4e2fb35d, type: 3}
+  m_PrefabInstance: {fileID: 9172533528190906402}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8955808850251568613 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 306945675781364669, guid: 1d778e44fc2c20240bda1e3a4e2fb35d, type: 3}
+  m_PrefabInstance: {fileID: 8618704780829488638}
   m_PrefabAsset: {fileID: 0}
