@@ -27,7 +27,7 @@ namespace NoRainbowAfter.Narrative
             }
             if (director.State.ActiveChapter == "Chapter3")
             {
-                ShowGuidance("Temui Bayu di kampus", "Bayu menunggu di depan lab grafkom besok setelah kelas.");
+                ShowGuidance("Berangkat kerja", "");
                 return;
             }
             if (director.State.ActiveChapter == "Chapter2")
@@ -53,7 +53,7 @@ namespace NoRainbowAfter.Narrative
             else if (!taskDone) hint.text = "Kerjakan tugas di laptop meja belajar. Arahkan pandangan ke laptop dan tekan E.";
             else if (director.LoopIndex == 0) hint.text = "Telusuri lorong, lalu kembali ke kamar.";
             else if (!director.HasReadOvertimeSlip) hint.text = "Periksa slip lembur di kamar.";
-            else if (director.BeatIndex < 4) hint.text = "Kembali ke lorong.";
+            else if (director.BeatIndex < 4) hint.text = "Buka pintu di ujung lorong, lalu melangkah keluar.";
             else hint.text = "Hadapi atau hindari sosok di lorong.";
         }
 
@@ -62,22 +62,19 @@ namespace NoRainbowAfter.Narrative
             switch (beat)
             {
                 case ChapterTwoBeat.WokeInDorm:
-                    ShowGuidance("Kerjakan tugas di laptop", "Tekan E di depan laptop untuk menyalin berita.");
+                    ShowGuidance("Kerjakan esai di laptop", "Tekan E di depan laptop untuk mengerjakan esai kuliah.");
                     break;
-                case ChapterTwoBeat.ReportSubmitted:
-                    ShowGuidance("Laporan selesai", "");
-                    break;
-                case ChapterTwoBeat.StreetEntered:
-                    ShowGuidance("Capai halte di seberang garis polisi", "Berlindung di balik peti. Tekan Ctrl untuk jongkok dan tunggu sorotan berlalu.");
-                    break;
-                case ChapterTwoBeat.ShelterReached:
-                    ShowGuidance("Periksa tas di halte", "Arahkan pandangan ke tas dan tekan E.");
-                    break;
-                case ChapterTwoBeat.BagInspected:
+                case ChapterTwoBeat.StayedInBed:
                     ShowGuidance("", "");
                     break;
-                case ChapterTwoBeat.ReturnedToDorm:
-                    ShowGuidance("Balas pesan Bayu", "Ponsel ada di samping laptop. Arahkan pandangan ke ponsel dan tekan E.");
+                case ChapterTwoBeat.OvertimeRequested:
+                    ShowGuidance("Berangkat lembur", "Buka pintu di ujung lorong, lalu melangkah keluar.");
+                    break;
+                case ChapterTwoBeat.StreetEntered:
+                    ShowGuidance("Capai halte dan naik bus", "Jongkok di balik peti dan tunggu sorot senter lewat.");
+                    break;
+                case ChapterTwoBeat.ShelterReached:
+                    ShowGuidance("Naik bus", "Dekati pintu bus dan tekan E.");
                     break;
             }
         }

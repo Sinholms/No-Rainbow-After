@@ -12,69 +12,108 @@ namespace NoRainbowAfter.Tests
     public sealed class ChapterTwoRouteTests
     {
         [UnityTest]
-        public IEnumerator BothPhysicalRoutesReachShelter()
+        public IEnumerator TwoStationaryPostsHaveNoRearRouteAndStreetCanBeCrossed()
         {
             yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");
             yield return null;
             var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
             var motor = player.GetComponent<FirstPersonMotor>();
-            player.enabled = false; Time.timeScale = 1f;
+            player.enabled = false;
+            player.SetPaused(false);
+            Time.timeScale = 1f;
+            motor.MovementScale = .75f;
             var prefab = Resources.Load<GameObject>("ChapterTwoStreet");
             Assert.That(prefab, Is.Not.Null);
-            for (int route = 0; route < 2; route++)
+            var street = Object.Instantiate(prefab).GetComponent<ChapterTwoStreet>();
+            Assert.That(street.Enter(motor), Is.True);
+            var encounter = street.Encounter;
+            encounter.AutoTick = false;
+            encounter.RenderFootprints = false;
+
+            Assert.That(street.Lamps.Length, Is.EqualTo(2));
+            Assert.That(street.Lamps.Any(lamp => lamp.IsChildOf(street.PatrolCar)), Is.False);
+            Assert.That(street.PatrolCar.GetComponentsInChildren<Light>().Length, Is.EqualTo(2));
+            foreach (var lamp in street.Lamps)
             {
-                var obj = Object.Instantiate(prefab);
-                var street = obj.GetComponent<ChapterTwoStreet>();
-                Assert.That(street.Enter(motor), Is.True, "Street spawn was obstructed");
-                street.Encounter.AutoTick = false;
-                if (route == 0)
-                {
-                    street.Encounter.ManualTick(.11f);
-                    yield return null;
-                    System.IO.Directory.CreateDirectory("Captures/ChapterTwo");
-                    var rt = new RenderTexture(1280, 720, 24);
-                    var oldTarget = motor.ViewCamera.targetTexture; var oldActive = RenderTexture.active;
-                    motor.ViewCamera.targetTexture = rt; motor.ViewCamera.Render(); RenderTexture.active = rt;
-                    var image = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-                    image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); image.Apply();
-                    System.IO.File.WriteAllBytes("Captures/ChapterTwo/blockout.png", image.EncodeToPNG());
-                    Object.Destroy(image);
-                    var view = motor.ViewCamera.transform;
-                    Vector3 oldPosition = view.localPosition; Quaternion oldRotation = view.localRotation;
-                    Transform source = street.Lamps[2];
-                    view.position = source.position + source.forward * 2.2f;
-                    view.LookAt(source.position);
-                    motor.ViewCamera.Render(); RenderTexture.active = rt;
-                    image = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-                    image.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0); image.Apply();
-                    System.IO.File.WriteAllBytes("Captures/ChapterTwo/shadow-light.png", image.EncodeToPNG());
-                    view.localPosition = oldPosition; view.localRotation = oldRotation;
-                    motor.ViewCamera.targetTexture = oldTarget; RenderTexture.active = oldActive;
-                    Object.Destroy(image); Object.Destroy(rt);
-                }
-                street.Encounter.CatchSeconds = 999f; // This checks physical reachability separately from stealth timing.
-                Vector2[] stops = route == 0 ? new[] { new Vector2(-4.25f,4), new Vector2(-4.25f,18), new Vector2(-4.1f,23), new Vector2(-3.1f,25), new Vector2(-3.1f,32), new Vector2(0,33), new Vector2(0,37.8f), new Vector2(2.5f,38) }
-                    : new[] { new Vector2(-4.25f,4), new Vector2(-4.25f,18), new Vector2(-4.1f,23), new Vector2(3.2f,23), new Vector2(3.2f,31), new Vector2(3.2f,36), new Vector2(2.5f,38) };
-                float maxExposure = 0;
-                foreach (var stop in stops)
-                {
-                    Vector3 target = street.transform.TransformPoint(new Vector3(stop.x,0,stop.y));
-                    int steps = 0;
-                    while (Vector2.Distance(new Vector2(motor.transform.position.x,motor.transform.position.z), new Vector2(target.x,target.z)) > .3f && steps++ < 500)
-                    {
-                        Vector3 delta = target - motor.transform.position; delta.y = 0;
-                        Vector3 local = motor.transform.InverseTransformDirection(delta.normalized);
-                        motor.Simulate(new FirstPersonFrame { Move = new Vector2(local.x,local.z) }, .04f);
-                        street.Encounter.ManualTick(.04f); street.CheckProgress();
-                        maxExposure = Mathf.Max(maxExposure, street.Encounter.Exposure);
-                        if (steps % 80 == 0) yield return null;
-                    }
-                    Assert.That(steps, Is.LessThan(500), "Route " + route + " blocked toward " + stop + " at " + street.transform.InverseTransformPoint(motor.transform.position));
-                }
-                Assert.That(street.AtShelter, Is.True, "Route " + route + " did not reach shelter");
-                Debug.Log("[Chapter2 route] " + route + " maximum continuous exposure: " + maxExposure);
-                Object.Destroy(obj); yield return null;
+                Vector3 fixedPost = lamp.parent.position;
+                Quaternion initialAim = lamp.localRotation;
+                encounter.ManualTick(1f);
+                Assert.That(lamp.parent.position, Is.EqualTo(fixedPost));
+                Assert.That(Quaternion.Angle(initialAim, lamp.localRotation), Is.GreaterThan(.1f));
+                Assert.That(lamp.parent.GetComponentsInChildren<MeshRenderer>().Length, Is.GreaterThan(15));
+
+                Vector3 pos = street.transform.InverseTransformPoint(fixedPost);
+                Vector3 beforeFence = new Vector3(Mathf.Sign(pos.x) * 6.28f, .16f, pos.z - 1.25f);
+                Assert.That(motor.TryRestorePose(street.transform.TransformPoint(beforeFence), Quaternion.identity, false), Is.True);
+                for (int i = 0; i < 65; i++)
+                    motor.Simulate(new FirstPersonFrame { Move = Vector2.up, CrouchPressed = i == 0 }, .033f);
+                Assert.That(street.transform.InverseTransformPoint(motor.transform.position).z,
+                    Is.LessThan(pos.z - .22f), "Colliders must stop the player behind " + lamp.parent.name);
             }
+
+            Assert.That(encounter.TryRestoreCheckpoint(), Is.True);
+            encounter.ManualTick(.02f);
+            var first = street.Lamps[0];
+            Vector3 aim = Quaternion.AngleAxis(15f, Vector3.up) * Vector3.ProjectOnPlane(first.forward, Vector3.up).normalized;
+            Vector3 exposed = first.position + aim * 1.95f;
+            exposed.y = street.transform.position.y + .04f;
+            string situation = DescribePose(exposed);
+            Assert.That(motor.TryRestorePose(exposed, Quaternion.identity, false), Is.True, situation + " emitter " + first.position.ToString("F3"));
+            encounter.ManualTick(.15f);
+            Assert.That(encounter.IsIlluminated, Is.True);
+            float exposureBeforePause = encounter.Exposure;
+            encounter.AutoTick = true;
+            player.SetPaused(true);
+            yield return null;
+            Assert.That(encounter.Exposure, Is.EqualTo(exposureBeforePause));
+            player.SetPaused(false);
+            encounter.AutoTick = false;
+            for (int i = 0; i < 100 && encounter.CatchCount == 0; i++) encounter.ManualTick(.033f);
+            Assert.That(encounter.CatchCount, Is.EqualTo(1));
+            Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.05f));
+
+            Vector2[] waypoints =
+            {
+                new(-3.55f, 10.9f), new(3.85f, 11.1f), new(3.85f, 21.9f),
+                new(-3.82f, 21.9f), new(-3.82f, 33.8f), new(.55f, 33.8f), new(.55f, 37.82f)
+            };
+            foreach (var waypoint in waypoints)
+            {
+                Assert.That(MoveTo(waypoint, street, motor), Is.True,
+                    $"Caught or blocked toward {waypoint} at {street.transform.InverseTransformPoint(motor.transform.position)}. Total catches: {encounter.CatchCount}");
+                yield return null;
+            }
+
+            Assert.That(street.AtShelter, Is.True);
+            Assert.That(street.TryBoard(), Is.True);
+            Assert.That(street.TryBoard(), Is.False);
+            Assert.That(Vector3.Distance(motor.transform.position, street.BusSeat.position), Is.LessThan(.05f));
+            Object.Destroy(street.gameObject);
+        }
+
+        private static string DescribePose(Vector3 feet)
+        {
+            const float radius = .24f;
+            var blockers = Physics.OverlapCapsule(feet + Vector3.up * (radius + .05f), feet + Vector3.up * (1.7f - radius),
+                radius, ~0, QueryTriggerInteraction.Ignore);
+            return feet.ToString("F3") + " overlaps " + string.Join(", ", blockers.Select(c => c.name + " " + c.bounds));
+        }
+
+        private static bool MoveTo(Vector2 waypoint, ChapterTwoStreet street, FirstPersonMotor motor)
+        {
+            Vector3 target = street.transform.TransformPoint(new Vector3(waypoint.x, 0f, waypoint.y));
+            int catches = street.Encounter.CatchCount;
+            for (int step = 0; step < 420; step++)
+            {
+                Vector3 delta = Vector3.ProjectOnPlane(target - motor.transform.position, Vector3.up);
+                if (delta.magnitude < .21f) return true;
+                Vector3 input = motor.transform.InverseTransformDirection(delta.normalized);
+                motor.Simulate(new FirstPersonFrame { Move = new Vector2(input.x, input.z) }, .033f);
+                if (street.Encounter.enabled) street.Encounter.ManualTick(.033f);
+                if (street.Encounter.CatchCount != catches) return false;
+                street.CheckProgress();
+            }
+            return false;
         }
     }
 }

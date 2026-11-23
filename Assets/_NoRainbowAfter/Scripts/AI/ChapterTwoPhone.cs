@@ -7,25 +7,24 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.AI
 {
-    public sealed class ChapterTwoPhone : MonoBehaviour, IInteractable
+    public sealed class ChapterTwoPhone : MonoBehaviour, IHiddenInteractable
     {
-        private const string Draft = "Besok bisa ketemu? Ada yang mau gue ceritain soal kecelakaan itu.";
-        private const string Meeting = "Bisa. Besok habis kelas, gue tunggu di depan lab grafkom.";
+        private const string Draft = "El, maaf. Aku masih pengen ngobrol.";
         private FirstPersonPlayer player;
-        private Func<bool> sendReply;
+        private Func<bool> sendMessage;
+        private Action readOldChat;
         private Canvas canvas;
         private GameObject draftPanel, replyPanel;
         private Button sendButton, closeButton;
-        private Mesh starMesh;
-        private Material caseMaterial, displayMaterial, reflectorMaterial;
-        private bool open, replyAvailable, sent;
+        private Material caseMaterial, displayMaterial;
+        private bool open, sent;
 
         public string StableId => "INT_C2_PHONE";
         public string DisplayName => "Ponsel Raka";
-        public string Prompt => "Buka pesan Bayu";
+        public string Prompt => null;
         public void SetFocused(bool focused) { }
 
-        public static ChapterTwoPhone Create(Transform laptop, FirstPersonPlayer owner, Func<bool> onSend)
+        public static ChapterTwoPhone Create(Transform laptop, FirstPersonPlayer owner, Func<bool> onSend, Action onRead)
         {
             var prop = new GameObject("C2 Raka Phone", typeof(BoxCollider), typeof(ChapterTwoPhone));
             prop.transform.SetParent(laptop.parent, false);
@@ -35,8 +34,9 @@ namespace NoRainbowAfter.AI
             collider.size = new Vector3(.12f, .03f, .18f);
             var phone = prop.GetComponent<ChapterTwoPhone>();
             phone.player = owner;
-            phone.sendReply = onSend;
-            phone.BuildProps(laptop);
+            phone.sendMessage = onSend;
+            phone.readOldChat = onRead;
+            phone.BuildProps();
             return phone;
         }
 
@@ -47,14 +47,15 @@ namespace NoRainbowAfter.AI
             open = true;
             player.SetInspecting(true);
             player.CloseInspectRequested += Close;
+            readOldChat?.Invoke();
             RefreshUi();
         }
 
-        public void SetReplyAvailable() => replyAvailable = true;
+        public void ResetMessage() => sent = false;
 
-        public bool TrySendReply()
+        public bool TrySendMessage()
         {
-            if (!open || !replyAvailable || sent || player.IsPaused || !sendReply()) return false;
+            if (!open || sent || player.IsPaused || !sendMessage()) return false;
             sent = true;
             RefreshUi();
             return true;
@@ -86,27 +87,25 @@ namespace NoRainbowAfter.AI
         private void OnDisable() => Dismiss();
         private void OnDestroy()
         {
-            Destroy(starMesh);
             Destroy(caseMaterial);
             Destroy(displayMaterial);
-            Destroy(reflectorMaterial);
         }
 
         private void RefreshUi()
         {
             canvas.enabled = open && !player.IsPaused;
-            draftPanel.SetActive(replyAvailable && !sent);
+            draftPanel.SetActive(!sent);
             replyPanel.SetActive(sent);
             if (canvas.enabled && EventSystem.current != null)
             {
-                var target = replyAvailable && !sent ? sendButton : closeButton;
+                var target = !sent ? sendButton : closeButton;
                 if (target != null) EventSystem.current.SetSelectedGameObject(target.gameObject);
             }
         }
 
         private void BuildUi()
         {
-            var root = new GameObject("Bayu Chat", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            var root = new GameObject("Ella Chat", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             root.transform.SetParent(transform, false);
             canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -122,22 +121,20 @@ namespace NoRainbowAfter.AI
             backdrop.offsetMin = backdrop.offsetMax = Vector2.zero;
             var frame = Panel(backdrop, "Messages", Vector2.zero, new Vector2(776f, 744f), new Color(.056f, .076f, .091f));
             var header = Panel(frame, "Contact", new Vector2(0f, 327f), new Vector2(776f, 90f), new Color(.09f, .13f, .16f));
-            Label(header, "Contact Name", "Bayu Kopling", new Vector2(-132f, 0f), new Vector2(440f, 55f), 34, TextAnchor.MiddleLeft);
+            Label(header, "Contact Name", "Ella", new Vector2(-132f, 0f), new Vector2(440f, 55f), 34, TextAnchor.MiddleLeft);
             closeButton = Button(header, "Close", "Tutup [F]", new Vector2(264f, 0f), new Vector2(162f, 48f), Close);
 
-            Message(frame, "Tiga hari lalu", "Ka, lu enggak masuk grafkom? Pak dosen nyariin.", 229f);
-            Message(frame, "Kemarin", "Catatan kelas udah gue simpan. Nanti gue kirim.", 120f);
-            Message(frame, "Hari ini", "Ka, lu gimana? Kalau mau ngobrol, kabarin gue.", 11f);
+            Message(frame, "Ella  ·  Semester 5", "Kalau tugasnya numpuk, besok kita lihat catatannya bareng.", 216f);
+            Message(frame, "Ella  ·  Semester 5", "Jangan lupa. Kita wisuda bareng, ya.", 94f);
 
             var draft = Panel(frame, "Draft", new Vector2(0f, -227f), new Vector2(704f, 214f), new Color(.09f, .14f, .16f));
             draftPanel = draft.gameObject;
             Label(draft, "Draft Text", Draft, new Vector2(0f, 30f), new Vector2(642f, 94f), 28, TextAnchor.MiddleLeft);
-            sendButton = Button(draft, "Send", "Kirim balasan", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendReply());
+            sendButton = Button(draft, "Send", "Kirim", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendMessage());
 
             var reply = Rect(frame, "New Messages", Vector2.zero, new Vector2(776f, 744f));
             replyPanel = reply.gameObject;
-            Message(reply, "Raka", Draft, -137f, outgoing: true);
-            Message(reply, "Bayu", Meeting, -266f);
+            Message(reply, "Raka  ·  ✓", Draft, -137f, outgoing: true);
         }
 
         private static void Message(Transform parent, string name, string message, float y, bool outgoing = false)
@@ -192,7 +189,7 @@ namespace NoRainbowAfter.AI
             return rect;
         }
 
-        private void BuildProps(Transform laptop)
+        private void BuildProps()
         {
             var shader = Shader.Find("Universal Render Pipeline/Lit");
             caseMaterial = new Material(shader) { color = new Color(.025f, .031f, .043f) };
@@ -202,17 +199,6 @@ namespace NoRainbowAfter.AI
             PhonePiece("Case", new Vector3(0f, .008f, 0f), new Vector3(.083f, .016f, .156f), caseMaterial);
             PhonePiece("Screen", new Vector3(0f, .017f, 0f), new Vector3(.075f, .004f, .142f), displayMaterial);
 
-            var reflector = new GameObject("C2 Star Reflector", typeof(MeshFilter), typeof(MeshRenderer), typeof(BoxCollider), typeof(SceneInteractable));
-            reflector.transform.SetParent(laptop.parent, false);
-            reflector.transform.position = laptop.position + new Vector3(.45f, .032f, -.10f);
-            var collider = reflector.GetComponent<BoxCollider>();
-            collider.size = new Vector3(.105f, .024f, .105f);
-            reflectorMaterial = new Material(shader) { color = new Color(.83f, .68f, .25f) };
-            reflector.GetComponent<MeshRenderer>().sharedMaterial = reflectorMaterial;
-            starMesh = BuildStar();
-            reflector.GetComponent<MeshFilter>().sharedMesh = starMesh;
-            reflector.GetComponent<SceneInteractable>().Configure("INT_C2_REFLECTOR", "Reflektor bintang", "Periksa reflektor",
-                "inspected.c2.reflector", "Gantungan reflektor", "Satu masih di sini. Pasangannya masih menggantung di ritsleting tas kuliahku.", false);
         }
 
         private void PhonePiece(string name, Vector3 position, Vector3 scale, Material material)
@@ -228,22 +214,5 @@ namespace NoRainbowAfter.AI
             piece.GetComponent<Renderer>().sharedMaterial = material;
         }
 
-        private static Mesh BuildStar()
-        {
-            var vertices = new Vector3[11];
-            var triangles = new int[30];
-            for (int i = 0; i < 10; i++)
-            {
-                float angle = Mathf.PI * i / 5f;
-                float radius = i % 2 == 0 ? .038f : .017f;
-                vertices[i + 1] = new Vector3(Mathf.Sin(angle) * radius, 0f, Mathf.Cos(angle) * radius);
-                triangles[i * 3] = 0;
-                triangles[i * 3 + 1] = i + 1;
-                triangles[i * 3 + 2] = (i + 1) % 10 + 1;
-            }
-            var mesh = new Mesh { name = "Star Reflector", vertices = vertices, triangles = triangles };
-            mesh.RecalculateNormals();
-            return mesh;
-        }
     }
 }

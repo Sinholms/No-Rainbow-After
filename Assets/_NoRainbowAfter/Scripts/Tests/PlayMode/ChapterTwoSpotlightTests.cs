@@ -27,7 +27,7 @@ namespace NoRainbowAfter.Tests
             var e2 = New("light2").transform; e2.position = e1.position;
             var checkpoint = New("checkpoint").transform; checkpoint.position = origin + Vector3.right * 5;
             var encounter = New("encounter").AddComponent<ChapterTwoSpotlightEncounter>(); encounter.AutoTick = false;
-            encounter.Configure(motor, new[] { e1, e2 }, null, new[] { checkpoint });
+            encounter.Configure(motor, new[] { e1, e2 }, new[] { checkpoint });
             Physics.SyncTransforms(); encounter.ManualTick(.5f);
             Assert.That(encounter.Exposure, Is.EqualTo(.5f).Within(.001f));
             var cover = Box(origin + new Vector3(0, 1, 2), new Vector3(2, 2, .5f));
@@ -51,7 +51,7 @@ namespace NoRainbowAfter.Tests
             var emitter = New("light").transform; emitter.position = origin + Vector3.up;
             var checkpoint = New("checkpoint").transform; checkpoint.position = origin + Vector3.right * 5;
             var encounter = New("encounter").AddComponent<ChapterTwoSpotlightEncounter>(); encounter.AutoTick = false;
-            encounter.Configure(motor, new[] { emitter }, null, new[] { checkpoint }); encounter.CatchSeconds = duration;
+            encounter.Configure(motor, new[] { emitter }, new[] { checkpoint }); encounter.CatchSeconds = duration;
             Physics.SyncTransforms();
             encounter.ManualTick(duration - .01f); encounter.ManualTick(0f);
             Assert.That(encounter.CatchCount, Is.Zero);

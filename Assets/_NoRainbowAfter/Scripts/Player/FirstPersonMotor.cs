@@ -47,6 +47,7 @@ namespace NoRainbowAfter.Player
 
         public event System.Action PoseRestored;
         public Camera ViewCamera => viewCamera;
+        public float MovementScale { get; set; } = 1f;
         public float FieldOfView => fieldOfView;
         public float MouseSensitivity => mouseSensitivity;
         public float StaminaSeconds { get; private set; }
@@ -107,8 +108,9 @@ namespace NoRainbowAfter.Player
             bool sprint = input.SprintHeld && move.sqrMagnitude > 0.01f && !IsCrouched &&
                 controller.height >= standingHeight - 0.02f && !exhausted && StaminaSeconds > 0f;
             float speed = IsCrouched ? crouchSpeed : sprint ? sprintSpeed : walkSpeed;
-            Vector3 target = transform.TransformDirection(new Vector3(move.x, 0, move.y)) * speed;
-            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * dt);
+            Vector3 target = transform.TransformDirection(new Vector3(move.x, 0, move.y)) * (speed * MovementScale);
+            float response = move.sqrMagnitude > .01f ? MovementScale : 1f;
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * response * dt);
             if (controller.isGrounded && verticalVelocity < 0) verticalVelocity = -2f;
             verticalVelocity += gravity * dt;
             Vector3 before = transform.position;

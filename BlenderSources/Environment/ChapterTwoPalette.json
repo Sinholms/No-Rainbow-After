@@ -1,6 +1,83 @@
 {
   "materials": [
     {
+      "name": "C2 Sentry Raincoat",
+      "hex": "414E54",
+      "smooth": 0.38,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Sentry Vest",
+      "hex": "303946",
+      "smooth": 0.38,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Rubber",
+      "hex": "252C36",
+      "smooth": 0.62,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Sentry Skin",
+      "hex": "514C43",
+      "smooth": 0.34,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Tarnished Brass",
+      "hex": "B79D54",
+      "smooth": 0.54,
+      "metal": 0.48,
+      "glow": 0
+    },
+    {
+      "name": "C2 Reflective Tape",
+      "hex": "9DACAD",
+      "smooth": 0.6,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Smoked Bus Glass",
+      "hex": "3F666F",
+      "smooth": 0.76,
+      "metal": 0.25,
+      "glow": 0
+    },
+    {
+      "name": "C2 Bus Teal",
+      "hex": "528C8A",
+      "smooth": 0.63,
+      "metal": 0.24,
+      "glow": 0
+    },
+    {
+      "name": "C2 Bus Ivory",
+      "hex": "C3BCA5",
+      "smooth": 0.54,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Lamp Amber",
+      "hex": "E19860",
+      "smooth": 0.73,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2 Lamp Red",
+      "hex": "A83131",
+      "smooth": 0.72,
+      "metal": 0,
+      "glow": 0
+    },
+    {
       "name": "C2_Ink",
       "hex": "1E262B",
       "smooth": 0.3,

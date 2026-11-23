@@ -8,7 +8,7 @@ namespace NoRainbowAfter.Narrative
 {
     public enum EncounterResponse { None, Fight, Hide }
     public enum ClueStorageStatus { Ready, InvalidOrUnsupported, ReadFailed, WriteFailed }
-    public enum ChapterTwoBeat { None, WokeInDorm, ReportSubmitted, StreetEntered, ShelterReached, BagInspected, ReturnedToDorm, RepliedToBayu }
+    public enum ChapterTwoBeat { None, WokeInDorm, StayedInBed, OvertimeRequested, StreetEntered, ShelterReached, BoardedBus }
     [Serializable] internal sealed class ClueDocument { public int schemaVersion; public string[] clueIds; }
 
     // This stores clues only, not chapter progress or a complete save game.
@@ -21,6 +21,7 @@ namespace NoRainbowAfter.Narrative
         public IReadOnlyCollection<string> ClueIds => new ReadOnlyCollection<string>(new List<string>(clues));
         public EncounterResponse Chapter1Response { get; internal set; }
         public string ActiveChapter { get; internal set; } = "Chapter1";
+        public bool EllaMessageSent { get; internal set; }
         public ChapterTwoBeat Chapter2Beat { get; internal set; }
         public IReadOnlyCollection<string> CompletedObjectives => new ReadOnlyCollection<string>(new List<string>(objectives));
         public bool HasObjective(string id) => objectives.Contains(id);

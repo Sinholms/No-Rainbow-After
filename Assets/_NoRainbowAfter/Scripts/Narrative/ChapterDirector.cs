@@ -176,15 +176,35 @@ namespace NoRainbowAfter.Narrative
             ChapterTransitionRequested?.Invoke();
             return true;
         }
+        public bool RecordEllaMessage()
+        {
+            if (State == null || State.EllaMessageSent ||
+                (State.Chapter2Beat != ChapterTwoBeat.WokeInDorm && State.Chapter2Beat != ChapterTwoBeat.OvertimeRequested))
+                return false;
+            State.EllaMessageSent = true;
+            return true;
+        }
+
         public bool AdvanceChapterTwo(ChapterTwoBeat next)
         {
-            if (!ChapterOneFinished || State == null || State.ActiveChapter == "Chapter3" ||
-                (int)next != (int)State.Chapter2Beat + 1 || next > ChapterTwoBeat.RepliedToBayu) return false;
-
+            if (!ChapterOneFinished || State == null) return false;
+            bool allowed = (State.Chapter2Beat, next) switch
+            {
+                (ChapterTwoBeat.None, ChapterTwoBeat.WokeInDorm) => true,
+                (ChapterTwoBeat.WokeInDorm, ChapterTwoBeat.StayedInBed) => true,
+                (ChapterTwoBeat.WokeInDorm, ChapterTwoBeat.OvertimeRequested) => true,
+                (ChapterTwoBeat.StayedInBed, ChapterTwoBeat.WokeInDorm) => true,
+                (ChapterTwoBeat.OvertimeRequested, ChapterTwoBeat.StreetEntered) => true,
+                (ChapterTwoBeat.StreetEntered, ChapterTwoBeat.ShelterReached) => true,
+                (ChapterTwoBeat.ShelterReached, ChapterTwoBeat.BoardedBus) => true,
+                _ => false
+            };
+            if (!allowed) return false;
+            if (next == ChapterTwoBeat.WokeInDorm) State.EllaMessageSent = false;
             State.Chapter2Beat = next;
-            State.ActiveChapter = next == ChapterTwoBeat.RepliedToBayu ? "Chapter3" : "Chapter2";
+            State.ActiveChapter = next == ChapterTwoBeat.BoardedBus ? "Chapter3" : "Chapter2";
             BeatCompleted?.Invoke($"C2-{(int)next:00}");
-            if (next == ChapterTwoBeat.RepliedToBayu) ChapterThreeTransitionRequested?.Invoke();
+            if (next == ChapterTwoBeat.BoardedBus) ChapterThreeTransitionRequested?.Invoke();
             return true;
         }
         private void Complete(string id, string speaker, string text, string audio)

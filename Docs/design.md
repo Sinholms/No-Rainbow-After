@@ -746,7 +746,7 @@ validation, and build performance. No graphic gore and no franchise copies.
 Implement Raka's fictional phone presentation using Docs/CHAPTER2_PLAN.md.
 Show Ella's old chat and the optional single-checkmark message. Coordinate
 clue registration with T10. Preserve exact clue IDs and ending reveal wording.
-Use a fictional UI. Verify font legibility at 1080p and closing with Tab.
+Use a fictional UI. Verify font legibility at 1080p and closing with F.
 ```
 
 **Graduation (T12 art pass):**

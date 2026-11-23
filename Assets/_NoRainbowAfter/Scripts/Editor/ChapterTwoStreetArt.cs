@@ -44,6 +44,18 @@ namespace NoRainbowAfter.Editor
                     mat.EnableKeyword("_EMISSION");
                     mat.SetColor("_EmissionColor", tint * color.glow);
                 }
+                if (color.name == "C2 Smoked Bus Glass")
+                {
+                    tint.a = .49f;
+                    mat.SetColor("_BaseColor", tint);
+                    mat.SetFloat("_Surface", 1f);
+                    mat.SetFloat("_SrcBlend", (float)BlendMode.SrcAlpha);
+                    mat.SetFloat("_DstBlend", (float)BlendMode.OneMinusSrcAlpha);
+                    mat.SetFloat("_ZWrite", 0f);
+                    mat.SetOverrideTag("RenderType", "Transparent");
+                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    mat.renderQueue = (int)RenderQueue.Transparent;
+                }
                 mat.enableInstancing = true;
                 EditorUtility.SetDirty(mat);
                 result.Add(color.name, mat);
@@ -99,11 +111,8 @@ namespace NoRainbowAfter.Editor
             Place("HaltePasar",stop,Vector3.zero,Vector3.one);
             // Bag's box is also the interactable raycast target.
             Place("TasRaka",stop,new Vector3(.50f,.654f,.48f),Vector3.one);
-            foreach (var car in new[]{root.Find("Patroli depan warung"), root.Find("Patroli garis polisi")})
-            {
-                RemoveVisuals(car);
-                Place("SedanPatroli",car,Vector3.zero,Vector3.one);
-            }
+            RemoveVisuals(street.PatrolCar);
+            Place("SedanPatroli",street.PatrolCar,Vector3.zero,Vector3.one);
             foreach (Transform prop in root.Find("Cover"))
             {
                 RemoveVisuals(prop);

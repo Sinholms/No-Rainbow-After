@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace NoRainbowAfter.Editor
 {
-    // The editable prefab is also the street loaded by the report transition.
+    // The editable prefab is also the street shared by the crash memory and the encounter.
     public static class ChapterTwoStreetBuilder
     {
         internal const string Art = "Assets/_NoRainbowAfter/Art";
@@ -73,7 +73,7 @@ namespace NoRainbowAfter.Editor
                 trinket.localRotation=Quaternion.Euler(0,0,45);
                 street.Bag=bag.gameObject.AddComponent<SceneInteractable>();
                 street.Bag.Configure("INT_C2_BAG","Tas di bangku","Periksa tas","c2.bag","Tas Raka",
-                    "Gantungan reflektor bentuk bintang itu lecet di ujungnya. Ini tas gue. Kenapa bisa ada di halte ini?",true);
+                    "Di saku tas Raka ada rekaman lama. Di sela hujan terdengar, ‘Ella … masih …’ lalu suara itu terputus.",true);
 
                 var cover=Node(t,"Cover",0,0,0);
                 Crate(cover,"Peti rendah A",-1.9f,6.9f,1.22f,1.12f,3.5f,timber);
@@ -85,17 +85,17 @@ namespace NoRainbowAfter.Editor
                 Crate(cover,"Peti pinggir kedua",4.34f,32.6f,1.75f,1.8f,1.2f,timber);
                 Barrier(cover,1.4f,30.3f,0,concrete,sand);
                 Barrier(cover,-4.75f,26.5f,90,concrete,sand);
-                Barrier(cover,-2.4f,35.4f,0,concrete,sand);
 
-                var a=Car(t,"Patroli depan warung",3.5f,8.4f,-101,ink,warm);
-                var c=Car(t,"Patroli garis polisi", -3.85f,37.2f,126,ink,warm);
-                var guard=Shadow(t,"Shadow berjaga",4.38f,19.3f,-103);
-                var patrol=Shadow(t,"Shadow berpatroli",-3.8f,28.5f,69);
-                street.Lamps=new[]{a.Find("Lampu kiri"),a.Find("Lampu kanan"),guard.Find("Sorotan"),
-                    patrol.Find("Sorotan"),c.Find("Lampu kiri"),c.Find("Lampu kanan")};
-                street.ShadowWrappers=new Transform[]{null,null,guard.Find("VisualWrapper"),patrol.Find("VisualWrapper"),null,null};
-                street.Checkpoints=new[]{Node(t,"Checkpoint A",-3.6f,.04f,1.3f,10),
-                    Node(t,"Checkpoint B",1.38f,.04f,12.95f,-10),Node(t,"Checkpoint C",-.58f,.04f,23.92f,12)};
+                var fence = Material("C2 Sentry Fence", "4F5753", .63f);
+                street.PatrolCar = Car(t, "Patroli TKP", 4.9f, 7.4f, -22f, ink, warm);
+                street.Lamps = new[] {
+                    PolicePost(t, "Polisi 1", 5.36f, 15.8f, -90f, fence, ink, warm),
+                    PolicePost(t, "Polisi 2", -5.36f, 29.1f, 90f, fence, ink, warm)
+                };
+                street.Checkpoints = new[] {
+                    Node(t, "Checkpoint sebelum polisi 1", -3.55f, .04f, 1.28f, 8f),
+                    Node(t, "Checkpoint antara dua pos", .94f, .04f, 21.9f, 4f)
+                };
                 for(int i=0;i<3;i++)
                 {
                     float x=i%2==0 ? 5.96f : -5.96f, z=6+i*12;
@@ -105,6 +105,7 @@ namespace NoRainbowAfter.Editor
                     LightAt(t,"Cahaya jalan",x-Mathf.Sign(x)*1.2f,4.99f,z,new Color(1f,.81f,.55f),7f,14);
                 }
                 ChapterTwoStreetArt.Dress(street);
+                AddBus(street, t, ink, warm);
                 PrefabUtility.SaveAsPrefabAsset(root,Destination);
                 AssetDatabase.SaveAssets();
             }
@@ -116,23 +117,87 @@ namespace NoRainbowAfter.Editor
             var car=Node(t,name,x,0,z,yaw);
             Box(car,"Body",0,.65f,0,1.84f,.77f,4.14f,metal);
             Box(car,"Cabin",0,1.30f,-.22f,1.59f,.62f,2.06f,metal);
-            foreach(float side in new[]{-.70f,.70f})
+            for (int side = -1; side <= 1; side += 2)
             {
-                Box(car,"Headlight",side,.82f,2.085f,.35f,.17f,.05f,glass,false);
-                var lamp=Node(car,side<0?"Lampu kiri":"Lampu kanan",side,.82f,2.16f);
-                lamp.localRotation=Quaternion.Euler(2f,0,0);
+                Box(car, "Headlight", side * .70f, .82f, 2.085f, .35f, .17f, .05f, glass, false);
+                var beacon = Node(car, side < 0 ? "Rotator biru" : "Rotator merah", side * .38f, 1.72f, -.26f)
+                    .gameObject.AddComponent<Light>();
+                beacon.type = LightType.Point;
+                beacon.color = side < 0 ? new Color(.10f, .34f, 1f) : new Color(1f, .11f, .125f);
+                beacon.range = 8.7f;
+                beacon.intensity = 2.2f;
             }
             return car;
         }
 
-        static Transform Shadow(Transform t,string name,float x,float z,float yaw)
+        private static Transform PolicePost(Transform root, string name, float x, float z, float yaw,
+            Material fence, Material flashlight, Material lens)
         {
-            var actor=Node(t,name,x,0,z,yaw);
-            var wrapper=Node(actor,"VisualWrapper",0,0,0);
-            var asset=AssetDatabase.LoadAssetAtPath<GameObject>(Art+"/Prefabs/Characters/ACT_Shadow_Raka.prefab");
-            PrefabUtility.InstantiatePrefab(asset,wrapper);
-            Node(actor,"Sorotan",0,1.60f,.18f).localRotation=Quaternion.Euler(7,0,0);
-            return actor;
+            var post = Node(root, name, x, .12f, z, yaw);
+            float center = Mathf.Sign(x) * 6.16f;
+            // The solid fencing overlaps the officer's body and meets the existing curb wall.
+            Box(root, name + " pagar", center, 1.11f, z, 1.69f, 2.22f, .31f, fence);
+            Box(root, name + " kaki pagar", center, .24f, z, 1.69f, .48f, .60f, fence);
+            Box(root, name + " pita reflektif", center, 1.31f, z - .162f, 1.68f, .105f, .026f, lens, false);
+            var body = post.gameObject.AddComponent<BoxCollider>();
+            body.center = new Vector3(0, 1.20f, .02f);
+            body.size = new Vector3(1.02f, 2.40f, .83f);
+
+            var art = PlaceModel("ACT_TKPSentry", "Cap brim", post);
+            art.localScale = new Vector3(1.11f, x > 0 ? 1.12f : 1.20f, 1.11f);
+            var aim = Node(post, "Senter", -.28f, 1.60f * art.localScale.y, .69f);
+            aim.localRotation = Quaternion.Euler(10f, 0f, 0f);
+            Box(aim, "Kepala senter", 0, 0, -.035f, .125f, .125f, .23f, flashlight, false);
+            Box(aim, "Lensa senter", 0, 0, .085f, .092f, .092f, .019f, lens, false);
+            return aim;
+        }
+
+        private static void AddBus(ChapterTwoStreet street, Transform root, Material trim, Material warm)
+        {
+            var bus = Node(root, "Bus terakhir", -2.60f, 0f, 38.62f);
+            var model = PlaceModel("PROP_TKPShuttle", "Front windshield", bus);
+            model.localRotation *= Quaternion.Euler(0f, 180f, 0f);
+            Box(bus, "Lantai kabin", 0, .48f, 0, 2.32f, .50f, 5.78f, trim, false);
+            ColliderAt(bus, "Pijakan kabin", new Vector3(0, .42f, 0), new Vector3(2.32f, .58f, 5.74f));
+            ColliderAt(bus, "Dinding kiri", new Vector3(-1.1f, 1.65f, 0), new Vector3(.13f, 1.85f, 5.78f));
+            ColliderAt(bus, "Dinding kanan belakang", new Vector3(1.10f, 1.65f, .73f), new Vector3(.13f, 1.85f, 4.25f));
+            ColliderAt(bus, "Dinding kanan depan", new Vector3(1.10f, 1.65f, -2.58f), new Vector3(.13f, 1.85f, .53f));
+            ColliderAt(bus, "Kaca depan", new Vector3(0, 1.65f, -2.80f), new Vector3(2.25f, 1.90f, .19f));
+            ColliderAt(bus, "Dinding belakang", new Vector3(0, 1.65f, 2.80f), new Vector3(2.25f, 1.90f, .19f));
+            ColliderAt(bus, "Atap kabin", new Vector3(0, 2.58f, 0), new Vector3(2.2f, .12f, 5.5f));
+
+            var door = ColliderAt(bus, "Pintu bus", new Vector3(1.21f, 1.20f, -1.64f), new Vector3(.12f, 2.40f, 1.13f));
+            street.BusDoor = door.gameObject.AddComponent<ChapterTwoBusDoor>();
+            street.BusSeat = Node(bus, "Lorong kabin bus", 0, .734f, .05f, 180f);
+            LightAt(bus, "Lampu kabin", 0, 2.35f, 0, new Color(.91f, .94f, .85f), 2.3f, 4f);
+            Box(bus, "Panel rute", 0, 2.37f, -2.98f, 1.44f, .20f, .022f, trim, false);
+            Sign(bus, "BUS TERAKHIR", 0, 2.37f, -3.00f, .118f, warm.color, 0f);
+            foreach (float row in new[] { -.80f, .15f, 1.10f, 2.02f })
+            {
+                Box(bus, "Dudukan kursi", -.77f, .97f, row, .54f, .15f, .49f, trim, false);
+                Box(bus, "Sandaran kursi", -.77f, 1.24f, row + .19f, .54f, .52f, .10f, trim, false);
+            }
+        }
+
+        private static Transform ColliderAt(Transform parent, string name, Vector3 center, Vector3 size)
+        {
+            var collider = Node(parent, name, center.x, center.y, center.z).gameObject.AddComponent<BoxCollider>();
+            collider.size = size;
+            return collider.transform;
+        }
+
+        private static Transform PlaceModel(string model, string frontMarker, Transform parent)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(Art + "/Models/Environment/ChapterTwo/" + model + ".fbx");
+            if (asset == null) throw new FileNotFoundException(model + ".fbx");
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(asset, parent);
+            foreach (var part in instance.GetComponentsInChildren<MeshRenderer>())
+                if (part.name == frontMarker && parent.InverseTransformPoint(part.bounds.center).z < 0f)
+                {
+                    instance.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                    break;
+                }
+            return instance.transform;
         }
 
         static void Crate(Transform t,string name,float x,float z,float w,float h,float d,Material mat)

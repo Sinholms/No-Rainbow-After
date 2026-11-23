@@ -12,6 +12,9 @@ namespace NoRainbowAfter.Interaction
         void Interact(PlayerInteractor interactor);
     }
 
+    // These props can be used through the normal raycast without revealing a prompt.
+    public interface IHiddenInteractable : IInteractable { }
+
     // Session objective flags remain independent of the T05 clue profile.
     public interface IObjectiveFlags { bool Set(string flag); bool Contains(string flag); }
     public sealed class SessionObjectiveFlags : IObjectiveFlags

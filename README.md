@@ -9,6 +9,8 @@ Efek pandangan melingkar aktif secara default. Ubah Lebar pandang atau matikan T
 
 Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres berwarna merah di pojok kiri atas** (mulai dari `50%`; layar memerah + peringatan berkedip pelan saat mencapai `>= 70%`), **minigame mengetik tugas kuliah ala Monkeytype** (`5` kalimat, huruf ketikan kuning, timer `60–30 detik`, kirim dengan `Enter`, keluar dengan `1x klik Tab`, otomatis keluar setelah 5 kalimat selesai) di laptop meja belajar (`PROP_RakaLaptop`), **kenaikan stres berkala di lorong horor** yang mendorong Raka bersembunyi di lemari (`E`) lalu menekan **`[Tab]` atur napas di bar hijau**, sistem **tertangkap Shadow** (pelarian pertama masih diberi kesempatan kabur; tertangkap berikutnya mengembalikan Raka ke **spawn awal koridor dengan stres 100%** sehingga wajib mengatur napas dengan `[Tab]` sebelum melangkah lagi), serta pintu keluar ujung lorong yang memulangkan Raka ke kos. Alur Chapter 2 aktif mengikuti rencana Bizarre Edition di bawah ini.
 
+**Chapter 2 Bizarre Edition** dimulai saat Raka kembali ke kos. Ketik esai di laptop, lalu buka dan lewati pintu di ujung lorong saat diminta lembur. Di TKP, baca sorotan dua polisi dan berlindung menuju Halte Pasar. Tekan **E** di pintu bus untuk naik.
+
 ## Membuka proyek setelah clone
 
 1. Pasang Git dan Unity Editor **6000.6.8f1** melalui Unity Hub (Windows Build Support untuk membuat build Windows).

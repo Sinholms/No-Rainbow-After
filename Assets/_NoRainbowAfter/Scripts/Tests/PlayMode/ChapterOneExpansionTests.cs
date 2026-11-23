@@ -66,6 +66,14 @@ namespace NoRainbowAfter.Tests
             player.FocusLost-=(Action)Delegate.CreateDelegate(typeof(Action),session,method);
             type.GetMethod("SetPaused").Invoke(session,new object[]{false});player.SetPaused(false);Time.timeScale=1;
         }
+        private static string DescribePose(Vector3 feet)
+        {
+            const float radius = .24f;
+            var blockers = Physics.OverlapCapsule(feet + Vector3.up * (radius + .05f), feet + Vector3.up * (1.7f - radius),
+                radius, ~0, QueryTriggerInteraction.Ignore);
+            return feet.ToString("F3") + " overlaps " + string.Join(", ", blockers.Select(c => c.name + " " + c.bounds));
+        }
+
         private IEnumerator Expand()
         {
             var interact=player.GetComponent<PlayerInteractor>();
@@ -73,8 +81,25 @@ namespace NoRainbowAfter.Tests
             yield return new WaitForSeconds(1.1f);
             interact.Flags.Set("objective.overtime");interact.NotifyInteraction("INT_OVERTIME");
             Assert.That(motor.TryRestorePose(new Vector3(.16f,.04f,6.1f),Quaternion.identity),Is.True);
-            yield return new WaitForSeconds(.8f);
-            Assert.That(world.Expanded,Is.True);Assert.That(world.OwnsPlayer,Is.True);
+            yield return null;
+            Assert.That(world.Expanded, Is.False, "The old position in the corridor no longer teleports the player.");
+
+            var exit = Object.FindAnyObjectByType<SharedCorridorDoor>();
+            Assert.That(exit, Is.Not.Null);
+            var approach = new Vector3(exit.transform.position.x, .04f, exit.transform.position.z - 1.16f);
+            string situation = DescribePose(approach);
+            Assert.That(motor.TryRestorePose(approach, Quaternion.identity), Is.True, situation + " door " + exit.transform.position.ToString("F3"));
+            EnsureInputDevices(out var keyboard, out _);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(exit.IsOpen, Is.True);
+            yield return new WaitForSeconds(.48f);
+            Assert.That(world.Expanded, Is.False, "Opening the door leaves the player in the normal corridor.");
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+            float deadline = Time.unscaledTime + 3.5f;
+            while (!world.Expanded && Time.unscaledTime < deadline) yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return new WaitForSeconds(.25f);
+            Assert.That(world.Expanded, Is.True); Assert.That(world.OwnsPlayer, Is.True);
         }
         [UnityTest] public IEnumerator RoomChangesOnReturn_AndSlipOpensExtendedRoute()
         {
@@ -117,8 +142,6 @@ namespace NoRainbowAfter.Tests
             Assert.That(player.IsHiding,Is.True,"Exiting breathing keeps Raka safely hidden until pressing E.");
 
             int transitions=0;director.ChapterTransitionRequested+=()=>transitions++;
-            var chapterTwoBeats = new List<string>();
-            director.BeatCompleted += beat => { if (beat.StartsWith("C2-", StringComparison.Ordinal)) chapterTwoBeats.Add(beat); };
             yield return new WaitForSeconds(8f);
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
             Assert.That(transitions,Is.Zero);
@@ -160,162 +183,113 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor.transform.position.x, Is.LessThan(4f), "Finishing Chapter 1 must return Raka to his dorm room, not MainMenu.");
             Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, Is.EqualTo("MasterGameplay"));
             var objLabel = GameObject.Find("TestObjective").GetComponent<UnityEngine.UI.Text>();
-            Assert.That(objLabel.text, Is.EqualTo("Kerjakan tugas di laptop"));
+            Assert.That(objLabel.text, Is.EqualTo("Kerjakan esai di laptop"));
             Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter2"));
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
             Assert.That(player.IsTransitionLocked, Is.False);
-            yield return CompleteChapterTwo(keyboard, mouse, chapterTwoBeats, objLabel);
+            yield return CompleteChapterTwo(keyboard, mouse, objLabel);
         }
 
-        private IEnumerator CompleteChapterTwo(Keyboard keyboard, Mouse mouse, List<string> beats, UnityEngine.UI.Text objective)
+        private IEnumerator CompleteChapterTwo(Keyboard keyboard, Mouse mouse, UnityEngine.UI.Text objective)
         {
             var interactions = player.GetComponent<PlayerInteractor>();
-            var stress = player.GetComponent<StressBarometer>();
             var laptop = Object.FindAnyObjectByType<LaptopTypingMinigame>();
             var phone = Object.FindAnyObjectByType<ChapterTwoPhone>();
-            var reflector = GameObject.Find("C2 Star Reflector");
-            string[] clues = director.State.ClueIds.ToArray();
-            int chapterThreeRequests = 0;
-            director.ChapterThreeTransitionRequested += () => chapterThreeRequests++;
-            int objectiveAppearedCount = 0;
-            string previousObjective = objective.text;
+            var exit = Object.FindAnyObjectByType<SharedCorridorDoor>();
+            Assert.That(motor.MovementScale, Is.EqualTo(.75f));
+            Assert.That(phone.Prompt, Is.Null);
+            Assert.That(exit.IsOpen, Is.False);
 
-            void SampleObjective()
-            {
-                if (objective.text != previousObjective)
-                {
-                    if (objective.text == "Temui Bayu di kampus") objectiveAppearedCount++;
-                    previousObjective = objective.text;
-                }
-            }
+            laptop.Interact(interactions);
+            yield return null;
+            for (int i = 0; i < 3; i++) laptop.Tick(60f, false);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StayedInBed));
+            Assert.That(exit.Prompt, Is.EqualTo("Pintu terkunci"));
+            Assert.That(Object.FindAnyObjectByType<ChapterTwoStreet>(), Is.Null);
+            yield return new WaitForSeconds(3.9f);
+            var retry = GameObject.Find("Ulangi Chapter 2").GetComponent<UnityEngine.UI.Button>();
+            yield return ClickUiButtonWithMouse(keyboard, mouse, retry);
+            yield return new WaitForSeconds(1.2f);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
+            Assert.That(laptop.JudgedEssaySections, Is.Zero);
+            Assert.That(director.State.EllaMessageSent, Is.False);
 
-            var deskApproach = new Vector3(.26f, .04f, 2.67f);
-            yield return WalkToWithKeyboardAndMouse(keyboard, mouse, deskApproach, false, .22f);
-
-            if (reflector != null)
-            {
-                yield return LookAtWithMouse(mouse, reflector.GetComponent<Collider>().bounds.center);
-                yield return TapKey(keyboard, Key.E);
-                Assert.That(player.IsInspecting, Is.True, "Star reflector on the desk can be inspected.");
-                yield return TapKey(keyboard, Key.F);
-                Assert.That(player.IsInspecting, Is.False);
-            }
-
-            yield return LookAtWithMouse(mouse, phone.GetComponent<Collider>().bounds.center);
-            yield return TapKey(keyboard, Key.E);
-            Assert.That(player.IsInspecting, Is.True, "Opening the phone shows Bayu's old messages.");
-            yield return TapKey(keyboard, Key.Enter);
-            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm), "The reply becomes available after the bag.");
+            phone.Interact(interactions);
+            Assert.That(director.State.HasClue("CLUE_03"));
+            Assert.That(director.State.EllaMessageSent, Is.False);
             yield return TapKey(keyboard, Key.F);
             Assert.That(player.IsInspecting, Is.False);
+            phone.Interact(interactions);
+            yield return ClickUiButtonWithMouse(keyboard, mouse, GameObject.Find("Send").GetComponent<UnityEngine.UI.Button>());
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(phone.TrySendMessage(), Is.False);
+            Assert.That(phone.GetComponentsInChildren<UnityEngine.UI.Text>().Count(t => t.text.Contains("✓")), Is.EqualTo(1));
+            yield return TapKey(keyboard, Key.F);
 
-            yield return LookAtWithMouse(mouse, laptop.GetComponent<Collider>().bounds.center);
-            yield return TapKey(keyboard, Key.E);
-            Assert.That(laptop.IsActive, Is.True);
-            StringAssert.Contains("kecelakaan", laptop.TargetSentence);
-            yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence);
-            yield return TapKey(keyboard, Key.Enter);
-            string next = laptop.TargetSentence;
-            InputSystem.QueueTextEvent(keyboard, next[0]);
+            laptop.Interact(interactions);
             yield return null;
-            Assert.That(laptop.CurrentInput, Is.Not.Empty);
+            InputSystem.QueueTextEvent(keyboard, laptop.TargetSentence[0]);
+            yield return null;
+            float heldTime = laptop.RemainingTime;
             yield return TapKey(keyboard, Key.Tab);
             Assert.That(laptop.IsActive, Is.False);
-
-            yield return LookAtWithMouse(mouse, laptop.GetComponent<Collider>().bounds.center);
-            yield return TapKey(keyboard, Key.E);
-            Assert.That(laptop.IsActive, Is.True);
-            Assert.That(laptop.CompletedSentences, Is.EqualTo(1));
-            Assert.That(laptop.TargetSentence, Is.EqualTo(next));
-            Assert.That(laptop.CurrentInput, Is.Empty);
-            for (int i = 0; i < 3; i++)
-            {
-                yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence);
-                yield return TapKey(keyboard, Key.Enter);
-            }
+            laptop.Interact(interactions);
+            yield return null;
+            Assert.That(laptop.CurrentInput, Has.Length.EqualTo(1));
+            Assert.That(laptop.RemainingTime, Is.LessThanOrEqualTo(heldTime).And.GreaterThan(heldTime - .6f));
+            yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence.Substring(1));
             yield return TapKey(keyboard, Key.Enter);
-            Assert.That(laptop.CompletedSentences, Is.EqualTo(4));
-            Assert.That(laptop.SubmittedAttempts, Is.EqualTo(4));
-            Assert.That(stress.CurrentStress, Is.EqualTo(100f));
-            Assert.That(stress.OverlayCanvas.enabled, Is.True);
-            Assert.That(player.IsTransitionLocked, Is.True);
-            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ReportSubmitted));
-
-            float entryDeadline = Time.unscaledTime + 4f;
-            while (director.State.Chapter2Beat == ChapterTwoBeat.ReportSubmitted && Time.unscaledTime < entryDeadline)
+            Assert.That(laptop.CompletedSentences, Is.EqualTo(1));
+            laptop.Tick(60f, false);
+            laptop.Tick(60f, false);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.OvertimeRequested));
+            Assert.That(Object.FindAnyObjectByType<ChapterTwoStreet>(), Is.Null, "The essay does not teleport the player.");
+            Assert.That(interactions.IsInspecting, Is.True, "Overtime is announced at the laptop.");
+            yield return TapKey(keyboard, Key.F);
+            Assert.That(motor.TryRestorePose(exit.transform.position + new Vector3(0, .04f, -1.1f), Quaternion.identity), Is.True);
+            yield return TapKey(keyboard, Key.E);
+            yield return new WaitForSeconds(.45f);
+            Assert.That(exit.IsOpen, Is.True);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.OvertimeRequested));
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+            float deadline = Time.unscaledTime + 4f;
+            while (director.State.Chapter2Beat != ChapterTwoBeat.StreetEntered && Time.unscaledTime < deadline)
                 yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return new WaitForSeconds(.75f);
+
             var street = Object.FindAnyObjectByType<ChapterTwoStreet>();
             Assert.That(street, Is.Not.Null);
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StreetEntered));
-            Assert.That(player.IsTransitionLocked, Is.True, "The street fade keeps control locked after the dorm deactivates.");
-            float streetUnlockDeadline = Time.unscaledTime + 3f;
-            while (player.IsTransitionLocked && Time.unscaledTime < streetUnlockDeadline)
-                yield return null;
-            SampleObjective();
-            Assert.That(objective.text, Is.EqualTo("Capai halte di seberang garis polisi"));
-            Assert.That(stress.OverlayCanvas.enabled, Is.False);
-            Assert.That(player.IsTransitionLocked, Is.False);
-            Assert.That(street.Bag.Prompt, Is.Null);
-            Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.15f));
+            Assert.That(street.TryRestoreCheckpoint(), Is.True);
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(street.GetComponent<AudioSource>().isPlaying, Is.True);
 
-            Vector2[] streetRoute =
-            {
-                new Vector2(-4.25f, 4f),
-                new Vector2(-4.25f, 18f),
-                new Vector2(-4.1f, 23f),
-                new Vector2(-3.1f, 25f),
-                new Vector2(-3.1f, 32f),
-                new Vector2(0f, 33f),
-                new Vector2(0f, 37.8f),
-                new Vector2(2.5f, 38f)
-            };
-            foreach (Vector2 waypoint in streetRoute)
-            {
-                Vector3 worldWaypoint = street.transform.TransformPoint(new Vector3(waypoint.x, 0f, waypoint.y));
-                yield return WalkToWithKeyboardAndMouse(keyboard, mouse, worldWaypoint, true, .32f);
-                SampleObjective();
-            }
-            Assert.That(street.AtShelter, Is.True);
-            Assert.That(street.Encounter.CatchCount, Is.EqualTo(0));
+            int handoffs = 0;
+            director.ChapterThreeTransitionRequested += () => handoffs++;
+            Vector3 stop = street.transform.TransformPoint(new Vector3(.55f, .19f, 37.82f));
+            Assert.That(motor.TryRestorePose(stop, Quaternion.identity), Is.True);
+            street.CheckProgress();
             Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ShelterReached));
-            SampleObjective();
-            Assert.That(objective.text, Is.EqualTo("Periksa tas di halte"));
-
-            yield return LookAtWithMouse(mouse, street.Bag.GetComponent<Collider>().bounds.center);
+            Physics.SyncTransforms();
+            yield return LookAtWithMouse(mouse, street.BusDoor.GetComponent<Collider>().bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(street.BusDoor));
             yield return TapKey(keyboard, Key.E);
-            Assert.That(interactions.IsInspecting, Is.True);
-            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.BagInspected));
-            Assert.That(player.IsTransitionLocked, Is.False, "Raka can read the bag inspection before the fade.");
-            yield return TapKey(keyboard, Key.F);
-            float returnDeadline = Time.unscaledTime + 4f;
-            while ((player.IsTransitionLocked || director.State.Chapter2Beat != ChapterTwoBeat.ReturnedToDorm) && Time.unscaledTime < returnDeadline)
-            {
-                yield return null;
-                SampleObjective();
-            }
-            yield return null;
-            SampleObjective();
-            Assert.That(street.gameObject.activeSelf, Is.False);
-            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ReturnedToDorm));
-            Assert.That(objective.text, Is.EqualTo("Balas pesan Bayu"));
-
-            yield return WalkToWithKeyboardAndMouse(keyboard, mouse, deskApproach, false, .22f);
-            yield return LookAtWithMouse(mouse, phone.GetComponent<Collider>().bounds.center);
-            yield return TapKey(keyboard, Key.E);
-            Assert.That(player.IsInspecting, Is.True);
-            var sendButton = phone.GetComponentsInChildren<UnityEngine.UI.Button>(true).Single(b => b.name == "Send");
-            yield return ClickUiButtonWithMouse(keyboard, mouse, sendButton);
-            SampleObjective();
-            yield return ClickUiButtonWithMouse(keyboard, mouse, sendButton);
-            SampleObjective();
-            yield return TapKey(keyboard, Key.F);
-            SampleObjective();
+            yield return new WaitForSeconds(1.2f);
+            Assert.That(street.Boarded, Is.True);
+            Assert.That(handoffs, Is.EqualTo(1));
             Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter3"));
-            Assert.That(objective.text, Is.EqualTo("Temui Bayu di kampus"));
-            Assert.That(objectiveAppearedCount, Is.EqualTo(1), "Objective 'Temui Bayu di kampus' must appear exactly once.");
-            Assert.That(chapterThreeRequests, Is.EqualTo(1));
-            CollectionAssert.AreEquivalent(clues, director.State.ClueIds);
-            CollectionAssert.AreEqual(new[] { "C2-01", "C2-02", "C2-03", "C2-04", "C2-05", "C2-06", "C2-07" }, beats);
+            Assert.That(objective.text, Is.EqualTo("Berangkat kerja"));
+            Assert.That(player.IsTransitionLocked, Is.False);
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(street.GetComponent<AudioSource>().isPlaying, Is.False);
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Bad));
+            foreach (string clue in new[] { "CLUE_01", "CLUE_04" }) director.State.AddClue(clue);
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Hidden));
+            var unsentState = new GameState(System.IO.Path.Combine(isolatedStorageFolder, "unsent.json"));
+            foreach (string clue in director.State.ClueIds) unsentState.AddClue(clue);
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, unsentState), Is.EqualTo(StoryEnding.Bad));
+            Assert.That(EndingResolver.Resolve(FinalChoice.Approach, director.State), Is.EqualTo(StoryEnding.Good));
         }
 
         private static void EnsureInputDevices(out Keyboard keyboard, out Mouse mouse)

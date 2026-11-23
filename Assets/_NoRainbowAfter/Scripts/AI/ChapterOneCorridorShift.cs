@@ -29,6 +29,8 @@ namespace NoRainbowAfter.AI
         private bool shifting;
         private ObjectiveTracker objectives;
         private ChapterTwoFlow chapterTwo;
+        internal SharedCorridorDoor SharedExit { get; private set; }
+        public static bool ShowCrashMemoryOnStart { get; set; }
         private bool arrivalNarrated;
         private Vector3 lastSafePosition;
         private float corridorStressTimer;
@@ -41,6 +43,13 @@ namespace NoRainbowAfter.AI
             chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
             if(Corridor != null) { CreateExitDoor(); Corridor.SetActive(false); }
+            SharedExit = SharedCorridorDoor.ReplaceEndWall(player, CanCrossSharedExit, CrossSharedExit);
+            if (SharedExit == null) Debug.LogError("[NRA] Missing end wall at the normal corridor exit.", this);
+            if (ShowCrashMemoryOnStart)
+            {
+                ShowCrashMemoryOnStart = false;
+                chapterTwo.PlayOpeningMemory();
+            }
         }
         private void OnDestroy() { if(instance.valid) instance.Remove(); }
         private void LateUpdate()
@@ -68,8 +77,20 @@ namespace NoRainbowAfter.AI
                 else objectives.SetChapterGuidance("Cari jalan keluar","Berjalan ke ujung lorong. Hati-hati, stres meningkat di dalam koridor.");
             }
             if(director == null || director.ChapterOneFinished || player.IsPaused || player.IsInspecting || player.IsUsingLaptop || player.IsTransitionLocked) return;
-            if(!OwnsPlayer && !shifting && director.BeatIndex>=3 && motor.transform.position.z>=5.75f) StartCoroutine(Shift());
             if(CanBegin) director.SamplePosition(6.5f);
+        }
+
+        private bool CanCrossSharedExit()
+        {
+            if (shifting || director == null || director.State == null || player.IsTransitionLocked) return false;
+            return director.ChapterOneFinished ? chapterTwo.CanEnterStreet : !Expanded && director.HasReadOvertimeSlip;
+        }
+
+        private void CrossSharedExit()
+        {
+            if (!CanCrossSharedExit()) return;
+            if (director.ChapterOneFinished) chapterTwo.UseStreetExit();
+            else StartCoroutine(Shift());
         }
 
         public void TickCorridorStress(float deltaTime)
@@ -180,6 +201,7 @@ namespace NoRainbowAfter.AI
             corridorStressTimer = 0f;
             if (Corridor != null) Corridor.SetActive(false);
             Expanded = false;
+            SharedExit?.ResetDoor();
             Physics.SyncTransforms();
             director.ResetCrossing();
         }

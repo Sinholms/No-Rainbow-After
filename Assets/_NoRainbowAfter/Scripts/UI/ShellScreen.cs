@@ -1,3 +1,4 @@
+using NoRainbowAfter.AI;
 using NoRainbowAfter.Core;
 using NoRainbowAfter.Quality;
 using UnityEngine;
@@ -41,8 +42,7 @@ namespace NoRainbowAfter.UI
             if (continueButton != null) continueButton.interactable = false;
             // No checkpoint is manufactured by this foundation task.
             if (primaryButton != null)
-                primaryButton.onClick.AddListener(() => flow.Load(
-                    kind == ShellKind.MainMenu ? GameScene.MasterGameplay : GameScene.MainMenu));
+                primaryButton.onClick.AddListener(StartPrimary);
             if (creditsButton != null) creditsButton.onClick.AddListener(() => flow.Load(GameScene.Credits));
             if (menuButton != null) menuButton.onClick.AddListener(() => flow.Load(GameScene.MainMenu));
             if (playTestButton != null) playTestButton.onClick.AddListener(() => flow.Load(GameScene.FirstPersonTest));
@@ -63,6 +63,17 @@ namespace NoRainbowAfter.UI
                 qualityHighButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.High));
             RefreshQualityControls(GraphicsQualityService.CurrentPreset);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+        }
+
+        private void StartPrimary()
+        {
+            if (kind != ShellKind.MainMenu)
+            {
+                flow.Load(GameScene.MainMenu);
+                return;
+            }
+
+            if (flow.Load(GameScene.MasterGameplay)) ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
         }
 
         private void OnEnable()

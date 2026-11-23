@@ -75,10 +75,11 @@ namespace NoRainbowAfter.Interaction
         }
         private void SetFocus(IInteractable next)
         {
-            if (next != null && string.IsNullOrEmpty(next.Prompt)) next = null;
+            if (next != null && !(next is IHiddenInteractable) && string.IsNullOrEmpty(next.Prompt)) next = null;
             if (!ReferenceEquals(focused, next)) { focused?.SetFocused(false); focused = next; focused?.SetFocused(true); }
-            if (reticle != null) reticle.color = focused == null ? new Color(1, 1, 1, .65f) : Color.white;
-            if (prompt != null) prompt.text = focused == null ? "" : "[E] " + focused.Prompt;
+            bool showPrompt = focused != null && !string.IsNullOrEmpty(focused.Prompt);
+            if (reticle != null) reticle.color = showPrompt ? Color.white : new Color(1, 1, 1, .65f);
+            if (prompt != null) prompt.text = showPrompt ? "[E] " + focused.Prompt : "";
         }
         public void Interact()
         {

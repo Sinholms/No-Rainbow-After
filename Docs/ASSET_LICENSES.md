@@ -24,4 +24,6 @@ Suggested attribution in coursework/credits:
 
 ## Original additions
 
+The Chapter 2 sentry, shuttle, siren and heavy footstep are original project assets. The Blender source is [ChapterTwoBizarre.blend](../BlenderSources/Environment/ChapterTwoBizarre.blend). The [Blender build script](../BlenderSources/Environment/create_chapter_two_bizarre.py) exports the FBX files and synthesizes both WAVs.
+
 Room disarray reuses original No Rainbow After furniture and papers, arranged in Blender. Hiding wardrobes and corridor connection geometry are original project additions. These additions do not resolve the provenance uncertainty of the downloaded corridor.

@@ -2,7 +2,7 @@
 
 Pembaruan: 23 November 2026<br>
 Proyek: **No Rainbow After**<br>
-Status: Dokumentasi konsep berdasarkan arahan pengguna; belum diimplementasikan. Dialog, durasi, dan pembagian shot di bawah merupakan draf untuk produksi.
+Status: Prototipe **Mulai Baru** menampilkan kilasan mobil polisi dan sirene sebelum bangun di kos. Perjalanan motor, dialog, dan urutan shot lengkap di bawah masih berupa rancangan produksi.
 
 ## 1. Inti adegan yang ditetapkan
 
