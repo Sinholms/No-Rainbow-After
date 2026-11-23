@@ -15,7 +15,7 @@ namespace NoRainbowAfter.AI
         private Action readOldChat;
         private Canvas canvas;
         private GameObject draftPanel, replyPanel;
-        private Button sendButton, closeButton;
+        private Button declineButton, closeButton;
         private Material caseMaterial, displayMaterial;
         private bool open, sent;
 
@@ -28,7 +28,7 @@ namespace NoRainbowAfter.AI
         {
             var prop = new GameObject("C2 Raka Phone", typeof(BoxCollider), typeof(ChapterTwoPhone));
             prop.transform.SetParent(laptop.parent, false);
-            prop.transform.SetPositionAndRotation(laptop.position + new Vector3(.28f, .02f, -.06f), Quaternion.Euler(0f, 12f, 0f));
+            prop.transform.SetPositionAndRotation(laptop.position + new Vector3(.30f, 0f, -.01f), Quaternion.Euler(0f, 12f, 0f));
             var collider = prop.GetComponent<BoxCollider>();
             collider.center = Vector3.up * .014f;
             collider.size = new Vector3(.12f, .03f, .18f);
@@ -98,7 +98,7 @@ namespace NoRainbowAfter.AI
             replyPanel.SetActive(sent);
             if (canvas.enabled && EventSystem.current != null)
             {
-                var target = !sent ? sendButton : closeButton;
+                var target = !sent ? declineButton : closeButton;
                 if (target != null) EventSystem.current.SetSelectedGameObject(target.gameObject);
             }
         }
@@ -130,7 +130,9 @@ namespace NoRainbowAfter.AI
             var draft = Panel(frame, "Draft", new Vector2(0f, -227f), new Vector2(704f, 214f), new Color(.09f, .14f, .16f));
             draftPanel = draft.gameObject;
             Label(draft, "Draft Text", Draft, new Vector2(0f, 30f), new Vector2(642f, 94f), 28, TextAnchor.MiddleLeft);
-            sendButton = Button(draft, "Send", "Kirim", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendMessage());
+            declineButton = Button(draft, "DoNotSend", "Jangan kirim", new Vector2(-110f, -60f), new Vector2(240f, 54f), Close);
+            declineButton.image.color = new Color(.13f, .19f, .22f);
+            Button(draft, "Send", "Kirim", new Vector2(225f, -60f), new Vector2(224f, 54f), () => TrySendMessage());
 
             var reply = Rect(frame, "New Messages", Vector2.zero, new Vector2(776f, 744f));
             replyPanel = reply.gameObject;

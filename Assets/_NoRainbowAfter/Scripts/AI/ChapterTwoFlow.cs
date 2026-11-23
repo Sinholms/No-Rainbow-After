@@ -41,7 +41,7 @@ namespace NoRainbowAfter.AI
         private Vector3 lastStepPosition;
         private float stepDistance;
         private bool transitioning, retryVisible;
-        private Material photoMaterial;
+        private Material[] photoMaterials;
 
         private ChapterTwoBeat Beat => director.State.Chapter2Beat;
         internal bool CanEnterStreet => !transitioning && Beat == ChapterTwoBeat.OvertimeRequested;
@@ -64,7 +64,8 @@ namespace NoRainbowAfter.AI
             if (interactor != null) interactor.InteractionCompleted -= RegisterOptionalClue;
             if (laptop != null) laptop.EssayFinished -= OnEssayFinished;
             if (street != null) Destroy(street.gameObject);
-            if (photoMaterial != null) Destroy(photoMaterial);
+            if (photoMaterials != null)
+                foreach (var material in photoMaterials) Destroy(material);
         }
 
         public void PlayOpeningMemory() => StartCoroutine(OpeningMemory());
@@ -331,20 +332,57 @@ namespace NoRainbowAfter.AI
 
         private void CreateGraduationPhoto()
         {
-            var photo = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            photo.name = "Foto Raka dan Ella";
-            photo.transform.SetParent(laptop.transform.parent, false);
-            photo.transform.SetPositionAndRotation(laptop.transform.position + new Vector3(-.40f, .09f, -.05f),
-                Quaternion.Euler(12f, -16f, 0f));
-            photo.transform.localScale = new Vector3(.16f, .18f, .031f);
-            photoMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"))
+            var portrait = Resources.Load<Texture2D>("ChapterTwoArt/T_RakaEllaPhoto");
+            if (portrait == null)
             {
-                color = new Color(.68f, .59f, .42f)
-            };
-            photo.GetComponent<Renderer>().sharedMaterial = photoMaterial;
-            var inspection = photo.AddComponent<SceneInteractable>();
-            inspection.Configure("INT_C2_PHOTO", "Foto Raka dan Ella", "Periksa foto", "c2.photo",
-                "Foto Raka dan Ella", "Di belakang foto ada tulisan tangan Ella: “Wisuda bareng, ya.”", false);
+                Debug.LogError("[NRA] Missing the Raka and Ella photograph.", this);
+                return;
+            }
+
+            var photo = new GameObject("Foto Raka dan Ella", typeof(BoxCollider), typeof(SceneInteractable));
+            photo.transform.SetParent(laptop.transform.parent, false);
+            // Right of the phone, behind the open notes, below the desk lamp.
+            photo.transform.SetPositionAndRotation(laptop.transform.position + new Vector3(.58f, .109f, .235f),
+                Quaternion.Euler(14f, -10f, 0f));
+            photo.GetComponent<BoxCollider>().size = new Vector3(.218f, .222f, .055f);
+
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            var frame = new Material(shader) { color = new Color(.13f, .078f, .049f) };
+            var border = new Material(shader) { color = new Color(.88f, .81f, .67f) };
+            var print = new Material(shader);
+            print.SetTexture("_BaseMap", portrait);
+            // A matte print stays readable under the strong warm desk light.
+            print.SetColor("_BaseColor", new Color(.31f, .34f, .38f));
+            print.SetTexture("_EmissionMap", portrait);
+            print.SetColor("_EmissionColor", new Color(.12f, .12f, .12f));
+            print.SetFloat("_Smoothness", .08f);
+            print.EnableKeyword("_EMISSION");
+            photoMaterials = new[] { frame, border, print };
+
+            PhotoPiece(photo.transform, "Bingkai kayu", PrimitiveType.Cube, Vector3.zero,
+                new Vector3(.218f, .222f, .022f), frame);
+            PhotoPiece(photo.transform, "Kaki bingkai", PrimitiveType.Cube, new Vector3(0, -.104f, .029f),
+                new Vector3(.166f, .013f, .071f), frame);
+            PhotoPiece(photo.transform, "Tepi foto", PrimitiveType.Cube, new Vector3(0, 0, -.0135f),
+                new Vector3(.194f, .198f, .004f), border);
+            PhotoPiece(photo.transform, "Cetakan Raka dan Ella", PrimitiveType.Quad, new Vector3(0, .003f, -.016f),
+                new Vector3(.178f, .178f, 1f), print);
+
+            photo.GetComponent<SceneInteractable>().Configure("INT_C2_PHOTO", "Foto Raka dan Ella", "Periksa foto",
+                "c2.photo", "Foto Raka dan Ella", "Di belakang foto ada tulisan tangan Ella: “Wisuda bareng, ya.”", false, portrait);
+        }
+
+        private static void PhotoPiece(Transform parent, string name, PrimitiveType shape, Vector3 position, Vector3 scale, Material material)
+        {
+            var piece = GameObject.CreatePrimitive(shape);
+            piece.name = name;
+            piece.transform.SetParent(parent, false);
+            piece.transform.localPosition = position;
+            piece.transform.localScale = scale;
+            var collider = piece.GetComponent<Collider>();
+            collider.enabled = false;
+            Destroy(collider);
+            piece.GetComponent<Renderer>().sharedMaterial = material;
         }
 
         private void RegisterOptionalClue(string id)

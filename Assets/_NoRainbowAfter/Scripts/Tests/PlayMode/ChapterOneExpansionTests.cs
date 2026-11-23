@@ -214,12 +214,38 @@ namespace NoRainbowAfter.Tests
             Assert.That(laptop.JudgedEssaySections, Is.Zero);
             Assert.That(director.State.EllaMessageSent, Is.False);
 
-            phone.Interact(interactions);
-            Assert.That(director.State.HasClue("CLUE_03"));
-            Assert.That(director.State.EllaMessageSent, Is.False);
+            // From the standing side of the desk both props must be reachable through the normal FPP raycast.
+            var standingByDesk = new Vector3(.24f, .04f, 2.76f);
+            Assert.That(motor.TryRestorePose(standingByDesk, Quaternion.identity), Is.True, DescribePose(standingByDesk));
+            var photo = GameObject.Find("Foto Raka dan Ella").GetComponent<SceneInteractable>();
+            var photoCollider = photo.GetComponent<BoxCollider>();
+            yield return LookAtWithMouse(mouse, photoCollider.bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(photo), "The framed photo must be visible on the desk.");
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(director.State.HasClue("CLUE_01"), Is.True);
+            var inspection = interactions.transform.Find("Interaction UI/Inspect");
+            var print = inspection.Find("Foto cetak").GetComponent<UnityEngine.UI.RawImage>();
+            Assert.That(print.gameObject.activeInHierarchy, Is.True);
+            Assert.That(print.texture.name, Is.EqualTo("T_RakaEllaPhoto"));
+            Assert.That(inspection.Find("Body").GetComponent<UnityEngine.UI.Text>().text, Does.Contain("Wisuda bareng"));
             yield return TapKey(keyboard, Key.F);
+
+            yield return LookAtWithMouse(mouse, phone.GetComponent<BoxCollider>().bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(phone), "The phone must be reachable by looking at it.");
+            Assert.That(interactions.transform.Find("Interaction UI/Prompt").GetComponent<UnityEngine.UI.Text>().text, Is.Empty);
+            Assert.That(objective.text, Is.EqualTo("Kerjakan esai di laptop"));
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsInspecting, Is.True);
+            Assert.That(director.State.HasClue("CLUE_03"), Is.True);
+            Assert.That(director.State.EllaMessageSent, Is.False);
+            var decline = GameObject.Find("DoNotSend").GetComponent<UnityEngine.UI.Button>();
+            Assert.That(decline.GetComponentInChildren<UnityEngine.UI.Text>().text, Is.EqualTo("Jangan kirim"));
+            yield return ClickUiButtonWithMouse(keyboard, mouse, decline);
             Assert.That(player.IsInspecting, Is.False);
-            phone.Interact(interactions);
+            Assert.That(director.State.EllaMessageSent, Is.False);
+
+            yield return LookAtWithMouse(mouse, phone.GetComponent<BoxCollider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
             yield return ClickUiButtonWithMouse(keyboard, mouse, GameObject.Find("Send").GetComponent<UnityEngine.UI.Button>());
             Assert.That(director.State.EllaMessageSent, Is.True);
             Assert.That(phone.TrySendMessage(), Is.False);
@@ -284,7 +310,7 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.State.EllaMessageSent, Is.True);
             Assert.That(street.GetComponent<AudioSource>().isPlaying, Is.False);
             Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Bad));
-            foreach (string clue in new[] { "CLUE_01", "CLUE_04" }) director.State.AddClue(clue);
+            director.State.AddClue("CLUE_04");
             Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Hidden));
             var unsentState = new GameState(System.IO.Path.Combine(isolatedStorageFolder, "unsent.json"));
             foreach (string clue in director.State.ClueIds) unsentState.AddClue(clue);

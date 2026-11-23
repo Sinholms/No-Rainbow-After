@@ -29,21 +29,25 @@ namespace NoRainbowAfter.Interaction
         [SerializeField] private string stableId, displayName, prompt, objectiveFlag, title;
         [SerializeField, TextArea(3, 8)] private string body;
         [SerializeField] private bool singleUse;
+        private Texture2D inspectionPhoto;
         private bool used;
         private bool available = true;
         public string StableId => stableId;
         public string DisplayName => displayName;
         public string Prompt => !available || (used && singleUse) ? null : prompt;
         public void SetAvailable(bool value) => available = value;
-        public void Configure(string id, string name, string action, string flag, string heading, string text, bool once)
-        { stableId = id; displayName = name; prompt = action; objectiveFlag = flag; title = heading; body = text; singleUse = once; }
+        public void Configure(string id, string name, string action, string flag, string heading, string text, bool once, Texture2D photo = null)
+        {
+            stableId = id; displayName = name; prompt = action; objectiveFlag = flag; title = heading; body = text;
+            singleUse = once; inspectionPhoto = photo;
+        }
         public void SetFocused(bool focused) { }
         public void Interact(PlayerInteractor interactor)
         {
             if (!available || (used && singleUse)) return;
             interactor.Flags.Set(objectiveFlag);
             used = true;
-            interactor.ShowInspection(title, body);
+            interactor.ShowInspection(title, body, inspectionPhoto);
             interactor.NotifyInteraction(stableId);
         }
     }

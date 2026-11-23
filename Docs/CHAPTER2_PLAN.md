@@ -30,10 +30,12 @@ Gerakan berat berlaku saat jalan di kos, lorong, dan TKP. Mulai dengan **sekitar
 - Setiap bagian punya satu hasil akhir. Pemain boleh memperbaiki salah ketik dan mencoba Enter lagi selama waktu tersisa. Bagian yang belum lolos ketika waktunya habis dicatat gagal, lalu sesi berlanjut ke bagian berikutnya. Menutup laptop atau pause menahan progres dan waktu tersisa. Membuka lagi melanjutkan bagian yang sama.
 - **0/3 berhasil** memicu adegan rebahan. **1/3 sampai 3/3 berhasil** memicu permintaan lembur setelah semua bagian selesai dinilai. Durasi bagian ditentukan setelah uji mengetik. Hasil ini mengatur alur hari Raka. Pilihan ending global dibaca terpisah.
 
-### HP Ella dan Hidden Ending
+### Foto, HP Ella, dan Hidden Ending
+
+Foto Raka dan Ella ada dalam bingkai di meja kos, di sebelah kanan HP dekat lampu. Saat diperiksa, pemain melihat fotonya dan tulisan Ella “Wisuda bareng, ya.” yang memberi `CLUE_01`.
 
 - Ponsel diletakkan di samping laptop dan tersedia selama Raka masih di kos, sebelum maupun sesudah esai. Interaksi normal dengan benda bisa membuka chat jika pemain mengarah langsung ke HP. Pemain menemukannya tanpa objektif, notifikasi yang memancing, penanda, atau teks **Buka HP**.
-- Pemain bisa membaca chat Ella, memilih **Kirim**, atau menutup ponsel dan melanjutkan hari. Pesan baru, misalnya *“El, maaf. Aku masih pengen ngobrol.”*, tetap tampil dengan **satu centang** tanpa balasan. Catat pilihan hanya saat pemain mengirim pesan, satu kali per percobaan.
+- Pemain bisa membaca chat Ella, memilih **Kirim** atau **Jangan kirim**. Pilihan **Jangan kirim** menutup ponsel. Pemain bisa membukanya lagi selama masih di kos. Pesan baru, misalnya *“El, maaf. Aku masih pengen ngobrol.”*, tetap tampil dengan **satu centang** tanpa balasan. Catat pilihan hanya saat pemain mengirim pesan, satu kali per percobaan.
 - Pembacaan chat lama tetap bisa memberi `CLUE_03` jika pemain melihat bagian yang relevan. Status kirim adalah flag cerita tersendiri. Flag bertahan saat retry di TKP dan ketika bab berikutnya dimuat. Memulai ulang percobaan Chapter 2 dari kasur mengulang pilihan kirim untuk percobaan baru.
 - **Usulan aturan ending:** pertahankan `Approach` → **Good**. Untuk `Fight` atau `Hide`, **Hidden** membutuhkan semua empat clue yang sudah ditetapkan serta pesan Ella yang dikirim. Jika syarat itu belum lengkap, hasilnya **Bad**. Pembedaan ini membuat keputusan mengirim berpengaruh tanpa menampilkan syarat Hidden kepada pemain. Beat rebahan adalah akhir hari di Chapter 2, terpisah dari tiga ending global.
 
