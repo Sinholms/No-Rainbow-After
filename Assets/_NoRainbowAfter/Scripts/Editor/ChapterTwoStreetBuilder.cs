@@ -102,7 +102,12 @@ namespace NoRainbowAfter.Editor
                     Box(t,"Tiang PJU",x,2.7f,z,.15f,5.4f,.15f,ink);
                     Box(t,"Lengan PJU",x-Mathf.Sign(x)*.6f,5.32f,z,1.3f,.08f,.11f,ink,false);
                     Box(t,"Lentera",x-Mathf.Sign(x)*1.21f,5.26f,z,.47f,.12f,.73f,warm,false);
-                    LightAt(t,"Cahaya jalan",x-Mathf.Sign(x)*1.2f,4.99f,z,new Color(1f,.81f,.55f),7f,14);
+                    var lamp = LightAt(t, "Cahaya jalan", x-Mathf.Sign(x)*1.21f, 5.05f, z,
+                        i == 1 ? new Color(.69f,.83f,.81f) : new Color(1f,.78f,.51f), 17f, 15f);
+                    lamp.type = LightType.Spot;
+                    lamp.spotAngle = 110f;
+                    lamp.innerSpotAngle = 68f;
+                    lamp.transform.localRotation = Quaternion.LookRotation(new Vector3(-Mathf.Sign(x)*.38f,-1f,0f));
                 }
                 ChapterTwoStreetArt.Dress(street);
                 AddBus(street, t, ink, warm);
@@ -191,9 +196,17 @@ namespace NoRainbowAfter.Editor
             var door = ColliderAt(bus, "Pintu bus", new Vector3(1.21f, 1.20f, -1.64f), new Vector3(.12f, 2.40f, 1.13f));
             street.BusDoor = door.gameObject.AddComponent<ChapterTwoBusDoor>();
             street.BusSeat = Node(bus, "Lorong kabin bus", 0, .734f, .05f, 180f);
+            var queueLight = LightAt(root.Find("Halte"), "Lampu antre", -2.37f, 2.72f, -.98f,
+                new Color(.78f,.88f,.79f), 8.5f, 8f);
+            queueLight.type = LightType.Spot;
+            queueLight.spotAngle = 105f;
+            queueLight.transform.localRotation = Quaternion.LookRotation(new Vector3(-1f,-.54f,-.95f));
             LightAt(bus, "Lampu kabin", 0, 2.35f, 0, new Color(.91f, .94f, .85f), 2.3f, 4f);
             Box(bus, "Panel rute", 0, 2.37f, -2.98f, 1.44f, .20f, .022f, trim, false);
-            Sign(bus, "BUS TERAKHIR", 0, 2.37f, -3.00f, .118f, warm.color, 0f);
+            ChapterTwoStreetArt.Lettering(bus, "04   PASAR  -  TERMINAL", new Vector3(0, 2.37f, -3.004f),
+                Quaternion.identity, 1.41f, .19f, .105f, new Color(1f, .72f, .33f));
+            ChapterTwoStreetArt.Lettering(bus, "B  7104  SR", new Vector3(0, .594f, -3.082f),
+                Quaternion.identity, .48f, .13f, .069f, new Color(.07f, .065f, .05f));
             foreach (float row in new[] { -.80f, .15f, 1.10f, 2.02f })
             {
                 Box(bus, "Dudukan kursi", -.77f, .97f, row, .54f, .15f, .49f, trim, false);
@@ -246,10 +259,11 @@ namespace NoRainbowAfter.Editor
             if(!solid) Object.DestroyImmediate(go.GetComponent<BoxCollider>());
             return t;
         }
-        static void LightAt(Transform t,string name,float x,float y,float z,Color color,float intensity,float range)
+        static Light LightAt(Transform t,string name,float x,float y,float z,Color color,float intensity,float range)
         {
             var l=Node(t,name,x,y,z).gameObject.AddComponent<Light>();
             l.type=LightType.Point;l.color=color;l.intensity=intensity;l.range=range;
+            return l;
         }
         static void Sign(Transform t,string label,float x,float y,float z,float height,Color color,float yaw)
         {

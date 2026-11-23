@@ -49,6 +49,7 @@ for args in [
     ("SmokedGlass","364954",.93,.63), ("Seal","192024",.22), ("Paper","D0C4A3",.18),
     ("Rubber","292C30",.22), ("Red","C75040",.62,.10,.24), ("Beacon","527EA9",.68,.18,.34),
     ("Lamp","FFE6B7",.48,.08,1.65), ("Signal","DAEAD6",.49,.05,.85),
+    ("Cabai","A7472E",.32), ("Sisik","9AACA2",.56,.21),
     ("Canvas","3F5055",.15), ("Strap","283338",.20), ("Plaster","ADAA97",.25),
     ("Tile","AC6E53",.29), ("Charcoal","38434A",.49)
 ]:
@@ -375,6 +376,31 @@ def patrol_car():
             prism("Pita bemper",[(side*.878,.51,z),(side*.914,.71,z+.03),(side*.901,.72,z+.18),(side*.86,.52,z+.16)],
                   (side*.018,0,0),"Mustard",.006)
         rod("Lampu mundur",(side*.647,.77,-2.052),(side*.647,.77,-2.079),.095,"Red",16)
+    # Pressed steel arches join the sill to the nose and quarter panels over the tyres.
+    for side in (-1,1):
+        for axle in (-1.37,1.27):
+            for j in range(14):
+                a,b=math.pi*j/14,math.pi*(j+1)/14
+                arc=[(side*.948,.355+r*math.sin(t),axle+r*math.cos(t))
+                     for r,t in ((.364,a),(.364,b),(.435,b),(.435,a))]
+                prism("Folded wheel arch",arc,(-side*.067,0,0),"PatrolWhite",.008)
+        box("Painted rocker panel",(side*.903,.378,-.05),(.085,.135,1.89),"PatrolBlue",.023)
+        prism("Front valance return",[(side*.906,.39,1.67),(side*.902,.71,1.62),
+              (side*.831,.739,1.98),(side*.805,.392,1.98)],(-side*.09,0,0),"PatrolWhite",.018)
+        prism("Rear quarter return",[(side*.897,.395,-1.76),(side*.91,.74,-1.73),
+              (side*.843,.77,-1.97),(side*.795,.395,-1.99)],(-side*.10,0,0),"PatrolWhite",.018)
+        box("Bumper rub strip",(side*.60,.52,2.006),(.41,.082,.16),"Seal",.025)
+        for dx in (-.085,0,.085):
+            box("Headlight fluting",(side*.67+dx,.82,2.121),(.008,.111,.008),"Aluminium",.002)
+    box("Front bumper wrap",(0,.439,1.989),(1.64,.175,.246),"PatrolWhite",.065)
+    box("Lower air intake",(0,.424,2.116),(.95,.093,.023),"Seal",.015)
+    box("Rear bumper wrap",(0,.44,-1.966),(1.67,.176,.245),"PatrolWhite",.064)
+    for side in (-1,1):
+        box("Lamp gasket surround",(side*.66,.771,2.003),(.41,.236,.167),"PatrolWhite",.036)
+        for i in range(3):
+            x=side*(.40+.095*i)
+            prism("Hood service chevron",[(x,.956,1.39),(x+side*.055,.953,1.39),
+                  (x+side*.16,.893,1.85),(x+side*.10,.893,1.85)],(0,.004,0),"PatrolBlue",.001)
     prism("Kaca depan utama",[(-.736,1.06,.87),(.736,1.06,.87),(.61,1.503,.372),(-.61,1.503,.372)],(0,.011,.006),"SmokedGlass",.018)
     prism("Kaca bagasi",[(-.738,1.073,-1.34),(.738,1.073,-1.34),(.609,1.40,-.92),(-.609,1.40,-.92)],(0,.009,-.009),"SmokedGlass",.018)
     for x in (-.43,.24):
@@ -418,6 +444,168 @@ def shophouse():
     for y in (.82,2.22,4.76):
         box("Klem pipa",(-2.54,y,.132),(.115,.05,.115),"Oxide")
 
+def market_stall(fish):
+    import random
+    rng=random.Random(122 if fish else 514)
+    module("LapakIkan" if fish else "LapakBumbu")
+    for x in (-1.51,1.51):
+        for z in (-.54,.55):
+            h=2.36 if z>0 else 2.68
+            rod("Tiang bambu",(x,.01,z),(x+.028,h,z),.041,"TimberLight",12,.032)
+            for y in (.24,.77,1.28,1.78,2.23):
+                rod("Buku bambu",(x+.01,y,z),(x+.01,y+.027,z),.044,"Timber",12)
+            frame("Kaki meja",(x*.89,0,z*.8),(x*.87,.83,z*.83),.075,.074,"TimberDark")
+        frame("Palang meja",(x*.89,.34,-.47),(x*.89,.34,.47),.057,.06,"Timber")
+        frame("Penyiku lapak",(x,1.96,.55),(x*.70,2.36,.55),.038,.052,"TimberLight")
+    for z,h in ((-.54,2.67),(.55,2.37)):
+        rod("Palang atap",(-1.67,h,z),(1.67,h,z),.035,"TimberLight")
+    for z in (-.48,.48):
+        box("Rangka bangku",(0,.77,z),(2.96,.116,.08),"TimberDark")
+    for j in range(7):
+        box("Papan meja",(0,.851,-.46+j*.15),(3.07,.082,.144),"TimberLight" if j%3 else "Timber")
+    # An unrolled, rope-tensioned sheet dips between the four poles.
+    nx,nz=36,12
+    verts=[];faces=[]
+    for k in range(nz+1):
+        f=k/nz
+        for j in range(nx+1):
+            u=j/nx
+            y=2.69-.34*f-.17*math.sin(math.pi*u)**2-.068*math.sin(math.pi*f)
+            y+=.018*math.sin(9*math.pi*u+1.8*f)+.012*math.sin(14*math.pi*u-6*f)
+            verts.append(v((u-.5)*3.43,y,-.72+1.55*f))
+    for k in range(nz):
+        for j in range(nx):
+            a=k*(nx+1)+j
+            faces.append((a,a+1,a+nx+2,a+nx+1))
+    # Short hanging front skirt; silhouette is irregular along the wet edge.
+    for j in range(nx+1):
+        u=j/nx
+        q=verts[nz*(nx+1)+j]
+        verts.append(q+v(0,-.17-.041*math.sin(3*math.pi*u)-.039*math.sin(7*math.pi*u),.014))
+    for j in range(nx):
+        a=nz*(nx+1)+j
+        faces.append((a,a+1,a+nx+2,a+nx+1))
+    awning=mesh("Terpal mengendur",verts,faces,"Canvas" if fish else "Oxide")
+    awning.modifiers.new("Jahit balik","SOLIDIFY").thickness=.009
+    for x in (-1.18,-.19,.83):
+        w=.78 if x>-.5 else .59
+        box("Bak dagangan",(x,.921,-.035),(w,.049,.64),"Steel" if fish else "Timber")
+        for side in (-1,1):
+            box("Bibir baki",(x,.997,-.035+side*.31),(w,.15,.035),"Aluminium" if fish else "TimberLight")
+            box("Bibir samping",(x+side*w*.49,.997,-.035),(.033,.15,.61),"Aluminium" if fish else "Timber")
+        if fish:
+            for j in range(4):
+                cx=x+(j-1.5)*w*.21
+                # Flat fish with sharply forked tails on the enamel tray.
+                prism("Ikan di baki",[(cx,.976,.245),(cx-.054,.977,.13),(cx-.042,.979,-.04),
+                      (cx,.98,-.166),(cx+.044,.979,-.025),(cx+.052,.976,.14)],(0,.036,0),"Sisik",.009)
+                prism("Sirip ekor",[(cx,.977,-.113),(cx-.053,.978,-.239),
+                      (cx,.977,-.212),(cx+.04,.979,-.244)],(0,.008,0),"Charcoal",.002)
+        else:
+            for j in range(36):
+                cx=x+rng.uniform(-w*.40,w*.40); cz=rng.uniform(-.25,.20)
+                mat="Cabai" if x<0 else "Ochre"
+                h=1.004+.040*(1-min(1,abs(cx-x)/(w*.5)))
+                rod("Cabai kering",(cx,h,cz),(cx+rng.uniform(-.033,.033),h+.018,cz+.098),
+                    .021,mat,8,.006)
+    # Mechanical counter scale, its enamel dial facing the street.
+    sx=1.25
+    box("Alas timbangan",(sx,.952,.055),(.33,.095,.36),"Enamel",.027)
+    box("Menara timbangan",(sx,1.057,.038),(.206,.19,.18),"Petrol",.034)
+    rod("Bingkai dial",(sx,1.132,.095),(sx,1.132,.193),.139,"Petrol",32)
+    rod("Dial gading",(sx,1.132,.193),(sx,1.132,.20),.12,"Paper",32)
+    for j in range(15):
+        a=math.tau*(j-7)/19
+        frame("Strip skala",(sx+.090*math.sin(a),1.132+.090*math.cos(a),.203),
+              (sx+.105*math.sin(a),1.132+.105*math.cos(a),.203),.004,.004,"Ink")
+    frame("Jarum timbang",(sx,1.132,.207),(sx-.067,1.193,.207),.006,.006,"Oxide")
+    rod("Tangkai wadah",(sx,1.203,.018),(sx,1.31,.018),.028,"Steel",12)
+    rod("Mangkuk timbangan",(sx,1.292,.018),(sx,1.347,.018),.072,"Aluminium",32,.191)
+    box("Papan lapak",(0,.67,.529),(1.74,.27,.037),"Petrol" if fish else "Charcoal",.017)
+    label("Nama los","LOS IKAN   /   07" if fish else "BUMBU  DAPUR",(0,.67,.554),.151,"Ivory")
+    # Suspended practical and a loop of insulated wire under the sheet.
+    x=-.58 if fish else .49
+    rod("Kabel bohlam",(x,2.49,0),(x,2.16,0),.008,"Ink",8)
+    rod("Kap seng",(x,2.185,0),(x,2.08,0),.061,"Petrol",24,.15)
+    rod("Diffuser",(x,2.085,0),(x,2.06,0),.136,"Signal" if fish else "Lamp",24)
+
+def covered_pallet():
+    module("MuatanPasar")
+    for x in (-.39,0,.39):
+        box("Balok palet",(x,.041,0),(.107,.082,.95),"TimberDark")
+    for z in (-.39,-.195,0,.195,.39):
+        box("Bilah palet",(0,.108,z),(.985,.052,.17),"Timber",.003)
+    for row in range(2):
+        y=.139+row*.411
+        for s in (-1,1):
+            x=s*.245
+            base="Petrol" if (s>0) == (row>0) else "Charcoal"
+            box("Lantai keranjang",(x,y+.026,0),(.474,.051,.94),base,.007)
+            for side in (-1,1):
+                for h in (.085,.173,.264,.359):
+                    box("Bilah krat",(x,y+h,side*.46),(.473,.049,.037),base,.004)
+                    box("Bilah samping",(x+side*.22,y+h,0),(.032,.049,.934),base,.004)
+                for offset in (-.39,-.19,0,.19,.39):
+                    box("Rusuk krat",(x+side*.226,y+.21,offset),(.034,.393,.027),base,.004)
+                for offset in (-.211,-.057,.103,.211):
+                    box("Rusuk muka",(x+offset,y+.21,side*.465),(.025,.392,.031),base,.004)
+                box("Bibir keranjang",(x,y+.389,side*.462),(.475,.043,.04),"Enamel",.006)
+    # A tied flysheet breaks the rectilinear silhouette while leaving the crates exposed.
+    nx,nz=24,18
+    coords=[]
+    for j in range(nz+1):
+        vj=j/nz
+        for i in range(nx+1):
+            u=i/nx
+            x=(u-.5)*.99
+            z=-.48+.82*vj+.038*math.sin(6*u)
+            edge=max(0,1-abs(x)/.49)
+            h=.963+.025*math.sin(u*17+vj*3)*math.sin(math.pi*vj)+.022*edge
+            coords.append(v(x,h,z))
+    for i in range(nx+1):
+        u=i/nx
+        coords.append(v((u-.5)*.97,.65+.14*math.sin(math.pi*u)+.045*math.sin(13*u),
+                        -.482-.014*math.cos(16*u)))
+    faces=[]
+    for j in range(nz):
+        for i in range(nx):
+            a=j*(nx+1)+i
+            faces.append((a,a+1,a+nx+2,a+nx+1))
+    for i in range(nx):
+        a=(nz+1)*(nx+1)+i
+        faces.append((i,i+1,a+1,a))
+    mesh("Terpal muatan",coords,faces,"Canvas").modifiers.new("Keliman","SOLIDIFY").thickness=.005
+    for x in (-.265,.281):
+        for a,b in [((x,.127,-.485),(x,.968,-.489)),((x,.968,-.489),(x,.975,.451)),
+                    ((x,.975,.451),(x,.127,.471))]:
+            frame("Tali pengikat",a,b,.015,.009,"Ochre")
+def market_gate():
+    module("GapuraPasar")
+    for side in (-1,1):
+        x=side*6.54
+        box("Umpak",(x,.52,0),(.49,1.04,.55),"Concrete",.04)
+        for z in (-.17,.17):
+            rod("Tiang gapura",(x,.95,z),(x,4.85,z),.075,"Petrol",12)
+            rod("Cincin kaki",(x,.95,z),(x,1.22,z),.093,"Steel",12)
+        for j in range(6):
+            h=1.29+j*.55
+            frame("Ikatan besi",(x,h,-.17),(x,h+.49,.17),.033,.033,"Steel")
+    def rise(x):
+        return 4.16+1.05*(1-(x/6.54)**2)
+    for j in range(24):
+        x=-6.54+j*13.08/24
+        end=x+13.08/24
+        for dy in (0,.43):
+            frame("Busur besi",(x,rise(x)+dy,0),(end,rise(end)+dy,0),.065,.087,"Petrol")
+        frame("Kisi diagonal",(x,rise(x)+.43*(j%2),0),(end,rise(end)+.43*((j+1)%2),0),.034,.038,"Steel")
+    box("Bingkai papan",(0,5.24,.053),(4.65,.83,.12),"TimberDark",.058)
+    box("Enamel dua muka",(0,5.24,.053),(4.54,.73,.16),"Petrol",.042)
+    for side in (-1,1):
+        z=.053+.085*side
+        for y in (4.95,5.54):
+            box("Garis cat tangan",(0,y,z),(4.29,.019,.009),"Ochre")
+        label("Huruf pasar","P A S A R    S R I",(0,5.27,z+.015*side),.43,"Ivory",side)
+        label("Huruf kecil","P I N T U   T I M U R",(0,5.016,z+.015*side),.098,"Mustard",side)
 def asphalt_textures():
     import numpy as np
     rng = np.random.default_rng(1704)
@@ -471,7 +659,7 @@ def asphalt_textures():
     for ch in range(3): rgba[:,:,ch]=stone
     write("MineralSurface",rgba)
 
-def export():
+def export(selected=None):
     # Collapse evaluated geometry for the game. In the .blend every plank, letter and fitting remains editable.
     for index,col in enumerate(modules):
         bpy.context.view_layer.update()
@@ -507,7 +695,8 @@ def export():
         bpy.ops.object.select_all(action="DESELECT")
         ob.select_set(True)
         bpy.context.view_layer.objects.active=ob
-        bpy.ops.export_scene.fbx(filepath=str(OUT/(col.name+".fbx")),use_selection=True,axis_forward='-Z',axis_up='Y',
+        if selected is None or col.name in selected:
+            bpy.ops.export_scene.fbx(filepath=str(OUT/(col.name+".fbx")),use_selection=True,axis_forward='-Z',axis_up='Y',
                                  bake_space_transform=True,add_leaf_bones=False,bake_anim=False,object_types={'MESH'})
         bpy.data.objects.remove(ob,do_unlink=True)
         bpy.data.meshes.remove(me)
@@ -521,7 +710,9 @@ def export():
             area.spaces.active.shading.color_type='MATERIAL'
             area.spaces.active.overlay.show_overlays=False
     bpy.data.libraries.write(str(SOURCE/"ChapterTwoStreet.blend"), {scene}, fake_user=True, compress=True)
-    (SOURCE/"ChapterTwoPalette.json").write_text(json.dumps({"materials":palette},indent=2)+"\n",encoding="utf-8")
+    extra=[swatch for swatch in json.loads((SOURCE/"ChapterTwoPalette.json").read_text())["materials"]
+           if swatch["name"] not in {m["name"] for m in palette}]
+    (SOURCE/"ChapterTwoPalette.json").write_text(json.dumps({"materials":extra+palette},indent=2)+"\n",encoding="utf-8")
     print("Exported",len(modules),"street modules and",sum(len(c.objects) for c in modules),"editable pieces.")
 
 warung()
@@ -532,5 +723,13 @@ barrier()
 sidewalk()
 satchel()
 shophouse()
-asphalt_textures()
-export()
+market_stall(False)
+market_stall(True)
+market_gate()
+covered_pallet()
+import sys
+if "--market-update" in sys.argv:
+    export({"LapakIkan","LapakBumbu","SedanPatroli","GapuraPasar","MuatanPasar"})
+else:
+    asphalt_textures()
+    export()

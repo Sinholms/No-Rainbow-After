@@ -36,9 +36,10 @@ Shader "NoRainbowAfter/OvercastStreet"
                 float3 dir=normalize(input.positionWS-GetCameraPositionWS());
                 float height=max(.035,dir.y);
                 float2 p=dir.xz / (height+.26) * float2(1.6,3.4);
-                float cover=.55*cloud(p)+.31*cloud(p*2.2)+.14*cloud(p*4.3);
+                p += _Time.y * float2(.004, -.001);
+                float cover=.52*cloud(p)+.29*cloud(p*2.2)+.14*cloud(p*4.3)+.05*cloud(p*9.1);
                 float haze=exp2(-4.2*height);
-                half3 sky=lerp(half3(.017,.029,.044),half3(.096,.117,.137),haze);
+                half3 sky=lerp(half3(.006,.012,.020),half3(.031,.045,.053),haze);
                 return half4(sky*lerp(.58,1.19,cover),1);
             }
             ENDHLSL

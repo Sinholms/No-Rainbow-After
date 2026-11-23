@@ -68,7 +68,7 @@
       "hex": "E19860",
       "smooth": 0.73,
       "metal": 0,
-      "glow": 0
+      "glow": 0.64
     },
     {
       "name": "C2 Lamp Red",
@@ -265,6 +265,20 @@
       "smooth": 0.49,
       "metal": 0.05,
       "glow": 0.85
+    },
+    {
+      "name": "C2_Cabai",
+      "hex": "A7472E",
+      "smooth": 0.32,
+      "metal": 0,
+      "glow": 0
+    },
+    {
+      "name": "C2_Sisik",
+      "hex": "9AACA2",
+      "smooth": 0.56,
+      "metal": 0.21,
+      "glow": 0
     },
     {
       "name": "C2_Canvas",

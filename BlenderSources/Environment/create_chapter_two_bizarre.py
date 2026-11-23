@@ -88,7 +88,8 @@ module_path.insert(0, str(source))
 from chapter_two_uniform import build_sentry
 build_sentry(root, coat, vest, rubber, skin, gold, trim, paint("C2_SmokedGlass", (.032,.046,.057), .19, .43), box, limb, ellipsoid)
 sentry = list(bpy.context.scene.objects)
-export("ACT_TKPSentry", sentry)
+if "--bus-update" not in sys.argv:
+    export("ACT_TKPSentry", sentry)
 
 box("Shuttle chassis", (0, 0, .53), (2.33, 5.9, .37), bus_paint, .135)
 box("Rear lower panel", (0, -2.841, 1.02), (2.29, .15, .72), bus_paint, .07)
@@ -122,8 +123,92 @@ for side in (-1, 1):
     box("Marker", (side*.961, 2.945, .73), (.16, .083, .109), amber, .026)
     box("Tail lamp", (side*.909, -2.933, .926), (.20, .08, .32), red, .033)
     box("Mirror", (side*1.23, 2.51, 1.97), (.17, .095, .25), rubber, .045)
+# Rounded corner posts and rubber seals enclose the glass at the ends of the coach.
+for end in (-1,1):
+    for side in (-1,1):
+        box("Coach corner pillar",(side*1.035,end*2.83,1.94),(.207,.185,.84),ivory,.075)
+    box("Glass lower seal",(0,end*2.912,1.555),(2.12,.047,.057),rubber,.017)
+    box("Roof drip rail",(0,end*2.855,2.514),(2.20,.12,.059),bus_paint,.027)
+box("Front grille recess",(0,2.934,1.055),(1.10,.085,.354),rubber,.046)
+for j in range(6):
+    box("Vent louvre",(0,2.989,.916+j*.052),(1.018,.025,.014),trim,.006)
+box("Pressed front belt",(0,2.929,1.426),(2.16,.057,.091),bus_paint,.035)
+box("Coach badge surround",(0,2.965,1.395),(.292,.032,.098),gold,.033)
+box("Coach badge enamel",(0,2.986,1.395),(.245,.018,.069),bus_paint,.021)
+box("Route registration",(0,3.058,.594),(.50,.032,.132),gold,.012)
+for side in (-1,1):
+    x=side*.79
+    box("Recessed headlight bezel",(x,2.94,.862),(.49,.144,.264),rubber,.057)
+    box("Headlight reflector",(x,3.015,.881),(.421,.022,.157),ivory,.037)
+    for dx in (-.122,-.061,0,.061,.122):
+        box("Headlight lens rib",(x+dx,3.032,.881),(.009,.009,.122),trim,.003)
+    box("Amber direction lens",(x,3.016,.781),(.315,.027,.040),amber,.014)
+    # Parked wipers lie on the glass, with both arms anchored below the seal.
+    limb("Wiper arm",(side*.70,2.971,1.573),(side*.41,2.967,1.783),.013,.009,rubber,10)
+    limb("Wiper blade",(side*.71,2.974,1.713),(side*.17,2.974,1.842),.012,.012,rubber,10)
+    for y in (-1.8,1.82):
+        limb("Steel wheel recess",(side*1.225,y,.43),(side*1.237,y,.43),.176,.176,rubber,24)
+        limb("Hub cover",(side*1.237,y,.43),(side*1.251,y,.43),.098,.083,trim,20)
+        for j in range(6):
+            a=j*math.tau/6
+            yy=y+.128*math.sin(a); zz=.43+.128*math.cos(a)
+            limb("Wheel lug",(side*1.236,yy,zz),(side*1.248,yy,zz),.018,.016,gold,6)
+    for z in (.707,.782,.856):
+        box("Engine side vent",(side*1.206,-2.36,z),(.021,.75,.031),rubber,.009)
+    for y in (-.7,.34):
+        box("Service panel",(side*1.202,y,.866),(.028,.92,.426),rubber,.018)
+        box("Service hatch",(side*1.217,y,.866),(.025,.898,.407),bus_paint,.018)
+        box("Hatch latch",(side*1.231,y,.988),(.019,.134,.024),trim,.007)
+    for z in (1.365,2.272):
+        box("Window rubber seal",(side*1.204,-.037,z),(.029,5.49,.029),rubber,.008)
+box("Driver instrument binnacle",(-.43,2.48,1.53),(1.13,.48,.218),rubber,.078)
+limb("Steering column",(-.43,2.41,1.43),(-.43,2.17,1.59),.032,.042,rubber)
+bpy.ops.mesh.primitive_torus_add(major_radius=.166,minor_radius=.016,location=(-.43,2.152,1.606),
+                                rotation=(math.radians(53),0,0),major_segments=36,minor_segments=8)
+finish(bpy.context.object,"Steering wheel",rubber)
+for side in (-1,1):
+    limb("Boarding handrail",(side*.98,.99,.78),(side*.98,.99,2.29),.025,.025,gold)
+    box("Ceiling light",(side*.53,-.27,2.445),(.083,2.7,.036),ivory,.014)
 bus = [obj for obj in bpy.context.scene.objects if obj not in sentry]
-export("PROP_TKPShuttle", bus)
+# World-metre UVs keep rain trails the same size across stamped panels and glass.
+bpy.context.view_layer.update()
+for obj in bus:
+    mesh = obj.data
+    uv = mesh.uv_layers.active or mesh.uv_layers.new(name="Coachwork")
+    normal_matrix = obj.matrix_world.to_3x3().inverted_safe().transposed()
+    for polygon in mesh.polygons:
+        normal = (normal_matrix @ polygon.normal).normalized()
+        axes = (0,1) if abs(normal.z)>.7 else (1,2) if abs(normal.x)>abs(normal.y) else (0,2)
+        for loop in polygon.loop_indices:
+            p = obj.matrix_world @ mesh.vertices[mesh.loops[loop].vertex_index].co
+            uv.data[loop].uv = (p[axes[0]],p[axes[1]])
+# Keep the coach editable in the source; combine fixed opaque fittings per material in the FBX.
+# Glass panes stay separate for sorting and the windshield is the import orientation marker.
+graph = bpy.context.evaluated_depsgraph_get()
+groups = {}
+window_panes = []
+for part in bus:
+    material = part.data.materials[0]
+    if material == glass:
+        window_panes.append(part)
+        continue
+    baked = bpy.data.meshes.new_from_object(part.evaluated_get(graph), depsgraph=graph)
+    copy = bpy.data.objects.new("Coachwork " + material.name, baked)
+    bpy.context.collection.objects.link(copy)
+    copy.matrix_world = part.matrix_world
+    groups.setdefault(material, []).append(copy)
+shells = []
+for parts in groups.values():
+    bpy.ops.object.select_all(action="DESELECT")
+    for part in parts:
+        part.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    if len(parts) > 1:
+        bpy.ops.object.join()
+    shells.append(parts[0])
+export("PROP_TKPShuttle", window_panes + shells)
+for shell in shells:
+    bpy.data.objects.remove(shell, do_unlink=True)
 
 # The source retains both original assets on separate collections.
 for name, objects in (("Police Sentry", sentry), ("Market Shuttle", bus)):

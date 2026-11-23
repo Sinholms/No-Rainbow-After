@@ -76,7 +76,10 @@ namespace NoRainbowAfter.AI
             {
                 float phase = Mathf.Sin(Time.time * 3.1f);
                 for (int i = 0; i < beacons.Length; i++)
-                    beacons[i].intensity = 2.2f + phase * (i == 0 ? 1.05f : -1.05f);
+                {
+                    float pulse = Mathf.Max(0f, i == 0 ? phase : -phase);
+                    beacons[i].intensity = .23f + 4.5f * pulse * pulse;
+                }
             }
             if (player == null || !player.IsTransitionLocked) CheckProgress();
         }
