@@ -29,8 +29,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_NoRainbowAfter/Scenes/Chapter2.unity
     guid: e3ecfe8995094ced87a43c5207ac55db
-  - enabled: 1
-    path: Assets/_NoRainbowAfter/Scenes/Chapter3.unity
-    guid: cb2eef89749b4492ae0a9d67f1487d79
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

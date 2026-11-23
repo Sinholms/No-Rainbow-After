@@ -18,9 +18,9 @@ Untuk tes per bab, buka satu scene dari folder `Assets/_NoRainbowAfter/Scenes` d
 | `MasterGameplay` | Alur cerita lengkap yang tersedia. Lewat **Mulai Baru** dari menu, Raka mulai dengan kilasan prolog. |
 | `Chapter1` | Raka di kos pada awal bab pertama. |
 | `Chapter2` | Raka bangun di kos dengan esai dan HP Ella siap dimainkan. |
-| `Chapter3` | Raka di kabin bus, titik masuk Chapter 3 yang tersedia saat ini. |
+| `Chapter3` | Scene kosong untuk pekerjaan Chapter 3 nanti. |
 
-Ketiga scene tes memuat aset yang sama dari `MasterGameplay`. Clue yang dikumpulkan saat tes berlaku sampai sesi Play berakhir.
+Scene tes `Chapter1` dan `Chapter2` memuat aset yang sama dari `MasterGameplay`. Clue yang dikumpulkan saat tes berlaku sampai sesi Play berakhir.
 
 ## Membuka proyek setelah clone
 

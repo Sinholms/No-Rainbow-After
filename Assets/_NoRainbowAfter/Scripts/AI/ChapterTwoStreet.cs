@@ -48,7 +48,11 @@ namespace NoRainbowAfter.AI
         public bool Enter(FirstPersonMotor target)
         {
             if (motor != null) return true;
-            if (!PlacePlayer(target, Checkpoints[0])) return false;
+            Stage();
+            if (!target.TryRestorePose(Checkpoints[0].position, Checkpoints[0].rotation)) return false;
+
+            motor = target;
+            player = target.GetComponent<FirstPersonPlayer>();
             Segment = 0;
             AtShelter = Boarded = false;
             Bag.SetAvailable(false);
@@ -59,23 +63,6 @@ namespace NoRainbowAfter.AI
             Encounter.ConfigureBeam(1, 42f, 14f);
             Encounter.ConfigureSweep(0, 27f, 7.6f);
             Encounter.ConfigureSweep(1, 25f, 8.6f, 1.3f);
-            return true;
-        }
-
-        internal bool EnterAtBus(FirstPersonMotor target)
-        {
-            if (!PlacePlayer(target, BusSeat)) return false;
-            AtShelter = Boarded = true;
-            Bag.SetAvailable(false);
-            return true;
-        }
-
-        private bool PlacePlayer(FirstPersonMotor target, Transform spawn)
-        {
-            Stage();
-            if (!target.TryRestorePose(spawn.position, spawn.rotation)) return false;
-            motor = target;
-            player = target.GetComponent<FirstPersonPlayer>();
             return true;
         }
 

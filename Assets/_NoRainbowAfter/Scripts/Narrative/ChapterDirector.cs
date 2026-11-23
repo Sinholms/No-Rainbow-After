@@ -66,7 +66,7 @@ namespace NoRainbowAfter.Narrative
         public void ConfigureChapterPreview(int chapter)
         {
             if (State != null) throw new InvalidOperationException("State already initialized");
-            if (chapter < 1 || chapter > 3) throw new ArgumentOutOfRangeException(nameof(chapter));
+            if (chapter < 1 || chapter > 2) throw new ArgumentOutOfRangeException(nameof(chapter));
             PreviewChapter = chapter;
         }
 
@@ -90,8 +90,7 @@ namespace NoRainbowAfter.Narrative
             }
 
             ChapterOneFinished = true;
-            State.ActiveChapter = PreviewChapter == 3 ? "Chapter3" : "Chapter2";
-            if (PreviewChapter == 3) State.Chapter2Beat = ChapterTwoBeat.BoardedBus;
+            State.ActiveChapter = "Chapter2";
         }
         private void OnDisable() { Unbind(); generation++; SetEncounter(null); }
         private void Bind()

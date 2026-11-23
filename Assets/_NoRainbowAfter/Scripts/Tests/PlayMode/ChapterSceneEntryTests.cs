@@ -3,7 +3,6 @@ using System.Collections;
 using System.IO;
 using NoRainbowAfter.AI;
 using NoRainbowAfter.Interaction;
-using NoRainbowAfter.Level;
 using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
 using NUnit.Framework;
@@ -72,20 +71,6 @@ namespace NoRainbowAfter.Tests
             laptop.CloseLaptop();
         }
 
-        [UnityTest]
-        public IEnumerator ChapterThreePreviewStartsAtTheBusCheckpoint()
-        {
-            yield return OpenPreview(3, ChapterTwoBeat.BoardedBus);
-            var street = Object.FindAnyObjectByType<ChapterTwoStreet>();
-            var motor = player.GetComponent<FirstPersonMotor>();
-            Assert.That(street.Boarded, Is.True);
-            Assert.That(street.Encounter, Is.Null);
-            Assert.That(Vector3.Distance(motor.transform.position, street.BusSeat.position), Is.LessThan(.1f));
-            Assert.That(motor.TryRestorePose(street.BusSeat.position + Vector3.forward * .45f, street.BusSeat.rotation), Is.True);
-            Assert.That(player.GetComponent<DormCheckpoint>().TryRestore(), Is.True);
-            Assert.That(Vector3.Distance(motor.transform.position, street.BusSeat.position), Is.LessThan(.1f));
-        }
-
         private IEnumerator OpenPreview(int chapter, ChapterTwoBeat expectedBeat)
         {
             string path = Scenes + $"Chapter{chapter}.unity";
@@ -95,10 +80,8 @@ namespace NoRainbowAfter.Tests
             {
                 director = Object.FindAnyObjectByType<ChapterDirector>();
                 player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-                var street = chapter == 3 ? Object.FindAnyObjectByType<ChapterTwoStreet>() : null;
                 if (director?.State != null && director.PreviewChapter == chapter && player != null &&
-                    !player.IsTransitionLocked && director.State.Chapter2Beat == expectedBeat &&
-                    (chapter != 3 || (street != null && street.Boarded)))
+                    !player.IsTransitionLocked && director.State.Chapter2Beat == expectedBeat)
                     break;
 
                 yield return null;

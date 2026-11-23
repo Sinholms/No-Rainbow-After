@@ -107,30 +107,24 @@ namespace NoRainbowAfter.AI
             });
         }
 
-        public IEnumerator StartChapterPreview()
+        public IEnumerator StartChapterTwoPreview()
         {
             if (director.PreviewChapter == 2) yield return WakeInDorm(null);
-            else if (director.PreviewChapter == 3) yield return StartInBus();
-        }
-
-        private bool FindDorm()
-        {
-            var laptopObject = GameObject.Find("PROP_RakaLaptop");
-            laptop = laptopObject != null ? laptopObject.GetComponent<LaptopTypingMinigame>() : null;
-            if (laptop == null || laptop.transform.parent == null)
-            {
-                Debug.LogError("[NRA] Chapter gameplay needs the dorm laptop.", this);
-                return false;
-            }
-
-            dorm = laptop.transform.parent.gameObject;
-            roomPostProcessing = GameObject.Find("Room Post Processing");
-            return true;
         }
 
         private IEnumerator WakeInDorm(Action leaveChapterOne)
         {
-            if (transitioning || Beat != ChapterTwoBeat.None || !FindDorm()) yield break;
+            if (transitioning || Beat != ChapterTwoBeat.None) yield break;
+            var laptopObject = GameObject.Find("PROP_RakaLaptop");
+            laptop = laptopObject != null ? laptopObject.GetComponent<LaptopTypingMinigame>() : null;
+            if (laptop == null || laptop.transform.parent == null)
+            {
+                Debug.LogError("[NRA] Chapter 2 needs the dorm laptop.", this);
+                yield break;
+            }
+
+            dorm = laptop.transform.parent.gameObject;
+            roomPostProcessing = GameObject.Find("Room Post Processing");
             SetTransition(true);
             yield return Fade(0f, 1f, .35f);
             if (!RestoreDorm())
@@ -158,28 +152,6 @@ namespace NoRainbowAfter.AI
             stepClip = Resources.Load<AudioClip>("ChapterTwoAudio/HeavyStep");
             Physics.SyncTransforms();
             yield return GetOutOfBed();
-        }
-
-        private IEnumerator StartInBus()
-        {
-            if (transitioning || street != null || !FindDorm()) yield break;
-            SetTransition(true);
-            yield return Fade(1f, 1f, .1f);
-            street = CreateStreet();
-            if (street != null && street.EnterAtBus(motor))
-            {
-                HideDorm();
-                checkpoint?.SetChapterRestore(RestoreCheckpoint);
-            }
-            else
-            {
-                if (street != null) Destroy(street.gameObject);
-                street = null;
-                Debug.LogError("[NRA] The Chapter 3 entry could not place the player inside the bus.", this);
-            }
-
-            yield return Fade(1f, 0f, .65f);
-            SetTransition(false);
         }
 
         private IEnumerator GetOutOfBed()
@@ -329,18 +301,13 @@ namespace NoRainbowAfter.AI
                 yield break;
             }
 
-            HideDorm();
-            director.AdvanceChapterTwo(ChapterTwoBeat.StreetEntered);
-            yield return Fade(1f, 0f, .65f);
-            SetTransition(false);
-        }
-
-        private void HideDorm()
-        {
             dorm.SetActive(false);
             if (roomPostProcessing != null) roomPostProcessing.SetActive(false);
             if (stress != null) stress.enabled = false;
             if (breathing != null) breathing.enabled = false;
+            director.AdvanceChapterTwo(ChapterTwoBeat.StreetEntered);
+            yield return Fade(1f, 0f, .65f);
+            SetTransition(false);
         }
 
         private void OnBoardRequested()

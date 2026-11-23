@@ -9,7 +9,7 @@ namespace NoRainbowAfter.Core
     // A chapter entry loads the same authored gameplay as the normal run.
     public sealed class ChapterSceneEntry : MonoBehaviour
     {
-        [SerializeField, Range(1, 3)] private int chapter = 1;
+        [SerializeField, Range(1, 2)] private int chapter = 1;
 
         private static string GameplayPath => SceneFlow.PathFor(GameScene.MasterGameplay);
         private ChapterDirector director;
@@ -46,7 +46,7 @@ namespace NoRainbowAfter.Core
                 Debug.LogError("[NRA] The loaded gameplay has no chapter flow.", this);
                 yield break;
             }
-            yield return flow.StartChapterPreview();
+            yield return flow.StartChapterTwoPreview();
         }
 
         private void PrepareGameplay(Scene scene, LoadSceneMode mode)
