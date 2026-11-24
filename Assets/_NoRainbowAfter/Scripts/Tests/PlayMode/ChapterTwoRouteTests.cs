@@ -71,8 +71,11 @@ namespace NoRainbowAfter.Tests
             Assert.That(encounter.Exposure, Is.EqualTo(exposureBeforePause));
             player.SetPaused(false);
             encounter.AutoTick = false;
+            float stressBeforeCatch = player.GetComponent<StressBarometer>().CurrentStress;
             for (int i = 0; i < 100 && encounter.CatchCount == 0; i++) encounter.ManualTick(.033f);
             Assert.That(encounter.CatchCount, Is.EqualTo(1));
+            Assert.That(player.GetComponent<StressBarometer>().CurrentStress,
+                Is.EqualTo(stressBeforeCatch + ChapterTwoStreet.StressPerCapture).Within(.01f));
             Assert.That(Vector3.Distance(motor.transform.position, street.Checkpoints[0].position), Is.LessThan(.05f));
 
             Vector2[] waypoints =

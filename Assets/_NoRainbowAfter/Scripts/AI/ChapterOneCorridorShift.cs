@@ -18,8 +18,7 @@ namespace NoRainbowAfter.AI
         public NavMeshData Navigation;
         public Vector3 Entry, MonsterSpawn;
         public bool Expanded { get; private set; }
-        public bool RequiresBreathRecovery { get; private set; }
-        public bool CanBegin => OwnsPlayer && !shifting && !RequiresBreathRecovery && motor.transform.position.x >= 79.8f && motor.transform.position.z < 2f && motor.transform.position.z > -4f;
+        public bool CanBegin => OwnsPlayer && !shifting && motor.transform.position.x >= 79.8f && motor.transform.position.z < 2f && motor.transform.position.z > -4f;
         public bool OwnsPlayer => Expanded && motor != null && motor.transform.position.x > 45f;
         private ChapterDirector director;
         private FirstPersonPlayer player;
@@ -39,6 +38,7 @@ namespace NoRainbowAfter.AI
         {
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
             stressBarometer=GetComponent<StressBarometer>();
+            if (GetComponent<ChapterStressRestart>() == null) gameObject.AddComponent<ChapterStressRestart>();
             objectives=GetComponent<ObjectiveTracker>();
             chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
@@ -70,7 +70,6 @@ namespace NoRainbowAfter.AI
             if(objectives != null && director != null && !director.ChapterOneFinished)
             {
                 if(!OwnsPlayer) objectives.SetChapterGuidance(null,null);
-                else if(RequiresBreathRecovery) objectives.SetChapterGuidance("Atur napas terlebih dahulu","Stres memuncak 100%! Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan.");
                 else if(director.BeatIndex>=6) objectives.SetChapterGuidance("Cari pintu keluar",player.IsHiding ? "Bayangan itu telah pergi. Tekan E untuk keluar dari lemari." : "Temukan pintu keluar di ujung lorong.");
                 else if(player.IsHiding) objectives.SetChapterGuidance("Tetap bersembunyi","Tekan [TAB] untuk atur napas. Tunggu langkah menjauh lalu tekan E untuk keluar.");
                 else if(director.BeatIndex>=4) objectives.SetChapterGuidance("Lolos dari bayangan","Cari lemari (E) untuk bersembunyi & atur napas [TAB], atau klik kiri saat bayangan dekat untuk melawan.");
@@ -99,16 +98,6 @@ namespace NoRainbowAfter.AI
             if (!OwnsPlayer || shifting || player.IsPaused || player.IsTransitionLocked) return;
             if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
 
-            if (RequiresBreathRecovery)
-            {
-                if (stressBarometer == null || stressBarometer.CurrentStress < StressBarometer.HighStressWarningThreshold)
-                {
-                    RequiresBreathRecovery = false;
-                    player.SetBreathRecoveryRequired(false);
-                }
-                return;
-            }
-
             // Inside hiding wardrobe or while actively breathing, stress stops escalating so player can calm down cleanly.
             if (player.IsHiding || player.IsBreathing) return;
 
@@ -120,22 +109,6 @@ namespace NoRainbowAfter.AI
             }
         }
 
-        public bool TryRespawnAtCorridorStart()
-        {
-            if (!Expanded || motor == null) return false;
-            HidingWardrobe.Occupied?.Release();
-            bool restored = motor.TryRestorePose(Entry, Quaternion.Euler(0f, 180f, 0f));
-            if (restored)
-            {
-                lastSafePosition = Entry;
-                corridorStressTimer = 0f;
-                if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
-                stressBarometer?.SetStress(StressBarometer.MaxStress);
-                RequiresBreathRecovery = true;
-                player?.SetBreathRecoveryRequired(true);
-            }
-            return restored;
-        }
         private IEnumerator Shift()
         {
             shifting=true;
@@ -196,7 +169,6 @@ namespace NoRainbowAfter.AI
         private void LeaveCorridor()
         {
             HidingWardrobe.Occupied?.Release();
-            RequiresBreathRecovery = false;
             player.SetBreathRecoveryRequired(false);
             corridorStressTimer = 0f;
             if (Corridor != null) Corridor.SetActive(false);

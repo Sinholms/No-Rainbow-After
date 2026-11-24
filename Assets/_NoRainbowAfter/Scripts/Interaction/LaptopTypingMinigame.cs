@@ -261,7 +261,7 @@ namespace NoRainbowAfter.Interaction
 
             if (!isCorrect)
             {
-                if (!IsEssay) stressBarometer?.AddStress(TypoStressPenalty);
+                stressBarometer?.AddStress(TypoStressPenalty);
                 if (feedbackLabel != null)
                     feedbackLabel.text = IsEssay ? "<color=#FF5555>Periksa huruf yang merah.</color>"
                         : "<color=#FF5555>Salah ketik! Stres meningkat (+2%).</color>";
@@ -280,9 +280,12 @@ namespace NoRainbowAfter.Interaction
             SubmittedAttempts++;
 
             bool exactMatch = string.Equals(CurrentInput, TargetSentence, StringComparison.OrdinalIgnoreCase);
+            bool passed = exactMatch && (!IsEssay || !fromTimeout);
+            float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
+            if (!passed) stressBarometer?.AddStress(penalty);
             if (IsEssay)
             {
-                SubmitEssaySection(!fromTimeout && exactMatch, fromTimeout);
+                SubmitEssaySection(passed, fromTimeout);
                 return;
             }
 
@@ -303,8 +306,6 @@ namespace NoRainbowAfter.Interaction
             }
             else
             {
-                float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
-                stressBarometer?.AddStress(penalty);
                 if (feedbackLabel != null)
                 {
                     feedbackLabel.text = fromTimeout

@@ -65,7 +65,7 @@ public class InteractionSceneTests
         Assert.That(stress, Is.Not.Null, "StressBarometer must exist on Player_Raka_FPP.");
         Assert.That(Object.FindObjectsByType<StressBarometer>(FindObjectsInactive.Include).Length, Is.EqualTo(1), "Must have only one StressBarometer instance.");
         Assert.That(stress.OverlayCanvas, Is.Not.Null, "StressBarometer must render on its single dedicated overlay Canvas.");
-        Assert.That(stress.CurrentStress, Is.EqualTo(50f).Within(0.01f), "Stress must start at 50%.");
+        Assert.That(stress.CurrentStress, Is.EqualTo(75f).Within(0.01f), "Chapter 1 must start at its 75% floor.");
         Assert.That(stress.FillImage, Is.Not.Null);
         Assert.That(stress.FillImage.color.r, Is.GreaterThan(stress.FillImage.color.g * 2f), "Stress bar must be red.");
 
@@ -99,17 +99,17 @@ public class InteractionSceneTests
         string firstTarget = laptop.TargetSentence;
         char wrongChar = firstTarget[0] == 'z' ? 'x' : 'z';
         laptop.ProcessTypedCharacter(wrongChar);
-        Assert.That(stress.CurrentStress, Is.EqualTo(52f).Within(0.01f));
+        Assert.That(stress.CurrentStress, Is.EqualTo(77f).Within(0.01f));
 
-        // Expiration auto-submits incomplete text and raises stress (+15% -> 67%)
+        // Expiration auto-submits incomplete text and raises stress (+15% -> 92%).
         laptop.Tick(60.5f, false);
         Assert.That(laptop.SubmittedAttempts, Is.EqualTo(1));
-        Assert.That(stress.CurrentStress, Is.EqualTo(67f).Within(0.01f));
+        Assert.That(stress.CurrentStress, Is.EqualTo(92f).Within(0.01f));
 
-        // Another two typos push >= 70% triggering blinking warning; backspace them before typing cleanly
+        // The high-stress warning remains visible after two more typos.
         laptop.ProcessTypedCharacter(laptop.TargetSentence[0] == 'z' ? 'x' : 'z');
         laptop.ProcessTypedCharacter(laptop.TargetSentence[0] == 'z' ? 'x' : 'z');
-        Assert.That(stress.CurrentStress, Is.EqualTo(71f).Within(0.01f));
+        Assert.That(stress.CurrentStress, Is.EqualTo(96f).Within(0.01f));
         Assert.That(stress.IsWarningActive, Is.True);
         Assert.That(stress.WarningLabel.enabled, Is.True, "Stress >= 70% must show blinking warning.");
         laptop.ProcessTypedCharacter('\b');
@@ -145,7 +145,7 @@ public class InteractionSceneTests
         var breathing = player.GetComponent<BreathingMinigame>();
 
         Assert.That(breathing, Is.Not.Null, "BreathingMinigame must be attached on Player_Raka_FPP.");
-        stress.SetStress(74f);
+        stress.SetStress(85f);
         Assert.That(stress.IsWarningActive, Is.True, "Warning must activate at >= 70% stress.");
         Assert.That(stress.WarningLabel.enabled, Is.True);
 
@@ -153,15 +153,15 @@ public class InteractionSceneTests
         Assert.That(breathing.IsActive, Is.True);
         Assert.That(player.IsBreathing, Is.True);
 
-        // Inhale while matching inside the green zone: stress drops below 70% and camera nods UP (negative X Euler offset)
+        // Matching the green zone reaches the chapter's floor while the camera nods up.
         for (int i = 0; i < 15; i++)
             breathing.Tick(0.10f, true);
 
         Assert.That(breathing.CurrentCameraPitchOffset, Is.LessThan(-0.5f), "Camera must pitch UP when inhaling.");
         Assert.That(breathing.IsInGreenZone, Is.True, "Holding breath cleanly tracks the rising green zone.");
-        Assert.That(stress.CurrentStress, Is.LessThan(70f), "Keeping parameter in the green bar must calm stress below 70%.");
-        Assert.That(stress.IsWarningActive, Is.False, "Warning must clear once stress drops below 70%.");
-        Assert.That(stress.WarningLabel.enabled, Is.False);
+        Assert.That(stress.CurrentStress, Is.EqualTo(75f));
+        Assert.That(stress.IsWarningActive, Is.True);
+        Assert.That(stress.WarningLabel.text, Does.Contain("Batas pemulihan"));
 
         // Exhale: camera nods DOWN (positive X Euler offset)
         for (int i = 0; i < 35; i++)

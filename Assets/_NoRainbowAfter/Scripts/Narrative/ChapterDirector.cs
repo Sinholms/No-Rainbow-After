@@ -52,6 +52,7 @@ namespace NoRainbowAfter.Narrative
         private int generation;
         private IShadowEncounter encounter;
         private string storagePath;
+        private static (int chapter, GameState state) pendingRestart;
 
         public void Configure(PlayerInteractor source, FirstPersonPlayer input, FirstPersonMotor movement, Transform actor, float doorwayZ)
         {
@@ -70,12 +71,29 @@ namespace NoRainbowAfter.Narrative
             PreviewChapter = chapter;
         }
 
+        public void PrepareChapterRestart(int chapter) => pendingRestart = (chapter, State);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void CancelChapterRestart() => pendingRestart = default;
+
         private void OnEnable() => Bind();
         private void Start()
         {
             var mainStorage = pathConfigured ? storagePath : StoragePathOverride ??
                 Path.Combine(Application.persistentDataPath, "clues-v1.json");
-            State = new GameState(PreviewChapter == 0 ? mainStorage : null);
+            if (pendingRestart.state != null && pendingRestart.chapter == PreviewChapter)
+            {
+                State = pendingRestart.state;
+                CancelChapterRestart();
+                State.ResetChapterForRestart(PreviewChapter);
+                BeatIndex = State.Chapter1Beat;
+                LoopIndex = State.LoopIndex;
+                if (interactor != null)
+                    foreach (string objective in State.CompletedObjectives) interactor.Flags.Set(objective);
+            }
+            else
+                State = new GameState(PreviewChapter == 0 ? mainStorage : null);
+            SetStressFloor(PreviewChapter == 2 ? 2 : 1);
             foreach (var target in FindObjectsByType<SceneInteractable>(FindObjectsInactive.Include))
                 if (target.gameObject.scene == gameObject.scene && target.StableId == "INT_OVERTIME")
                 {
@@ -190,8 +208,16 @@ namespace NoRainbowAfter.Narrative
         {
             if (State == null || BeatIndex < 6 || ChapterOneFinished) return false;
             ChapterOneFinished = true;
+            SetStressFloor(2);
             ChapterTransitionRequested?.Invoke();
             return true;
+        }
+
+        private void SetStressFloor(int chapter)
+        {
+            var stress = GetComponent<StressBarometer>();
+            if (stress != null)
+                stress.SetMinimumStress(chapter == 2 ? StressBarometer.ChapterTwoMinimumStress : StressBarometer.ChapterOneMinimumStress);
         }
         public bool RecordEllaMessage()
         {

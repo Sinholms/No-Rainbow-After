@@ -27,7 +27,6 @@ namespace NoRainbowAfter.AI
         private ChapterDirector director;
         private DormCheckpoint checkpoint;
         private StressBarometer stress;
-        private BreathingMinigame breathing;
         private SubtitlePlaceholder subtitles;
         private LaptopTypingMinigame laptop;
         private GameObject dorm, roomPostProcessing;
@@ -54,7 +53,6 @@ namespace NoRainbowAfter.AI
             director = GetComponent<ChapterDirector>();
             checkpoint = GetComponent<DormCheckpoint>();
             stress = GetComponent<StressBarometer>();
-            breathing = GetComponent<BreathingMinigame>();
             subtitles = GetComponent<SubtitlePlaceholder>();
         }
 
@@ -304,8 +302,6 @@ namespace NoRainbowAfter.AI
 
             dorm.SetActive(false);
             if (roomPostProcessing != null) roomPostProcessing.SetActive(false);
-            if (stress != null) stress.enabled = false;
-            if (breathing != null) breathing.enabled = false;
             director.AdvanceChapterTwo(ChapterTwoBeat.StreetEntered);
             yield return Fade(1f, 0f, .65f);
             SetTransition(false);

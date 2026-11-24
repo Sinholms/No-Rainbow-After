@@ -38,6 +38,17 @@ namespace NoRainbowAfter.Narrative
             Save();
             return true;
         }
+
+        internal void ResetChapterForRestart(int chapter)
+        {
+            Chapter2Beat = ChapterTwoBeat.None;
+            EllaMessageSent = false;
+            if (chapter != 1) return;
+            Chapter1Response = EncounterResponse.None;
+            Chapter1Beat = LoopIndex = 0;
+            objectives.Clear();
+            ActiveChapter = "Chapter1";
+        }
         // Explicit future New Game hook; never called by scene load or checkpoint restore.
         public void ResetClues() { clues.Clear(); if (!protectedFile) Save(); }
         private void Load()

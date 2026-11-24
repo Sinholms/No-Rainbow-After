@@ -5,12 +5,14 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Tracks Raka's stress level (0-100%, starting at 50%) and renders a single, non-duplicated
+    /// Tracks Raka's stress level and renders a single, non-duplicated
     /// red Stress Barometer overlay in the top-left corner of the HUD.
     /// </summary>
     public sealed class StressBarometer : MonoBehaviour
     {
         public const float InitialStress = 50f;
+        public const float ChapterOneMinimumStress = 75f;
+        public const float ChapterTwoMinimumStress = 45f;
         public const float HighStressWarningThreshold = 70f;
         public const float MaxStress = 100f;
 
@@ -25,9 +27,11 @@ namespace NoRainbowAfter.Player
         private Image pulseVignette;
         private Text statusLabel;
         private Text warningLabel;
+        private string minimumWarningText;
         private float flashTimer;
 
         public float CurrentStress => currentStress;
+        public float MinimumStress { get; private set; }
         public float NormalizedStress => Mathf.Clamp01(currentStress / MaxStress);
         public bool IsWarningActive => currentStress >= HighStressWarningThreshold;
         public Text Label => statusLabel;
@@ -93,12 +97,19 @@ namespace NoRainbowAfter.Player
 
         public void SetStress(float value)
         {
-            float clamped = Mathf.Clamp(value, 0f, MaxStress);
+            float clamped = Mathf.Clamp(value, MinimumStress, MaxStress);
             if (clamped > currentStress + 0.01f)
                 flashTimer = 0.35f;
             currentStress = clamped;
-            RefreshUi();
             StressChanged?.Invoke(currentStress);
+            RefreshUi();
+        }
+
+        public void SetMinimumStress(float value)
+        {
+            MinimumStress = Mathf.Clamp(value, 0f, MaxStress);
+            minimumWarningText = $"STRES TINGGI • Batas pemulihan bab ini {Mathf.RoundToInt(MinimumStress)}%.";
+            if (currentStress < MinimumStress) SetStress(currentStress);
         }
 
         public void AddStress(float amount)
@@ -247,7 +258,10 @@ namespace NoRainbowAfter.Player
         private void RefreshUi()
         {
             if (statusLabel != null)
-                statusLabel.text = "STRES  " + Mathf.RoundToInt(currentStress) + "%";
+            {
+                int displayedStress = currentStress >= MaxStress ? (int)MaxStress : Mathf.Min((int)MaxStress - 1, Mathf.RoundToInt(currentStress));
+                statusLabel.text = "STRES  " + displayedStress + "%";
+            }
             if (fillRect != null)
                 fillRect.anchorMax = new Vector2(NormalizedStress, 1f);
             RefreshFillColor();
@@ -280,9 +294,14 @@ namespace NoRainbowAfter.Player
                 {
                     float blinkAlpha = 0.28f + 0.72f * slowWave;
                     bool recoveryLocked = ownerPlayer != null && ownerPlayer.IsBreathRecoveryRequired;
-                    warningLabel.text = recoveryLocked
-                        ? "STRES 100%!  Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan!"
-                        : "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
+                    if (recoveryLocked)
+                        warningLabel.text = ownerPlayer.IsUsingLaptop
+                            ? "STRES 100%!  Tekan [TAB] untuk keluar dari laptop, lalu [TAB] lagi untuk atur napas."
+                            : "STRES 100%!  Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan!";
+                    else if (currentStress <= MinimumStress)
+                        warningLabel.text = minimumWarningText;
+                    else
+                        warningLabel.text = "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
                     warningLabel.color = new Color(1.0f, 0.28f, 0.24f, blinkAlpha);
                 }
             }

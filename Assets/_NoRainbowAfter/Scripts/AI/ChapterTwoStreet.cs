@@ -7,6 +7,7 @@ namespace NoRainbowAfter.AI
 {
     public sealed class ChapterTwoStreet : MonoBehaviour
     {
+        public const float StressPerCapture = 10f;
         public Transform[] Lamps, Checkpoints;
         public Transform[] GazePivots;
         public Transform PatrolCar, BusSeat;
@@ -60,11 +61,17 @@ namespace NoRainbowAfter.AI
             BusDoor.Bind(this);
             Encounter = gameObject.AddComponent<ChapterTwoSpotlightEncounter>();
             Encounter.Configure(target, Lamps, Checkpoints, GazePivots);
+            Encounter.Caught += OnCaught;
             Encounter.ConfigureBeam(0, 42f, 14f);
             Encounter.ConfigureBeam(1, 42f, 14f);
             Encounter.ConfigureSweep(0, 27f, 7.6f);
             Encounter.ConfigureSweep(1, 25f, 8.6f, 1.3f);
             return true;
+        }
+
+        private void OnCaught(int segment)
+        {
+            if (player != null) player.GetComponent<StressBarometer>()?.AddStress(StressPerCapture);
         }
 
         private void Update()

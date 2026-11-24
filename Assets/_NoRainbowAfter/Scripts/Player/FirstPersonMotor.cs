@@ -43,6 +43,7 @@ namespace NoRainbowAfter.Player
         private float breathingPitchOffset;
         private float sinceSprint;
         private bool crouchRequested;
+        private bool recoveryCrouch;
         private bool exhausted;
 
         public event System.Action PoseRestored;
@@ -93,14 +94,13 @@ namespace NoRainbowAfter.Player
             transform.Rotate(0f, input.Look.x * mouseSensitivity, 0f, Space.Self);
             pitch = Mathf.Clamp(pitch - input.Look.y * mouseSensitivity, -85f, 85f);
             ApplyViewRotation();
+            if (recoveryCrouch) return;
 
             if (input.CrouchPressed) crouchRequested = !crouchRequested;
             bool alreadyLow = controller.height < standingHeight - 0.001f;
             IsCrouched = crouchRequested || (alreadyLow && !CanStand());
             float targetHeight = IsCrouched ? crouchingHeight : standingHeight;
-            controller.height = Mathf.MoveTowards(controller.height, targetHeight, stanceSpeed * dt);
-            controller.center = Vector3.up * (controller.height * 0.5f);
-            UpdateEyeHeight();
+            SetHeight(Mathf.MoveTowards(controller.height, targetHeight, stanceSpeed * dt));
 
             if (exhausted && (StaminaSeconds >= sprintCapacity - 0.001f ||
                 (!input.SprintHeld && StaminaNormalized >= 0.25f))) exhausted = false;
@@ -160,13 +160,11 @@ namespace NoRainbowAfter.Player
             if (count >= overlaps.Length) return false;
             controller.enabled = false;
             transform.SetPositionAndRotation(position, rotation);
-            controller.height = standingHeight;
-            controller.center = Vector3.up * (standingHeight * 0.5f);
-            controller.enabled = true;
             horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f; breathingPitchOffset = 0f;
-            crouchRequested = false; IsCrouched = false; IsSprinting = false;
+            crouchRequested = false; IsCrouched = recoveryCrouch; IsSprinting = false;
             viewCamera.transform.localRotation = Quaternion.identity;
-            UpdateEyeHeight();
+            SetHeight(recoveryCrouch ? crouchingHeight : standingHeight);
+            controller.enabled = true;
             if (notify) PoseRestored?.Invoke();
             return true;
         }
@@ -187,6 +185,25 @@ namespace NoRainbowAfter.Player
         {
             horizontalVelocity = Vector3.zero;
             IsSprinting = false;
+        }
+
+        public void SetRecoveryCrouch(bool required)
+        {
+            if (recoveryCrouch == required) return;
+            recoveryCrouch = required;
+            if (!required) return;
+
+            StopMotion();
+            verticalVelocity = 0f;
+            IsCrouched = true;
+            if (controller != null && viewCamera != null) SetHeight(crouchingHeight);
+        }
+
+        private void SetHeight(float height)
+        {
+            controller.height = height;
+            controller.center = Vector3.up * (height * 0.5f);
+            UpdateEyeHeight();
         }
 
         private void UpdateEyeHeight()
