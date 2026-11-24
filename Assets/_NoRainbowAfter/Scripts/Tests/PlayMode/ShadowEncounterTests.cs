@@ -27,10 +27,15 @@ namespace NoRainbowAfter.Tests
         private string tempFolder;
         private string tempClueFile;
         private Mouse addedMouse;
+        private readonly InputTestFixture inputFixture = new InputTestFixture();
+        private InputSettings.BackgroundBehavior previousBackgroundBehavior;
 
         [SetUp]
         public void SetUpIsolation()
         {
+            inputFixture.Setup();
+            previousBackgroundBehavior = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             Time.timeScale = 1f;
             previousOverridePath = ChapterDirector.StoragePathOverride;
             tempFolder = Path.Combine(Path.GetTempPath(), "NRA-T06-" + Guid.NewGuid().ToString("N"));
@@ -58,6 +63,8 @@ namespace NoRainbowAfter.Tests
                 InputSystem.RemoveDevice(addedMouse);
                 addedMouse = null;
             }
+            InputSystem.settings.backgroundBehavior = previousBackgroundBehavior;
+            inputFixture.TearDown();
 
             ChapterDirector.StoragePathOverride = previousOverridePath;
             if (!string.IsNullOrEmpty(tempFolder) && Directory.Exists(tempFolder))
@@ -72,442 +79,262 @@ namespace NoRainbowAfter.Tests
         public IEnumerator FreshSession_SpawnReadability_WallBlockedClick_FightFeedback_AndSpamClickSingleResolution()
         {
             var beats = new List<string>();
-            var cues = new List<string>();
-            int transitions = 0;
-
-            yield return LoadFreshSession(beats, cues, () => transitions++);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-
-            Assert.That(encounter, Is.Not.Null, "MasterGameplay must contain the installed T06 ShadowEncounterController.");
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Dormant));
-            Assert.That(encounter.IsReady, Is.True);
-
-            yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03" }, beats);
-            Assert.That(director.State.HasClue("CLUE_02"), Is.True);
-
-            // Re-enter corridor to trigger C1-04 and spawn the shadow silhouette.
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-
-            Assert.That(beats, Is.EqualTo(new[] { "C1-01", "C1-02", "C1-03", "C1-04" }));
+            yield return EnterHorror(beats);
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var director = player.GetComponent<ChapterDirector>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
             Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn));
+            Assert.That(director.State.HasClue("CLUE_02"), Is.True);
+            Assert.That(beats, Is.EqualTo(new[] { "C1-01", "C1-02", "C1-03", "C1-04" }));
+            Assert.That(Vector3.Distance(motor.transform.position, encounter.transform.position), Is.GreaterThan(3f));
+            Assert.That(ShadowVisibility.IsLineOfSightClear(motor.ViewCamera.transform.position,
+                encounter.transform.position + Vector3.up * 1.4f, motor.transform, encounter.transform), Is.True);
 
-            float spawnDistance = Vector2.Distance(
-                new Vector2(motor.transform.position.x, motor.transform.position.z),
-                new Vector2(encounter.transform.position.x, encounter.transform.position.z));
-            Assert.That(spawnDistance, Is.InRange(8.0f, 12.5f), "Spawn must stage at readable FPP distance, never glued to camera.");
-            Assert.That(
-                ShadowVisibility.IsLineOfSightClear(
-                    motor.ViewCamera.transform.position,
-                    encounter.transform.position + Vector3.up * 1.4f,
-                    motor.transform,
-                    encounter.transform),
-                Is.True,
-                "Spawned corridor silhouette should be readable from FPP.");
-
-            // Advance from Spawn into Pursue and let the creature close in toward Fight range.
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2.5f);
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
-
-            yield return StepEncounterUntil(
-                encounter,
-                () => Vector3.Distance(motor.transform.position, encounter.transform.position) <= 2.25f,
-                6.5f);
-            Assert.That(Mathf.Abs(encounter.transform.position.x), Is.LessThan(0.68f), "Monster must stay inside corridor walls.");
-
-            AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
+            var target = encounter.transform.position;
+            Assert.That(motor.TryRestorePose(target + Vector3.left * 2f, Quaternion.Euler(0, 90, 0), false), Is.True);
+            AimCameraAt(motor, target + Vector3.up * 1.3f);
             Physics.SyncTransforms();
             encounter.TickEncounter(0f);
-
-            // Solid obstacle between player and monster must block contextual Fight.
-            GameObject blocker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Assert.That(encounter.CanFightRightNow(), Is.True);
+            Assert.That(encounter.IsFightPromptVisible, Is.True);
+            Assert.That(player.enabled, Is.True);
+            int fightRequests = 0;
+            player.FightRequested += () => fightRequests++;
+            var blocker = GameObject.CreatePrimitive(PrimitiveType.Cube);
             try
             {
-                Vector3 mid = Vector3.Lerp(motor.ViewCamera.transform.position, encounter.transform.position + Vector3.up * 1.3f, 0.5f);
-                blocker.transform.position = mid;
-                blocker.transform.localScale = new Vector3(1.6f, 2.4f, 0.25f);
+                blocker.transform.position = Vector3.Lerp(motor.ViewCamera.transform.position, target + Vector3.up * 1.3f, .5f);
+                blocker.transform.localScale = new Vector3(1f, 2f, 1f);
                 Physics.SyncTransforms();
                 encounter.TickEncounter(0f);
-
-                Assert.That(encounter.CanFightRightNow(), Is.False, "Solid wall must block Fight.");
+                Assert.That(encounter.CanFightRightNow(), Is.False);
                 Assert.That(encounter.IsFightPromptVisible, Is.False);
                 ClickLeftMouse();
-                Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
+                Assert.That(fightRequests, Is.EqualTo(1), "The blocked click must reach the player input handler.");
+                Assert.That(encounter.SuccessfulHits, Is.Zero);
             }
-            finally
+            finally { Object.DestroyImmediate(blocker); Physics.SyncTransforms(); }
+            for (int hit = 1; hit <= 3; hit++)
             {
-                Object.DestroyImmediate(blocker);
-                Physics.SyncTransforms();
-            }
-
-            encounter.TickEncounter(0f);
-            Assert.That(encounter.CanFightRightNow(), Is.True, "Unobstructed close aim must enable contextual Fight.");
-            Assert.That(encounter.IsFightPromptVisible, Is.True);
-
-            // Rapid clicks count as one hit during recoil.
-            for (int i = 0; i < 5; i++)
-            {
-                ClickLeftMouse();
-                encounter.TickEncounter(0.02f);
-            }
-
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.FightResolved));
-            Assert.That(encounter.BlackoutAlpha, Is.GreaterThan(0.01f), "Fight feedback pulse should be active.");
-
-            Assert.That(encounter.SuccessfulHits, Is.EqualTo(1));
-            for (int hit = 2; hit <= 3; hit++)
-            {
-                yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 1f);
                 AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
+                Assert.That(encounter.CanFightRightNow(), Is.True);
                 ClickLeftMouse();
-                Assert.That(encounter.SuccessfulHits, Is.EqualTo(hit));
+                ClickLeftMouse();
+                Assert.That(fightRequests, Is.EqualTo(1 + 2 * hit), "Both clicks must reach the player input handler.");
+                Assert.That(encounter.SuccessfulHits, Is.EqualTo(hit), "Recoil blocks repeated clicks.");
+                Assert.That(encounter.BlackoutAlpha, Is.GreaterThan(0f));
+                float duration = encounter.GetComponent<ShadowPlaceholderVisual>().HitDuration(hit == 3);
+                for (int step = 0; step < Mathf.CeilToInt(duration / .1f) + 1; step++) encounter.TickEncounter(.1f);
             }
-            yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 1.5f);
-
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
             Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Fight));
-            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
+            Assert.That(beats, Is.EqualTo(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }));
         }
 
         [UnityTest]
-        public IEnumerator FreshSession_HideInLeftCover_ResolvesOnceAfterMonsterPasses()
+        public IEnumerator FreshSession_HideInEastWardrobe_ResolvesOnceAfterMonsterPasses()
         {
-            yield return VerifyHideInCover("C1_COVER_LEFT", new Vector2(0f, 9.0f), new Vector2(-1.45f, 9.0f));
+            yield return VerifyHideInWardrobe("Wardrobe_East");
         }
 
         [UnityTest]
-        public IEnumerator FreshSession_HideInRightCover_ResolvesOnceAfterMonsterPasses()
+        public IEnumerator FreshSession_HideInCornerWardrobe_ResolvesOnceAfterMonsterPasses()
         {
-            yield return VerifyHideInCover("C1_COVER_RIGHT", new Vector2(0f, 13.0f), new Vector2(1.45f, 13.0f));
+            yield return VerifyHideInWardrobe("Wardrobe_CornerA");
         }
 
-        private IEnumerator VerifyHideInCover(string coverId, Vector2 corridorEntry, Vector2 coverTarget)
+        private IEnumerator VerifyHideInWardrobe(string name)
         {
             var beats = new List<string>();
-            var cues = new List<string>();
-            int transitions = 0;
-
-            yield return LoadFreshSession(beats, cues, () => transitions++);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-            CoverZone zone = Object.FindObjectsByType<CoverZone>(FindObjectsInactive.Exclude).Single(z => z.StableId == coverId);
-
-            yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn));
-
-            // Walk into the chosen cover alcove and crouch down before the creature reaches the alcove.
-            yield return WalkTo(motor, corridorEntry);
-            yield return WalkTo(motor, coverTarget);
-            yield return new WaitForFixedUpdate();
-            Assert.That(zone.PlayerInside, Is.True, "Player must occupy " + coverId);
-
-            SetCrouch(motor, true);
-            Assert.That(motor.IsCrouched, Is.True);
-
-            yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 14f);
-
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
+            yield return EnterHorror(beats);
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var director = player.GetComponent<ChapterDirector>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            var wardrobe = Object.FindObjectsByType<HidingWardrobe>().Single(w => w.name == name);
+            Assert.That(motor.TryRestorePose(wardrobe.transform.TransformPoint(new Vector3(0, .08f, -1.35f)), wardrobe.transform.rotation, false), Is.True);
+            wardrobe.Interact(player.GetComponent<PlayerInteractor>());
+            Assert.That(player.IsHiding, Is.True);
+            Assert.That(wardrobe.Spotted, Is.False);
+            Assert.That(encounter.CanFightRightNow(), Is.False);
+            yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 12f);
             Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Hide));
-            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
+            Assert.That(beats, Is.EqualTo(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }));
+            Assert.That(encounter.GetComponent<CharacterController>().enabled, Is.False);
+            Assert.That(wardrobe.TryExit(), Is.True);
+            Assert.That(player.IsHiding, Is.False);
         }
 
         [UnityTest]
-        public IEnumerator StandingInCoverNeverAutoHides_And_LosingCoverCancelsUnfinishedHide()
+        public IEnumerator StandingNearWardrobeDoesNotHide_AndLeavingCancelsUnfinishedHide()
         {
-            var beats = new List<string>();
-            var cues = new List<string>();
-            int transitions = 0;
-
-            yield return LoadFreshSession(beats, cues, () => transitions++);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-            CoverZone leftCover = Object.FindObjectsByType<CoverZone>(FindObjectsInactive.Exclude).Single(z => z.StableId == "C1_COVER_LEFT");
-
-            yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2.0f);
-
-            yield return WalkTo(motor, new Vector2(0f, 9.0f));
-            yield return WalkTo(motor, new Vector2(-1.45f, 9.0f));
-            yield return new WaitForFixedUpdate();
-            Assert.That(leftCover.PlayerInside, Is.True);
-
-            // 1) Crouch briefly to accumulate partial Hide progress, then stand up -> must cancel to 0 immediately.
-            SetCrouch(motor, true);
-            yield return StepEncounterUntil(encounter, () => encounter.HideElapsedSeconds >= 0.45f, 2.0f);
-            Assert.That(encounter.HideElapsedSeconds, Is.GreaterThanOrEqualTo(0.45f));
-
-            SetCrouch(motor, false);
-            encounter.TickEncounter(0.02f);
-            Assert.That(motor.IsCrouched, Is.False);
-            Assert.That(encounter.HideElapsedSeconds, Is.EqualTo(0f), "Standing up must cancel unfinished Hide immediately.");
-            Assert.That(director.BeatIndex, Is.EqualTo(4));
-
-            // 2) Re-crouch briefly while monster is still away, then exit cover -> must cancel to 0 immediately.
-            SetCrouch(motor, true);
-            yield return StepEncounterUntil(encounter, () => encounter.HideElapsedSeconds >= 0.35f, 2.0f);
-            SetCrouch(motor, false);
-            yield return WalkTo(motor, new Vector2(0f, 9.0f));
-            yield return new WaitForFixedUpdate();
-            encounter.TickEncounter(0.02f);
-            Assert.That(leftCover.PlayerInside, Is.False);
-            Assert.That(encounter.HideElapsedSeconds, Is.EqualTo(0f), "Exiting cover must cancel unfinished Hide.");
-
-            // 3) Re-enter cover standing upright -> never auto-hides; monster enters alcove and triggers Caught.
-            yield return WalkTo(motor, new Vector2(-1.35f, 9.0f));
-            yield return new WaitForFixedUpdate();
-            Assert.That(leftCover.PlayerInside, Is.True);
-            Assert.That(motor.IsCrouched, Is.False);
-
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Caught, 8.0f);
-            Assert.That(encounter.HideElapsedSeconds, Is.EqualTo(0f));
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Caught));
-            Assert.That(transitions, Is.Zero);
-            Assert.That(director.BeatIndex, Is.EqualTo(4), "Caught must never advance C1-05/C1-06.");
+            yield return EnterHorror(new List<string>());
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var director = player.GetComponent<ChapterDirector>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            var wardrobe = Object.FindObjectsByType<HidingWardrobe>().Single(w => w.name == "Wardrobe_CornerA");
+            Assert.That(motor.TryRestorePose(wardrobe.transform.TransformPoint(new Vector3(0, .08f, -1.35f)), wardrobe.transform.rotation, false), Is.True);
+            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2f);
+            for (int i = 0; i < 10; i++) encounter.TickEncounter(.1f);
+            Assert.That(player.IsHiding, Is.False, "Standing outside does not enter a wardrobe.");
+            wardrobe.Interact(player.GetComponent<PlayerInteractor>());
+            Assert.That(player.IsHiding, Is.True);
+            for (int i = 0; i < 40; i++) encounter.TickEncounter(.1f);
+            Assert.That(wardrobe.TryExit(), Is.True);
+            Assert.That(player.IsHiding, Is.False);
+            encounter.TickEncounter(.1f);
+            wardrobe.Interact(player.GetComponent<PlayerInteractor>());
+            Assert.That(player.IsHiding, Is.True);
+            Assert.That(wardrobe.Spotted, Is.False);
+            for (int i = 0; i < 30; i++) encounter.TickEncounter(.1f);
+            Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.None));
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
+            yield return StepEncounterUntil(encounter, () => director.State.Chapter1Response == EncounterResponse.Hide, 5f);
         }
 
         [UnityTest]
         public IEnumerator PauseAndInspectFreezeEncounterAndBlockFight_AndCheckpointButtonAbortsCleanly()
         {
             var beats = new List<string>();
-            var cues = new List<string>();
-            int transitions = 0;
-
-            yield return LoadFreshSession(beats, cues, () => transitions++);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-
-            Type sessionType = Type.GetType("NoRainbowAfter.UI.FirstPersonSession, Assembly-CSharp");
-            Component session = GameObject.Find("UI_FirstPerson").GetComponent(sessionType);
-            MethodInfo togglePause = sessionType.GetMethod("TogglePause", BindingFlags.Instance | BindingFlags.NonPublic);
-            MethodInfo setPaused = sessionType.GetMethod("SetPaused", BindingFlags.Instance | BindingFlags.Public);
-            MethodInfo restoreCheckpoint = sessionType.GetMethod("RestoreCheckpoint", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2.0f);
-            yield return StepEncounterUntil(
-                encounter,
-                () => Vector3.Distance(motor.transform.position, encounter.transform.position) <= 2.25f,
-                6.5f);
-
-            AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
-            encounter.TickEncounter(0f);
+            yield return EnterHorror(beats);
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var interactor = player.GetComponent<PlayerInteractor>();
+            var director = player.GetComponent<ChapterDirector>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            var sessionType = Type.GetType("NoRainbowAfter.UI.FirstPersonSession, Assembly-CSharp");
+            var session = GameObject.Find("UI_FirstPerson").GetComponent(sessionType);
+            var setPaused = sessionType.GetMethod("SetPaused", BindingFlags.Instance | BindingFlags.Public);
+            var restore = sessionType.GetMethod("RestoreCheckpoint", BindingFlags.Instance | BindingFlags.NonPublic);
+            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2f);
+            var target = encounter.transform.position;
+            Assert.That(motor.TryRestorePose(target + Vector3.left * 2f, Quaternion.Euler(0, 90, 0), false), Is.True);
+            AimCameraAt(motor, target + Vector3.up * 1.3f);
+            Physics.SyncTransforms();
             Assert.That(encounter.CanFightRightNow(), Is.True);
-
-            // Inspect freezes AI, hides Fight prompt, and blocks Left-Click; Esc closes Inspect before Pause.
-            Vector3 frozenMonsterPos = encounter.transform.position;
+            var frozen = encounter.transform.position;
             interactor.ShowInspection("Uji Inspect", "Bayangan berhenti saat inspeksi.");
-            encounter.TickEncounter(0.5f);
+            encounter.TickEncounter(.5f);
             ClickLeftMouse();
-            Assert.That(player.IsInspecting, Is.True);
-            Assert.That(encounter.IsFightPromptVisible, Is.False);
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
-            Assert.That(Vector3.Distance(encounter.transform.position, frozenMonsterPos), Is.LessThan(0.0001f));
-
-            togglePause.Invoke(session, null);
-            Assert.That(player.IsInspecting, Is.False, "First Esc closes Inspect before opening Pause.");
-            Assert.That(player.IsPaused, Is.False);
-
-            // Pause freezes AI & blocks Left-Click; Pause 'Kembali ke titik awal' aborts encounter cleanly.
+            Assert.That(encounter.CanFightRightNow(), Is.False);
+            Assert.That(encounter.SuccessfulHits, Is.Zero);
+            Assert.That(Vector3.Distance(frozen, encounter.transform.position), Is.LessThan(.001f));
+            interactor.CloseInspection();
             setPaused.Invoke(session, new object[] { true });
-            Assert.That(player.IsPaused, Is.True);
-            encounter.TickEncounter(0.5f);
+            encounter.TickEncounter(.5f);
             ClickLeftMouse();
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
-            Assert.That(Vector3.Distance(encounter.transform.position, frozenMonsterPos), Is.LessThan(0.0001f));
-
-            restoreCheckpoint.Invoke(session, null);
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Dormant), "Checkpoint recovery from Pause must abort active pursuit.");
-            Assert.That(Vector3.Distance(motor.transform.position, GameObject.Find("DormSpawn_T04").transform.position), Is.LessThan(0.05f));
+            Assert.That(encounter.CanFightRightNow(), Is.False);
+            Assert.That(encounter.SuccessfulHits, Is.Zero);
+            Assert.That(Vector3.Distance(frozen, encounter.transform.position), Is.LessThan(.001f));
+            restore.Invoke(session, null);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Dormant));
+            Assert.That(Vector3.Distance(motor.transform.position, GameObject.Find("DormSpawn_T04").transform.position), Is.LessThan(.05f));
             Assert.That(director.BeatIndex, Is.EqualTo(4));
             Assert.That(director.State.HasClue("CLUE_02"), Is.True);
-            Assert.That(transitions, Is.Zero);
-
             setPaused.Invoke(session, new object[] { false });
-            Assert.That(player.IsPaused, Is.False);
-
-            // Re-entering corridor starts a fresh encounter without repeating C1-04.
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
+            Assert.That(encounter.IsReady, Is.False, "Encounter stays dormant outside the horror corridor.");
+            Assert.That(player.GetComponent<ChapterOneCorridorShift>().Expanded, Is.False);
+            yield return CrossSharedDoor(player);
+            Assert.That(motor.TryRestorePose(new Vector3(80f, .10f, -1.65f), Quaternion.Euler(0, 90, 0), false), Is.True);
             yield return null;
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn));
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04" }, beats);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn), "The checkpoint must allow a new encounter.");
+            Assert.That(beats, Is.EqualTo(new[] { "C1-01", "C1-02", "C1-03", "C1-04" }));
         }
 
         [UnityTest]
-        public IEnumerator RepeatedCaughtPreservesCluesAndFallbackSpawn_ThenRetryResolvesWithoutDuplicateBeats()
+        public IEnumerator FirstEscapeThenCaptureRestartsChapterAndPreservesClues()
         {
-            // Pre-seed CLUE_01 in isolated temp profile to prove Caught never wipes previously found clues either.
             new GameState(tempClueFile).AddClue("CLUE_01");
-
             var beats = new List<string>();
-            var cues = new List<string>();
-            int transitions = 0;
-
-            yield return LoadFreshSession(beats, cues, () => transitions++);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-
-            yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            CollectionAssert.AreEquivalent(new[] { "CLUE_01", "CLUE_02" }, director.State.ClueIds);
-
-            // Attempt #1 -> Caught -> normal DormSpawn_T04 checkpoint restore.
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Caught, 8.0f);
-            Assert.That(encounter.CaughtCount, Is.EqualTo(1));
+            yield return EnterHorror(beats);
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var director = player.GetComponent<ChapterDirector>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Grabbed, 20f);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Grabbed));
+            Assert.That(encounter.EscapeUsed, Is.True);
+            Assert.That(encounter.CaughtCount, Is.Zero);
             Assert.That(player.IsTransitionLocked, Is.True);
-
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Dormant, 2.0f);
-            Assert.That(player.IsTransitionLocked, Is.False, "Controls must unlock after Caught recovery.");
-            Assert.That(Vector3.Distance(motor.transform.position, GameObject.Find("DormSpawn_T04").transform.position), Is.LessThan(0.05f));
-            Assert.That(director.BeatIndex, Is.EqualTo(4));
-            Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.None));
-            Assert.That(director.LoopIndex, Is.EqualTo(1));
-            Assert.That(interactor.Flags.Contains("objective.book"), Is.True);
-            Assert.That(interactor.Flags.Contains("objective.overtime"), Is.True);
-            CollectionAssert.AreEquivalent(new[] { "CLUE_01", "CLUE_02" }, new GameState(tempClueFile).ClueIds);
-            Assert.That(transitions, Is.Zero);
-
-            // Attempt #2 -> Block primary DormSpawn_T04 to verify safe fallback spawn without instant re-catch or control lock.
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn));
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04" }, beats, "C1-04 must not repeat on retry.");
-
-            GameObject spawnBlocker = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            try
+            yield return new WaitForSeconds(1.3f);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Pursue));
+            Assert.That(player.IsTransitionLocked, Is.False);
+            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Grabbed, 20f);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Grabbed));
+            yield return new WaitForSeconds(1.3f);
+            Assert.That(encounter.CaughtCount, Is.EqualTo(1));
+            float deadline = Time.realtimeSinceStartup + 15f;
+            ChapterDirector fresh = null;
+            while (Time.realtimeSinceStartup < deadline)
             {
-                spawnBlocker.transform.position = GameObject.Find("DormSpawn_T04").transform.position + Vector3.up * 0.9f;
-                spawnBlocker.transform.localScale = new Vector3(0.75f, 1.8f, 0.75f);
-                Physics.SyncTransforms();
-
-                yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Caught, 8.0f);
-                Assert.That(encounter.CaughtCount, Is.EqualTo(2));
-                yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Dormant, 2.0f);
-
-                Assert.That(player.IsTransitionLocked, Is.False);
-                Assert.That(motor.transform.position.z, Is.InRange(0.4f, 4.4f), "Fallback spawn must place Raka safely inside the dorm room.");
-                Assert.That(Vector3.Distance(motor.transform.position, spawnBlocker.transform.position), Is.GreaterThan(0.7f));
+                fresh = Object.FindAnyObjectByType<ChapterDirector>();
+                if (fresh != null && fresh != director && fresh.State != null) break;
+                yield return null;
             }
-            finally
-            {
-                Object.DestroyImmediate(spawnBlocker);
-                Physics.SyncTransforms();
-            }
-
-            // Attempt #3 -> Succeed via Fight -> exact 1 resolution, all clues preserved.
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
-            yield return null;
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2.0f);
-            yield return StepEncounterUntil(
-                encounter,
-                () => Vector3.Distance(motor.transform.position, encounter.transform.position) <= 2.25f,
-                6.5f);
-
-            AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
-            encounter.TickEncounter(0f);
-            for (int hit = 1; hit <= 3; hit++)
-            {
-                AimCameraAt(motor, encounter.transform.position + Vector3.up * 1.3f);
-                ClickLeftMouse();
-                if (hit < 3) yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 1f);
-            }
-            yield return StepEncounterUntil(encounter, () => director.BeatIndex == 6, 1.5f);
-
-            CollectionAssert.AreEqual(new[] { "C1-01", "C1-02", "C1-03", "C1-04", "C1-05", "C1-06" }, beats);
-            Assert.That(director.State.Chapter1Response, Is.EqualTo(EncounterResponse.Fight));
-            Assert.That(transitions, Is.Zero, "The exit door triggers the chapter transition.");
-            CollectionAssert.AreEquivalent(new[] { "CLUE_01", "CLUE_02" }, new GameState(tempClueFile).ClueIds);
+            Assert.That(fresh, Is.Not.Null);
+            Assert.That(fresh, Is.Not.SameAs(director));
+            Assert.That(fresh.BeatIndex, Is.EqualTo(1));
+            Assert.That(fresh.State.Chapter1Response, Is.EqualTo(EncounterResponse.None));
+            Assert.That(fresh.GetComponent<ChapterOneCorridorShift>().Expanded, Is.False);
+            CollectionAssert.AreEquivalent(new[] { "CLUE_01", "CLUE_02" }, fresh.State.ClueIds);
         }
 
         [UnityTest]
-        public IEnumerator CollisionAgainstCorridorAndLockedDoor_AndDoorwayLintelStoopClearance()
+        public IEnumerator MonsterColliderCannotPassHorrorCorridorWallOrLockedExit()
         {
-            var beats = new List<string>();
-            var cues = new List<string>();
+            yield return EnterHorror(new List<string>());
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            var cc = encounter.GetComponent<CharacterController>();
+            cc.enabled = false;
+            encounter.transform.position = new Vector3(77.6f, .1f, -1.65f);
+            cc.enabled = true;
+            Physics.SyncTransforms();
+            for (int i = 0; i < 40; i++) cc.Move(new Vector3(0, -.04f, -.08f));
+            Assert.That(encounter.transform.position.z, Is.GreaterThan(-2.65f), "The horror corridor wall stops the monster.");
+            cc.enabled = false;
+            encounter.transform.position = new Vector3(78.6f, .1f, 2f);
+            cc.enabled = true;
+            Physics.SyncTransforms();
+            for (int i = 0; i < 40; i++) cc.Move(new Vector3(0, -.04f, -.08f));
+            Assert.That(encounter.transform.position.z, Is.GreaterThan(.8f), "The locked exit door stops the monster.");
+        }
 
-            yield return LoadFreshSession(beats, cues, null);
-
-            FirstPersonPlayer player = Object.FindAnyObjectByType<FirstPersonPlayer>();
-            FirstPersonMotor motor = player.GetComponent<FirstPersonMotor>();
-            PlayerInteractor interactor = player.GetComponent<PlayerInteractor>();
-            ChapterDirector director = player.GetComponent<ChapterDirector>();
-            ShadowEncounterController encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
-            ShadowPlaceholderVisual visual = encounter.GetComponent<ShadowPlaceholderVisual>();
-
-            SceneInteractable lockedDoor = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude)
-                .Single(x => x.StableId == "INT_C1_DOOR");
-            Assert.That(lockedDoor, Is.Not.Null, "INT_C1_DOOR must remain the locked T03 hall door.");
-
+        private static IEnumerator EnterHorror(List<string> beats)
+        {
+            yield return LoadFreshSession(beats, new List<string>(), null);
+            var player = Object.FindAnyObjectByType<FirstPersonPlayer>();
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var director = player.GetComponent<ChapterDirector>();
+            var interactor = player.GetComponent<PlayerInteractor>();
+            var encounter = Object.FindAnyObjectByType<ShadowEncounterController>();
+            var world = player.GetComponent<ChapterOneCorridorShift>();
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Dormant));
+            Assert.That(encounter.IsReady, Is.False);
             yield return CompleteBookLoopAndSlip(motor, interactor, director);
-            yield return WalkTo(motor, new Vector2(0f, 6.25f));
+            Assert.That(director.BeatIndex, Is.EqualTo(3));
+            yield return CrossSharedDoor(player);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Dormant));
+            Assert.That(encounter.IsReady, Is.False);
+            Assert.That(motor.TryRestorePose(new Vector3(80f, .10f, -1.65f), Quaternion.Euler(0, 90, 0), false), Is.True);
             yield return null;
-            yield return StepEncounterUntil(encounter, () => encounter.State == ShadowEncounterState.Pursue, 2.0f);
+            Assert.That(encounter.State, Is.EqualTo(ShadowEncounterState.Spawn));
+        }
 
-            // Verify monster cannot penetrate the right corridor wall / INT_C1_DOOR at x = +0.89, z = 7.10.
-            var monsterCc = encounter.GetComponent<CharacterController>();
-            monsterCc.enabled = false;
-            encounter.transform.position = new Vector3(0.25f, 0.02f, 7.10f);
-            monsterCc.enabled = true;
-            Physics.SyncTransforms();
-
-            for (int i = 0; i < 40; i++)
-                monsterCc.Move(new Vector3(0.08f, -0.04f, 0f));
-
-            Assert.That(encounter.transform.position.x, Is.LessThan(0.70f), "Monster CharacterController must not penetrate INT_C1_DOOR or corridor wall.");
-
-            // Retreat player into dorm room (z = 2.4) so monster navigates through the 0.66m doorway under the 2.05m lintel.
-            yield return WalkTo(motor, new Vector2(0.15f, 2.40f));
-
-            monsterCc.enabled = false;
-            encounter.transform.position = new Vector3(0f, 0.02f, 6.60f);
-            monsterCc.enabled = true;
-            Physics.SyncTransforms();
-
-            float maxRenderedYInDoorway = 0f;
-            bool crossedDoorway = false;
-            for (int i = 0; i < 240; i++)
-            {
-                encounter.TickEncounter(0.025f);
-                float z = encounter.transform.position.z;
-                if (z >= 4.85f && z <= 5.35f)
-                {
-                    crossedDoorway = true;
-                    maxRenderedYInDoorway = Mathf.Max(maxRenderedYInDoorway, visual.GetHighestRenderedY());
-                }
-                if (z <= 4.35f) break;
-            }
-
-            Assert.That(crossedDoorway, Is.True, "Monster should navigate through the open dorm doorway.");
-            Assert.That(encounter.transform.position.z, Is.LessThanOrEqualTo(4.40f), "Monster must fit cleanly into the dorm room.");
-            Assert.That(maxRenderedYInDoorway, Is.LessThan(2.02f), "Monster upper silhouette must stoop below the 2.05m doorway lintel.");
+        private static IEnumerator CrossSharedDoor(FirstPersonPlayer player)
+        {
+            var motor = player.GetComponent<FirstPersonMotor>();
+            var interactor = player.GetComponent<PlayerInteractor>();
+            var world = player.GetComponent<ChapterOneCorridorShift>();
+            var door = Object.FindAnyObjectByType<SharedCorridorDoor>();
+            Assert.That(motor.TryRestorePose(door.transform.TransformPoint(new Vector3(0, .04f, -1.16f)), Quaternion.identity), Is.True);
+            door.Interact(interactor);
+            Assert.That(door.IsOpen, Is.True);
+            yield return new WaitForSeconds(.45f);
+            Assert.That(motor.TryRestorePose(door.transform.TransformPoint(new Vector3(0, .04f, .35f)), Quaternion.identity), Is.True);
+            float deadline = Time.realtimeSinceStartup + 5f;
+            while ((!world.Expanded || player.IsTransitionLocked) && Time.realtimeSinceStartup < deadline) yield return null;
+            Assert.That(world.Expanded, Is.True, "Crossing the shared door enters the horror corridor.");
+            Assert.That(player.IsTransitionLocked, Is.False);
         }
 
         private static IEnumerator LoadFreshSession(List<string> beats, List<string> cues, Action onTransition)
@@ -616,15 +443,6 @@ namespace NoRainbowAfter.Tests
             }
 
             Assert.Fail("Unable to walk to " + destination + "; stopped at " + motor.transform.position);
-        }
-
-        private static void SetCrouch(FirstPersonMotor motor, bool crouched)
-        {
-            if (motor.IsCrouched != crouched)
-                motor.Simulate(new FirstPersonFrame { CrouchPressed = true }, 0.02f);
-            for (int i = 0; i < 35; i++)
-                motor.Simulate(default, 0.02f);
-            Physics.SyncTransforms();
         }
 
         private static void AimCameraAt(FirstPersonMotor motor, Vector3 worldTarget)

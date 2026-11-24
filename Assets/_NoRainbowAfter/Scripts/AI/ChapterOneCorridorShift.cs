@@ -39,6 +39,7 @@ namespace NoRainbowAfter.AI
             director=GetComponent<ChapterDirector>();player=GetComponent<FirstPersonPlayer>();motor=GetComponent<FirstPersonMotor>();
             stressBarometer=GetComponent<StressBarometer>();
             if (GetComponent<ChapterStressRestart>() == null) gameObject.AddComponent<ChapterStressRestart>();
+            if (motor != null) motor.PoseRestored += OnPlayerPoseRestored;
             objectives=GetComponent<ObjectiveTracker>();
             chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
@@ -51,7 +52,16 @@ namespace NoRainbowAfter.AI
                 chapterTwo.PlayOpeningMemory();
             }
         }
-        private void OnDestroy() { if(instance.valid) instance.Remove(); }
+        private void OnDestroy()
+        {
+            if (motor != null) motor.PoseRestored -= OnPlayerPoseRestored;
+            if(instance.valid) instance.Remove();
+        }
+        private void OnPlayerPoseRestored()
+        {
+            // Checkpoint recovery may return the player to the dorm during an encounter.
+            if (Expanded && !shifting && !OwnsPlayer) LeaveCorridor();
+        }
         private void LateUpdate()
         {
             if(OwnsPlayer && !shifting && !player.IsPaused && !player.IsTransitionLocked)
