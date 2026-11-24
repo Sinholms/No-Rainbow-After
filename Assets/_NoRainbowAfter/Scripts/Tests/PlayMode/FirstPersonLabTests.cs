@@ -18,6 +18,8 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor, Is.Not.Null);
             motor.GetComponent<FirstPersonPlayer>().enabled = false;
             var cc = motor.GetComponent<CharacterController>();
+            float standingHeight = cc.height;
+            Assert.That(standingHeight, Is.EqualTo(1.70f).Within(.001f), "Raka's standing capsule must measure 170 cm.");
             Time.timeScale = 1;
             Warp(motor, new Vector3(3, 0.05f, 0));
             Move(motor, 100);
@@ -30,7 +32,8 @@ namespace NoRainbowAfter.Tests
             Assert.That(cc.height, Is.LessThan(1.12f), "Do not expand the capsule into the Blender roof.");
             Move(motor, 150);
             Assert.That(motor.transform.position.z, Is.GreaterThan(5.4f));
-            Assert.That(cc.height, Is.GreaterThan(1.79f));
+            Assert.That(motor.IsCrouched, Is.False);
+            Assert.That(cc.height, Is.EqualTo(standingHeight).Within(.001f), "The capsule must return to standing height after exiting the passage.");
 
             Warp(motor, new Vector3(-3, 0.05f, 3.8f));
             float rampPeak = Move(motor, 180);
