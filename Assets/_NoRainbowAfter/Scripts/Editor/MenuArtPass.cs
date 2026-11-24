@@ -19,6 +19,11 @@ namespace NoRainbowAfter.Editor
         [MenuItem("No Rainbow After/Apply Cinematic Menu Art")]
         public static void Apply()
         {
+            MenuUiRedesignPass.ApplyAll();
+        }
+
+        private static void ApplyLegacy()
+        {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Stop Play Mode before changing menu assets.");
             for (int i = 0; i < SceneManager.sceneCount; i++)

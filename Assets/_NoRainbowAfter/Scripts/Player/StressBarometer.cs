@@ -29,6 +29,8 @@ namespace NoRainbowAfter.Player
         private Text warningLabel;
         private string minimumWarningText;
         private float flashTimer;
+        private AudioSource heartbeatSource;
+        private AudioClip heartbeatClip;
 
         public float CurrentStress => currentStress;
         public float MinimumStress { get; private set; }
@@ -68,6 +70,7 @@ namespace NoRainbowAfter.Player
         {
             if (overlayCanvas != null) overlayCanvas.enabled = false;
             if (vignetteCanvas != null) vignetteCanvas.enabled = false;
+            if (heartbeatSource != null && heartbeatSource.isPlaying) heartbeatSource.Stop();
         }
 
         private void OnDestroy()
@@ -76,6 +79,7 @@ namespace NoRainbowAfter.Player
             else if (rootPanel != null) Destroy(rootPanel.gameObject);
             if (pulseVignette != null && pulseVignette.transform.parent != null)
                 Destroy(pulseVignette.transform.parent.gameObject);
+            if (heartbeatClip != null) Destroy(heartbeatClip);
         }
 
         private void Update()
@@ -93,6 +97,50 @@ namespace NoRainbowAfter.Player
             }
 
             RefreshWarningEffects();
+            UpdateHeartbeatAudio();
+        }
+
+        private void UpdateHeartbeatAudio()
+        {
+            bool mute = ownerPlayer != null && (ownerPlayer.IsPaused || ownerPlayer.IsTransitionLocked || ownerPlayer.IsBreathing);
+            if (!IsWarningActive || mute)
+            {
+                if (heartbeatSource != null && heartbeatSource.isPlaying) heartbeatSource.Pause();
+                return;
+            }
+
+            if (heartbeatSource == null)
+            {
+                heartbeatSource = gameObject.AddComponent<AudioSource>();
+                heartbeatSource.playOnAwake = false;
+                heartbeatSource.loop = true;
+                heartbeatSource.spatialBlend = 0f;
+                heartbeatClip = CreateHeartbeatClip();
+                heartbeatSource.clip = heartbeatClip;
+            }
+
+            float severity = Mathf.InverseLerp(HighStressWarningThreshold, MaxStress, currentStress);
+            heartbeatSource.volume = Mathf.Lerp(0.08f, 0.34f, severity);
+            heartbeatSource.pitch = Mathf.Lerp(0.88f, 1.42f, severity);
+            if (!heartbeatSource.isPlaying) heartbeatSource.Play();
+        }
+
+        private static AudioClip CreateHeartbeatClip()
+        {
+            const int rate = 22050;
+            const float duration = 1.05f;
+            int samples = Mathf.RoundToInt(rate * duration);
+            var data = new float[samples];
+            for (int i = 0; i < samples; i++)
+            {
+                float t = (float)i / rate;
+                float lub = Mathf.Exp(-Mathf.Pow((t - 0.14f) / 0.042f, 2f)) * Mathf.Sin(2f * Mathf.PI * 52f * t);
+                float dub = Mathf.Exp(-Mathf.Pow((t - 0.33f) / 0.052f, 2f)) * Mathf.Sin(2f * Mathf.PI * 44f * t) * 0.78f;
+                data[i] = Mathf.Clamp((lub + dub) * 0.9f, -1f, 1f);
+            }
+            var clip = AudioClip.Create("RakaStressHeartbeat", samples, 1, rate, false);
+            clip.SetData(data, 0);
+            return clip;
         }
 
         public void SetStress(float value)

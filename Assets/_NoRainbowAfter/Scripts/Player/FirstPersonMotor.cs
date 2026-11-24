@@ -35,13 +35,22 @@ namespace NoRainbowAfter.Player
         [SerializeField, Min(0.1f)] private float rechargeDuration = 4f;
         [SerializeField, Min(0)] private float rechargeDelay = 1f;
 
+        private const float StressSwayOnset = 35f;
+        private const float StressSlowOnset = 55f;
+        private const float StressTunnelOnset = 65f;
+        private const float StressLimpOnset = 70f;
+
         private readonly Collider[] overlaps = new Collider[24];
         private CharacterController controller;
+        private StressBarometer stressBarometer;
         private Vector3 horizontalVelocity;
         private float verticalVelocity;
         private float pitch;
         private float breathingPitchOffset;
         private float sinceSprint;
+        private float gaitPhase;
+        private float idleSwayClock;
+        private float gaitBlend;
         private bool crouchRequested;
         private bool recoveryCrouch;
         private bool exhausted;
@@ -57,6 +66,11 @@ namespace NoRainbowAfter.Player
         public bool IsSprinting { get; private set; }
         public float Pitch => pitch;
         public float BreathingPitchOffset => breathingPitchOffset;
+        public float StressGaitIntensity { get; private set; }
+        public float StressSpeedMultiplier { get; private set; } = 1f;
+        public float StressRollOffset { get; private set; }
+        public float StressPitchOffset { get; private set; }
+        public Vector3 StressEyeOffset { get; private set; }
         public float CrouchBlend => controller != null
             ? 1f - Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height)
             : (IsCrouched ? 1f : 0f);
@@ -64,6 +78,7 @@ namespace NoRainbowAfter.Player
         private void Awake()
         {
             controller = GetComponent<CharacterController>();
+            stressBarometer = GetComponent<StressBarometer>();
             if (viewCamera == null) viewCamera = GetComponentInChildren<Camera>();
             if (viewCamera == null)
             {
@@ -91,10 +106,23 @@ namespace NoRainbowAfter.Player
         {
             if (!enabled || !controller.enabled || deltaTime <= 0f) return;
             float dt = Mathf.Min(deltaTime, 0.1f);
+            float stress = ReadCurrentStress();
+            StressGaitIntensity = stress > StressSwayOnset
+                ? Mathf.Pow(Mathf.InverseLerp(StressSwayOnset, StressBarometer.MaxStress, stress), 1.15f)
+                : 0f;
+            StressSpeedMultiplier = stress > StressSlowOnset
+                ? Mathf.Lerp(1f, 0.88f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(StressSlowOnset, StressBarometer.MaxStress, stress)))
+                : 1f;
+
             transform.Rotate(0f, input.Look.x * mouseSensitivity, 0f, Space.Self);
             pitch = Mathf.Clamp(pitch - input.Look.y * mouseSensitivity, -85f, 85f);
-            ApplyViewRotation();
-            if (recoveryCrouch) return;
+            if (recoveryCrouch)
+            {
+                UpdateStressCamera(stress, 0f, dt);
+                ApplyViewRotation();
+                UpdateEyeHeight();
+                return;
+            }
 
             if (input.CrouchPressed) crouchRequested = !crouchRequested;
             bool alreadyLow = controller.height < standingHeight - 0.001f;
@@ -108,9 +136,24 @@ namespace NoRainbowAfter.Player
             bool sprint = input.SprintHeld && move.sqrMagnitude > 0.01f && !IsCrouched &&
                 controller.height >= standingHeight - 0.02f && !exhausted && StaminaSeconds > 0f;
             float speed = IsCrouched ? crouchSpeed : sprint ? sprintSpeed : walkSpeed;
-            Vector3 target = transform.TransformDirection(new Vector3(move.x, 0, move.y)) * (speed * MovementScale);
-            float response = move.sqrMagnitude > .01f ? MovementScale : 1f;
-            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * response * dt);
+
+            // Severe stress introduces a slight uneven heavy-step drag and unsteady lateral drift while walking.
+            float limpFactor = stress > StressLimpOnset
+                ? Mathf.InverseLerp(StressLimpOnset, StressBarometer.MaxStress, stress)
+                : 0f;
+            float cadenceDrag = 1f - limpFactor * 0.06f * Mathf.Max(0f, Mathf.Sin(gaitPhase));
+            Vector3 moveDir = transform.TransformDirection(new Vector3(move.x, 0, move.y));
+            Vector3 target = moveDir * (speed * MovementScale * StressSpeedMultiplier * cadenceDrag);
+            if (limpFactor > 0.001f && moveDir.sqrMagnitude > 0.0001f && !IsCrouched)
+            {
+                Vector3 perp = Vector3.Cross(Vector3.up, moveDir.normalized);
+                float weave = Mathf.Sin(gaitPhase * 0.5f) * limpFactor * 0.16f * MovementScale;
+                target += perp * weave;
+            }
+
+            // Starting to move feels heavier under high stress while stopping remains crisp.
+            float accelScale = move.sqrMagnitude > .01f ? MovementScale * Mathf.Lerp(1f, 0.70f, StressGaitIntensity) : 1f;
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * accelScale * dt);
             if (controller.isGrounded && verticalVelocity < 0) verticalVelocity = -2f;
             verticalVelocity += gravity * dt;
             Vector3 before = transform.position;
@@ -120,10 +163,12 @@ namespace NoRainbowAfter.Player
 
             Vector3 travelled = transform.position - before;
             travelled.y = 0;
+            float actualSpeed = travelled.magnitude / dt;
             IsSprinting = sprint && travelled.sqrMagnitude > 0.000001f;
             if (IsSprinting)
             {
-                StaminaSeconds = Mathf.Max(0, StaminaSeconds - dt);
+                float drainScale = Mathf.Lerp(1f, 1.35f, StressGaitIntensity);
+                StaminaSeconds = Mathf.Max(0, StaminaSeconds - dt * drainScale);
                 sinceSprint = 0;
                 if (StaminaSeconds <= 0.001f) { StaminaSeconds = 0; exhausted = true; }
             }
@@ -133,6 +178,86 @@ namespace NoRainbowAfter.Player
                 if (sinceSprint >= rechargeDelay)
                     StaminaSeconds = Mathf.Min(sprintCapacity, StaminaSeconds + sprintCapacity / rechargeDuration * dt);
             }
+
+            UpdateStressCamera(stress, actualSpeed, dt);
+            ApplyViewRotation();
+            UpdateEyeHeight();
+        }
+
+        private float ReadCurrentStress()
+        {
+            if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
+            return stressBarometer != null ? stressBarometer.CurrentStress : 0f;
+        }
+
+        private void UpdateStressCamera(float stress, float actualSpeed, float dt)
+        {
+            if (StressGaitIntensity <= 0.0001f)
+            {
+                gaitBlend = 0f;
+                StressRollOffset = 0f;
+                StressPitchOffset = 0f;
+                StressEyeOffset = Vector3.zero;
+                if (viewCamera != null && !Mathf.Approximately(viewCamera.fieldOfView, fieldOfView))
+                    viewCamera.fieldOfView = fieldOfView;
+                return;
+            }
+
+            float refSpeed = Mathf.Max(0.4f, walkSpeed * MovementScale * 0.85f);
+            float moveActivity = Mathf.Clamp01(actualSpeed / refSpeed);
+            gaitBlend = Mathf.MoveTowards(gaitBlend, moveActivity, (moveActivity > gaitBlend ? 4.5f : 3.2f) * dt);
+
+            if (moveActivity > 0.05f)
+            {
+                float cadence = IsSprinting ? 8.8f : (IsCrouched ? 4.6f : 5.6f);
+                gaitPhase += dt * cadence * Mathf.Lerp(1f, 0.84f, StressGaitIntensity);
+            }
+            idleSwayClock += dt;
+
+            float idleIntensity = stress > StressLimpOnset
+                ? Mathf.InverseLerp(StressLimpOnset, StressBarometer.MaxStress, stress)
+                : 0f;
+            float idleRoll = Mathf.Sin(idleSwayClock * 0.95f) * 0.85f * idleIntensity;
+            float idlePitch = Mathf.Sin(idleSwayClock * 0.65f + 0.8f) * 0.55f * idleIntensity;
+
+            float walkWeight = StressGaitIntensity * gaitBlend * (IsCrouched ? 0.58f : 1f);
+            // Asymmetric heavy sway + downward head-droop so walking feels exhausted and unsteady.
+            float asymWave = Mathf.Sin(gaitPhase) + 0.32f * Mathf.Sin(2f * gaitPhase + 0.4f);
+            float stepDip = Mathf.Abs(Mathf.Sin(gaitPhase));
+
+            float targetRoll = asymWave * 3.1f * walkWeight + idleRoll;
+            float targetPitch = 1.25f * StressGaitIntensity * gaitBlend + stepDip * 1.85f * walkWeight + idlePitch;
+            Vector3 targetEyeOffset = new Vector3(
+                Mathf.Sin(gaitPhase) * 0.032f * walkWeight,
+                -stepDip * 0.044f * walkWeight - 0.014f * StressGaitIntensity * gaitBlend,
+                0f);
+
+            float smooth = 1f - Mathf.Exp(-10f * dt);
+            StressRollOffset = Mathf.Lerp(StressRollOffset, targetRoll, smooth);
+            StressPitchOffset = Mathf.Lerp(StressPitchOffset, targetPitch, smooth);
+            StressEyeOffset = Vector3.Lerp(StressEyeOffset, targetEyeOffset, smooth);
+
+            if (viewCamera != null)
+            {
+                float tunnel = stress > StressTunnelOnset
+                    ? Mathf.InverseLerp(StressTunnelOnset, StressBarometer.MaxStress, stress)
+                    : 0f;
+                float targetFov = tunnel > 0.001f
+                    ? Mathf.Clamp(fieldOfView - 4.2f * tunnel + Mathf.Sin(idleSwayClock * 1.4f) * 0.65f * tunnel, 60f, 95f)
+                    : fieldOfView;
+                viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView, targetFov, smooth);
+            }
+        }
+
+        private void ClearStressCameraOffsets()
+        {
+            gaitBlend = 0f;
+            StressRollOffset = 0f;
+            StressPitchOffset = 0f;
+            StressEyeOffset = Vector3.zero;
+            if (viewCamera != null) viewCamera.fieldOfView = fieldOfView;
+            ApplyViewRotation();
+            if (controller != null && viewCamera != null) UpdateEyeHeight();
         }
 
         public bool CanStand()
@@ -161,7 +286,11 @@ namespace NoRainbowAfter.Player
             controller.enabled = false;
             transform.SetPositionAndRotation(position, rotation);
             horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f; breathingPitchOffset = 0f;
+            gaitPhase = 0f; idleSwayClock = 0f; gaitBlend = 0f;
+            StressGaitIntensity = 0f; StressSpeedMultiplier = 1f;
+            StressRollOffset = 0f; StressPitchOffset = 0f; StressEyeOffset = Vector3.zero;
             crouchRequested = false; IsCrouched = recoveryCrouch; IsSprinting = false;
+            viewCamera.fieldOfView = fieldOfView;
             viewCamera.transform.localRotation = Quaternion.identity;
             SetHeight(recoveryCrouch ? crouchingHeight : standingHeight);
             controller.enabled = true;
@@ -178,13 +307,17 @@ namespace NoRainbowAfter.Player
         private void ApplyViewRotation()
         {
             if (viewCamera != null)
-                viewCamera.transform.localRotation = Quaternion.Euler(Mathf.Clamp(pitch + breathingPitchOffset, -85f, 85f), 0f, 0f);
+            {
+                float combinedPitch = Mathf.Clamp(pitch + breathingPitchOffset + StressPitchOffset, -85f, 85f);
+                viewCamera.transform.localRotation = Quaternion.Euler(combinedPitch, 0f, StressRollOffset);
+            }
         }
 
         public void StopMotion()
         {
             horizontalVelocity = Vector3.zero;
             IsSprinting = false;
+            ClearStressCameraOffsets();
         }
 
         public void SetRecoveryCrouch(bool required)
@@ -209,8 +342,7 @@ namespace NoRainbowAfter.Player
         private void UpdateEyeHeight()
         {
             float blend = Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height);
-            // No headbob, roll, or third-person offset.
-            viewCamera.transform.localPosition = Vector3.up * Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend);
+            viewCamera.transform.localPosition = Vector3.up * Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend) + StressEyeOffset;
         }
     }
 }

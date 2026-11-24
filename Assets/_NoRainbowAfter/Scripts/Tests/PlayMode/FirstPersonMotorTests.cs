@@ -151,6 +151,154 @@ namespace NoRainbowAfter.Tests
             Assert.That(motor.ViewCamera.fieldOfView, Is.EqualTo(95));
         }
 
+        [Test]
+        public void StressGaitIncreasesSwayAndHeadDroopAndSlowsWalking()
+        {
+            var noBarometer = Actor(origin);
+            var zeroStress = ActorWithStress(origin + Vector3.right * 10f, 0f);
+            var lowStress = ActorWithStress(origin + Vector3.right * 20f, 30f);
+            var highStress85 = ActorWithStress(origin + Vector3.right * 30f, 85f);
+            var highStress95 = ActorWithStress(origin + Vector3.right * 40f, 95f);
+
+            var walkFrame = new FirstPersonFrame { Move = Vector2.up };
+            var noBarometerMetrics = SimulateWalkAndMeasure(noBarometer, walkFrame, 120);
+            var zeroStressMetrics = SimulateWalkAndMeasure(zeroStress, walkFrame, 120);
+            var lowStressMetrics = SimulateWalkAndMeasure(lowStress, walkFrame, 120);
+            var high85Metrics = SimulateWalkAndMeasure(highStress85, walkFrame, 120);
+            var high95Metrics = SimulateWalkAndMeasure(highStress95, walkFrame, 120);
+
+            Assert.That(noBarometerMetrics.MaxAbsRoll, Is.Zero);
+            Assert.That(noBarometerMetrics.MaxHeadDroop, Is.Zero);
+            Assert.That(noBarometerMetrics.MaxPitchOffset, Is.Zero);
+            Assert.That(noBarometer.ViewCamera.transform.localPosition, Is.EqualTo(new Vector3(0f, 1.58f, 0f)));
+
+            Assert.That(zeroStressMetrics.MaxAbsRoll, Is.Zero);
+            Assert.That(zeroStressMetrics.MaxHeadDroop, Is.Zero);
+            Assert.That(zeroStressMetrics.MaxPitchOffset, Is.Zero);
+            Assert.That(zeroStressMetrics.Distance, Is.EqualTo(noBarometerMetrics.Distance).Within(0.001f));
+
+            Assert.That(lowStressMetrics.MaxAbsRoll, Is.Zero);
+            Assert.That(lowStressMetrics.MaxHeadDroop, Is.Zero);
+            Assert.That(lowStressMetrics.MaxPitchOffset, Is.Zero);
+            Assert.That(lowStressMetrics.Distance, Is.EqualTo(noBarometerMetrics.Distance).Within(0.001f));
+
+            Assert.That(high85Metrics.MaxAbsRoll, Is.GreaterThan(1f));
+            Assert.That(high95Metrics.MaxAbsRoll, Is.GreaterThan(high85Metrics.MaxAbsRoll));
+            Assert.That(high85Metrics.MaxHeadDroop, Is.GreaterThan(0.01f));
+            Assert.That(high95Metrics.MaxHeadDroop, Is.GreaterThan(high85Metrics.MaxHeadDroop));
+            Assert.That(high85Metrics.BobRange, Is.GreaterThan(0.005f));
+            Assert.That(high95Metrics.BobRange, Is.GreaterThan(0.005f));
+            Assert.That(high85Metrics.MaxPitchOffset, Is.GreaterThan(0.5f));
+            Assert.That(high95Metrics.MaxPitchOffset, Is.GreaterThan(high85Metrics.MaxPitchOffset));
+            Assert.That(high85Metrics.Distance, Is.LessThan(lowStressMetrics.Distance - 0.5f));
+            Assert.That(high95Metrics.Distance, Is.LessThan(high85Metrics.Distance - 0.1f));
+        }
+
+        [Test]
+        public void HighStressNarrowsFieldOfViewAndStopOrRestoreClearsStressOffsets()
+        {
+            var motor = ActorWithStress(origin, 90f);
+            float baseFov = motor.FieldOfView;
+
+            Tick(motor, new FirstPersonFrame { Move = Vector2.up }, 60);
+            Assert.That(motor.ViewCamera.fieldOfView, Is.LessThan(baseFov - 1.5f));
+            Assert.That(motor.StressPitchOffset, Is.GreaterThan(0f));
+            Assert.That(motor.StressEyeOffset.y, Is.LessThan(0f));
+
+            motor.StopMotion();
+            Assert.That(motor.StressRollOffset, Is.Zero);
+            Assert.That(motor.StressPitchOffset, Is.Zero);
+            Assert.That(motor.StressEyeOffset, Is.EqualTo(Vector3.zero));
+            Assert.That(motor.ViewCamera.fieldOfView, Is.EqualTo(baseFov));
+            Assert.That(motor.ViewCamera.transform.localPosition, Is.EqualTo(new Vector3(0f, 1.58f, 0f)));
+            Assert.That(motor.ViewCamera.transform.localRotation, Is.EqualTo(Quaternion.identity));
+
+            Tick(motor, new FirstPersonFrame { Move = Vector2.up, Look = new Vector2(10f, -20f) }, 60);
+            Assert.That(motor.ViewCamera.fieldOfView, Is.LessThan(baseFov - 1.5f));
+            Assert.That(motor.StressPitchOffset, Is.GreaterThan(0f));
+            Assert.That(motor.StressEyeOffset.y, Is.LessThan(0f));
+
+            Assert.That(motor.TryRestorePose(origin + Vector3.forward * 2f, Quaternion.identity), Is.True);
+            Assert.That(motor.StressRollOffset, Is.Zero);
+            Assert.That(motor.StressPitchOffset, Is.Zero);
+            Assert.That(motor.StressEyeOffset, Is.EqualTo(Vector3.zero));
+            Assert.That(motor.ViewCamera.fieldOfView, Is.EqualTo(baseFov));
+            Assert.That(motor.ViewCamera.transform.localPosition, Is.EqualTo(new Vector3(0f, 1.58f, 0f)));
+            Assert.That(motor.ViewCamera.transform.localRotation, Is.EqualTo(Quaternion.identity));
+        }
+
+        [Test]
+        public void SprintStaminaDrainsFasterAtHighStress()
+        {
+            var lowStressMotor = ActorWithStress(origin, 30f);
+            var highStressMotor = ActorWithStress(origin + Vector3.right * 10f, 90f);
+            var sprintFrame = new FirstPersonFrame { Move = Vector2.up, SprintHeld = true };
+
+            Tick(lowStressMotor, sprintFrame, 150);
+            Tick(highStressMotor, sprintFrame, 150);
+            Assert.That(lowStressMotor.IsSprinting, Is.True);
+            Assert.That(highStressMotor.IsSprinting, Is.True);
+            Assert.That(highStressMotor.StaminaSeconds, Is.LessThan(lowStressMotor.StaminaSeconds - 0.5f));
+
+            Tick(lowStressMotor, sprintFrame, 60);
+            Tick(highStressMotor, sprintFrame, 60);
+            Assert.That(highStressMotor.StaminaSeconds, Is.Zero.Within(0.001f));
+            Assert.That(highStressMotor.IsSprinting, Is.False);
+            Assert.That(lowStressMotor.StaminaSeconds, Is.GreaterThan(0.5f));
+            Assert.That(lowStressMotor.IsSprinting, Is.True);
+        }
+
+        private FirstPersonMotor ActorWithStress(Vector3 position, float stressLevel)
+        {
+            var motor = Actor(position);
+            var barometer = motor.gameObject.AddComponent<StressBarometer>();
+            barometer.SetStress(stressLevel);
+            return motor;
+        }
+
+        private struct WalkMetrics
+        {
+            public float Distance;
+            public float MaxAbsRoll;
+            public float MaxHeadDroop;
+            public float MaxPitchOffset;
+            public float BobRange;
+        }
+
+        private static WalkMetrics SimulateWalkAndMeasure(FirstPersonMotor motor, FirstPersonFrame input, int ticks)
+        {
+            Vector3 start = motor.transform.position;
+            float maxAbsRoll = 0f;
+            float maxHeadDroop = 0f;
+            float maxPitch = 0f;
+            float minEyeY = float.MaxValue;
+            float maxEyeY = float.MinValue;
+
+            for (int i = 0; i < ticks; i++)
+            {
+                motor.Simulate(input, 0.02f);
+                maxAbsRoll = Mathf.Max(maxAbsRoll, Mathf.Abs(motor.StressRollOffset));
+                maxHeadDroop = Mathf.Max(maxHeadDroop, -motor.StressEyeOffset.y);
+                maxPitch = Mathf.Max(maxPitch, motor.StressPitchOffset);
+                if (i >= 40)
+                {
+                    minEyeY = Mathf.Min(minEyeY, motor.StressEyeOffset.y);
+                    maxEyeY = Mathf.Max(maxEyeY, motor.StressEyeOffset.y);
+                }
+            }
+
+            Vector3 delta = motor.transform.position - start;
+            delta.y = 0f;
+            return new WalkMetrics
+            {
+                Distance = delta.magnitude,
+                MaxAbsRoll = maxAbsRoll,
+                MaxHeadDroop = maxHeadDroop,
+                MaxPitchOffset = maxPitch,
+                BobRange = maxEyeY > minEyeY ? maxEyeY - minEyeY : 0f
+            };
+        }
+
         private FirstPersonMotor Actor(Vector3 position)
         {
             var root = new GameObject("TestPlayer"); objects.Add(root);

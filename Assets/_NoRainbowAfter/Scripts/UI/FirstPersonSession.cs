@@ -1,5 +1,6 @@
 using NoRainbowAfter.Core;
 using NoRainbowAfter.Level;
+using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
 using NoRainbowAfter.Quality;
 using UnityEngine;
@@ -10,6 +11,11 @@ namespace NoRainbowAfter.UI
 {
     public sealed class FirstPersonSession : MonoBehaviour
     {
+        private static readonly Color QualitySelectedBg = new Color(0.70f, 0.55f, 0.34f, 0.24f);
+        private static readonly Color QualityIdleBg = new Color(0f, 0f, 0f, 0f);
+        private static readonly Color QualitySelectedText = new Color(0.97f, 0.93f, 0.84f, 1f);
+        private static readonly Color QualityIdleText = new Color(0.62f, 0.73f, 0.78f, 0.86f);
+
         [SerializeField] private FirstPersonPlayer player;
         [SerializeField] private FirstPersonMotor motor;
         [SerializeField] private GameObject pausePanel;
@@ -32,8 +38,23 @@ namespace NoRainbowAfter.UI
         [SerializeField] private Button qualityLowButton;
         [SerializeField] private Button qualityMediumButton;
         [SerializeField] private Button qualityHighButton;
+        [SerializeField] private Slider masterVolumeSlider;
+        [SerializeField] private Text masterVolumeLabel;
+        [SerializeField] private CanvasGroup pauseCanvasGroup;
+        [SerializeField] private RawImage pauseScrim;
+        [SerializeField] private Text chapterStatusLabel;
+        [SerializeField] private Text stressStatusLabel;
+        [SerializeField] private RectTransform stressFillBar;
+        [SerializeField] private Image stressFillImage;
+
         private bool circularViewEnabled;
         private float circularViewRadius;
+        private Material pauseScrimInstance;
+        private RectTransform pauseScrimRect;
+        private float pauseFadeAlpha = 1f;
+        private StressBarometer stressBarometer;
+        private ChapterDirector chapterDirector;
+
         public bool IsPaused { get; private set; }
         public QualityPreset CurrentQualityPreset => GraphicsQualityService.CurrentPreset;
 
@@ -41,6 +62,20 @@ namespace NoRainbowAfter.UI
         {
             SceneFlow.EnsureInstance();
             GraphicsQualityService.ApplySavedPreset();
+            if (player != null)
+                stressBarometer = player.GetComponent<StressBarometer>();
+            chapterDirector = FindAnyObjectByType<ChapterDirector>();
+
+            if (pauseScrim != null)
+            {
+                pauseScrimRect = pauseScrim.rectTransform;
+                if (pauseScrim.material != null)
+                {
+                    pauseScrimInstance = new Material(pauseScrim.material);
+                    pauseScrim.material = pauseScrimInstance;
+                }
+            }
+
             motor.SetViewSettings(PlayerPrefs.GetFloat("NRA.MouseSensitivity", motor.MouseSensitivity),
                 PlayerPrefs.GetFloat("NRA.FieldOfView", motor.FieldOfView));
             sensitivity.SetValueWithoutNotify(motor.MouseSensitivity);
@@ -56,6 +91,11 @@ namespace NoRainbowAfter.UI
             {
                 viewRadius.SetValueWithoutNotify(circularViewRadius);
                 viewRadius.onValueChanged.AddListener(OnViewRadiusChanged);
+            }
+            if (masterVolumeSlider != null)
+            {
+                masterVolumeSlider.SetValueWithoutNotify(AudioListener.volume);
+                masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
             }
             if (qualityLowButton != null)
                 qualityLowButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.Low));
@@ -76,8 +116,15 @@ namespace NoRainbowAfter.UI
 
         private void OnEnable()
         {
-            player.PauseRequested += TogglePause;
-            player.FocusLost += PauseForFocusLoss;
+            if (player != null)
+            {
+                player.PauseRequested += TogglePause;
+                player.FocusLost += PauseForFocusLoss;
+                if (stressBarometer == null)
+                    stressBarometer = player.GetComponent<StressBarometer>();
+            }
+            if (stressBarometer != null)
+                stressBarometer.StressChanged += OnStressChanged;
             GraphicsQualityService.PresetChanged += OnQualityPresetChanged;
             OnQualityPresetChanged(GraphicsQualityService.CurrentPreset);
         }
@@ -86,8 +133,13 @@ namespace NoRainbowAfter.UI
 
         private void OnDisable()
         {
-            player.PauseRequested -= TogglePause;
-            player.FocusLost -= PauseForFocusLoss;
+            if (player != null)
+            {
+                player.PauseRequested -= TogglePause;
+                player.FocusLost -= PauseForFocusLoss;
+            }
+            if (stressBarometer != null)
+                stressBarometer.StressChanged -= OnStressChanged;
             GraphicsQualityService.PresetChanged -= OnQualityPresetChanged;
             Time.timeScale = 1;
             Cursor.lockState = CursorLockMode.None;
@@ -95,10 +147,33 @@ namespace NoRainbowAfter.UI
             PlayerPrefs.Save();
         }
 
+        private void OnDestroy()
+        {
+            if (pauseScrimInstance != null) Destroy(pauseScrimInstance);
+        }
+
         private void Update()
         {
             staminaRoot.SetActive(!IsPaused && motor.StaminaNormalized < 0.999f);
             staminaFill.anchorMax = new Vector2(motor.StaminaNormalized, 1);
+
+            if (IsPaused)
+            {
+                if (pauseCanvasGroup != null && pauseFadeAlpha < 1f)
+                {
+                    pauseFadeAlpha = Mathf.MoveTowards(pauseFadeAlpha, 1f, Time.unscaledDeltaTime * 7.5f);
+                    pauseCanvasGroup.alpha = 1f - (1f - pauseFadeAlpha) * (1f - pauseFadeAlpha);
+                }
+
+                if (pauseScrimInstance != null)
+                {
+                    pauseScrimInstance.SetFloat("_UnscaledTime", Time.unscaledTime);
+                    if (pauseScrimRect != null && pauseScrimRect.rect.height > 1f)
+                        pauseScrimInstance.SetFloat("_Aspect", pauseScrimRect.rect.width / pauseScrimRect.rect.height);
+                    float stressNorm = stressBarometer != null ? stressBarometer.NormalizedStress : 0f;
+                    pauseScrimInstance.SetFloat("_StressLevel", stressNorm);
+                }
+            }
         }
 
         private void TogglePause()
@@ -106,6 +181,7 @@ namespace NoRainbowAfter.UI
             // Document inspection is closed with [F], and laptop minigame is exited with 1x [Tab].
             SetPaused(!IsPaused);
         }
+
         private void PauseForFocusLoss()
         {
             SetPaused(true);
@@ -113,15 +189,93 @@ namespace NoRainbowAfter.UI
 
         public void SetPaused(bool paused)
         {
+            bool changed = IsPaused != paused;
             IsPaused = paused;
             Time.timeScale = paused ? 0 : 1;
-            player.SetPaused(paused);
-            pausePanel.SetActive(paused);
-            gameplayHud.SetActive(!paused);
+            if (player != null) player.SetPaused(paused);
+            if (pausePanel != null) pausePanel.SetActive(paused);
+            if (gameplayHud != null) gameplayHud.SetActive(!paused);
             ApplyCircularView();
-            if (paused && EventSystem.current != null)
-                EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
-            else PlayerPrefs.Save();
+            if (paused)
+            {
+                if (masterVolumeSlider != null)
+                    masterVolumeSlider.SetValueWithoutNotify(AudioListener.volume);
+                UpdateLabels();
+                RefreshPauseContext();
+                if (pauseCanvasGroup != null)
+                {
+                    pauseFadeAlpha = 0.16f;
+                    pauseCanvasGroup.alpha = pauseFadeAlpha;
+                }
+                if (changed) MenuUiAudio.PlayPanelTransition();
+                if (EventSystem.current != null && resumeButton != null)
+                    EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+            }
+            else
+            {
+                if (changed) MenuUiAudio.PlayPanelTransition();
+                PlayerPrefs.Save();
+            }
+        }
+
+        private void OnStressChanged(float _)
+        {
+            if (IsPaused) RefreshPauseContext();
+        }
+
+        private void RefreshPauseContext()
+        {
+            if (chapterStatusLabel != null)
+                chapterStatusLabel.text = ResolveChapterLabel();
+
+            if (stressBarometer == null && player != null)
+                stressBarometer = player.GetComponent<StressBarometer>();
+
+            if (stressStatusLabel != null)
+            {
+                if (stressBarometer != null)
+                {
+                    float stress = stressBarometer.CurrentStress;
+                    float norm = stressBarometer.NormalizedStress;
+                    string mood = stress >= 80f ? "Tertekan Berat"
+                        : stress >= 65f ? "Tegang"
+                        : stress >= 45f ? "Gelisah"
+                        : "Tenang";
+                    stressStatusLabel.text = "Kondisi Mental  ·  " + mood + " (" + Mathf.RoundToInt(stress) + "%)";
+                    if (stressFillBar != null)
+                        stressFillBar.anchorMax = new Vector2(Mathf.Clamp01(norm), 1f);
+                    if (stressFillImage != null)
+                    {
+                        stressFillImage.color = stress >= 70f
+                            ? new Color(0.76f, 0.24f, 0.22f, 0.95f)
+                            : stress >= 45f
+                                ? new Color(0.84f, 0.65f, 0.39f, 0.92f)
+                                : new Color(0.42f, 0.66f, 0.72f, 0.90f);
+                    }
+                }
+                else
+                {
+                    stressStatusLabel.text = "Mode Latihan Kontrol";
+                    if (stressFillBar != null) stressFillBar.anchorMax = new Vector2(0.25f, 1f);
+                }
+            }
+        }
+
+        private string ResolveChapterLabel()
+        {
+            if (chapterDirector == null) chapterDirector = FindAnyObjectByType<ChapterDirector>();
+            if (chapterDirector == null || chapterDirector.State == null)
+                return "UJI KONTROL  ·  ORANG PERTAMA";
+
+            switch (chapterDirector.State.ActiveChapter)
+            {
+                case "Chapter2":
+                    return "BAB II  ·  PASAR MALAM";
+                case "Chapter3":
+                    return "BAB III  ·  PERJALANAN";
+                default:
+                    return "BAB I  ·  KOS RAKA";
+            }
         }
 
         private void ApplySettings()
@@ -132,19 +286,29 @@ namespace NoRainbowAfter.UI
             UpdateLabels();
         }
 
+        private void OnMasterVolumeChanged(float value)
+        {
+            AudioListener.volume = Mathf.Clamp01(value);
+            PlayerPrefs.SetFloat("NRA.MasterVolume", AudioListener.volume);
+            UpdateLabels();
+        }
+
         private void UpdateLabels()
         {
             sensitivityLabel.text = "Sensitivitas mouse  " + motor.MouseSensitivity.ToString("F2");
             fovLabel.text = "Bidang pandang  " + Mathf.RoundToInt(motor.FieldOfView) + "°";
             if (viewRadiusLabel != null)
                 viewRadiusLabel.text = "Lebar pandang  " + Mathf.RoundToInt(circularViewRadius * 100f) + "%";
+            if (masterVolumeLabel != null)
+                masterVolumeLabel.text = "Volume utama  " + Mathf.RoundToInt(AudioListener.volume * 100f) + "%";
             if (qualityPresetLabel != null)
-                qualityPresetLabel.text = "Kualitas grafis  " + GraphicsQualityService.GetDisplayLabel(GraphicsQualityService.CurrentPreset);
+                qualityPresetLabel.text = "Kualitas grafis  —  " + GraphicsQualityService.GetDisplayLabel(GraphicsQualityService.CurrentPreset);
         }
 
         public void SelectQualityPreset(QualityPreset preset)
         {
             GraphicsQualityService.ApplyPreset(preset, savePreference: true);
+            MenuUiAudio.PlayConfirm();
         }
 
         private void OnQualityPresetChanged(QualityPreset preset)
@@ -165,17 +329,18 @@ namespace NoRainbowAfter.UI
             if (button == null) return;
             var bg = button.GetComponent<Image>();
             if (bg != null)
-            {
-                bg.color = selected
-                    ? new Color(0.27f, 0.38f, 0.40f, 0.96f)
-                    : new Color(0.12f, 0.17f, 0.19f, 0.88f);
-            }
+                bg.color = selected ? QualitySelectedBg : QualityIdleBg;
+
+            Transform activeBar = button.transform.Find("ActiveBar");
+            if (activeBar != null) activeBar.gameObject.SetActive(selected);
+
+            Transform outline = button.transform.Find("Border");
+            if (outline != null) outline.gameObject.SetActive(false);
+
             var caption = button.GetComponentInChildren<Text>(true);
             if (caption != null)
             {
-                caption.color = selected
-                    ? new Color(0.96f, 0.94f, 0.86f, 1f)
-                    : new Color(0.72f, 0.78f, 0.79f, 1f);
+                caption.color = selected ? QualitySelectedText : QualityIdleText;
                 caption.fontStyle = selected ? FontStyle.Bold : FontStyle.Normal;
             }
         }
@@ -184,6 +349,7 @@ namespace NoRainbowAfter.UI
         {
             circularViewEnabled = enabled;
             PlayerPrefs.SetInt("NRA.CircularViewEnabled", enabled ? 1 : 0);
+            MenuUiAudio.PlayHover();
             ApplyCircularView();
         }
 
@@ -212,7 +378,7 @@ namespace NoRainbowAfter.UI
             var label = checkpointButton.GetComponentInChildren<Text>();
             if (checkpoint.TryRestore())
             {
-                if (label != null) label.text = "Kembali ke titik awal";
+                if (label != null) label.text = "Kembali ke Titik Awal";
             }
             else if (label != null) label.text = "Titik awal terhalang";
         }
