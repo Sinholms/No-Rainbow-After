@@ -24,7 +24,7 @@ import bpy
 import bmesh
 from mathutils import Vector, Matrix
 
-ROOT = Path(r"c:\Users\User\Documents\Nono\No-Rainbow-After")
+ROOT = Path(__file__).resolve().parents[2]
 EXPORT_FBX = ROOT / "Assets/_NoRainbowAfter/Art/Models/Characters/ACT_Raka_StudentBody.fbx"
 BLEND_PATH = ROOT / "BlenderSources/Characters/ACT_Raka_StudentBody.blend"
 TEX_DIR = ROOT / "Assets/_NoRainbowAfter/Art/Textures/RakaBody"
@@ -634,6 +634,29 @@ def build_organic_sneaker(col, sname, hip_x, mat_sneaker, mat_sole, knee_pivot, 
                offset=knee_world, cap_start=True, cap_end=True, subdiv=2, uv_scale=3.0)
 
 
+def build_head(col, mat_skin):
+    # The collar covers the neck base. The crown is 1.700 m above the shoe soles.
+    profile = [
+        (1.320, -0.007, 0.057, 0.047),
+        (1.353, -0.007, 0.048, 0.044),
+        (1.395, -0.004, 0.043, 0.043),
+        (1.436, -0.006, 0.045, 0.044),
+        (1.468, -0.015, 0.053, 0.056),
+        (1.497, -0.018, 0.064, 0.074),
+        (1.529, -0.015, 0.073, 0.078),
+        (1.562, -0.009, 0.078, 0.086),
+        (1.590, -0.005, 0.080, 0.087),
+        (1.618, -0.002, 0.077, 0.083),
+        (1.645, 0.000, 0.068, 0.074),
+        (1.669, 0.002, 0.054, 0.061),
+        (1.687, 0.003, 0.035, 0.041),
+        (1.697, 0.003, 0.019, 0.024),
+        (1.701, 0.003, 0.006, 0.007),
+    ]
+    rings = [sample_ellipse_ring(0.0, y, z, rx, ry, sides=32) for z, y, rx, ry in profile]
+    return loft_rings(col, "SM_Raka_Head", rings, mat_skin, None, cap_start=True, cap_end=True, subdiv=0)
+
+
 def build_student_body():
     EXPORT_FBX.parent.mkdir(parents=True, exist_ok=True)
     BLEND_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -676,6 +699,7 @@ def build_student_body():
         sample_ellipse_ring(0.0, -0.010, 1.345, 0.058, 0.053, sides=24),
     ]
     loft_rings(col, "SM_Raka_InnerTee", inner_neck, mat_tee, None, offset=zero_offset, cap_end=True, subdiv=1)
+    build_head(col, mat_skin)
 
     # Tailored short-sleeve collared plaid shirt draping cleanly OVER trouser waist (solidified subtle hem edge)
     shirt_rings = [
@@ -840,7 +864,7 @@ def build_student_body():
 
         if oname in ("SM_Raka_FlannelBody", "SM_Raka_ButtonPlacket") or oname.startswith("SM_Raka_Button_"):
             assign_chain_weights(obj, zs, ["Pelvis", "Spine", "Chest"], [(0.92, 1.04), (1.13, 1.24)])
-        elif oname in ("SM_Raka_InnerTee", "SM_Raka_Collar", "SM_Raka_ShirtPocket", "SM_Raka_PocketPen", "SM_Raka_PenClip"):
+        elif oname in ("SM_Raka_Head", "SM_Raka_InnerTee", "SM_Raka_Collar", "SM_Raka_ShirtPocket", "SM_Raka_PocketPen", "SM_Raka_PenClip"):
             assign_single_bone(obj, "Chest")
         elif oname in ("SM_Raka_Lanyard_L", "SM_Raka_Lanyard_R"):
             assign_chain_weights(obj, zs, ["Lanyard", "Chest"], [(1.22, 1.28)])
@@ -992,7 +1016,11 @@ def build_student_body():
     scene.frame_set(1)
 
     bpy.ops.wm.save_as_mainfile(filepath=str(BLEND_PATH), compress=True)
+    export_rig(rig, mesh_objects)
+    print(f"EXPORTED_RAKA_BODY_RIGGED_V3: {EXPORT_FBX} meshes={len(mesh_objects)} bones={len(arm_data.bones)} unweighted={unweighted}")
 
+
+def export_rig(rig, mesh_objects):
     bpy.ops.object.select_all(action="DESELECT")
     rig.select_set(True)
     for obj in mesh_objects:
@@ -1014,7 +1042,6 @@ def build_student_body():
         bake_anim=False,
         path_mode="AUTO",
     )
-    print(f"EXPORTED_RAKA_BODY_RIGGED_V3: {EXPORT_FBX} meshes={len(mesh_objects)} bones={len(arm_data.bones)} unweighted={unweighted}")
 
 
 if __name__ == "__main__":

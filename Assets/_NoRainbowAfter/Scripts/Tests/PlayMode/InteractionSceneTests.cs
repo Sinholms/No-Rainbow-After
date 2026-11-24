@@ -134,6 +134,50 @@ public class InteractionSceneTests
         Assert.That(player.IsUsingLaptop, Is.False, "Player must return to FPP mode after auto-exit.");
     }
 
+    [UnityTest] public IEnumerator RakaStandingMeshMeasures170CmFromSolesToCrown()
+    {
+        yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");
+        yield return null;
+
+        var body = Object.FindAnyObjectByType<FirstPersonBodyVisual>();
+        var motor = body.GetComponent<FirstPersonMotor>();
+        body.ApplyPoseNow(0f);
+        Assert.That(motor.IsCrouched, Is.False);
+        Assert.That(motor.ViewCamera.transform.localPosition.y, Is.EqualTo(1.58f).Within(.001f));
+
+        var renderers = body.BodyInstance.GetComponentsInChildren<SkinnedMeshRenderer>();
+        var head = renderers.Single(renderer => renderer.name == "SM_Raka_Head");
+        var soles = renderers.Where(renderer => renderer.name.StartsWith("SM_Raka_SneakerSole_", StringComparison.Ordinal)).ToArray();
+        Assert.That(soles.Length, Is.EqualTo(2));
+        Assert.That(head.enabled, Is.True);
+        Assert.That(head.gameObject.layer, Is.EqualTo(LayerMask.NameToLayer("PlayerHead")));
+        Assert.That(motor.ViewCamera.cullingMask & (1 << head.gameObject.layer), Is.Zero);
+        Assert.That(head.shadowCastingMode, Is.EqualTo(UnityEngine.Rendering.ShadowCastingMode.Off));
+
+        var bakedMesh = new Mesh();
+        try
+        {
+            float crown = VertexHeights(head, body.transform, bakedMesh).Max();
+            float sole = soles.Min(renderer => VertexHeights(renderer, body.transform, bakedMesh).Min());
+            Assert.That(crown - sole, Is.EqualTo(1.70f).Within(.002f));
+
+            motor.Simulate(new FirstPersonFrame { CrouchPressed = true }, .02f);
+            for (int i = 0; i < 20; i++) motor.Simulate(default, .02f);
+            body.ApplyPoseNow(0f);
+            Assert.That(VertexHeights(head, body.transform, bakedMesh).Max(), Is.LessThan(crown - .4f));
+        }
+        finally
+        {
+            Object.Destroy(bakedMesh);
+        }
+    }
+
+    private static float[] VertexHeights(SkinnedMeshRenderer renderer, Transform actor, Mesh bakedMesh)
+    {
+        renderer.BakeMesh(bakedMesh);
+        return bakedMesh.vertices.Select(vertex => actor.InverseTransformPoint(renderer.transform.TransformPoint(vertex)).y).ToArray();
+    }
+
     [UnityTest] public IEnumerator BreathingMinigameReducesStressWithGreenBarAndCameraPitchNod()
     {
         yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");

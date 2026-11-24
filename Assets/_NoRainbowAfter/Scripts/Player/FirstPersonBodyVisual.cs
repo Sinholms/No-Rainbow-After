@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Attaches Raka's MiSide-style headless FPP student body (ACT_Raka_StudentBody) beneath
+    /// Attaches Raka's student body (ACT_Raka_StudentBody) beneath
     /// Player_Raka_FPP and animates the Generic Armature rig with grounded 2-bone leg IK and
     /// camera-safe continuous crouch posture synchronized with FirstPersonMotor.CrouchBlend.
     /// </summary>
@@ -244,8 +245,17 @@ namespace NoRainbowAfter.Player
             }
 
             // Ensure SkinnedMeshRenderer bounds do not cull arms/legs when pitch changes steeply.
+            int headLayer = LayerMask.NameToLayer("PlayerHead");
             foreach (SkinnedMeshRenderer smr in bodyInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
                 smr.updateWhenOffscreen = true;
+                if (smr.name != "SM_Raka_Head" || headLayer < 0) continue;
+
+                smr.gameObject.layer = headLayer;
+                smr.shadowCastingMode = ShadowCastingMode.Off;
+                if (motor != null && motor.ViewCamera != null)
+                    motor.ViewCamera.cullingMask &= ~(1 << headLayer);
+            }
 
             rootBone = FindDeepChild(bodyInstance.transform, "Root");
             pelvisBone = FindDeepChild(bodyInstance.transform, "Pelvis");
