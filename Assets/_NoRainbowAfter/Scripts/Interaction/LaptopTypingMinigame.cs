@@ -139,6 +139,7 @@ namespace NoRainbowAfter.Interaction
             OpenLaptop();
         }
 
+        // Membuka sesi mengetik dan mengalihkan kendali pemain ke laptop.
         public void OpenLaptop()
         {
             if (IsActive || IsEssayComplete) return;
@@ -234,6 +235,7 @@ namespace NoRainbowAfter.Interaction
             RefreshUi();
         }
 
+        // Karakter dibandingkan dengan posisi yang sama pada kalimat target.
         public void ProcessTypedCharacter(char c)
         {
             if (!IsActive) return;
@@ -274,12 +276,14 @@ namespace NoRainbowAfter.Interaction
             RefreshUi();
         }
 
+        // Nilai ketikan saat Enter atau waktu habis, lalu lanjutkan sesuai mode.
         public void SubmitInput(bool fromTimeout = false)
         {
             if (!IsActive) return;
             SubmittedAttempts++;
 
             bool exactMatch = string.Equals(CurrentInput, TargetSentence, StringComparison.OrdinalIgnoreCase);
+            // Pada tugas biasa, kalimat tepat tetap dihitung saat waktu habis. Esai harus dikirim sebelum itu.
             bool passed = exactMatch && (!IsEssay || !fromTimeout);
             float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
             if (!passed) stressBarometer?.AddStress(penalty);
@@ -344,6 +348,7 @@ namespace NoRainbowAfter.Interaction
             SentenceSubmitted?.Invoke(passed);
         }
 
+        // Setelah jumlah kalimat objektif tercapai, simpan flag dan kirim pemberitahuan.
         private void MarkObjectiveProgress()
         {
             if (activeInteractor == null) return;

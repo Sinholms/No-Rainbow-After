@@ -59,7 +59,7 @@ namespace NoRainbowAfter.AI
         }
         private void OnPlayerPoseRestored()
         {
-            // Checkpoint recovery may return the player to the dorm during an encounter.
+            // Saat checkpoint mengembalikan pemain ke kamar, tutup versi lorong horor.
             if (Expanded && !shifting && !OwnsPlayer) LeaveCorridor();
         }
         private void LateUpdate()
@@ -108,7 +108,7 @@ namespace NoRainbowAfter.AI
             if (!OwnsPlayer || shifting || player.IsPaused || player.IsTransitionLocked) return;
             if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
 
-            // Inside hiding wardrobe or while actively breathing, stress stops escalating so player can calm down cleanly.
+            // Kenaikan stres berhenti sementara saat pemain di lemari atau sedang mengatur napas.
             if (player.IsHiding || player.IsBreathing) return;
 
             corridorStressTimer += Mathf.Max(0f, deltaTime);
@@ -119,6 +119,7 @@ namespace NoRainbowAfter.AI
             }
         }
 
+        // Layar ditutup sebelum memindahkan pemain ke lorong horor yang dimuat dari scene yang sama.
         private IEnumerator Shift()
         {
             shifting=true;
@@ -187,14 +188,27 @@ namespace NoRainbowAfter.AI
             Physics.SyncTransforms();
             director.ResetCrossing();
         }
+        // Cari jalur NavMesh lengkap, lalu gunakan belokan berikutnya sebagai tujuan gerak bayangan.
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {
-            NavMeshHit a,b;
-            if(!NavMesh.SamplePosition(from,out a,2f,NavMesh.AllAreas) || !NavMesh.SamplePosition(to,out b,2f,NavMesh.AllAreas)) return from;
-            var path=new NavMeshPath();
-            if(!NavMesh.CalculatePath(a.position,b.position,NavMesh.AllAreas,path) || path.status!=NavMeshPathStatus.PathComplete) return from;
-            foreach(var corner in path.corners) if(Vector3.Distance(new Vector3(from.x,0,from.z),new Vector3(corner.x,0,corner.z))>.2f) return corner;
-            return b.position;
+            if (!NavMesh.SamplePosition(from, out NavMeshHit start, 2f, NavMesh.AllAreas) ||
+                !NavMesh.SamplePosition(to, out NavMeshHit destination, 2f, NavMesh.AllAreas))
+                return from;
+
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(start.position, destination.position, NavMesh.AllAreas, path) ||
+                path.status != NavMeshPathStatus.PathComplete)
+                return from;
+
+            Vector3 floorStart = new Vector3(from.x, 0f, from.z);
+            foreach (var corner in path.corners)
+            {
+                Vector3 floorCorner = new Vector3(corner.x, 0f, corner.z);
+                if (Vector3.Distance(floorStart, floorCorner) > .2f)
+                    return corner;
+            }
+
+            return destination.position;
         }
     }
     public sealed class ChapterOneExitDoor : MonoBehaviour, IInteractable

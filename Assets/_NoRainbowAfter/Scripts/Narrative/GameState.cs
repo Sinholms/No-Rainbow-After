@@ -11,7 +11,7 @@ namespace NoRainbowAfter.Narrative
     public enum ChapterTwoBeat { None, WokeInDorm, StayedInBed, OvertimeRequested, StreetEntered, ShelterReached, BoardedBus }
     [Serializable] internal sealed class ClueDocument { public int schemaVersion; public string[] clueIds; }
 
-    // This stores clues only, not chapter progress or a complete save game.
+    // Koleksi petunjuk disimpan ke disk. Tahap cerita, pilihan, dan tujuan disimpan selama sesi bermain.
     public sealed class GameState
     {
         private readonly HashSet<string> clues = new HashSet<string>(StringComparer.Ordinal);
@@ -41,6 +41,7 @@ namespace NoRainbowAfter.Narrative
 
         internal void ResetChapterForRestart(int chapter)
         {
+            // Restart bab membersihkan progres bab yang dimulai ulang, tetapi tidak menghapus clue terkumpul.
             Chapter2Beat = ChapterTwoBeat.None;
             EllaMessageSent = false;
             if (chapter != 1) return;
@@ -67,6 +68,7 @@ namespace NoRainbowAfter.Narrative
         private void Save()
         {
             if (protectedFile || string.IsNullOrEmpty(path)) return;
+            // Tulis ke berkas sementara dahulu supaya save lama tetap utuh bila penulisan gagal.
             string temp = path + ".tmp";
             try
             {

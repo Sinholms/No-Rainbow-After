@@ -20,6 +20,7 @@ namespace NoRainbowAfter.Narrative
         private void Update()
         {
             if (director == null || interactor == null || director.State == null) return;
+            // Flag interaksi diubah menjadi catatan progres satu kali agar objective tidak tercatat ulang.
             foreach (string flag in KnownFlags)
             {
                 if (flag == "objective.overtime" && !director.HasReadOvertimeSlip) continue;
@@ -59,6 +60,7 @@ namespace NoRainbowAfter.Narrative
 
         private void ShowChapterTwoGuidance(ChapterTwoBeat beat)
         {
+            // Petunjuk mengikuti beat aktif, jadi perubahan beat menjadi sumber progres UI bab 2.
             switch (beat)
             {
                 case ChapterTwoBeat.WokeInDorm:

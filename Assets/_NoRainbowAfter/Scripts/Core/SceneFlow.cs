@@ -7,7 +7,7 @@ namespace NoRainbowAfter.Core
 {
     public enum GameScene { Boot, MainMenu, MasterGameplay, Credits, FirstPersonTest, Chapter1, Chapter2 }
 
-    /// <summary>One persistent owner of guarded, asynchronous scene transitions.</summary>
+    /// <summary>Mengelola perpindahan scene. Objek ini tetap hidup dari menu hingga gameplay.</summary>
     public sealed class SceneFlow : MonoBehaviour
     {
         private static SceneFlow instance;
@@ -51,6 +51,7 @@ namespace NoRainbowAfter.Core
 
         public bool Load(GameScene target)
         {
+            // Klik kedua saat proses muat berjalan harus diabaikan agar hanya satu transisi yang aktif.
             if (IsLoading) return false;
             if (!Enum.IsDefined(typeof(GameScene), target))
             {
@@ -73,6 +74,7 @@ namespace NoRainbowAfter.Core
         {
             IsLoading = true;
             SetStatus("Memuat...");
+            // Pemain bisa keluar dari menu pause. Pulihkan waktu dan kursor sebelum scene berikutnya dibuka.
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;

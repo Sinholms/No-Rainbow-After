@@ -178,7 +178,6 @@ namespace NoRainbowAfter.UI
 
         private void TogglePause()
         {
-            // Document inspection is closed with [F], and laptop minigame is exited with 1x [Tab].
             SetPaused(!IsPaused);
         }
 
@@ -191,6 +190,8 @@ namespace NoRainbowAfter.UI
         {
             bool changed = IsPaused != paused;
             IsPaused = paused;
+            // Hentikan waktu simulasi dan teruskan status jeda ke pengendali pemain.
+            // Animasi panel di Update memakai unscaledDeltaTime supaya menu tetap bergerak.
             Time.timeScale = paused ? 0 : 1;
             if (player != null) player.SetPaused(paused);
             if (pausePanel != null) pausePanel.SetActive(paused);
@@ -237,10 +238,7 @@ namespace NoRainbowAfter.UI
                 {
                     float stress = stressBarometer.CurrentStress;
                     float norm = stressBarometer.NormalizedStress;
-                    string mood = stress >= 80f ? "Tertekan Berat"
-                        : stress >= 65f ? "Tegang"
-                        : stress >= 45f ? "Gelisah"
-                        : "Tenang";
+                    string mood = DescribeStress(stress);
                     stressStatusLabel.text = "Kondisi Mental  ·  " + mood + " (" + Mathf.RoundToInt(stress) + "%)";
                     if (stressFillBar != null)
                         stressFillBar.anchorMax = new Vector2(Mathf.Clamp01(norm), 1f);
@@ -259,6 +257,15 @@ namespace NoRainbowAfter.UI
                     if (stressFillBar != null) stressFillBar.anchorMax = new Vector2(0.25f, 1f);
                 }
             }
+        }
+
+        // Label di menu pause hanya menerjemahkan angka stres yang dihitung StressBarometer.
+        private static string DescribeStress(float stress)
+        {
+            if (stress >= 80f) return "Tertekan Berat";
+            if (stress >= 65f) return "Tegang";
+            if (stress >= 45f) return "Gelisah";
+            return "Tenang";
         }
 
         private string ResolveChapterLabel()

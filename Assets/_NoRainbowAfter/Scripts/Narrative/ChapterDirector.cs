@@ -79,10 +79,13 @@ namespace NoRainbowAfter.Narrative
         private void OnEnable() => Bind();
         private void Start()
         {
+            // Setiap beat menandai satu tahap cerita. Setelah tugas kamar selesai, pemain bisa
+            // keluar dan kembali untuk menemukan slip lembur. Membacanya membuka pertemuan dengan Shadow.
             var mainStorage = pathConfigured ? storagePath : StoragePathOverride ??
                 Path.Combine(Application.persistentDataPath, "clues-v1.json");
             if (pendingRestart.state != null && pendingRestart.chapter == PreviewChapter)
             {
+                // Pakai lagi GameState agar petunjuk yang terkumpul tetap dimiliki saat bab diulang.
                 State = pendingRestart.state;
                 CancelChapterRestart();
                 State.ResetChapterForRestart(PreviewChapter);
@@ -148,6 +151,7 @@ namespace NoRainbowAfter.Narrative
         private void OnInteraction(string id) { if (id == "INT_OVERTIME") RegisterSlip(); }
         private void RegisterSlip()
         {
+            // Slip hanya valid setelah loop pertama (beat 2); clue kedua dicatat sebelum encounter dimulai.
             if (State == null || BeatIndex != 2 || LoopIndex < 1) return;
             State.AddClue("CLUE_02");
             Complete("C1-03", "Raka", "Lembur lagi. Aku hampir lupa.", "c1_slip");
@@ -160,11 +164,11 @@ namespace NoRainbowAfter.Narrative
             else SamplePosition(playerTransform.position.z);
             TryBeginEncounter();
         }
-        // Hysteresis requires an excursion into the corridor and a return to the room.
         public void SamplePosition(float z)
         {
             if (State == null || ChapterOneFinished || BeatIndex > 4 || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
             bool taskReady = interactor != null && (interactor.Flags.Contains("objective.laptop") || interactor.Flags.Contains("objective.book"));
+            // Batas keluar dan masuk berbeda agar langkah kecil di ambang pintu tidak terhitung sebagai satu putaran.
             if (!outside && z >= thresholdZ + 1f && taskReady)
             {
                 outside = true; armed = true; TryBeginEncounter();
@@ -174,7 +178,12 @@ namespace NoRainbowAfter.Narrative
                 outside = false;
                 if (!armed) return;
                 armed = false;
-                if (BeatIndex < 4 && LoopIndex < 3) { LoopIndex++; State.LoopIndex = LoopIndex; LoopChanged?.Invoke(LoopIndex); }
+                if (BeatIndex < 4 && LoopIndex < 3)
+                {
+                    LoopIndex++;
+                    State.LoopIndex = LoopIndex;
+                    LoopChanged?.Invoke(LoopIndex);
+                }
                 if (BeatIndex == 1)
                 {
                     overtimeSlip?.SetAvailable(true);
@@ -185,6 +194,7 @@ namespace NoRainbowAfter.Narrative
         public void ResetCrossing() { outside = false; armed = false; }
         private void TryBeginEncounter()
         {
+            // Encounter hanya berjalan di beat 3/4 ketika pemain berada di lorong dan provider siap.
             if (!isActiveAndEnabled || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop ||
                 (BeatIndex != 3 && BeatIndex != 4) || !outside || encounterBegun || encounter == null || !encounter.IsReady) return;
             encounterBegun = true;
@@ -196,6 +206,7 @@ namespace NoRainbowAfter.Narrative
         }
         private void Resolve(int token, EncounterResponse response)
         {
+            // Abaikan callback lama / respons lain; hanya Fight atau Hide pada beat respons yang sah.
             if (!isActiveAndEnabled || !encounterBegun || resolved || token != generation || BeatIndex != 4 ||
                 (response != EncounterResponse.Fight && response != EncounterResponse.Hide)) return;
             resolved = true; State.Chapter1Response = response;
@@ -206,6 +217,7 @@ namespace NoRainbowAfter.Narrative
         public bool ChapterOneFinished { get; private set; }
         public bool FinishChapterOne()
         {
+            // Setelah tahap keenam, kirim sinyal akhir bab satu kali agar pendengar bisa memulai bab 2.
             if (State == null || BeatIndex < 6 || ChapterOneFinished) return false;
             ChapterOneFinished = true;
             SetStressFloor(2);
@@ -231,6 +243,7 @@ namespace NoRainbowAfter.Narrative
         public bool AdvanceChapterTwo(ChapterTwoBeat next)
         {
             if (!ChapterOneFinished || State == null) return false;
+            // Daftar ini adalah state machine bab 2: hanya perpindahan di bawah yang sah.
             bool allowed = (State.Chapter2Beat, next) switch
             {
                 (ChapterTwoBeat.None, ChapterTwoBeat.WokeInDorm) => true,
@@ -252,6 +265,7 @@ namespace NoRainbowAfter.Narrative
         }
         private void Complete(string id, string speaker, string text, string audio)
         {
+            // Beat bab 1 maju berurutan; cue subtitle/audio mengikuti event yang sama.
             BeatIndex++; State.Chapter1Beat = BeatIndex;
             BeatCompleted?.Invoke(id);
             CueRequested?.Invoke(new NarrativeCue(speaker, text, 4f, audio));

@@ -7,6 +7,8 @@ namespace NoRainbowAfter.Narrative
     {
         public static StoryEnding Resolve(FinalChoice choice, GameState state)
         {
+            // Approach selalu Good. Fight/Hide menjadi Hidden hanya jika pesan Ella terkirim dan CLUE_01..04 ada;
+            // jika tidak, hasilnya Bad. None atau pilihan tak dikenal belum menghasilkan ending.
             if (choice == FinalChoice.Approach) return StoryEnding.Good;
             if (choice != FinalChoice.Fight && choice != FinalChoice.Hide) return StoryEnding.None;
             return state != null && state.EllaMessageSent && state.HasClue("CLUE_01") &&

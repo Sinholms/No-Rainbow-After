@@ -15,7 +15,7 @@ namespace NoRainbowAfter.AI
     }
 
     /// <summary>
-    /// Physics-backed sightline, occlusion, cover concealment, and contextual Fight checks for T06.
+    /// Memeriksa penghalang fisik, persembunyian, dan syarat serangan terhadap bayangan.
     /// </summary>
     public static class ShadowVisibility
     {
@@ -90,7 +90,7 @@ namespace NoRainbowAfter.AI
 
             var cc = motor.GetComponent<CharacterController>();
             float currentHeight = cc != null ? cc.height : (motor.IsCrouched ? 1.1f : 1.8f);
-            // Merely touching CoverZone upright never counts as hiding; crouch posture must be active.
+            // Pemain perlu berada di zona dan sudah cukup rendah untuk dinilai sedang bersembunyi.
             result.IsCrouchedInCover = result.PlayerInsideVolume && motor.IsCrouched && currentHeight <= 1.28f;
             result.IsPhysicallyOccluded = !HasAnyClearSightlineToPlayer(monsterEye, motor, monsterRoot);
 
@@ -103,14 +103,14 @@ namespace NoRainbowAfter.AI
                 ? Vector3.Angle(fwd, toPlayer.normalized)
                 : 0f;
 
-            // Concealment requires crouched occupancy inside a valid CoverZone, plus either solid wall
-            // occlusion or remaining outside the bowed creature's narrow forward gaze as it stalks past.
+            // Saat jongkok di zona, dinding atau posisi di luar sudut pandang bayangan dapat menyembunyikan pemain.
             result.IsConcealedFromMonster = result.IsCrouchedInCover &&
                 (result.IsPhysicallyOccluded || result.AngleFromMonsterGaze > crouchedGazeHalfAngle);
 
             return result;
         }
 
+        // Uji jarak ke permukaan badan, lalu cek apakah kamera membidik salah satu titik pada tubuh bayangan.
         public static bool CanPlayerFightMonster(
             Camera playerCamera,
             Transform playerRoot,

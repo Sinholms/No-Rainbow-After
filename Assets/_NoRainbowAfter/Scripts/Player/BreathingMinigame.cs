@@ -177,7 +177,8 @@ namespace NoRainbowAfter.Player
             Tick(Time.unscaledDeltaTime, holdInhale);
         }
 
-        /// <summary>Deterministic simulation step for breathing rhythm, green-bar stress relief, audio &amp; camera nod.</summary>
+        /// <summary>Menahan tombol menaikkan indikator napas. Melepasnya menurunkan indikator.
+        /// Stres berkurang sesuai waktu yang dihabiskan indikator di zona hijau.</summary>
         public void Tick(float deltaTime, bool holdInhale)
         {
             if (!IsActive) return;
@@ -206,6 +207,7 @@ namespace NoRainbowAfter.Player
             RefreshUi();
         }
 
+        // Target bergerak naik dan turun selama satu siklus napas.
         private float EvaluateTargetCenter(float t)
         {
             float half = BreathCycleDuration * 0.5f;

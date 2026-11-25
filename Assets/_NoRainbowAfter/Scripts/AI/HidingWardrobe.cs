@@ -21,6 +21,7 @@ namespace NoRainbowAfter.AI
             var actor=interactor.GetComponent<FirstPersonPlayer>();
             var motor=interactor.GetComponent<FirstPersonMotor>();
             if(actor == null || motor == null || actor.IsPaused || actor.IsInspecting) return;
+            // Catat apakah pemain terlihat sebelum dipindah ke dalam lemari.
             var monster=FindAnyObjectByType<ShadowEncounterController>();
             bool spotted=monster != null && monster.State==ShadowEncounterState.Pursue &&
                 Vector3.Distance(monster.transform.position,motor.transform.position)<3.1f &&
@@ -34,7 +35,7 @@ namespace NoRainbowAfter.AI
         public bool TryExit()
         {
             if(Occupant == null) { Release(); return true; }
-            // Keep the hiding state if a monster or another solid currently blocks the exit.
+            // Pertahankan status sembunyi bila collider menghalangi titik keluar.
             if(!Occupant.TryRestorePose(transform.TransformPoint(new Vector3(0,.06f,-1.35f)),transform.rotation*Quaternion.Euler(0,180,0),false)) return false;
             Release(); return true;
         }

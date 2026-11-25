@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace NoRainbowAfter.Player
 {
+    // Membaca action Input System sebagai data per frame atau event.
     public sealed class FirstPersonInputSource : IDisposable
     {
         private readonly InputActionAsset ownedAsset;

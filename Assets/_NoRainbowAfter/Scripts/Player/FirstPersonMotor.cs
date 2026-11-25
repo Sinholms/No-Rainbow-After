@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace NoRainbowAfter.Player
 {
+    // Paket input yang dibaca sekali per frame oleh pengendali pemain.
     public struct FirstPersonFrame
     {
         public Vector2 Move;
@@ -124,6 +125,7 @@ namespace NoRainbowAfter.Player
                 return;
             }
 
+            // Jongkok adalah toggle; halangan di atas dapat mencegah pemain berdiri.
             if (input.CrouchPressed) crouchRequested = !crouchRequested;
             bool alreadyLow = controller.height < standingHeight - 0.001f;
             IsCrouched = crouchRequested || (alreadyLow && !CanStand());
@@ -137,7 +139,7 @@ namespace NoRainbowAfter.Player
                 controller.height >= standingHeight - 0.02f && !exhausted && StaminaSeconds > 0f;
             float speed = IsCrouched ? crouchSpeed : sprint ? sprintSpeed : walkSpeed;
 
-            // Severe stress introduces a slight uneven heavy-step drag and unsteady lateral drift while walking.
+            // Saat stres tinggi, irama langkah memperlambat gerak dan membuat Raka sedikit oleng.
             float limpFactor = stress > StressLimpOnset
                 ? Mathf.InverseLerp(StressLimpOnset, StressBarometer.MaxStress, stress)
                 : 0f;
@@ -151,7 +153,7 @@ namespace NoRainbowAfter.Player
                 target += perp * weave;
             }
 
-            // Starting to move feels heavier under high stress while stopping remains crisp.
+            // Stres mengurangi percepatan saat pemain mulai melangkah.
             float accelScale = move.sqrMagnitude > .01f ? MovementScale * Mathf.Lerp(1f, 0.70f, StressGaitIntensity) : 1f;
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * accelScale * dt);
             if (controller.isGrounded && verticalVelocity < 0) verticalVelocity = -2f;
@@ -161,6 +163,7 @@ namespace NoRainbowAfter.Player
             if ((flags & CollisionFlags.Above) != 0 && verticalVelocity > 0) verticalVelocity = 0;
             if ((flags & CollisionFlags.Below) != 0 && verticalVelocity < 0) verticalVelocity = -2f;
 
+            // Stamina sprint berkurang ketika pemain benar-benar berpindah.
             Vector3 travelled = transform.position - before;
             travelled.y = 0;
             float actualSpeed = travelled.magnitude / dt;

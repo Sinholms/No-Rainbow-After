@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace NoRainbowAfter.Player
 {
+    // Menghubungkan input dan motor; status UI menentukan kapan pemain boleh bergerak.
     [RequireComponent(typeof(FirstPersonMotor))]
     public sealed class FirstPersonPlayer : MonoBehaviour
     {
@@ -122,6 +123,7 @@ namespace NoRainbowAfter.Player
             ApplyInputAndCursorState();
         }
 
+        // Input global tetap tersedia saat peta gameplay dimatikan untuk mode lain.
         private void ApplyInputAndCursorState()
         {
             input?.SetGameplayEnabled(!IsPaused && !IsInspecting && !IsUsingLaptop && !IsBreathing && !IsTransitionLocked);
