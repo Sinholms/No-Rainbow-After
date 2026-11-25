@@ -21,7 +21,10 @@ namespace NoRainbowAfter.Editor
         private const string Root = "Assets/_NoRainbowAfter/";
         private const string ArtPath = Root + "Art/Textures/Menu/T_Menu_KosRain_v1.png";
         private const string RainAudioPath = Root + "Audio/Ambience/AUD_KosRain.wav";
-        private const string FontPath = Root + "UI/Fonts/CrimsonText/CrimsonText-Regular.ttf";
+        private const string TitleFontPath = Root + "UI/Fonts/RubikDistressed/RubikDistressed-Regular.ttf";
+        private const string NavFontPath = Root + "UI/Fonts/AmaticSC/AmaticSC-Bold.ttf";
+        private const string BodyFontPath = Root + "UI/Fonts/BarlowCondensed/BarlowCondensed-Medium.ttf";
+        private const string BodyBoldFontPath = Root + "UI/Fonts/BarlowCondensed/BarlowCondensed-SemiBold.ttf";
         private const string SpriteDir = Root + "UI/Sprites/";
         private const string MenuAtmosphereMatPath = Root + "Art/Materials/MAT_MenuAtmosphere.mat";
         private const string PauseScrimMatPath = Root + "Art/Materials/MAT_PauseScrim.mat";
@@ -40,15 +43,12 @@ namespace NoRainbowAfter.Editor
         private static readonly Color SliderTrackCol = new Color(0.22f, 0.34f, 0.40f, 0.52f);
         private static readonly Color SliderFillCol = new Color(0.87f, 0.71f, 0.46f, 0.94f);
 
-        private static Font uiSansFont;
-        private static Font SansFont
+        private sealed class UiFonts
         {
-            get
-            {
-                if (uiSansFont == null)
-                    uiSansFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                return uiSansFont;
-            }
+            public Font TitleFont;
+            public Font NavFont;
+            public Font BodyFont;
+            public Font BodyBoldFont;
         }
 
         private sealed class UiSprites
@@ -59,6 +59,7 @@ namespace NoRainbowAfter.Editor
             public Sprite SliderKnob;
             public Sprite ToggleRing;
             public Sprite Checkmark;
+            public Sprite CheckboxBox;
         }
 
         [MenuItem("No Rainbow After/Apply Menu & Pause UI Redesign")]
@@ -71,9 +72,7 @@ namespace NoRainbowAfter.Editor
                     throw new InvalidOperationException("Save open scenes before applying menu UI redesign.");
 
             UiSprites sprites = EnsureUiSprites();
-            Font font = AssetDatabase.LoadAssetAtPath<Font>(FontPath);
-            if (font == null)
-                throw new InvalidOperationException("Missing licensed font at " + FontPath);
+            UiFonts fonts = LoadUiFonts();
 
             Material menuWeatherMat = EnsureMaterial(MenuAtmosphereMatPath, "NoRainbowAfter/UI/MenuAtmosphere");
 
@@ -87,15 +86,35 @@ namespace NoRainbowAfter.Editor
             settingsScrimMat.SetFloat("_StressLevel", 0.25f);
             EditorUtility.SetDirty(settingsScrimMat);
 
-            ApplyMainMenu(font, sprites, menuWeatherMat, settingsScrimMat);
-            ApplyPauseScene(SceneFlow.PathFor(GameScene.MasterGameplay), font, sprites, pauseScrimMat, hasCheckpointAndQuality: true);
-            ApplyPauseScene(SceneFlow.PathFor(GameScene.FirstPersonTest), font, sprites, pauseScrimMat, hasCheckpointAndQuality: false);
+            ApplyMainMenu(fonts, sprites, menuWeatherMat, settingsScrimMat);
+            ApplyPauseScene(SceneFlow.PathFor(GameScene.MasterGameplay), fonts, sprites, pauseScrimMat, hasCheckpointAndQuality: true);
+            ApplyPauseScene(SceneFlow.PathFor(GameScene.FirstPersonTest), fonts, sprites, pauseScrimMat, hasCheckpointAndQuality: false);
 
             AssetDatabase.SaveAssets();
-            Debug.Log("[NRA] Organic wet-rain and creeping-shadow Main Menu and Pause Menu redesign applied cleanly.");
+            Debug.Log("[NRA] Reference-inspired distressed title, organic hand-lettered navigation/objective, and hairline UI redesign applied cleanly.");
         }
 
-        private static void ApplyMainMenu(Font font, UiSprites sprites, Material weatherMat, Material settingsScrimMat)
+        private static UiFonts LoadUiFonts()
+        {
+            Font titleFont = AssetDatabase.LoadAssetAtPath<Font>(TitleFontPath);
+            Font navFont = AssetDatabase.LoadAssetAtPath<Font>(NavFontPath);
+            Font bodyFont = AssetDatabase.LoadAssetAtPath<Font>(BodyFontPath);
+            Font bodyBoldFont = AssetDatabase.LoadAssetAtPath<Font>(BodyBoldFontPath);
+            if (titleFont == null || navFont == null || bodyFont == null || bodyBoldFont == null)
+            {
+                throw new InvalidOperationException(
+                    $"Missing required UI font(s): Title={TitleFontPath} ({titleFont != null}), Nav={NavFontPath} ({navFont != null}), Body={BodyFontPath} ({bodyFont != null}), BodyBold={BodyBoldFontPath} ({bodyBoldFont != null}).");
+            }
+            return new UiFonts
+            {
+                TitleFont = titleFont,
+                NavFont = navFont,
+                BodyFont = bodyFont,
+                BodyBoldFont = bodyBoldFont
+            };
+        }
+
+        private static void ApplyMainMenu(UiFonts fonts, UiSprites sprites, Material weatherMat, Material settingsScrimMat)
         {
             AssetDatabase.ImportAsset(ArtPath);
             var artwork = AssetDatabase.LoadAssetAtPath<Texture2D>(ArtPath);
@@ -151,25 +170,25 @@ namespace NoRainbowAfter.Editor
             {
                 eyebrowTr.gameObject.SetActive(true);
                 Text eyebrow = eyebrowTr.GetComponent<Text>();
-                StyleText(eyebrow, SansFont, 15, ColdMist, TextAnchor.MiddleLeft, true);
+                StyleText(eyebrow, fonts.BodyBoldFont, 17, ColdMist, TextAnchor.MiddleLeft, true);
                 eyebrow.text = "HOROR PSIKOLOGIS   ·   ORANG PERTAMA";
-                PlaceMenuLeft(eyebrow.rectTransform, 368f, new Vector2(620f, 30f), 16f);
+                PlaceMenuLeft(eyebrow.rectTransform, 376f, new Vector2(620f, 30f), 16f);
             }
 
             Image eyebrowAccent = UpsertImage(content, "EyebrowAccent", null, DoorwayAmber);
-            PlaceMenuLeft(eyebrowAccent.rectTransform, 368f, new Vector2(2.5f, 15f), 0f);
+            PlaceMenuLeft(eyebrowAccent.rectTransform, 376f, new Vector2(2.5f, 15f), 0f);
             eyebrowAccent.raycastTarget = false;
 
             Text title = content.Find("Title").GetComponent<Text>();
-            StyleText(title, font, 80, IvoryInk, TextAnchor.MiddleLeft, true);
+            StyleText(title, fonts.TitleFont, 74, IvoryInk, TextAnchor.MiddleLeft, true);
             title.text = "NO RAINBOW\nAFTER";
-            title.lineSpacing = 0.88f;
-            PlaceMenuLeft(title.rectTransform, 246f, new Vector2(660f, 186f));
+            title.lineSpacing = 0.90f;
+            PlaceMenuLeft(title.rectTransform, 248f, new Vector2(720f, 196f));
             var titleShadow = title.GetComponent<Shadow>();
             if (titleShadow != null)
             {
-                titleShadow.effectColor = new Color(0.0f, 0.01f, 0.02f, 0.90f);
-                titleShadow.effectDistance = new Vector2(2f, -3f);
+                titleShadow.effectColor = new Color(0.0f, 0.01f, 0.02f, 0.92f);
+                titleShadow.effectDistance = new Vector2(2.5f, -3.5f);
             }
 
             Transform ruleTr = content.Find("TitleRule");
@@ -183,24 +202,24 @@ namespace NoRainbowAfter.Editor
                 PlaceMenuLeft(ruleImg.rectTransform, 144f, new Vector2(310f, 2f));
             }
 
-            Text tagline = UpsertText(content, "TitleTagline", font, 21, new Color(0.70f, 0.80f, 0.84f, 0.95f), TextAnchor.MiddleLeft, true);
+            Text tagline = UpsertText(content, "TitleTagline", fonts.BodyFont, 22, new Color(0.75f, 0.83f, 0.86f, 0.95f), TextAnchor.MiddleLeft, true);
             tagline.text = "Di balik pintu yang terbuka, hujan tak pernah benar-benar reda.";
-            PlaceMenuLeft(tagline.rectTransform, 112f, new Vector2(640f, 36f));
+            PlaceMenuLeft(tagline.rectTransform, 112f, new Vector2(660f, 36f));
 
             // 3. Navigation Stack (feathered smoky mist focus — zero boxes!)
-            StyleEditorialButton(content.Find("NewGameButton").GetComponent<Button>(), "Mulai Baru", font, sprites, 20f, 440f, 54f, 32, false);
-            StyleEditorialButton(content.Find("ContinueButton").GetComponent<Button>(), "Lanjutkan", font, sprites, -42f, 440f, 54f, 32, false);
-            StyleEditorialButton(content.Find("SettingsButton").GetComponent<Button>(), "Pengaturan", font, sprites, -104f, 440f, 54f, 32, false);
-            StyleEditorialButton(content.Find("CreditsButton").GetComponent<Button>(), "Kredit", font, sprites, -166f, 440f, 54f, 32, false);
-            StyleEditorialButton(content.Find("QuitButton").GetComponent<Button>(), "Keluar", font, sprites, -228f, 440f, 54f, 32, true);
+            StyleEditorialButton(content.Find("NewGameButton").GetComponent<Button>(), "Mulai Baru", fonts.NavFont, sprites, 22f, 460f, 56f, 44, false);
+            StyleEditorialButton(content.Find("ContinueButton").GetComponent<Button>(), "Lanjutkan", fonts.NavFont, sprites, -40f, 460f, 56f, 44, false);
+            StyleEditorialButton(content.Find("SettingsButton").GetComponent<Button>(), "Pengaturan", fonts.NavFont, sprites, -102f, 460f, 56f, 44, false);
+            StyleEditorialButton(content.Find("CreditsButton").GetComponent<Button>(), "Kredit", fonts.NavFont, sprites, -164f, 460f, 56f, 44, false);
+            StyleEditorialButton(content.Find("QuitButton").GetComponent<Button>(), "Keluar", fonts.NavFont, sprites, -226f, 460f, 56f, 44, true);
 
             Text hint = content.Find("SaveHint").GetComponent<Text>();
-            StyleText(hint, SansFont, 15, MutedSlate, TextAnchor.MiddleLeft, true);
+            StyleText(hint, fonts.BodyFont, 18, MutedSlate, TextAnchor.MiddleLeft, true);
             hint.text = "Belum ada permainan tersimpan.";
             PlaceMenuLeft(hint.rectTransform, -296f, new Vector2(540f, 30f), 20f);
 
             Text status = content.Find("LoadingStatus").GetComponent<Text>();
-            StyleText(status, SansFont, 17, DoorwayAmber, TextAnchor.MiddleLeft, true);
+            StyleText(status, fonts.BodyBoldFont, 20, DoorwayAmber, TextAnchor.MiddleLeft, true);
             PlaceMenuLeft(status.rectTransform, -344f, new Vector2(640f, 36f), 20f);
 
             Image footerRule = UpsertImage(content, "FooterRule", sprites.SoftRule, new Color(0.45f, 0.62f, 0.69f, 0.42f));
@@ -208,18 +227,18 @@ namespace NoRainbowAfter.Editor
             footerRule.raycastTarget = false;
 
             Text footer = content.Find("Footer").GetComponent<Text>();
-            StyleText(footer, SansFont, 14, MutedSlate, TextAnchor.MiddleLeft, true);
-            footer.text = "↑ ↓  Navigasi      ·      Enter  Pilih      ·      Esc  Kembali";
+            StyleText(footer, fonts.BodyFont, 17, MutedSlate, TextAnchor.MiddleLeft, true);
+            footer.text = "W / S / Panah  Navigasi      ·      Enter  Pilih      ·      Esc  Kembali";
             PlaceMenuLeft(footer.rectTransform, -464f, new Vector2(660f, 32f));
 
-            Text edition = UpsertText(content, "EditionStamp", SansFont, 13, new Color(0.62f, 0.74f, 0.79f, 0.78f), TextAnchor.MiddleRight, true);
+            Text edition = UpsertText(content, "EditionStamp", fonts.BodyBoldFont, 15, new Color(0.62f, 0.74f, 0.79f, 0.78f), TextAnchor.MiddleRight, true);
             edition.text = "NO RAINBOW AFTER   ·   BAB I–III";
             edition.rectTransform.anchorMin = edition.rectTransform.anchorMax = new Vector2(0.94f, 0.07f);
             edition.rectTransform.pivot = new Vector2(1f, 0.5f);
             edition.rectTransform.anchoredPosition = Vector2.zero;
             edition.rectTransform.sizeDelta = new Vector2(420f, 28f);
 
-            // 4. Organic Box-Free SettingsPanel (floating directly over translucent wet-rain + shadow scrim!)
+            // 4. Organic Hairline SettingsPanel (floating over translucent wet-rain + shadow scrim with minimal Ref-2 hairline frame)
             Transform settings = canvas.transform.Find("SettingsPanel");
             if (settings == null) settings = content.Find("SettingsPanel");
             if (settings == null) throw new InvalidOperationException("SettingsPanel missing in MainMenu.");
@@ -247,60 +266,64 @@ namespace NoRainbowAfter.Editor
             settingsScrimImg.color = Color.white;
             settingsScrimImg.transform.SetAsFirstSibling();
 
-            Text settingsEyebrow = UpsertText(settings, "SettingsEyebrow", SansFont, 14, ColdMist, TextAnchor.MiddleLeft, true);
+            // Remove any hairline frame box so SettingsPanel stays completely box-free
+            Transform oldSettingsFrame = settings.Find("SettingsHairlineFrame");
+            if (oldSettingsFrame != null) UnityEngine.Object.DestroyImmediate(oldSettingsFrame.gameObject);
+
+            Text settingsEyebrow = UpsertText(settings, "SettingsEyebrow", fonts.BodyBoldFont, 17, ColdMist, TextAnchor.MiddleLeft, true);
             settingsEyebrow.text = "NO RAINBOW AFTER   ·   SISTEM";
-            PlaceMenuLeft(settingsEyebrow.rectTransform, 316f, new Vector2(640f, 26f), 16f);
+            PlaceMenuLeft(settingsEyebrow.rectTransform, 326f, new Vector2(640f, 26f), 16f);
 
             Image settingsEyebrowBar = UpsertImage(settings, "SettingsEyebrowAccent", null, DoorwayAmber);
-            PlaceMenuLeft(settingsEyebrowBar.rectTransform, 316f, new Vector2(2.5f, 14f), 0f);
+            PlaceMenuLeft(settingsEyebrowBar.rectTransform, 326f, new Vector2(2.5f, 14f), 0f);
             settingsEyebrowBar.raycastTarget = false;
 
             Text settingsTitle = settings.Find("SettingsTitle").GetComponent<Text>();
-            StyleText(settingsTitle, font, 56, IvoryInk, TextAnchor.MiddleLeft, true);
-            settingsTitle.text = "Pengaturan";
-            PlaceMenuLeft(settingsTitle.rectTransform, 264f, new Vector2(640f, 70f));
+            StyleText(settingsTitle, fonts.TitleFont, 50, IvoryInk, TextAnchor.MiddleLeft, true);
+            settingsTitle.text = "PENGATURAN";
+            PlaceMenuLeft(settingsTitle.rectTransform, 270f, new Vector2(680f, 70f));
 
             Image settingsRule = UpsertImage(settings, "SettingsRule", sprites.SoftRule, new Color(DoorwayAmber.r, DoorwayAmber.g, DoorwayAmber.b, 0.86f));
-            PlaceMenuLeft(settingsRule.rectTransform, 212f, new Vector2(280f, 2f));
+            PlaceMenuLeft(settingsRule.rectTransform, 218f, new Vector2(280f, 2f));
             settingsRule.raycastTarget = false;
 
-            Text settingsSub = UpsertText(settings, "SettingsSubtitle", font, 20, ColdMist, TextAnchor.MiddleLeft, true);
+            Text settingsSub = UpsertText(settings, "SettingsSubtitle", fonts.BodyFont, 22, ColdMist, TextAnchor.MiddleLeft, true);
             settingsSub.text = "Sesuaikan audio dan kualitas visual sebelum memasuki malam.";
-            PlaceMenuLeft(settingsSub.rectTransform, 176f, new Vector2(640f, 34f));
+            PlaceMenuLeft(settingsSub.rectTransform, 182f, new Vector2(640f, 34f));
 
             Text masterLabel = settings.Find("MasterLabel").GetComponent<Text>();
-            StyleText(masterLabel, font, 28, SoftPaper, TextAnchor.MiddleLeft, true);
+            StyleText(masterLabel, fonts.BodyBoldFont, 24, SoftPaper, TextAnchor.MiddleLeft, true);
             masterLabel.text = "Volume Utama";
             PlaceMenuLeft(masterLabel.rectTransform, 102f, new Vector2(440f, 40f));
 
             Text valueLabel = settings.Find("VolumeValue").GetComponent<Text>();
-            StyleText(valueLabel, SansFont, 20, DoorwayAmber, TextAnchor.MiddleRight, true);
+            StyleText(valueLabel, fonts.BodyBoldFont, 22, DoorwayAmber, TextAnchor.MiddleRight, true);
             PlaceMenuLeft(valueLabel.rectTransform, 102f, new Vector2(180f, 40f), 440f);
 
             Slider masterSlider = settings.Find("MasterVolumeSlider").GetComponent<Slider>();
             PlaceMenuLeft((RectTransform)masterSlider.transform, 52f, new Vector2(620f, 30f));
             StyleSlider(masterSlider, sprites);
 
-            Text qualitySection = UpsertText(settings, "QualitySectionLabel", font, 28, SoftPaper, TextAnchor.MiddleLeft, true);
+            Text qualitySection = UpsertText(settings, "QualitySectionLabel", fonts.BodyBoldFont, 24, SoftPaper, TextAnchor.MiddleLeft, true);
             qualitySection.text = "Kualitas Grafis";
             PlaceMenuLeft(qualitySection.rectTransform, -26f, new Vector2(620f, 40f));
 
-            Text qualityPreset = UpsertText(settings, "QualityPresetLabel", SansFont, 15, ColdMist, TextAnchor.MiddleLeft, true);
+            Text qualityPreset = UpsertText(settings, "QualityPresetLabel", fonts.BodyFont, 18, ColdMist, TextAnchor.MiddleLeft, true);
             qualityPreset.text = "Kualitas Grafis  —  Tinggi";
             PlaceMenuLeft(qualityPreset.rectTransform, -60f, new Vector2(620f, 28f));
 
             // Borderless floating horror quality tabs (ZERO rectangular boxes!)
-            Button lowBtn = StyleOrganicQualityTab(settings.Find("QualityLowButton").GetComponent<Button>(), "Rendah", font, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -118f), new Vector2(190f, 48f));
-            Button medBtn = StyleOrganicQualityTab(settings.Find("QualityMediumButton").GetComponent<Button>(), "Sedang", font, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(215f, -118f), new Vector2(190f, 48f));
-            Button highBtn = StyleOrganicQualityTab(settings.Find("QualityHighButton").GetComponent<Button>(), "Tinggi", font, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(430f, -118f), new Vector2(190f, 48f));
+            Button lowBtn = StyleOrganicQualityTab(settings.Find("QualityLowButton").GetComponent<Button>(), "Rendah", fonts.BodyBoldFont, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, -118f), new Vector2(190f, 48f));
+            Button medBtn = StyleOrganicQualityTab(settings.Find("QualityMediumButton").GetComponent<Button>(), "Sedang", fonts.BodyBoldFont, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(215f, -118f), new Vector2(190f, 48f));
+            Button highBtn = StyleOrganicQualityTab(settings.Find("QualityHighButton").GetComponent<Button>(), "Tinggi", fonts.BodyBoldFont, sprites, new Vector2(0.075f, 0.5f), new Vector2(0f, 0.5f), new Vector2(430f, -118f), new Vector2(190f, 48f));
 
             Button backBtn = settings.Find("SettingsBackButton").GetComponent<Button>();
-            StyleEditorialButton(backBtn, "Kembali", font, sprites, -222f, 360f, 54f, 30, false);
+            StyleEditorialButton(backBtn, "Kembali", fonts.NavFont, sprites, -224f, 360f, 56f, 42, false);
 
             Text settingsHint = settings.Find("SettingsHint").GetComponent<Text>();
-            StyleText(settingsHint, SansFont, 14, MutedSlate, TextAnchor.MiddleLeft, true);
+            StyleText(settingsHint, fonts.BodyFont, 17, MutedSlate, TextAnchor.MiddleLeft, true);
             settingsHint.text = "ESC   ·   Kembali ke Menu Utama";
-            PlaceMenuLeft(settingsHint.rectTransform, -288f, new Vector2(620f, 30f), 20f);
+            PlaceMenuLeft(settingsHint.rectTransform, -290f, new Vector2(620f, 30f), 20f);
 
             // Smooth dark intro fade overlay
             Image introFade = UpsertImage(canvas.transform, "IntroFadeOverlay", null, new Color(VoidSlate.r, VoidSlate.g, VoidSlate.b, 0f));
@@ -323,7 +346,7 @@ namespace NoRainbowAfter.Editor
                 throw new InvalidOperationException("Failed to save redesigned MainMenu.unity.");
         }
 
-        private static void ApplyPauseScene(string scenePath, Font font, UiSprites sprites, Material pauseScrimMat, bool hasCheckpointAndQuality)
+        private static void ApplyPauseScene(string scenePath, UiFonts fonts, UiSprites sprites, Material pauseScrimMat, bool hasCheckpointAndQuality)
         {
             if (!File.Exists(scenePath)) return;
 
@@ -364,18 +387,20 @@ namespace NoRainbowAfter.Editor
             scrimImg.color = Color.white;
             scrimImg.transform.SetAsFirstSibling();
 
-            // Remove old boxy PauseSettingsCard rectangle completely!
+            // Remove old boxy PauseSettingsCard / PauseSettingsFrame completely!
+            Transform oldSettingsFrame = pause.Find("PauseSettingsFrame");
+            if (oldSettingsFrame != null) UnityEngine.Object.DestroyImmediate(oldSettingsFrame.gameObject);
             Transform oldRightCard = pause.Find("PauseSettingsCard");
             if (oldRightCard != null) UnityEngine.Object.DestroyImmediate(oldRightCard.gameObject);
 
             // Convert PauseControlsCard & PauseContextCard into 100% invisible borderless containers (ZERO boxes!)
             Transform controlsContainer = MakeBorderlessContainer(pause, "PauseControlsCard", new Vector2(-505f, -206f), new Vector2(450f, 250f));
             controlsContainer.SetSiblingIndex(1);
-            PopulateControlsLegend(controlsContainer, sprites);
+            PopulateControlsLegend(controlsContainer, fonts, sprites);
 
             Transform contextContainer = MakeBorderlessContainer(pause, "PauseContextCard", new Vector2(510f, 406f), new Vector2(440f, 92f));
             contextContainer.SetSiblingIndex(2);
-            BuildContextReadout(contextContainer, sprites, out Text chapterStatusLabel, out Text stressStatusLabel, out RectTransform stressFillBar, out Image stressFillImg);
+            BuildContextReadout(contextContainer, fonts, sprites, out Text chapterStatusLabel, out Text stressStatusLabel, out RectTransform stressFillBar, out Image stressFillImg);
 
             // Delicate fading mist hairlines (never closed boxes!)
             Image headerLine = UpsertImage(pause, "PauseHeaderRule", sprites.SoftRule, new Color(0.45f, 0.62f, 0.69f, 0.28f));
@@ -394,7 +419,7 @@ namespace NoRainbowAfter.Editor
             footerLine.transform.SetSiblingIndex(5);
 
             // Layer 2: Top Header
-            Text eyebrow = UpsertText(pause, "PauseEyebrow", SansFont, 14, ColdMist, TextAnchor.MiddleLeft, true);
+            Text eyebrow = UpsertText(pause, "PauseEyebrow", fonts.BodyBoldFont, 17, ColdMist, TextAnchor.MiddleLeft, true);
             eyebrow.text = "JEDA PERMAINAN   ·   NO RAINBOW AFTER";
             PlaceCenterLeft(eyebrow.rectTransform, new Vector2(-714f, 444f), new Vector2(560f, 26f));
 
@@ -403,7 +428,7 @@ namespace NoRainbowAfter.Editor
             eyebrowBar.raycastTarget = false;
 
             Text pauseTitle = pause.Find("PauseTitle").GetComponent<Text>();
-            StyleText(pauseTitle, font, 60, IvoryInk, TextAnchor.MiddleLeft, true);
+            StyleText(pauseTitle, fonts.TitleFont, 56, IvoryInk, TextAnchor.MiddleLeft, true);
             pauseTitle.text = "JEDA";
             PlaceCenterLeft(pauseTitle.rectTransform, new Vector2(-730f, 392f), new Vector2(520f, 70f));
 
@@ -412,29 +437,29 @@ namespace NoRainbowAfter.Editor
             titleAccentRule.raycastTarget = false;
 
             // Layer 3: Left Column — Floating Actions (x = -730 .. -240, leaving open dark mist center for the lurking shadow!)
-            Text actionsHeader = UpsertText(pause, "ActionsSectionHeader", SansFont, 14, ColdMist, TextAnchor.MiddleLeft, true);
+            Text actionsHeader = UpsertText(pause, "ActionsSectionHeader", fonts.BodyBoldFont, 18, ColdMist, TextAnchor.MiddleLeft, true);
             actionsHeader.text = "TINDAKAN";
             PlaceCenterLeft(actionsHeader.rectTransform, new Vector2(-730f, 286f), new Vector2(460f, 26f));
 
             Button resumeBtn = pause.Find("ResumeButton").GetComponent<Button>();
-            StylePauseActionButton(resumeBtn, "Lanjutkan Permainan", font, sprites, new Vector2(-730f, 224f), new Vector2(460f, 58f), 31, false);
+            StylePauseActionButton(resumeBtn, "Lanjutkan Permainan", fonts.NavFont, sprites, new Vector2(-730f, 224f), new Vector2(480f, 58f), 40, false);
 
             Transform checkpointTr = pause.Find("CheckpointButton");
             float menuBtnY = 152f;
             if (checkpointTr != null)
             {
-                StylePauseActionButton(checkpointTr.GetComponent<Button>(), "Kembali ke Titik Awal", font, sprites, new Vector2(-730f, 152f), new Vector2(460f, 56f), 29, false);
+                StylePauseActionButton(checkpointTr.GetComponent<Button>(), "Kembali ke Titik Awal", fonts.NavFont, sprites, new Vector2(-730f, 152f), new Vector2(480f, 58f), 40, false);
                 menuBtnY = 80f;
             }
 
             Button menuBtn = pause.Find("ReturnToMenuButton").GetComponent<Button>();
-            StylePauseActionButton(menuBtn, "Kembali ke Menu Utama", font, sprites, new Vector2(-730f, menuBtnY), new Vector2(460f, 56f), 29, true);
+            StylePauseActionButton(menuBtn, "Kembali ke Menu Utama", fonts.NavFont, sprites, new Vector2(-730f, menuBtnY), new Vector2(480f, 58f), 40, true);
 
-            // Layer 4: Right Column — Floating Controls over dark shadow (x = +84 .. +730, width = 646 — zero box!)
+            // Layer 4: Right Column — Floating Controls inside Ref-2 hairline frame (x = +84 .. +730, width = 646)
             const float rightX = 84f;
             const float rightW = 646f;
 
-            Text settingsHeader = UpsertText(pause, "SettingsSectionHeader", SansFont, 14, ColdMist, TextAnchor.MiddleLeft, true);
+            Text settingsHeader = UpsertText(pause, "SettingsSectionHeader", fonts.BodyBoldFont, 18, ColdMist, TextAnchor.MiddleLeft, true);
             settingsHeader.text = "PENGATURAN KONTROL & VISUAL";
             PlaceCenterLeft(settingsHeader.rectTransform, new Vector2(rightX, 286f), new Vector2(rightW, 26f));
 
@@ -443,7 +468,7 @@ namespace NoRainbowAfter.Editor
             settingsHeaderRule.raycastTarget = false;
 
             // Master Volume
-            Text volLabel = UpsertText(pause, "MasterVolumeLabel", SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+            Text volLabel = UpsertText(pause, "MasterVolumeLabel", fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
             volLabel.text = "Volume utama  80%";
             PlaceCenterLeft(volLabel.rectTransform, new Vector2(rightX, 222f), new Vector2(rightW, 30f));
 
@@ -453,7 +478,7 @@ namespace NoRainbowAfter.Editor
 
             // Sensitivity
             Text sensLabel = pause.Find("SensitivityLabel").GetComponent<Text>();
-            StyleText(sensLabel, SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+            StyleText(sensLabel, fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
             sensLabel.text = "Sensitivitas mouse  0.08";
             PlaceCenterLeft(sensLabel.rectTransform, new Vector2(rightX, 134f), new Vector2(rightW, 30f));
 
@@ -463,7 +488,7 @@ namespace NoRainbowAfter.Editor
 
             // FOV
             Text fovLabel = pause.Find("FovLabel").GetComponent<Text>();
-            StyleText(fovLabel, SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+            StyleText(fovLabel, fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
             fovLabel.text = "Bidang pandang  75°";
             PlaceCenterLeft(fovLabel.rectTransform, new Vector2(rightX, 46f), new Vector2(rightW, 30f));
 
@@ -477,7 +502,7 @@ namespace NoRainbowAfter.Editor
             if (viewRadiusLabelTr != null && viewRadiusSliderTr != null)
             {
                 Text vrLabel = viewRadiusLabelTr.GetComponent<Text>();
-                StyleText(vrLabel, SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+                StyleText(vrLabel, fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
                 vrLabel.text = "Lebar pandang  50%";
                 PlaceCenterLeft(vrLabel.rectTransform, new Vector2(rightX, -42f), new Vector2(rightW, 30f));
 
@@ -495,7 +520,7 @@ namespace NoRainbowAfter.Editor
             if (toggleCapTr != null)
             {
                 Text capText = toggleCapTr.GetComponent<Text>();
-                StyleText(capText, SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+                StyleText(capText, fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
                 capText.text = "Tepi pandangan melingkar";
                 PlaceCenterLeft(capText.rectTransform, new Vector2(rightX + 42f, -134f), new Vector2(rightW - 42f, 34f));
             }
@@ -507,7 +532,7 @@ namespace NoRainbowAfter.Editor
                 if (qLabelTr != null)
                 {
                     Text qLabel = qLabelTr.GetComponent<Text>();
-                    StyleText(qLabel, SansFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
+                    StyleText(qLabel, fonts.BodyFont, 21, SoftPaper, TextAnchor.MiddleLeft, true);
                     qLabel.text = "Kualitas grafis  —  Tinggi";
                     PlaceCenterLeft(qLabel.rectTransform, new Vector2(rightX, -196f), new Vector2(rightW, 30f));
                 }
@@ -515,14 +540,14 @@ namespace NoRainbowAfter.Editor
                 Transform qLow = pause.Find("QualityLowButton");
                 Transform qMed = pause.Find("QualityMediumButton");
                 Transform qHigh = pause.Find("QualityHighButton");
-                // Three evenly spaced floating serif tabs spanning rightX (84) .. rightX + 646 (730)
-                if (qLow != null) StyleOrganicQualityTab(qLow.GetComponent<Button>(), "Rendah", font, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 100f, -252f), new Vector2(200f, 48f));
-                if (qMed != null) StyleOrganicQualityTab(qMed.GetComponent<Button>(), "Sedang", font, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 323f, -252f), new Vector2(200f, 48f));
-                if (qHigh != null) StyleOrganicQualityTab(qHigh.GetComponent<Button>(), "Tinggi", font, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 546f, -252f), new Vector2(200f, 48f));
+                // Three evenly spaced floating tabs spanning rightX (84) .. rightX + 646 (730)
+                if (qLow != null) StyleOrganicQualityTab(qLow.GetComponent<Button>(), "Rendah", fonts.BodyBoldFont, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 100f, -252f), new Vector2(200f, 48f));
+                if (qMed != null) StyleOrganicQualityTab(qMed.GetComponent<Button>(), "Sedang", fonts.BodyBoldFont, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 323f, -252f), new Vector2(200f, 48f));
+                if (qHigh != null) StyleOrganicQualityTab(qHigh.GetComponent<Button>(), "Tinggi", fonts.BodyBoldFont, sprites, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(rightX + 546f, -252f), new Vector2(200f, 48f));
             }
 
             // Bottom Footer
-            Text footer = UpsertText(pause, "PauseFooter", SansFont, 14, MutedSlate, TextAnchor.MiddleLeft, true);
+            Text footer = UpsertText(pause, "PauseFooter", fonts.BodyFont, 17, MutedSlate, TextAnchor.MiddleLeft, true);
             footer.text = "ESC  Lanjutkan Permainan       ·       Perubahan pengaturan disimpan otomatis";
             PlaceCenterLeft(footer.rectTransform, new Vector2(-730f, -454f), new Vector2(1460f, 30f));
 
@@ -535,11 +560,72 @@ namespace NoRainbowAfter.Editor
             AssignObjectRef(session, "stressFillBar", stressFillBar);
             AssignObjectRef(session, "stressFillImage", stressFillImg);
 
+            ApplyGameplayObjectiveStyle(uiRoot, fonts);
+
             pause.gameObject.SetActive(false);
             EditorUtility.SetDirty(session);
             EditorSceneManager.MarkSceneDirty(scene);
             if (!EditorSceneManager.SaveScene(scene))
                 throw new InvalidOperationException("Failed to save redesigned pause UI in " + scenePath);
+        }
+
+        private static void ApplyGameplayObjectiveStyle(GameObject uiRoot, UiFonts fonts)
+        {
+            Transform hud = uiRoot.transform.Find("GameplayHUD");
+            if (hud == null) return;
+
+            Transform objTr = hud.Find("TestObjective");
+            if (objTr != null)
+            {
+                Text objText = objTr.GetComponent<Text>();
+                if (objText != null)
+                {
+                    objText.font = fonts.NavFont;
+                    objText.fontSize = 44;
+                    objText.fontStyle = FontStyle.Normal;
+                    objText.color = IvoryInk;
+                    objText.alignment = TextAnchor.MiddleLeft;
+                    objText.horizontalOverflow = HorizontalWrapMode.Overflow;
+                    objText.verticalOverflow = VerticalWrapMode.Overflow;
+                    objText.raycastTarget = false;
+
+                    RectTransform rect = objText.rectTransform;
+                    rect.sizeDelta = new Vector2(Mathf.Max(560f, rect.sizeDelta.x), Mathf.Max(58f, rect.sizeDelta.y));
+                    if (rect.anchoredPosition.y > 405f)
+                        rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, 405f);
+
+                    var shadow = objTr.GetComponent<Shadow>() ?? objTr.gameObject.AddComponent<Shadow>();
+                    shadow.effectColor = new Color(0f, 0.01f, 0.02f, 0.92f);
+                    shadow.effectDistance = new Vector2(1.8f, -2.0f);
+
+                    var outline = objTr.GetComponent<Outline>() ?? objTr.gameObject.AddComponent<Outline>();
+                    outline.effectColor = new Color(0f, 0f, 0f, 0.65f);
+                    outline.effectDistance = new Vector2(0.8f, -0.8f);
+
+                    EditorUtility.SetDirty(objText);
+                }
+            }
+
+            Transform hintTr = hud.Find("ControlHint");
+            if (hintTr != null)
+            {
+                Text hintText = hintTr.GetComponent<Text>();
+                if (hintText != null)
+                {
+                    hintText.font = fonts.BodyFont;
+                    hintText.fontSize = 24;
+                    hintText.fontStyle = FontStyle.Normal;
+                    hintText.color = SoftPaper;
+                    hintText.verticalOverflow = VerticalWrapMode.Overflow;
+                    hintText.raycastTarget = false;
+
+                    var shadow = hintTr.GetComponent<Shadow>() ?? hintTr.gameObject.AddComponent<Shadow>();
+                    shadow.effectColor = new Color(0f, 0.01f, 0.02f, 0.90f);
+                    shadow.effectDistance = new Vector2(1.2f, -1.5f);
+
+                    EditorUtility.SetDirty(hintText);
+                }
+            }
         }
 
         private static Transform MakeBorderlessContainer(Transform parent, string name, Vector2 pos, Vector2 size)
@@ -558,9 +644,9 @@ namespace NoRainbowAfter.Editor
             return go.transform;
         }
 
-        private static void PopulateControlsLegend(Transform container, UiSprites sprites)
+        private static void PopulateControlsLegend(Transform container, UiFonts fonts, UiSprites sprites)
         {
-            Text header = UpsertText(container, "ControlsTitle", SansFont, 14, ColdMist, TextAnchor.MiddleLeft, true);
+            Text header = UpsertText(container, "ControlsTitle", fonts.BodyBoldFont, 17, ColdMist, TextAnchor.MiddleLeft, true);
             header.text = "KONTROL SINGKAT";
             header.rectTransform.anchorMin = header.rectTransform.anchorMax = new Vector2(0f, 1f);
             header.rectTransform.pivot = new Vector2(0f, 1f);
@@ -587,15 +673,14 @@ namespace NoRainbowAfter.Editor
             for (int i = 0; i < rows.Length; i++)
             {
                 float y = -46f - i * 31f;
-                Text k = UpsertText(container, "Key_" + i, SansFont, 14, DoorwayAmber, TextAnchor.MiddleLeft, true);
-                k.fontStyle = FontStyle.Bold;
+                Text k = UpsertText(container, "Key_" + i, fonts.BodyBoldFont, 17, DoorwayAmber, TextAnchor.MiddleLeft, true);
                 k.text = rows[i].key;
                 k.rectTransform.anchorMin = k.rectTransform.anchorMax = new Vector2(0f, 1f);
                 k.rectTransform.pivot = new Vector2(0f, 1f);
                 k.rectTransform.anchoredPosition = new Vector2(0f, y);
                 k.rectTransform.sizeDelta = new Vector2(118f, 26f);
 
-                Text a = UpsertText(container, "Action_" + i, SansFont, 15, SoftPaper, TextAnchor.MiddleLeft, true);
+                Text a = UpsertText(container, "Action_" + i, fonts.BodyFont, 18, SoftPaper, TextAnchor.MiddleLeft, true);
                 a.text = rows[i].action;
                 a.rectTransform.anchorMin = a.rectTransform.anchorMax = new Vector2(0f, 1f);
                 a.rectTransform.pivot = new Vector2(0f, 1f);
@@ -606,6 +691,7 @@ namespace NoRainbowAfter.Editor
 
         private static void BuildContextReadout(
             Transform container,
+            UiFonts fonts,
             UiSprites sprites,
             out Text chapterLabel,
             out Text stressLabel,
@@ -621,15 +707,14 @@ namespace NoRainbowAfter.Editor
             rightAccent.rectTransform.sizeDelta = new Vector2(2f, 0f);
             rightAccent.raycastTarget = false;
 
-            chapterLabel = UpsertText(container, "ChapterStatusLabel", SansFont, 14, DoorwayAmber, TextAnchor.MiddleRight, true);
-            chapterLabel.fontStyle = FontStyle.Bold;
+            chapterLabel = UpsertText(container, "ChapterStatusLabel", fonts.BodyBoldFont, 17, DoorwayAmber, TextAnchor.MiddleRight, true);
             chapterLabel.text = "BAB I  ·  KOS RAKA";
             chapterLabel.rectTransform.anchorMin = chapterLabel.rectTransform.anchorMax = new Vector2(1f, 1f);
             chapterLabel.rectTransform.pivot = new Vector2(1f, 1f);
             chapterLabel.rectTransform.anchoredPosition = new Vector2(-16f, -8f);
             chapterLabel.rectTransform.sizeDelta = new Vector2(410f, 22f);
 
-            stressLabel = UpsertText(container, "StressStatusLabel", SansFont, 17, IvoryInk, TextAnchor.MiddleRight, true);
+            stressLabel = UpsertText(container, "StressStatusLabel", fonts.BodyFont, 20, IvoryInk, TextAnchor.MiddleRight, true);
             stressLabel.text = "Kondisi Mental  ·  Gelisah (50%)";
             stressLabel.rectTransform.anchorMin = stressLabel.rectTransform.anchorMax = new Vector2(1f, 1f);
             stressLabel.rectTransform.pivot = new Vector2(1f, 1f);
@@ -819,7 +904,7 @@ namespace NoRainbowAfter.Editor
             Text caption = button.GetComponentInChildren<Text>(true);
             if (caption != null)
             {
-                StyleText(caption, SansFont, 19, SoftPaper, TextAnchor.MiddleCenter, true);
+                StyleText(caption, font, 22, SoftPaper, TextAnchor.MiddleCenter, true);
                 caption.text = captionText;
                 Stretch(caption.rectTransform);
                 caption.rectTransform.offsetMin = Vector2.zero;
@@ -944,11 +1029,11 @@ namespace NoRainbowAfter.Editor
             Transform oldBorder = toggle.transform.Find("Border");
             if (oldBorder != null) UnityEngine.Object.DestroyImmediate(oldBorder.gameObject);
 
-            // Organic circular mist ring (no square form box!)
+            // Reference-2 crisp thin square hairline checkbox
             Image bg = toggle.GetComponent<Image>();
-            bg.sprite = sprites.ToggleRing;
+            bg.sprite = sprites.CheckboxBox;
             bg.type = Image.Type.Simple;
-            bg.color = new Color(0.52f, 0.68f, 0.74f, 0.75f);
+            bg.color = new Color(0.82f, 0.88f, 0.90f, 0.85f);
 
             Transform markTr = toggle.transform.Find("Checkmark");
             if (markTr != null)
@@ -992,7 +1077,8 @@ namespace NoRainbowAfter.Editor
                 VerticalFadeRule = SaveProceduralSprite("UI_VerticalFadeRule.png", BuildVerticalFadeRuleTex(8, 256), Vector4.zero),
                 SliderKnob = SaveProceduralSprite("UI_SliderKnob.png", BuildRaindropOrbKnobTex(48), Vector4.zero),
                 ToggleRing = SaveProceduralSprite("UI_ToggleRing.png", BuildSoftRingTex(48), Vector4.zero),
-                Checkmark = SaveProceduralSprite("UI_Checkmark.png", BuildCheckmarkTex(48), Vector4.zero)
+                Checkmark = SaveProceduralSprite("UI_Checkmark.png", BuildCheckmarkTex(48), Vector4.zero),
+                CheckboxBox = SaveProceduralSprite("UI_CheckboxBox.png", BuildCheckboxBoxTex(48), Vector4.zero)
             };
         }
 
@@ -1137,6 +1223,34 @@ namespace NoRainbowAfter.Editor
                     float d = Mathf.Min(DistToSegment(p, p0, p1), DistToSegment(p, p1, p2));
                     float alpha = Mathf.Clamp01(thickness - d + 0.8f);
                     tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+            tex.Apply();
+            return tex;
+        }
+
+        private static Texture2D BuildCheckboxBoxTex(int size)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            int pad = 4;
+            int innerMin = pad;
+            int innerMax = size - 1 - pad;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    if (x < innerMin || x > innerMax || y < innerMin || y > innerMax)
+                    {
+                        tex.SetPixel(x, y, Color.clear);
+                        continue;
+                    }
+                    int edgeDist = Mathf.Min(Mathf.Min(x - innerMin, innerMax - x), Mathf.Min(y - innerMin, innerMax - y));
+                    if (edgeDist == 0)
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, 0.90f));
+                    else if (edgeDist == 1)
+                        tex.SetPixel(x, y, new Color(1f, 1f, 1f, 0.45f));
+                    else
+                        tex.SetPixel(x, y, new Color(0.04f, 0.07f, 0.09f, 0.36f));
                 }
             }
             tex.Apply();
