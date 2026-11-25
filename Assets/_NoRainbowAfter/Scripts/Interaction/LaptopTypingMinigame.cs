@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using NoRainbowAfter.Player;
 using UnityEngine;
@@ -66,10 +67,14 @@ namespace NoRainbowAfter.Interaction
 
         private int sentenceIndex;
         private int openedFrame = -1;
+        private string[] essaySections;
+        private const float EssaySectionSeconds = 45f;
+        private AudioSource typingSource;
+        private AudioClip typingClip;
 
         public string StableId => "INT_LAPTOP";
         public string DisplayName => "Laptop Raka";
-        public string Prompt => "Kerjakan Tugas";
+        public string Prompt => IsEssayComplete ? null : IsEssay ? "Kerjakan esai" : "Kerjakan Tugas";
 
         public bool IsActive { get; private set; }
         public string TargetSentence { get; private set; } = string.Empty;
@@ -78,9 +83,29 @@ namespace NoRainbowAfter.Interaction
         public float RemainingTime { get; private set; } = SentenceTimeLimit;
         public int CompletedSentences { get; private set; }
         public int SubmittedAttempts { get; private set; }
+        public int JudgedEssaySections { get; private set; }
+        public bool IsEssayComplete => IsEssay && JudgedEssaySections == essaySections.Length;
+        private bool IsEssay => essaySections != null;
+        private int RequiredSentences => essaySections?.Length ?? RequiredSentencesForObjective;
 
         public event Action<bool> SessionStateChanged;
         public event Action<bool> SentenceSubmitted;
+        public event Action<int> EssayFinished;
+
+        public void ConfigureEssay(IReadOnlyList<string> sections)
+        {
+            if (IsActive || sections == null || sections.Count == 0) return;
+            essaySections = new string[sections.Count];
+            for (int i = 0; i < sections.Count; i++) essaySections[i] = sections[i];
+            ResetEssay();
+        }
+
+        public void ResetEssay()
+        {
+            if (!IsEssay || IsActive) return;
+            JudgedEssaySections = CompletedSentences = SubmittedAttempts = 0;
+            LoadNextSentence();
+        }
 
         private void Awake()
         {
@@ -97,13 +122,14 @@ namespace NoRainbowAfter.Interaction
         {
             UnhookTextInput();
             if (overlayCanvas != null) Destroy(overlayCanvas.gameObject);
+            if (typingClip != null) Destroy(typingClip);
         }
 
         public void SetFocused(bool focused) { }
 
         public void Interact(PlayerInteractor interactor)
         {
-            if (interactor == null || IsActive) return;
+            if (interactor == null || IsActive || IsEssayComplete) return;
             activeInteractor = interactor;
             player = interactor.GetComponent<FirstPersonPlayer>();
             stressBarometer = interactor.GetComponent<StressBarometer>();
@@ -115,8 +141,9 @@ namespace NoRainbowAfter.Interaction
 
         public void OpenLaptop()
         {
+            if (IsActive || IsEssayComplete) return;
             BuildUi();
-            if (CompletedSentences >= RequiredSentencesForObjective)
+            if (!IsEssay && CompletedSentences >= RequiredSentencesForObjective)
                 CompletedSentences = 0;
             IsActive = true;
             openedFrame = Time.frameCount;
@@ -127,10 +154,12 @@ namespace NoRainbowAfter.Interaction
                 player.BreatheRequested -= OnTabCloseRequested;
                 player.BreatheRequested += OnTabCloseRequested;
             }
-            LoadNextSentence();
+            if (IsEssay) PrepareTypingSound();
+            else LoadNextSentence();
             HookTextInput();
             if (feedbackLabel != null)
-                feedbackLabel.text = "Ketik 5 kalimat tugas dengan tepat. Tekan [ENTER] untuk kirim, tekan [TAB] untuk keluar.";
+                feedbackLabel.text = IsEssay ? "Ketik bagian esai. Tekan [ENTER] untuk kirim."
+                    : "Ketik 5 kalimat tugas dengan tepat. Tekan [ENTER] untuk kirim, tekan [TAB] untuk keluar.";
             RefreshUi();
             SessionStateChanged?.Invoke(true);
         }
@@ -142,6 +171,7 @@ namespace NoRainbowAfter.Interaction
             if (player != null)
                 player.BreatheRequested -= OnTabCloseRequested;
             UnhookTextInput();
+            if (typingSource != null) typingSource.Stop();
             if (panelRoot != null) panelRoot.SetActive(false);
             if (overlayCanvas != null) overlayCanvas.enabled = false;
             player?.SetUsingLaptop(false);
@@ -160,6 +190,7 @@ namespace NoRainbowAfter.Interaction
             if (player != null && player.IsPaused)
             {
                 if (overlayCanvas != null) overlayCanvas.enabled = false;
+                if (typingSource != null && typingSource.isPlaying) typingSource.Stop();
                 return;
             }
             if (overlayCanvas != null && !overlayCanvas.enabled) overlayCanvas.enabled = true;
@@ -191,7 +222,7 @@ namespace NoRainbowAfter.Interaction
             if (RemainingTime <= 0f)
             {
                 SubmitInput(fromTimeout: true);
-                if (!IsActive) return;
+                return;
             }
 
             if (enterPressed)
@@ -213,6 +244,7 @@ namespace NoRainbowAfter.Interaction
                 if (CurrentInput.Length > 0)
                 {
                     CurrentInput = CurrentInput.Substring(0, CurrentInput.Length - 1);
+                    PlayTypingSound();
                     RefreshUi();
                 }
                 return;
@@ -225,12 +257,14 @@ namespace NoRainbowAfter.Interaction
             bool isCorrect = idx < TargetSentence.Length &&
                              char.ToLowerInvariant(c) == char.ToLowerInvariant(TargetSentence[idx]);
             CurrentInput += c;
+            PlayTypingSound();
 
             if (!isCorrect)
             {
                 stressBarometer?.AddStress(TypoStressPenalty);
                 if (feedbackLabel != null)
-                    feedbackLabel.text = "<color=#FF5555>Salah ketik! Stres meningkat (+2%).</color>";
+                    feedbackLabel.text = IsEssay ? "<color=#FF5555>Periksa huruf yang merah.</color>"
+                        : "<color=#FF5555>Salah ketik! Stres meningkat (+2%).</color>";
             }
             else if (feedbackLabel != null && CurrentInput.Length == TargetSentence.Length)
             {
@@ -246,26 +280,32 @@ namespace NoRainbowAfter.Interaction
             SubmittedAttempts++;
 
             bool exactMatch = string.Equals(CurrentInput, TargetSentence, StringComparison.OrdinalIgnoreCase);
+            bool passed = exactMatch && (!IsEssay || !fromTimeout);
+            float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
+            if (!passed) stressBarometer?.AddStress(penalty);
+            if (IsEssay)
+            {
+                SubmitEssaySection(passed, fromTimeout);
+                return;
+            }
+
             if (exactMatch)
             {
                 CompletedSentences++;
                 MarkObjectiveProgress();
                 SentenceSubmitted?.Invoke(true);
 
-                // Auto-exit once 3 sentences are completed so player does not have to manually hold Enter afterwards.
-                if (CompletedSentences >= RequiredSentencesForObjective)
+                if (CompletedSentences >= RequiredSentences)
                 {
                     CloseLaptop();
                     return;
                 }
 
                 if (feedbackLabel != null)
-                    feedbackLabel.text = $"<color=#8BE78B>Kalimat terkirim tepat waktu! ({CompletedSentences}/{RequiredSentencesForObjective})</color>";
+                    feedbackLabel.text = $"<color=#8BE78B>Kalimat terkirim tepat waktu! ({CompletedSentences}/{RequiredSentences})</color>";
             }
             else
             {
-                float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
-                stressBarometer?.AddStress(penalty);
                 if (feedbackLabel != null)
                 {
                     feedbackLabel.text = fromTimeout
@@ -277,6 +317,31 @@ namespace NoRainbowAfter.Interaction
 
             LoadNextSentence();
             RefreshUi();
+        }
+
+        private void SubmitEssaySection(bool passed, bool fromTimeout)
+        {
+            if (!passed && !fromTimeout)
+            {
+                feedbackLabel.text = "<color=#FF5555>Bagian belum tepat. Perbaiki sebelum waktu habis.</color>";
+                SentenceSubmitted?.Invoke(false);
+                return;
+            }
+
+            if (passed) CompletedSentences++;
+            JudgedEssaySections++;
+            if (IsEssayComplete)
+            {
+                CloseLaptop();
+                SentenceSubmitted?.Invoke(passed);
+                EssayFinished?.Invoke(CompletedSentences);
+                return;
+            }
+            feedbackLabel.text = passed ? "<color=#8BE78B>Bagian terkirim.</color>"
+                : "<color=#FF5555>Waktu habis. Lanjut ke bagian berikutnya.</color>";
+            LoadNextSentence();
+            RefreshUi();
+            SentenceSubmitted?.Invoke(passed);
         }
 
         private void MarkObjectiveProgress()
@@ -292,20 +357,49 @@ namespace NoRainbowAfter.Interaction
 
         private void LoadNextSentence()
         {
+            CurrentInput = string.Empty;
+            if (IsEssay)
+            {
+                TargetSentence = essaySections[JudgedEssaySections];
+                CurrentSentenceTimeLimit = RemainingTime = EssaySectionSeconds;
+                return;
+            }
             string baseSentence = CollegeSentenceBank[sentenceIndex % CollegeSentenceBank.Length];
+            TargetSentence = baseSentence;
             if (sentenceIndex >= CollegeSentenceBank.Length)
             {
                 string extra = RandomTopicSuffixes[(sentenceIndex / CollegeSentenceBank.Length) % RandomTopicSuffixes.Length];
-                TargetSentence = baseSentence + " " + extra;
-            }
-            else
-            {
-                TargetSentence = baseSentence;
+                TargetSentence += " " + extra;
             }
             sentenceIndex++;
-            CurrentInput = string.Empty;
             CurrentSentenceTimeLimit = GetTimeLimitForSentence(CompletedSentences);
             RemainingTime = CurrentSentenceTimeLimit;
+        }
+
+        private void PrepareTypingSound()
+        {
+            if (typingClip != null) return;
+            const int sampleRate = 22050;
+            var samples = new float[2205];
+            var noise = new System.Random(34);
+            for (int i = 0; i < samples.Length; i++)
+            {
+                float seconds = i / (float)sampleRate;
+                float click = (float)(noise.NextDouble() * 2 - 1) * Mathf.Exp(-seconds * 128f);
+                float resonance = Mathf.Sin(seconds * 2f * Mathf.PI * 620f) * Mathf.Exp(-seconds * 68f);
+                samples[i] = (click * .5f + resonance * .18f) * Mathf.Clamp01(i / 8f);
+            }
+            typingClip = AudioClip.Create("Report keystroke", samples.Length, 1, sampleRate, false);
+            typingClip.SetData(samples, 0);
+            typingSource = gameObject.AddComponent<AudioSource>();
+            typingSource.playOnAwake = false;
+            typingSource.volume = .25f;
+            typingSource.clip = typingClip;
+        }
+
+        private void PlayTypingSound()
+        {
+            if (IsEssay && typingSource != null) typingSource.Play();
         }
 
         private void OnTextInput(char ch)
@@ -339,10 +433,10 @@ namespace NoRainbowAfter.Interaction
 
             if (headerLabel != null)
             {
-                string doneNote = CompletedSentences >= RequiredSentencesForObjective ? "  [TUGAS SELESAI]" : "";
-                headerLabel.text = $"TUGAS KULIAH — MENGETIK LAPORAN  ({CompletedSentences}/{RequiredSentencesForObjective}){doneNote}";
+                headerLabel.text = IsEssay
+                    ? $"ESAI KULIAH  ·  Bagian {JudgedEssaySections + 1}/{RequiredSentences}  ·  Terkirim {CompletedSentences}"
+                    : $"TUGAS KULIAH — MENGETIK LAPORAN  ({CompletedSentences}/{RequiredSentences})";
             }
-
             if (timerLabel != null)
                 timerLabel.text = $"Sisa waktu: {Mathf.Max(0f, RemainingTime):F1} dtk";
             if (timerFill != null)

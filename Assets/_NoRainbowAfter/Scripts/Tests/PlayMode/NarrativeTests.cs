@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NoRainbowAfter.AI;
 using NoRainbowAfter.Interaction;
 using NoRainbowAfter.Level;
 using NoRainbowAfter.Narrative;
@@ -129,6 +130,8 @@ public sealed class NarrativeTests
         var interactor = player.GetComponent<PlayerInteractor>();
         var tracker = player.GetComponent<ObjectiveTracker>();
         var slip = Object.FindObjectsByType<SceneInteractable>(FindObjectsInactive.Exclude).Single(target => target.StableId == "INT_OVERTIME");
+        var exit = Object.FindAnyObjectByType<SharedCorridorDoor>();
+        Assert.That(exit, Is.Not.Null);
         // Older or externally supplied flags must not replay an out-of-order read.
         interactor.Flags.Set("objective.overtime");
         interactor.NotifyInteraction("INT_OVERTIME");
@@ -143,11 +146,14 @@ public sealed class NarrativeTests
             .GetField("hint", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(tracker);
         Assert.That(hint.text, Is.EqualTo("Periksa slip lembur di kamar."));
         Assert.That(tracker.IsCompleted("objective.overtime"), Is.False);
+        exit.Interact(interactor);
+        Assert.That(exit.IsOpen, Is.False, "The imported flag must not unlock the exit.");
         slip.Interact(interactor); interactor.CloseInspection();
         yield return null;
         Assert.That(director.BeatIndex, Is.EqualTo(3));
         Assert.That(tracker.IsCompleted("objective.overtime"), Is.True);
-        Assert.That(hint.text, Is.EqualTo("Kembali ke lorong."));
+        exit.Interact(interactor);
+        Assert.That(exit.IsOpen, Is.True, "Reading the slip must unlock the exit.");
         slip.Interact(interactor); interactor.CloseInspection();
         Assert.That(director.BeatIndex, Is.EqualTo(3), "Rereading must not repeat the story beat.");
     }

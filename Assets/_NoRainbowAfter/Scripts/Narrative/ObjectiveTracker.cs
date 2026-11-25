@@ -25,10 +25,19 @@ namespace NoRainbowAfter.Narrative
                 if (flag == "objective.overtime" && !director.HasReadOvertimeSlip) continue;
                 if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag)) ObjectiveCompleted?.Invoke(flag);
             }
+            if (director.State.ActiveChapter == "Chapter3")
+            {
+                ShowGuidance("Berangkat kerja", "");
+                return;
+            }
+            if (director.State.ActiveChapter == "Chapter2")
+            {
+                ShowChapterTwoGuidance(director.State.Chapter2Beat);
+                return;
+            }
             if (director.ChapterOneFinished)
             {
-                if (objective != null) objective.text = "Chapter 2 sedang dikembangkan";
-                if (hint != null) hint.text = "Chapter 1 selesai. Tekan [TAB] untuk atur napas atau [ESC] untuk jeda.";
+                ShowGuidance("", "");
                 return;
             }
             if (!string.IsNullOrEmpty(chapterTitle))
@@ -44,8 +53,36 @@ namespace NoRainbowAfter.Narrative
             else if (!taskDone) hint.text = "Kerjakan tugas di laptop meja belajar. Arahkan pandangan ke laptop dan tekan E.";
             else if (director.LoopIndex == 0) hint.text = "Telusuri lorong, lalu kembali ke kamar.";
             else if (!director.HasReadOvertimeSlip) hint.text = "Periksa slip lembur di kamar.";
-            else if (director.BeatIndex < 4) hint.text = "Kembali ke lorong.";
+            else if (director.BeatIndex < 4) hint.text = "Buka pintu di ujung lorong, lalu melangkah keluar.";
             else hint.text = "Hadapi atau hindari sosok di lorong.";
+        }
+
+        private void ShowChapterTwoGuidance(ChapterTwoBeat beat)
+        {
+            switch (beat)
+            {
+                case ChapterTwoBeat.WokeInDorm:
+                    ShowGuidance("Kerjakan esai di laptop", "Tekan E di depan laptop untuk mengerjakan esai kuliah.");
+                    break;
+                case ChapterTwoBeat.StayedInBed:
+                    ShowGuidance("", "");
+                    break;
+                case ChapterTwoBeat.OvertimeRequested:
+                    ShowGuidance("Berangkat lembur", "Buka pintu di ujung lorong, lalu melangkah keluar.");
+                    break;
+                case ChapterTwoBeat.StreetEntered:
+                    ShowGuidance("Capai halte dan naik bus", "Jongkok di balik peti dan tunggu sorot senter lewat.");
+                    break;
+                case ChapterTwoBeat.ShelterReached:
+                    ShowGuidance("Naik bus", "Dekati pintu bus dan tekan E.");
+                    break;
+            }
+        }
+
+        private void ShowGuidance(string title, string detail)
+        {
+            if (objective != null) objective.text = title;
+            if (hint != null) hint.text = detail;
         }
     }
 }

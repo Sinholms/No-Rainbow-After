@@ -24,4 +24,15 @@ Suggested attribution in coursework/credits:
 
 ## Original additions
 
+The [Raka and Ella campus snapshot](../Assets/_NoRainbowAfter/Resources/ChapterTwoArt/T_RakaEllaPhoto.png) was made with the built-in image generator. It appears on Raka's desk and in the photo inspection.
+
+<details>
+<summary>Prompt for the campus snapshot</summary>
+
+Use case: illustration-story. A single in-world printed photo texture for the Indonesian first-person game No Rainbow After. Generate a candid, almost square landscape snapshot of two fictional Indonesian university friends in their early twenties, Raka and Ella, outside their campus corridor before the accident. Raka has short slightly messy black hair, looks quietly happy, wears a dark navy-charcoal short-sleeved plaid flannel over a plain shirt with a blue student lanyard. Ella has naturally dark shoulder-length hair and simple muted warm campus casual clothes. Their shoulders are comfortably near each other, small spontaneous smiles, relaxed platonic campus snapshot. Clean readable waist-up or chest-up framing, both faces inside center 75%, not cropped at top or sides. Natural shaded daylight, old white plaster, a little quiet greenery, soft warmly faded print colors, understated analog snapshot grain. Style: believable photo from a lightly stylized 3D story game, natural anatomy, no exaggerated anime eyes, not fashion or glamour photography. Output the photograph itself edge-to-edge, no frame or paper border, no text, lettering, watermark, brand, third person, graduation caps or gowns, or evidence of the accident. This is an ordinary memory of two classmates before their promise to graduate together.
+
+</details>
+
+The Chapter 2 police uniform, shuttle, siren and heavy footstep are original project assets. The officer’s face adapts *Infinite, 3D Head Scan* by Lee Perry-Smith / Infinite-Realities. The scan was trimmed and fitted to the uniform and its photographic color and tangent-space normal maps were adapted to URP. [Source files](https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/LeePerrySmith) · [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). The Blender source is [ChapterTwoBizarre.blend](../BlenderSources/Environment/ChapterTwoBizarre.blend). The [Blender build script](../BlenderSources/Environment/create_chapter_two_bizarre.py) exports the FBX files and synthesizes both WAVs.
+
 Room disarray reuses original No Rainbow After furniture and papers, arranged in Blender. Hiding wardrobes and corridor connection geometry are original project additions. These additions do not resolve the provenance uncertainty of the downloaded corridor.

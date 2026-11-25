@@ -1,14 +1,14 @@
 # Cutscene pembuka — Hujan di Perempatan
 
-Tanggal: 9 November 2026<br>
+Pembaruan: 23 November 2026<br>
 Proyek: **No Rainbow After**<br>
-Status: Dokumentasi konsep berdasarkan arahan pengguna; belum diimplementasikan. Dialog, durasi, dan pembagian shot di bawah merupakan draf untuk produksi.
+Status: Prototipe **Mulai Baru** menampilkan kilasan mobil polisi dan sirene sebelum bangun di kos. Perjalanan motor, dialog, dan urutan shot lengkap di bawah masih berupa rancangan produksi.
 
 ## 1. Inti adegan yang ditetapkan
 
 Raka mengendarai motor saat hujan dengan Ella sebagai penumpang di belakangnya. Dalam perjalanan, Raka mengeluhkan beban hidupnya, kemudian Ella menyemangatinya. Saat mendekati perempatan dan hendak berbelok, Raka menoleh ke belakang untuk mengucapkan terima kasih kepada Ella. Perhatiannya teralih dari jalan. Sebuah mobil dari arah berlawanan berada di lintasan belokan mereka.
 
-Sesaat sebelum motor dan mobil bersentuhan, layar langsung menjadi hitam. Benturan hanya disampaikan melalui suara tabrakan, lalu suara hujan yang tetap terdengar. **Tidak ada gambar tabrakan, tubuh terlempar, luka, atau kondisi korban sesudah kejadian.**
+Sesaat sebelum motor dan mobil bersentuhan, layar langsung menjadi hitam. Benturan hanya disampaikan melalui suara tabrakan, lalu suara hujan yang tetap terdengar. Beberapa saat setelah benturan, Raka melihat sekilas mobil polisi dan rotator yang kabur, mendengar sirene, lalu pingsan. **Tidak ada gambar tabrakan, tubuh terlempar, luka, atau kondisi korban sesudah kejadian.**
 
 ## 2. Tujuan narasi dan kaitan dengan cerita
 
@@ -16,7 +16,7 @@ Sesaat sebelum motor dan mobil bersentuhan, layar langsung menjadi hitam. Bentur
 - Menunjukkan Ella sebagai seseorang yang peduli dan memberi dukungan kepada Raka.
 - Membangun momen hangat yang terputus mendadak, menjadi ingatan yang menghantui Raka sepanjang permainan.
 - Menanamkan janji wisuda bersama sebagai penghubung ke petunjuk dan akhir cerita.
-- Menghubungkan hujan, suara kendaraan, dan perempatan dengan ingatan traumatis Raka.
+- Menghubungkan hujan, suara kendaraan, dan perempatan dengan ingatan traumatis Raka. Kilasan mobil dan motif sirene kembali saat Raka masuk ke TKP di [Chapter 2 Bizarre Edition](CHAPTER2_PLAN.md#2-encounter-tkp).
 
 Adegan tidak menetapkan Ella meninggal dan tidak mengungkap keadaan medisnya. Nasib Ella setelah kecelakaan tetap tidak diketahui pemain pada prolog. Manifestasi yang muncul kemudian adalah representasi pikiran dan rasa bersalah Raka, bukan tubuh Raka secara literal.
 
@@ -47,7 +47,7 @@ Target awal sekitar **90–120 detik**, termasuk jeda percakapan dan layar hitam
 | 05 — Menoleh | 83–88 detik | Menjelang atau saat motor mulai memasuki belokan, Raka menoleh singkat ke belakang. Ella terlihat dekat di balik bahu, dengan helm dan wajah yang hanya sebagian tampak. | Raka mengucapkan terima kasih. Suaranya lebih hangat daripada pada awal percakapan. |
 | 06 — Ancaman di depan | 88–90 detik | Pandangan kembali ke depan. Motor sudah berada di lintasan belokan dan mobil sangat dekat dari arah berlawanan. Lampu serta bagian depan mobil membesar cepat. | Klakson singkat dan suara reaksi pengereman dapat mendahului benturan. Tidak perlu dialog tambahan yang panjang. |
 | 07 — Hitam dan benturan | 90–100 detik | **Hard cut ke hitam sebelum kontak kendaraan terjadi.** Tidak ada satu frame pun yang memperlihatkan motor dan mobil bersentuhan. | Bunyi tabrakan terjadi setelah layar benar-benar hitam. Suara mesin terputus atau meredup; hujan berlanjut. |
-| 08 — Sisa hujan | 100–120 detik | Layar tetap hitam untuk memberi ruang pada kejadian. Transisi berikutnya menuju awal Chapter 1 disiapkan terpisah. | Hujan menjadi suara dominan. Tidak ada ucapan yang memastikan nasib Ella, suara tenaga medis yang memberi diagnosis, atau narator yang menyatakan kematian. |
+| 08 — Kilasan sebelum pingsan | 100–120 detik | Setelah jeda hitam, tampilkan satu kilasan FPP pendek berisi mobil polisi, rotator, dan pantulan aspal. Pandangan kembali gelap saat Raka pingsan. | Hujan berlanjut. Sirene masuk sebentar dengan motif yang sama seperti di TKP Chapter 2. |
 
 Pada bagian nyaris bertabrakan, jarak motor dan mobil dibuat terasa sangat dekat melalui komposisi, gerakan, dan bunyi. Jangan menunda cut sampai geometri kendaraan saling menembus. Hindari slow motion panjang yang mengurangi kesan mendadak.
 
@@ -93,7 +93,7 @@ Ucapan terima kasih harus tetap menjadi alasan Raka menoleh, sesuai arahan pengg
 
 ### Saat cut dan sesudahnya
 
-Urutan wajib: **gambar nyaris bertabrakan → layar hitam penuh → bunyi benturan → hujan berlanjut**.
+Urutan wajib: **gambar nyaris bertabrakan → layar hitam penuh → bunyi benturan → hujan berlanjut → kilasan mobil dan sirene → hitam saat pingsan**.
 
 Bunyi benturan diusulkan masuk sekitar 0,1–0,25 detik setelah cut ke hitam. Selisih kecil ini perlu diuji saat penyuntingan agar tidak terasa terlambat. Bunyi berupa benturan logam, gesekan singkat, dan jatuhnya benda kendaraan; tidak perlu suara cedera tubuh atau jeritan berkepanjangan. Hindari lonjakan volume berlebihan.
 
@@ -106,11 +106,11 @@ Subtitle menggunakan nama pembicara dan kalimat pendek yang mudah dibaca. Baris 
 | Kelompok | Kebutuhan |
 |---|---|
 | Karakter | Bagian tubuh Raka untuk kamera FPP; Ella sebagai penumpang dengan helm, pakaian, dan ekspresi sederhana. Model manifestasi pikiran Raka tidak digunakan sebagai model manusia Raka. |
-| Kendaraan | Motor dengan stang, roda, lampu, spion, dan penanda belok; mobil dengan lampu serta bagian depan yang terbaca. Tidak diperlukan model kendaraan ringsek. |
+| Kendaraan | Motor dengan stang, roda, lampu, spion, dan penanda belok; mobil dengan lampu serta bagian depan yang terbaca. Pakai ulang mobil patroli Chapter 2 untuk kilasan polisi. |
 | Lingkungan | Potongan jalan basah, perempatan empat arah, marka, trotoar atau tepi jalan, lampu jalan, dan latar sederhana. Tidak perlu membuat satu kota penuh. |
 | Efek | Hujan, cipratan ringan, permukaan basah, pantulan lampu, serta pengaburan atmosfer secukupnya. |
 | Animasi | Perjalanan motor, melambat, mulai berbelok, gerakan kepala Raka menoleh dan kembali ke depan, serta gerakan Ella sebagai penumpang. |
-| Audio | Rekaman dialog Raka dan Ella; hujan, mesin motor, cipratan, indikator belok, klakson atau rem singkat, dan tabrakan. Gunakan rekaman/aset asli atau berizin. |
+| Audio | Rekaman dialog Raka dan Ella; hujan, mesin motor, cipratan, indikator belok, klakson atau rem singkat, tabrakan, dan motif sirene yang sama dengan TKP Chapter 2. Gunakan rekaman/aset asli atau berizin. |
 | Penyajian | Kamera cutscene FPP, subtitle, pengaturan waktu audio, hard cut ke hitam, dan sambungan menuju Chapter 1. |
 
 Cutscene dapat dibuat langsung di Unity atau dirender dahulu menjadi video. Dokumen ini menetapkan isi adegan; pilihan cara produksi belum ditetapkan.
@@ -123,7 +123,7 @@ Cutscene dapat dibuat langsung di Unity atau dirender dahulu menjadi video. Doku
 - Perempatan dan arah belokan dapat dipahami tanpa penjelasan teks.
 - Mobil datang dari arah berlawanan dan bertemu lintasan belokan motor.
 - Layar sudah hitam saat bunyi benturan terdengar; tidak ada visual kontak atau akibat kecelakaan.
-- Hujan tetap terdengar sesudah benturan.
+- Hujan tetap terdengar sesudah benturan. Kilasan mobil dan sirene tersedia sebelum Raka pingsan dan bisa dikenali saat muncul kembali di Chapter 2.
 - Tidak ada informasi yang memastikan Ella meninggal atau membocorkan keadaan Ella pada akhir cerita.
 - Dialog, subtitle, dan bunyi tidak bertumpuk sampai sulit dipahami.
 - Sambungan ke Chapter 1 tidak menambahkan fakta pascakecelakaan yang belum ditentukan.

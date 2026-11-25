@@ -1,3 +1,4 @@
+using NoRainbowAfter.AI;
 using NoRainbowAfter.Core;
 using NoRainbowAfter.Quality;
 using UnityEngine;
@@ -9,9 +10,14 @@ namespace NoRainbowAfter.UI
 {
     public enum ShellKind { MainMenu, Gameplay, Credits }
 
-    /// <summary>T01 scene shell. Gameplay, checkpoint saves and narrative arrive in later tasks.</summary>
+    /// <summary>Main menu, gameplay shell, and credits UI controller with smooth unscaled transitions.</summary>
     public sealed class ShellScreen : MonoBehaviour
     {
+        private static readonly Color QualitySelectedBg = new Color(0.70f, 0.55f, 0.34f, 0.24f);
+        private static readonly Color QualityIdleBg = new Color(0f, 0f, 0f, 0f);
+        private static readonly Color QualitySelectedText = new Color(0.97f, 0.93f, 0.84f, 1f);
+        private static readonly Color QualityIdleText = new Color(0.62f, 0.73f, 0.78f, 0.86f);
+
         [SerializeField] private ShellKind kind;
         [SerializeField] private CanvasGroup controls;
         [SerializeField] private Button primaryButton;
@@ -30,7 +36,15 @@ namespace NoRainbowAfter.UI
         [SerializeField] private Button qualityLowButton;
         [SerializeField] private Button qualityMediumButton;
         [SerializeField] private Button qualityHighButton;
+        [SerializeField] private CanvasGroup settingsCanvasGroup;
+        [SerializeField] private RawImage settingsScrim;
+        [SerializeField] private Graphic introFadeOverlay;
+
         private SceneFlow flow;
+        private Material settingsScrimInstance;
+        private RectTransform settingsScrimRect;
+        private float introFadeAlpha = 1f;
+        private float settingsFadeAlpha;
 
         private void Awake()
         {
@@ -41,8 +55,7 @@ namespace NoRainbowAfter.UI
             if (continueButton != null) continueButton.interactable = false;
             // No checkpoint is manufactured by this foundation task.
             if (primaryButton != null)
-                primaryButton.onClick.AddListener(() => flow.Load(
-                    kind == ShellKind.MainMenu ? GameScene.MasterGameplay : GameScene.MainMenu));
+                primaryButton.onClick.AddListener(StartPrimary);
             if (creditsButton != null) creditsButton.onClick.AddListener(() => flow.Load(GameScene.Credits));
             if (menuButton != null) menuButton.onClick.AddListener(() => flow.Load(GameScene.MainMenu));
             if (playTestButton != null) playTestButton.onClick.AddListener(() => flow.Load(GameScene.FirstPersonTest));
@@ -63,6 +76,34 @@ namespace NoRainbowAfter.UI
                 qualityHighButton.onClick.AddListener(() => SelectQualityPreset(QualityPreset.High));
             RefreshQualityControls(GraphicsQualityService.CurrentPreset);
             if (settingsPanel != null) settingsPanel.SetActive(false);
+            if (settingsScrim != null)
+            {
+                settingsScrimRect = settingsScrim.rectTransform;
+                if (settingsScrim.material != null)
+                {
+                    settingsScrimInstance = new Material(settingsScrim.material);
+                    settingsScrim.material = settingsScrimInstance;
+                }
+            }
+            if (introFadeOverlay != null)
+            {
+                introFadeAlpha = 0.85f;
+                introFadeOverlay.gameObject.SetActive(true);
+                Color c = introFadeOverlay.color;
+                c.a = introFadeAlpha;
+                introFadeOverlay.color = c;
+            }
+        }
+
+        private void StartPrimary()
+        {
+            if (kind != ShellKind.MainMenu)
+            {
+                flow.Load(GameScene.MainMenu);
+                return;
+            }
+
+            if (flow.Load(GameScene.MasterGameplay)) ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
         }
 
         private void OnEnable()
@@ -81,28 +122,79 @@ namespace NoRainbowAfter.UI
             GraphicsQualityService.PresetChanged -= RefreshQualityControls;
         }
 
+        private void OnDestroy()
+        {
+            if (settingsScrimInstance != null) Destroy(settingsScrimInstance);
+        }
+
         private void Update()
         {
+            UpdateTransitions();
+
             if (Keyboard.current == null || !Keyboard.current.escapeKey.wasPressedThisFrame || flow.IsLoading)
                 return;
             if (settingsPanel != null && settingsPanel.activeSelf) ShowSettings(false);
             else if (kind != ShellKind.MainMenu) flow.Load(GameScene.MainMenu);
         }
 
+        private void UpdateTransitions()
+        {
+            if (introFadeOverlay != null && introFadeAlpha > 0f)
+            {
+                introFadeAlpha = Mathf.MoveTowards(introFadeAlpha, 0f, Time.unscaledDeltaTime * 1.65f);
+                Color c = introFadeOverlay.color;
+                c.a = introFadeAlpha * introFadeAlpha;
+                introFadeOverlay.color = c;
+                if (introFadeAlpha <= 0.001f)
+                {
+                    introFadeAlpha = 0f;
+                    introFadeOverlay.gameObject.SetActive(false);
+                }
+            }
+
+            if (settingsCanvasGroup != null && settingsPanel != null && settingsPanel.activeSelf && settingsFadeAlpha < 1f)
+            {
+                settingsFadeAlpha = Mathf.MoveTowards(settingsFadeAlpha, 1f, Time.unscaledDeltaTime * 6.5f);
+                settingsCanvasGroup.alpha = 1f - (1f - settingsFadeAlpha) * (1f - settingsFadeAlpha);
+            }
+
+            if (settingsScrimInstance != null && settingsPanel != null && settingsPanel.activeSelf)
+            {
+                settingsScrimInstance.SetFloat("_UnscaledTime", Time.unscaledTime);
+                if (settingsScrimRect != null && settingsScrimRect.rect.height > 1f)
+                    settingsScrimInstance.SetFloat("_Aspect", settingsScrimRect.rect.width / settingsScrimRect.rect.height);
+            }
+        }
+
         private void RefreshState()
         {
             bool settingsVisible = settingsPanel != null && settingsPanel.activeSelf;
             bool menuEnabled = !flow.IsLoading && !settingsVisible;
-            controls.alpha = settingsVisible ? 0f : 1f;
-            controls.interactable = menuEnabled;
-            controls.blocksRaycasts = menuEnabled;
+            if (controls != null)
+            {
+                controls.alpha = settingsVisible ? 0f : 1f;
+                controls.interactable = menuEnabled;
+                controls.blocksRaycasts = menuEnabled;
+            }
             SetMenuInteraction(menuEnabled);
-            statusLabel.text = flow.Status;
+            if (statusLabel != null) statusLabel.text = flow.Status;
         }
 
         private void ShowSettings(bool visible)
         {
+            if (settingsPanel == null) return;
             settingsPanel.SetActive(visible);
+            if (visible && masterVolume != null)
+            {
+                masterVolume.SetValueWithoutNotify(AudioListener.volume);
+                UpdateVolumeLabel(AudioListener.volume);
+            }
+            if (settingsCanvasGroup != null)
+            {
+                settingsFadeAlpha = visible ? 0.12f : 0f;
+                settingsCanvasGroup.alpha = visible ? settingsFadeAlpha : 0f;
+            }
+            MenuUiAudio.PlayPanelTransition();
             RefreshState();
             Focus(visible ? (Selectable)masterVolume : settingsButton);
             if (!visible) PlayerPrefs.Save();
@@ -129,6 +221,7 @@ namespace NoRainbowAfter.UI
         public void SelectQualityPreset(QualityPreset preset)
         {
             GraphicsQualityService.ApplyPreset(preset, savePreference: true);
+            MenuUiAudio.PlayConfirm();
         }
 
         private void RefreshQualityControls(QualityPreset activePreset)
@@ -145,17 +238,18 @@ namespace NoRainbowAfter.UI
             if (button == null) return;
             var bg = button.GetComponent<Image>();
             if (bg != null)
-            {
-                bg.color = selected
-                    ? new Color(0.24f, 0.34f, 0.36f, 0.90f)
-                    : new Color(0.08f, 0.13f, 0.16f, 0.72f);
-            }
+                bg.color = selected ? QualitySelectedBg : QualityIdleBg;
+
+            Transform activeBar = button.transform.Find("ActiveBar");
+            if (activeBar != null) activeBar.gameObject.SetActive(selected);
+
+            Transform outline = button.transform.Find("Border");
+            if (outline != null) outline.gameObject.SetActive(false);
+
             var caption = button.GetComponentInChildren<Text>(true);
             if (caption != null)
             {
-                caption.color = selected
-                    ? new Color(0.95f, 0.92f, 0.82f, 1f)
-                    : new Color(0.68f, 0.76f, 0.78f, 1f);
+                caption.color = selected ? QualitySelectedText : QualityIdleText;
                 caption.fontStyle = selected ? FontStyle.Bold : FontStyle.Normal;
             }
         }
@@ -170,7 +264,8 @@ namespace NoRainbowAfter.UI
         {
             PlayerPrefs.Save();
 #if UNITY_EDITOR
-            statusLabel.text = "Tombol Keluar akan menutup aplikasi pada build Windows.";
+            if (statusLabel != null)
+                statusLabel.text = "Tombol Keluar akan menutup aplikasi pada build Windows.";
 #else
             Application.Quit();
 #endif

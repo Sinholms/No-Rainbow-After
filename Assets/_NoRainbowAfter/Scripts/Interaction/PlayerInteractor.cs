@@ -13,6 +13,7 @@ namespace NoRainbowAfter.Interaction
         private IInteractable focused;
         private Canvas canvas;
         private Text reticle, prompt, heading, body;
+        private RawImage inspectionPhoto;
         private GameObject overlay;
         public IObjectiveFlags Flags { get; set; } = new SessionObjectiveFlags();
         public event System.Action<string> InteractionCompleted;
@@ -53,7 +54,7 @@ namespace NoRainbowAfter.Interaction
         private void Update()
         {
             if (canvas != null) canvas.enabled = !player.IsPaused;
-            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing;
+            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing && !player.IsTransitionLocked;
             reticle.enabled = showWorldUi;
             prompt.enabled = showWorldUi;
             if (!showWorldUi || viewCamera == null) { SetFocus(null); return; }
@@ -75,10 +76,11 @@ namespace NoRainbowAfter.Interaction
         }
         private void SetFocus(IInteractable next)
         {
-            if (next != null && string.IsNullOrEmpty(next.Prompt)) next = null;
+            if (next != null && !(next is IHiddenInteractable) && string.IsNullOrEmpty(next.Prompt)) next = null;
             if (!ReferenceEquals(focused, next)) { focused?.SetFocused(false); focused = next; focused?.SetFocused(true); }
-            if (reticle != null) reticle.color = focused == null ? new Color(1, 1, 1, .65f) : Color.white;
-            if (prompt != null) prompt.text = focused == null ? "" : "[E] " + focused.Prompt;
+            bool showPrompt = focused != null && !string.IsNullOrEmpty(focused.Prompt);
+            if (reticle != null) reticle.color = showPrompt ? Color.white : new Color(1, 1, 1, .65f);
+            if (prompt != null) prompt.text = showPrompt ? "[E] " + focused.Prompt : "";
         }
         public void Interact()
         {
@@ -86,9 +88,23 @@ namespace NoRainbowAfter.Interaction
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
             focused?.Interact(this);
         }
-        public void ShowInspection(string title, string text)
+        public void ShowInspection(string title, string text, Texture2D photo = null)
         {
-            SetFocus(null); reticle.enabled = false; prompt.enabled = false; heading.text = title; body.text = text; overlay.SetActive(true); player.SetInspecting(true);
+            SetFocus(null);
+            reticle.enabled = false;
+            prompt.enabled = false;
+            bool hasPhoto = photo != null;
+            inspectionPhoto.texture = photo;
+            inspectionPhoto.gameObject.SetActive(hasPhoto);
+            heading.text = title;
+            heading.rectTransform.anchoredPosition = new Vector2(0, hasPhoto ? 290 : 210);
+            heading.alignment = hasPhoto ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
+            body.text = text;
+            body.rectTransform.anchoredPosition = new Vector2(0, hasPhoto ? -220 : -10);
+            body.rectTransform.sizeDelta = new Vector2(900, hasPhoto ? 90 : 340);
+            body.alignment = hasPhoto ? TextAnchor.MiddleCenter : TextAnchor.UpperLeft;
+            overlay.SetActive(true);
+            player.SetInspecting(true);
         }
         public bool CloseInspection()
         {
@@ -110,6 +126,15 @@ namespace NoRainbowAfter.Interaction
             overlay.GetComponent<Image>().color = new Color(.015f, .018f, .02f, .95f); overlay.GetComponent<Image>().raycastTarget = false;
             heading = Label(overlay.transform, "Title", "", 38, TextAnchor.MiddleLeft, new Vector2(0, 210), new Vector2(900, 80));
             body = Label(overlay.transform, "Body", "", 30, TextAnchor.UpperLeft, new Vector2(0, -10), new Vector2(900, 340));
+            var photoObject = new GameObject("Foto cetak", typeof(RectTransform), typeof(RawImage));
+            photoObject.transform.SetParent(overlay.transform, false);
+            inspectionPhoto = photoObject.GetComponent<RawImage>();
+            inspectionPhoto.raycastTarget = false;
+            var photoRect = inspectionPhoto.rectTransform;
+            photoRect.anchorMin = photoRect.anchorMax = new Vector2(.5f, .5f);
+            photoRect.anchoredPosition = new Vector2(0, 45);
+            photoRect.sizeDelta = new Vector2(418, 418);
+
             Label(overlay.transform, "Close", "[F]  Tutup", 23, TextAnchor.MiddleCenter, new Vector2(0, -330), new Vector2(500, 50));
             overlay.SetActive(false);
         }

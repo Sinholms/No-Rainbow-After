@@ -5,12 +5,14 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Tracks Raka's stress level (0-100%, starting at 50%) and renders a single, non-duplicated
+    /// Tracks Raka's stress level and renders a single, non-duplicated
     /// red Stress Barometer overlay in the top-left corner of the HUD.
     /// </summary>
     public sealed class StressBarometer : MonoBehaviour
     {
         public const float InitialStress = 50f;
+        public const float ChapterOneMinimumStress = 75f;
+        public const float ChapterTwoMinimumStress = 45f;
         public const float HighStressWarningThreshold = 70f;
         public const float MaxStress = 100f;
 
@@ -25,9 +27,13 @@ namespace NoRainbowAfter.Player
         private Image pulseVignette;
         private Text statusLabel;
         private Text warningLabel;
+        private string minimumWarningText;
         private float flashTimer;
+        private AudioSource heartbeatSource;
+        private AudioClip heartbeatClip;
 
         public float CurrentStress => currentStress;
+        public float MinimumStress { get; private set; }
         public float NormalizedStress => Mathf.Clamp01(currentStress / MaxStress);
         public bool IsWarningActive => currentStress >= HighStressWarningThreshold;
         public Text Label => statusLabel;
@@ -64,6 +70,7 @@ namespace NoRainbowAfter.Player
         {
             if (overlayCanvas != null) overlayCanvas.enabled = false;
             if (vignetteCanvas != null) vignetteCanvas.enabled = false;
+            if (heartbeatSource != null && heartbeatSource.isPlaying) heartbeatSource.Stop();
         }
 
         private void OnDestroy()
@@ -72,6 +79,7 @@ namespace NoRainbowAfter.Player
             else if (rootPanel != null) Destroy(rootPanel.gameObject);
             if (pulseVignette != null && pulseVignette.transform.parent != null)
                 Destroy(pulseVignette.transform.parent.gameObject);
+            if (heartbeatClip != null) Destroy(heartbeatClip);
         }
 
         private void Update()
@@ -89,16 +97,67 @@ namespace NoRainbowAfter.Player
             }
 
             RefreshWarningEffects();
+            UpdateHeartbeatAudio();
+        }
+
+        private void UpdateHeartbeatAudio()
+        {
+            bool mute = ownerPlayer != null && (ownerPlayer.IsPaused || ownerPlayer.IsTransitionLocked || ownerPlayer.IsBreathing);
+            if (!IsWarningActive || mute)
+            {
+                if (heartbeatSource != null && heartbeatSource.isPlaying) heartbeatSource.Pause();
+                return;
+            }
+
+            if (heartbeatSource == null)
+            {
+                heartbeatSource = gameObject.AddComponent<AudioSource>();
+                heartbeatSource.playOnAwake = false;
+                heartbeatSource.loop = true;
+                heartbeatSource.spatialBlend = 0f;
+                heartbeatClip = CreateHeartbeatClip();
+                heartbeatSource.clip = heartbeatClip;
+            }
+
+            float severity = Mathf.InverseLerp(HighStressWarningThreshold, MaxStress, currentStress);
+            heartbeatSource.volume = Mathf.Lerp(0.08f, 0.34f, severity);
+            heartbeatSource.pitch = Mathf.Lerp(0.88f, 1.42f, severity);
+            if (!heartbeatSource.isPlaying) heartbeatSource.Play();
+        }
+
+        private static AudioClip CreateHeartbeatClip()
+        {
+            const int rate = 22050;
+            const float duration = 1.05f;
+            int samples = Mathf.RoundToInt(rate * duration);
+            var data = new float[samples];
+            for (int i = 0; i < samples; i++)
+            {
+                float t = (float)i / rate;
+                float lub = Mathf.Exp(-Mathf.Pow((t - 0.14f) / 0.042f, 2f)) * Mathf.Sin(2f * Mathf.PI * 52f * t);
+                float dub = Mathf.Exp(-Mathf.Pow((t - 0.33f) / 0.052f, 2f)) * Mathf.Sin(2f * Mathf.PI * 44f * t) * 0.78f;
+                data[i] = Mathf.Clamp((lub + dub) * 0.9f, -1f, 1f);
+            }
+            var clip = AudioClip.Create("RakaStressHeartbeat", samples, 1, rate, false);
+            clip.SetData(data, 0);
+            return clip;
         }
 
         public void SetStress(float value)
         {
-            float clamped = Mathf.Clamp(value, 0f, MaxStress);
+            float clamped = Mathf.Clamp(value, MinimumStress, MaxStress);
             if (clamped > currentStress + 0.01f)
                 flashTimer = 0.35f;
             currentStress = clamped;
-            RefreshUi();
             StressChanged?.Invoke(currentStress);
+            RefreshUi();
+        }
+
+        public void SetMinimumStress(float value)
+        {
+            MinimumStress = Mathf.Clamp(value, 0f, MaxStress);
+            minimumWarningText = $"STRES TINGGI • Batas pemulihan bab ini {Mathf.RoundToInt(MinimumStress)}%.";
+            if (currentStress < MinimumStress) SetStress(currentStress);
         }
 
         public void AddStress(float amount)
@@ -247,7 +306,10 @@ namespace NoRainbowAfter.Player
         private void RefreshUi()
         {
             if (statusLabel != null)
-                statusLabel.text = "STRES  " + Mathf.RoundToInt(currentStress) + "%";
+            {
+                int displayedStress = currentStress >= MaxStress ? (int)MaxStress : Mathf.Min((int)MaxStress - 1, Mathf.RoundToInt(currentStress));
+                statusLabel.text = "STRES  " + displayedStress + "%";
+            }
             if (fillRect != null)
                 fillRect.anchorMax = new Vector2(NormalizedStress, 1f);
             RefreshFillColor();
@@ -280,9 +342,14 @@ namespace NoRainbowAfter.Player
                 {
                     float blinkAlpha = 0.28f + 0.72f * slowWave;
                     bool recoveryLocked = ownerPlayer != null && ownerPlayer.IsBreathRecoveryRequired;
-                    warningLabel.text = recoveryLocked
-                        ? "STRES 100%!  Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan!"
-                        : "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
+                    if (recoveryLocked)
+                        warningLabel.text = ownerPlayer.IsUsingLaptop
+                            ? "STRES 100%!  Tekan [TAB] untuk keluar dari laptop, lalu [TAB] lagi untuk atur napas."
+                            : "STRES 100%!  Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan!";
+                    else if (currentStress <= MinimumStress)
+                        warningLabel.text = minimumWarningText;
+                    else
+                        warningLabel.text = "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
                     warningLabel.color = new Color(1.0f, 0.28f, 0.24f, blinkAlpha);
                 }
             }

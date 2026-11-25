@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Attaches Raka's MiSide-style headless FPP student body (ACT_Raka_StudentBody) beneath
+    /// Attaches Raka's student body (ACT_Raka_StudentBody) beneath
     /// Player_Raka_FPP and animates the Generic Armature rig with grounded 2-bone leg IK and
     /// camera-safe continuous crouch posture synchronized with FirstPersonMotor.CrouchBlend.
     /// </summary>
@@ -110,13 +111,14 @@ namespace NoRainbowAfter.Player
                 lastPosition = transform.position;
 
                 if (speed > 0.12f)
-                    walkCycle += deltaTime * (motor.IsSprinting ? 10.5f : 7.0f);
+                    walkCycle += deltaTime * (motor.IsSprinting ? 10.5f : 7.0f) * Mathf.Lerp(1f, 0.84f, motor.StressGaitIntensity);
                 else
                     walkCycle = Mathf.MoveTowards(walkCycle, 0f, deltaTime * 4f);
             }
 
+            float stress = motor.StressGaitIntensity;
             float speedFactor = speed > 0.12f ? Mathf.Clamp01(speed / 3.4f) : 0f;
-            float swing = speedFactor * (motor.IsSprinting ? 26f : 16f);
+            float swing = speedFactor * (motor.IsSprinting ? 26f : 16f) * Mathf.Lerp(1f, 0.68f, stress);
             float stride = Mathf.Sin(walkCycle) * swing;
             float crouch = Mathf.Clamp01(motor.CrouchBlend);
             float lookDown = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(35f, 82f, motor.Pitch + motor.BreathingPitchOffset));
@@ -129,12 +131,19 @@ namespace NoRainbowAfter.Player
                 0f,
                 bodyLocalOffset.z - 0.14f * crouch - 0.06f * crouch * lookDown);
 
-            float walkDip = speedFactor * (1f - crouch) * 0.015f * Mathf.Abs(Mathf.Sin(walkCycle));
+            float walkDip = speedFactor * (1f - crouch) * (0.015f + 0.018f * stress) * Mathf.Abs(Mathf.Sin(walkCycle));
             pelvisBone.position += transform.up * (-0.50f * crouch - walkDip) + transform.forward * (-0.04f * crouch);
 
-            spineBone.rotation = Quaternion.AngleAxis(7f * crouch, transform.right) * spineBone.rotation;
-            chestBone.rotation = Quaternion.AngleAxis(7f * crouch, transform.right) * chestBone.rotation;
-            lanyardBone.rotation = Quaternion.AngleAxis(6f * crouch, transform.right) * lanyardBone.rotation;
+            // Progressive forward slouch when moving or under heavy stress, keeping idle rest posture upright.
+            float stressSlouch = Mathf.InverseLerp(0.45f, 1f, stress) * (1f - crouch * 0.65f) * Mathf.Max(speedFactor, Mathf.InverseLerp(0.65f, 1f, stress));
+            float torsoRoll = motor.StressRollOffset * 0.45f;
+            spineBone.rotation = Quaternion.AngleAxis(7f * crouch + 5.5f * stressSlouch, transform.right)
+                * Quaternion.AngleAxis(torsoRoll, transform.forward)
+                * spineBone.rotation;
+            chestBone.rotation = Quaternion.AngleAxis(7f * crouch + 4.5f * stressSlouch, transform.right)
+                * Quaternion.AngleAxis(torsoRoll * 0.6f, transform.forward)
+                * chestBone.rotation;
+            lanyardBone.rotation = Quaternion.AngleAxis(6f * crouch + 3.5f * stressSlouch, transform.right) * lanyardBone.rotation;
 
             if (upperArmL != null)
             {
@@ -244,8 +253,17 @@ namespace NoRainbowAfter.Player
             }
 
             // Ensure SkinnedMeshRenderer bounds do not cull arms/legs when pitch changes steeply.
+            int headLayer = LayerMask.NameToLayer("PlayerHead");
             foreach (SkinnedMeshRenderer smr in bodyInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
                 smr.updateWhenOffscreen = true;
+                if (smr.name != "SM_Raka_Head" || headLayer < 0) continue;
+
+                smr.gameObject.layer = headLayer;
+                smr.shadowCastingMode = ShadowCastingMode.Off;
+                if (motor != null && motor.ViewCamera != null)
+                    motor.ViewCamera.cullingMask &= ~(1 << headLayer);
+            }
 
             rootBone = FindDeepChild(bodyInstance.transform, "Root");
             pelvisBone = FindDeepChild(bodyInstance.transform, "Pelvis");

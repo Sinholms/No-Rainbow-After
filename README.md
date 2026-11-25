@@ -7,7 +7,20 @@ Buka dengan Unity **6000.6.8f1**. Pipeline yang saat ini terpasang adalah **URP 
 Untuk menjalankan proyek, buka `Assets/_NoRainbowAfter/Scenes/Boot.unity` lalu tekan Play. Mulai Baru kini langsung masuk ke kamar kos dan lorong 3D dalam MasterGameplay. Kontrol FPP: `WASD`/mouse untuk bergerak dan melihat (termasuk tubuh fisik FPP Raka berjari-5 ala *MiSide* yang tampak saat menunduk), `Shift` sprint, `Ctrl` crouch, `E` berinteraksi, `Tab` minigame atur napas untuk menurunkan stres (atau `1x klik Tab` untuk keluar dari laptop), `F` menutup layar inspeksi dokumen (slip lembur, buku, pintu), `Enter` mengirim ketikan tugas pada laptop (otomatis keluar setelah 5 kalimat selesai), dan `Esc` untuk Pause; environment dan prop dibuat di Blender mengikuti `Docs/design.md`.
 Efek pandangan melingkar aktif secara default. Ubah Lebar pandang atau matikan Tepi pandangan melingkar melalui menu pause. Debug lab T02 tetap tersedia di `Assets/_NoRainbowAfter/Scenes/FirstPersonTest.unity`.
 
-Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres berwarna merah di pojok kiri atas** (mulai dari `50%`; layar memerah + peringatan berkedip pelan saat mencapai `>= 70%`), **minigame mengetik tugas kuliah ala Monkeytype** (`5` kalimat, huruf ketikan kuning, timer `60–30 detik`, kirim dengan `Enter`, keluar dengan `1x klik Tab`, otomatis keluar setelah 5 kalimat selesai) di laptop meja belajar (`PROP_RakaLaptop`), **kenaikan stres berkala di lorong horor** yang mendorong Raka bersembunyi di lemari (`E`) lalu menekan **`[Tab]` atur napas di bar hijau**, sistem **tertangkap Shadow** (pelarian pertama masih diberi kesempatan kabur; tertangkap berikutnya mengembalikan Raka ke **spawn awal koridor dengan stres 100%** sehingga wajib mengatur napas dengan `[Tab]` sebelum melangkah lagi), serta pintu keluar ujung lorong yang memulangkan Raka kembali ke kos dengan objektif **"Chapter 2 sedang dikembangkan"**. Kelanjutan Chapter 2, prolog sinematik, dan ending masih mengikuti rencana produksi.
+Chapter 1 sudah memiliki objektif **"Mengerjakan tugas"**, **Barometer Stres berwarna merah di pojok kiri atas** (minimal `75%` di Chapter 1 dan `45%` di Chapter 2, dengan stres awal `50%` di Chapter 2; layar memerah + peringatan berkedip pelan saat mencapai `>= 70%`), **minigame mengetik tugas kuliah ala Monkeytype** (`5` kalimat, huruf ketikan kuning, timer `60–30 detik`, kirim dengan `Enter`, keluar dengan `1x klik Tab`, otomatis keluar setelah 5 kalimat selesai) di laptop meja belajar (`PROP_RakaLaptop`), **kenaikan stres berkala di lorong horor** yang mendorong Raka bersembunyi di lemari (`E`) lalu menekan **`[Tab]` atur napas di bar hijau**, sistem **tertangkap Shadow** (pelarian pertama masih memberi kesempatan kabur; tertangkap berikutnya menaikkan stres ke 100%), serta pintu keluar ujung lorong yang memulangkan Raka ke kos. Stres 100% di lorong horor **mengulang Chapter 1 dari kamar kos**. Di kamar sendiri, stres 100% membuat Raka berjongkok dan terkunci sampai menggunakan `Tab` untuk mengatur napas.
+
+**Chapter 2 Bizarre Edition** dimulai saat Raka kembali ke kos. Ketik esai di laptop, lalu buka dan lewati pintu di ujung lorong saat diminta lembur. Di TKP, baca sorotan dua polisi dan berlindung menuju Halte Pasar. Setiap kali tertangkap, stres bertambah 10% dan Raka kembali ke checkpoint; saat mencapai 100%, Chapter 2 diulang dari kamar kos. Tekan **E** di pintu bus untuk naik.
+
+Untuk tes per bab, buka satu scene dari folder `Assets/_NoRainbowAfter/Scenes` dan tekan **Play**.
+
+| Scene | Mulai dari |
+| --- | --- |
+| `MasterGameplay` | Alur cerita lengkap yang tersedia. Lewat **Mulai Baru** dari menu, Raka mulai dengan kilasan prolog. |
+| `Chapter1` | Raka di kos pada awal bab pertama. |
+| `Chapter2` | Raka bangun di kos dengan esai dan HP Ella siap dimainkan. |
+| `Chapter3` | Scene kosong untuk pekerjaan Chapter 3 nanti. |
+
+Scene tes `Chapter1` dan `Chapter2` memuat aset yang sama dari `MasterGameplay`. Clue yang dikumpulkan saat tes berlaku sampai sesi Play berakhir.
 
 ## Membuka proyek setelah clone
 
@@ -24,14 +37,14 @@ Branch utama adalah **main**. Ambil pembaruan sebelum mulai bekerja dan gunakan 
 
 ## Dokumentasi dan rencana kerja
 
-- [Spesifikasi cerita](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
+- [Rencana aktif Chapter 2 — Bizarre Edition](Docs/CHAPTER2_PLAN.md), termasuk pintu keluar lorong untuk Chapter 1 dan 2, esai, HP Ella, serta jalur ke halte.
+- [Referensi cerita dan clue — GDD v1.1](Docs/GDD_No_Rainbow_After_v1_1_REFERENCE.md)
 - [Urutan tugas T00–T16](Docs/CODEX_TASKS_No_Rainbow_After_v1_1.md)
 - [Desain dunia dan aset](Docs/design.md)
 - [Hasil T01 dan cara menguji](Docs/T01_HANDOFF.md)
 - [Menu sinematik imagegen dan hasil pengujian](Docs/MENU_ART_HANDOFF.md)
 - [T02 kontrol first person dan aset Blender](Docs/T02_HANDOFF.md)
 - [Revisi environment horror dan POV melingkar](Docs/KOS_ATMOSPHERE_HANDOFF.md)
-- [Pembagian tugas tim dan roadmap](PEMBAGIAN_TUGAS_KERJA.md)
 - [Rencana cutscene prolog](Docs/PROLOGUE_CUTSCENE.md)
 - [Panduan tugas Codex](Docs/CODEX_MASTER_PROMPT.md)
 - [Interaksi dan inspeksi T03](Docs/T03_HANDOFF.md)

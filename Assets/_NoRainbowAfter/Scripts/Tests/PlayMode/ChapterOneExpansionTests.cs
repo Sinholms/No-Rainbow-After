@@ -1,14 +1,18 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NoRainbowAfter.AI;
 using NoRainbowAfter.Interaction;
+using NoRainbowAfter.Level;
 using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using Object=UnityEngine.Object;
@@ -23,9 +27,14 @@ namespace NoRainbowAfter.Tests
         private ChapterOneCorridorShift world;
         private ShadowEncounterController monster;
         private string previousStoragePath, isolatedStorageFolder;
+        private InputSettings.BackgroundBehavior previousBackgroundBehavior;
+        private readonly InputTestFixture inputFixture = new InputTestFixture();
 
         [SetUp] public void IsolateClues()
         {
+            inputFixture.Setup();
+            previousBackgroundBehavior = InputSystem.settings.backgroundBehavior;
+            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             previousStoragePath = ChapterDirector.StoragePathOverride;
             isolatedStorageFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "NRA-C1-" + Guid.NewGuid().ToString("N"));
             System.IO.Directory.CreateDirectory(isolatedStorageFolder);
@@ -35,12 +44,17 @@ namespace NoRainbowAfter.Tests
         [TearDown] public void RestoreClueStorage()
         {
             Time.timeScale = 1f;
+            InputSystem.settings.backgroundBehavior = previousBackgroundBehavior;
+            inputFixture.TearDown();
             ChapterDirector.StoragePathOverride = previousStoragePath;
             if (System.IO.Directory.Exists(isolatedStorageFolder)) System.IO.Directory.Delete(isolatedStorageFolder, true);
         }
         private IEnumerator Load()
         {
+            EnsureInputDevices(out _, out _);
             yield return SceneManager.LoadSceneAsync("Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity");yield return null;
+            var uiModule = Object.FindFirstObjectByType<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+            if (uiModule != null) { uiModule.UnassignActions(); uiModule.AssignDefaultActions(); }
             player=Object.FindFirstObjectByType<FirstPersonPlayer>();motor=player.GetComponent<FirstPersonMotor>();
             director=player.GetComponent<ChapterDirector>();world=player.GetComponent<ChapterOneCorridorShift>();
             monster=Object.FindFirstObjectByType<ShadowEncounterController>();
@@ -52,6 +66,14 @@ namespace NoRainbowAfter.Tests
             player.FocusLost-=(Action)Delegate.CreateDelegate(typeof(Action),session,method);
             type.GetMethod("SetPaused").Invoke(session,new object[]{false});player.SetPaused(false);Time.timeScale=1;
         }
+        private static string DescribePose(Vector3 feet)
+        {
+            const float radius = .24f;
+            var blockers = Physics.OverlapCapsule(feet + Vector3.up * (radius + .05f), feet + Vector3.up * (1.7f - radius),
+                radius, ~0, QueryTriggerInteraction.Ignore);
+            return feet.ToString("F3") + " overlaps " + string.Join(", ", blockers.Select(c => c.name + " " + c.bounds));
+        }
+
         private IEnumerator Expand()
         {
             var interact=player.GetComponent<PlayerInteractor>();
@@ -59,8 +81,25 @@ namespace NoRainbowAfter.Tests
             yield return new WaitForSeconds(1.1f);
             interact.Flags.Set("objective.overtime");interact.NotifyInteraction("INT_OVERTIME");
             Assert.That(motor.TryRestorePose(new Vector3(.16f,.04f,6.1f),Quaternion.identity),Is.True);
-            yield return new WaitForSeconds(.8f);
-            Assert.That(world.Expanded,Is.True);Assert.That(world.OwnsPlayer,Is.True);
+            yield return null;
+            Assert.That(world.Expanded, Is.False, "The old position in the corridor no longer teleports the player.");
+
+            var exit = Object.FindAnyObjectByType<SharedCorridorDoor>();
+            Assert.That(exit, Is.Not.Null);
+            var approach = new Vector3(exit.transform.position.x, .04f, exit.transform.position.z - 1.16f);
+            string situation = DescribePose(approach);
+            Assert.That(motor.TryRestorePose(approach, Quaternion.identity), Is.True, situation + " door " + exit.transform.position.ToString("F3"));
+            EnsureInputDevices(out var keyboard, out _);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(exit.IsOpen, Is.True);
+            yield return new WaitForSeconds(.48f);
+            Assert.That(world.Expanded, Is.False, "Opening the door leaves the player in the normal corridor.");
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+            float deadline = Time.unscaledTime + 3.5f;
+            while (!world.Expanded && Time.unscaledTime < deadline) yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return new WaitForSeconds(.25f);
+            Assert.That(world.Expanded, Is.True); Assert.That(world.OwnsPlayer, Is.True);
         }
         [UnityTest] public IEnumerator RoomChangesOnReturn_AndSlipOpensExtendedRoute()
         {
@@ -79,6 +118,32 @@ namespace NoRainbowAfter.Tests
             float beforeCorridor=stress.CurrentStress;
             world.TickCorridorStress(ChapterOneCorridorShift.CorridorStressIntervalSeconds * 2f);
             Assert.That(stress.CurrentStress,Is.GreaterThan(beforeCorridor),"Corridor exposure must periodically raise Raka's stress.");
+            stress.SetStress(99f);
+            yield return null;
+            Assert.That(stress.CurrentStress, Is.EqualTo(99f));
+            Assert.That(world.OwnsPlayer, Is.True, "Stress below 100% must not restart the chapter.");
+            Assert.That(monster.State, Is.EqualTo(ShadowEncounterState.Dormant));
+            var originalDirector = director;
+            world.TickCorridorStress(ChapterOneCorridorShift.CorridorStressIntervalSeconds);
+            float deadline = Time.realtimeSinceStartup + 15f;
+            while (Time.realtimeSinceStartup < deadline)
+            {
+                var fresh = Object.FindFirstObjectByType<ChapterDirector>();
+                if (fresh != null && fresh != originalDirector && fresh.State != null)
+                {
+                    director = fresh;
+                    break;
+                }
+                yield return null;
+            }
+            Assert.That(director, Is.Not.SameAs(originalDirector), "Passive corridor stress at 100% must restart the chapter.");
+            yield return null;
+            Assert.That(director.BeatIndex, Is.EqualTo(1));
+            Assert.That(director.GetComponent<ChapterOneCorridorShift>().Expanded, Is.False);
+            Assert.That(director.transform.position.x, Is.LessThan(2f));
+            var freshTracker = director.GetComponent<ObjectiveTracker>();
+            var objective = (UnityEngine.UI.Text)typeof(ObjectiveTracker).GetField("objective", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(freshTracker);
+            Assert.That(objective.text, Is.EqualTo("Mengerjakan tugas"));
         }
         [UnityTest] public IEnumerator WardrobeHideDespawnsMonster_AndRecordsHideOnce()
         {
@@ -98,7 +163,7 @@ namespace NoRainbowAfter.Tests
             Assert.That(stress.CurrentStress,Is.EqualTo(stressBeforeHideTick).Within(0.01f),"Hiding in wardrobe pauses corridor stress gain.");
             Assert.That(breathing.StartBreathing(),Is.True,"Must allow [Tab] breathing inside hiding wardrobe.");
             for(int i=0;i<15;i++) breathing.Tick(0.10f,true);
-            Assert.That(stress.CurrentStress,Is.LessThan(70f));
+            Assert.That(stress.CurrentStress,Is.EqualTo(75f));
             breathing.StopBreathing();
             Assert.That(player.IsHiding,Is.True,"Exiting breathing keeps Raka safely hidden until pressing E.");
 
@@ -107,23 +172,291 @@ namespace NoRainbowAfter.Tests
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Hide));
             Assert.That(transitions,Is.Zero);
             Assert.That(monster.GetComponent<CharacterController>().enabled,Is.False);
-            Assert.That(wardrobe.TryExit(),Is.True);Assert.That(player.IsHiding,Is.False);
+
+            // From the end of Chapter 1 inside the wardrobe, play the entire session with keyboard and mouse only.
+            EnsureInputDevices(out var keyboard, out var mouse);
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsHiding,Is.False);
             var door = GameObject.Find("C1_ExitDoor");
             Assert.That(door, Is.Not.Null);
-            Assert.That(motor.TryRestorePose(new Vector3(78.6f,.1f,2.5f), Quaternion.Euler(0,180,0), false), Is.True);
-            Physics.SyncTransforms();
+            Vector3[] corridorExitStops =
+            {
+                new Vector3(90f, 0f, -1.65f),
+                new Vector3(92.6f, 0f, 10f),
+                new Vector3(82f, 0f, 12.35f),
+                new Vector3(78.6f, 0f, 2.35f)
+            };
+            foreach (Vector3 stop in corridorExitStops)
+            {
+                var path = new NavMeshPath();
+                Assert.That(NavMesh.CalculatePath(motor.transform.position, stop, NavMesh.AllAreas, path), Is.True);
+                Assert.That(path.status, Is.EqualTo(NavMeshPathStatus.PathComplete));
+                foreach (Vector3 corner in path.corners.Skip(1))
+                {
+                    if (stress.CurrentStress >= 87f)
+                    {
+                        yield return TapKey(keyboard, Key.Tab);
+                        Assert.That(breathing.IsActive, Is.True);
+                        float recoveryDeadline = Time.unscaledTime + 3f;
+                        while (stress.CurrentStress > 75f && Time.unscaledTime < recoveryDeadline)
+                        {
+                            bool inhale = breathing.IndicatorValue <= breathing.TargetCenter;
+                            InputSystem.QueueStateEvent(keyboard, inhale ? new KeyboardState(Key.Space) : new KeyboardState());
+                            yield return null;
+                        }
+                        Assert.That(stress.CurrentStress, Is.EqualTo(75f));
+                        yield return TapKey(keyboard, Key.Tab);
+                    }
+                    yield return WalkToWithKeyboardAndMouse(keyboard, mouse, corner, true, .28f);
+                }
+            }
+            yield return LookAtWithMouse(mouse, door.GetComponent<Collider>().bounds.center);
             var target = PlayerInteractor.FindTarget(new Ray(motor.ViewCamera.transform.position, motor.ViewCamera.transform.forward), motor.transform);
             Assert.That(target, Is.Not.Null);
             Assert.That(target.StableId, Is.EqualTo("INT_C1_EXIT"));
-            target.Interact(player.GetComponent<PlayerInteractor>());
-            yield return new WaitForSeconds(1.65f);
+            yield return TapKey(keyboard, Key.E);
+            float wakeDeadline = Time.unscaledTime + 4f;
+            while ((player.IsTransitionLocked || director.State.Chapter2Beat != ChapterTwoBeat.WokeInDorm) && Time.unscaledTime < wakeDeadline)
+                yield return null;
+            yield return null;
             Assert.That(director.ChapterOneFinished, Is.True);
             Assert.That(transitions, Is.EqualTo(1));
             Assert.That(world.Expanded, Is.False);
             Assert.That(motor.transform.position.x, Is.LessThan(4f), "Finishing Chapter 1 must return Raka to his dorm room, not MainMenu.");
             Assert.That(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name, Is.EqualTo("MasterGameplay"));
             var objLabel = GameObject.Find("TestObjective").GetComponent<UnityEngine.UI.Text>();
-            Assert.That(objLabel.text, Is.EqualTo("Chapter 2 sedang dikembangkan"));
+            Assert.That(objLabel.text, Is.EqualTo("Kerjakan esai di laptop"));
+            Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter2"));
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
+            Assert.That(player.IsTransitionLocked, Is.False);
+            yield return CompleteChapterTwo(keyboard, mouse, objLabel);
+        }
+
+        private IEnumerator CompleteChapterTwo(Keyboard keyboard, Mouse mouse, UnityEngine.UI.Text objective)
+        {
+            var interactions = player.GetComponent<PlayerInteractor>();
+            var laptop = Object.FindAnyObjectByType<LaptopTypingMinigame>();
+            var phone = Object.FindAnyObjectByType<ChapterTwoPhone>();
+            var exit = Object.FindAnyObjectByType<SharedCorridorDoor>();
+            Assert.That(motor.MovementScale, Is.EqualTo(.75f));
+            Assert.That(phone.Prompt, Is.Null);
+            Assert.That(exit.IsOpen, Is.False);
+
+            laptop.Interact(interactions);
+            yield return null;
+            for (int i = 0; i < 3; i++) laptop.Tick(60f, false);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StayedInBed));
+            Assert.That(exit.Prompt, Is.EqualTo("Pintu terkunci"));
+            Assert.That(Object.FindAnyObjectByType<ChapterTwoStreet>(), Is.Null);
+            yield return new WaitForSeconds(3.9f);
+            var retry = GameObject.Find("Ulangi Chapter 2").GetComponent<UnityEngine.UI.Button>();
+            yield return ClickUiButtonWithMouse(keyboard, mouse, retry);
+            yield return new WaitForSeconds(1.2f);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.WokeInDorm));
+            Assert.That(laptop.JudgedEssaySections, Is.Zero);
+            Assert.That(director.State.EllaMessageSent, Is.False);
+
+            // From the standing side of the desk both props must be reachable through the normal FPP raycast.
+            var standingByDesk = new Vector3(.24f, .04f, 2.76f);
+            Assert.That(motor.TryRestorePose(standingByDesk, Quaternion.identity), Is.True, DescribePose(standingByDesk));
+            var photo = GameObject.Find("Foto Raka dan Ella").GetComponent<SceneInteractable>();
+            var photoCollider = photo.GetComponent<BoxCollider>();
+            yield return LookAtWithMouse(mouse, photoCollider.bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(photo), "The framed photo must be visible on the desk.");
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(director.State.HasClue("CLUE_01"), Is.True);
+            var inspection = interactions.transform.Find("Interaction UI/Inspect");
+            var print = inspection.Find("Foto cetak").GetComponent<UnityEngine.UI.RawImage>();
+            Assert.That(print.gameObject.activeInHierarchy, Is.True);
+            Assert.That(print.texture.name, Is.EqualTo("T_RakaEllaPhoto"));
+            Assert.That(inspection.Find("Body").GetComponent<UnityEngine.UI.Text>().text, Does.Contain("Wisuda bareng"));
+            yield return TapKey(keyboard, Key.F);
+
+            yield return LookAtWithMouse(mouse, phone.GetComponent<BoxCollider>().bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(phone), "The phone must be reachable by looking at it.");
+            Assert.That(interactions.transform.Find("Interaction UI/Prompt").GetComponent<UnityEngine.UI.Text>().text, Is.Empty);
+            Assert.That(objective.text, Is.EqualTo("Kerjakan esai di laptop"));
+            yield return TapKey(keyboard, Key.E);
+            Assert.That(player.IsInspecting, Is.True);
+            Assert.That(director.State.HasClue("CLUE_03"), Is.True);
+            Assert.That(director.State.EllaMessageSent, Is.False);
+            var draft = phone.GetComponentsInChildren<UnityEngine.UI.Text>();
+            Assert.That(draft.Any(t => t.name == "Sender"), Is.False, "The thread is empty before Raka sends.");
+            Assert.That(draft.Single(t => t.name == "Draft Text").text, Does.Contain("maaf").And.Contain("kangen"));
+            var decline = GameObject.Find("DoNotSend").GetComponent<UnityEngine.UI.Button>();
+            Assert.That(decline.GetComponentInChildren<UnityEngine.UI.Text>().text, Is.EqualTo("Jangan kirim"));
+            yield return ClickUiButtonWithMouse(keyboard, mouse, decline);
+            Assert.That(player.IsInspecting, Is.False);
+            Assert.That(director.State.EllaMessageSent, Is.False);
+
+            yield return LookAtWithMouse(mouse, phone.GetComponent<BoxCollider>().bounds.center);
+            yield return TapKey(keyboard, Key.E);
+            yield return ClickUiButtonWithMouse(keyboard, mouse, GameObject.Find("Send").GetComponent<UnityEngine.UI.Button>());
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(phone.TrySendMessage(), Is.False);
+            var sentText = phone.GetComponentsInChildren<UnityEngine.UI.Text>();
+            Assert.That(sentText.Where(t => t.name == "Sender").Select(t => t.text), Is.EqualTo(new[] { "Raka" }));
+            Assert.That(sentText.Count(t => t.text == "✓"), Is.EqualTo(1));
+            Assert.That(sentText.Any(t => t.name == "Draft Text"), Is.False);
+            yield return TapKey(keyboard, Key.F);
+
+            laptop.Interact(interactions);
+            yield return null;
+            InputSystem.QueueTextEvent(keyboard, laptop.TargetSentence[0]);
+            yield return null;
+            float heldTime = laptop.RemainingTime;
+            yield return TapKey(keyboard, Key.Tab);
+            Assert.That(laptop.IsActive, Is.False);
+            laptop.Interact(interactions);
+            yield return null;
+            Assert.That(laptop.CurrentInput, Has.Length.EqualTo(1));
+            Assert.That(laptop.RemainingTime, Is.LessThanOrEqualTo(heldTime).And.GreaterThan(heldTime - .6f));
+            yield return TypeSentenceOnKeyboard(keyboard, laptop.TargetSentence.Substring(1));
+            yield return TapKey(keyboard, Key.Enter);
+            Assert.That(laptop.CompletedSentences, Is.EqualTo(1));
+            laptop.Tick(60f, false);
+            laptop.Tick(60f, false);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.OvertimeRequested));
+            Assert.That(Object.FindAnyObjectByType<ChapterTwoStreet>(), Is.Null, "The essay does not teleport the player.");
+            Assert.That(interactions.IsInspecting, Is.True, "Overtime is announced at the laptop.");
+            yield return TapKey(keyboard, Key.F);
+            Assert.That(motor.TryRestorePose(exit.transform.position + new Vector3(0, .04f, -1.1f), Quaternion.identity), Is.True);
+            yield return TapKey(keyboard, Key.E);
+            yield return new WaitForSeconds(.45f);
+            Assert.That(exit.IsOpen, Is.True);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.OvertimeRequested));
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W));
+            float deadline = Time.unscaledTime + 4f;
+            while (director.State.Chapter2Beat != ChapterTwoBeat.StreetEntered && Time.unscaledTime < deadline)
+                yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return new WaitForSeconds(.75f);
+
+            var street = Object.FindAnyObjectByType<ChapterTwoStreet>();
+            Assert.That(street, Is.Not.Null);
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.StreetEntered));
+            Assert.That(street.TryRestoreCheckpoint(), Is.True);
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(street.GetComponent<AudioSource>().isPlaying, Is.True);
+
+            int handoffs = 0;
+            director.ChapterThreeTransitionRequested += () => handoffs++;
+            Vector3 stop = street.Shelter.transform.TransformPoint(new Vector3(1.1f, -.98f, -.74f));
+            Assert.That(motor.TryRestorePose(stop, Quaternion.identity), Is.True);
+            street.CheckProgress();
+            Assert.That(director.State.Chapter2Beat, Is.EqualTo(ChapterTwoBeat.ShelterReached));
+            Physics.SyncTransforms();
+            yield return LookAtWithMouse(mouse, street.BusDoor.GetComponent<Collider>().bounds.center);
+            Assert.That(interactions.Focused, Is.SameAs(street.BusDoor));
+            yield return TapKey(keyboard, Key.E);
+            yield return new WaitForSeconds(1.2f);
+            Assert.That(street.Boarded, Is.True);
+            Assert.That(handoffs, Is.EqualTo(1));
+            Assert.That(director.State.ActiveChapter, Is.EqualTo("Chapter3"));
+            Assert.That(objective.text, Is.EqualTo("Berangkat kerja"));
+            Assert.That(player.IsTransitionLocked, Is.False);
+            Assert.That(director.State.EllaMessageSent, Is.True);
+            Assert.That(street.GetComponent<AudioSource>().isPlaying, Is.False);
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Bad));
+            director.State.AddClue("CLUE_04");
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, director.State), Is.EqualTo(StoryEnding.Hidden));
+            var unsentState = new GameState(System.IO.Path.Combine(isolatedStorageFolder, "unsent.json"));
+            foreach (string clue in director.State.ClueIds) unsentState.AddClue(clue);
+            Assert.That(EndingResolver.Resolve(FinalChoice.Hide, unsentState), Is.EqualTo(StoryEnding.Bad));
+            Assert.That(EndingResolver.Resolve(FinalChoice.Approach, director.State), Is.EqualTo(StoryEnding.Good));
+        }
+
+        private static void EnsureInputDevices(out Keyboard keyboard, out Mouse mouse)
+        {
+            keyboard = Keyboard.current ?? InputSystem.AddDevice<Keyboard>();
+            mouse = Mouse.current ?? InputSystem.AddDevice<Mouse>();
+            InputSystem.EnableDevice(keyboard);
+            InputSystem.EnableDevice(mouse);
+            keyboard.MakeCurrent();
+            mouse.MakeCurrent();
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            InputSystem.Update();
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState());
+            InputSystem.Update();
+        }
+
+        private static IEnumerator TapKey(Keyboard keyboard, Key key)
+        {
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState(key));
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            yield return null;
+        }
+
+        private static IEnumerator TypeSentenceOnKeyboard(Keyboard keyboard, string sentence)
+        {
+            for (int i = 0; i < sentence.Length; i++)
+            {
+                InputSystem.QueueTextEvent(keyboard, sentence[i]);
+                if ((i + 1) % 14 == 0) yield return null;
+            }
+            yield return null;
+        }
+
+        private IEnumerator LookAtWithMouse(Mouse mouse, Vector3 targetWorld)
+        {
+            for (int step = 0; step < 6; step++)
+            {
+                Physics.SyncTransforms();
+                Vector3 eye = motor.ViewCamera.transform.position;
+                Vector3 dir = (targetWorld - eye).normalized;
+                float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                float yawDiff = Mathf.DeltaAngle(motor.transform.eulerAngles.y, targetYaw);
+                float targetPitch = -Mathf.Asin(Mathf.Clamp(dir.y, -1f, 1f)) * Mathf.Rad2Deg;
+                float pitchDiff = targetPitch - motor.Pitch;
+                if (Mathf.Abs(yawDiff) < .15f && Mathf.Abs(pitchDiff) < .15f) break;
+                InputSystem.QueueStateEvent(mouse, new MouseState
+                {
+                    delta = new Vector2(yawDiff / motor.MouseSensitivity, -pitchDiff / motor.MouseSensitivity)
+                });
+                yield return null;
+            }
+            InputSystem.QueueStateEvent(mouse, new MouseState { delta = Vector2.zero });
+            yield return null;
+        }
+
+        private IEnumerator WalkToWithKeyboardAndMouse(Keyboard keyboard, Mouse mouse, Vector3 targetWorld, bool sprint, float tolerance)
+        {
+            float elapsed = 0f;
+            while (true)
+            {
+                Vector3 planar = Vector3.ProjectOnPlane(targetWorld - motor.transform.position, Vector3.up);
+                if (planar.magnitude <= tolerance) break;
+                Assert.That(elapsed, Is.LessThan(25f), "Blocked walking toward " + targetWorld + " at " + motor.transform.position);
+                Vector3 dir = planar.normalized;
+                float targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
+                float yawDiff = Mathf.DeltaAngle(motor.transform.eulerAngles.y, targetYaw);
+                float pitchDiff = 0f - motor.Pitch;
+                InputSystem.QueueStateEvent(mouse, new MouseState
+                {
+                    delta = new Vector2(yawDiff / motor.MouseSensitivity, -pitchDiff / motor.MouseSensitivity)
+                });
+                InputSystem.QueueStateEvent(keyboard, sprint ? new KeyboardState(Key.W, Key.LeftShift) : new KeyboardState(Key.W));
+                yield return null;
+                elapsed += Time.deltaTime;
+            }
+            InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+            InputSystem.QueueStateEvent(mouse, new MouseState { delta = Vector2.zero });
+            yield return null;
+        }
+
+        private static IEnumerator ClickUiButtonWithMouse(Keyboard keyboard, Mouse mouse, UnityEngine.UI.Button button)
+        {
+            Canvas.ForceUpdateCanvases();
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(null, button.transform.position);
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos });
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos }.WithButton(MouseButton.Left, true));
+            yield return null;
+            InputSystem.QueueStateEvent(mouse, new MouseState { position = screenPos }.WithButton(MouseButton.Left, false));
+            yield return null;
         }
         [UnityTest] public IEnumerator RiggedHitAndGrabStayGroundedAndReset()
         {
@@ -276,7 +609,7 @@ namespace NoRainbowAfter.Tests
             }
             Assert.That(director.State.Chapter1Response,Is.EqualTo(EncounterResponse.Fight));
         }
-        [UnityTest] public IEnumerator FirstCatchGivesEscape_SecondCatchRestoresCheckpointWithClue()
+        [UnityTest] public IEnumerator FirstCatchGivesEscape_SecondCatchRestartsChapter()
         {
             yield return Load();yield return Expand();
             Assert.That(motor.TryRestorePose(new Vector3(80f,.10f,-1.65f),Quaternion.Euler(0,90,0),false),Is.True);
@@ -315,25 +648,25 @@ namespace NoRainbowAfter.Tests
             Time.timeScale = 1f;
             yield return new WaitForSeconds(1.3f);
             Assert.That(monster.CaughtCount,Is.EqualTo(1));
-            yield return new WaitForSeconds(1f);
-            Assert.That(Vector3.Distance(motor.transform.position, world.Entry), Is.LessThan(0.6f), "Shadow catch must respawn Raka at corridor start, not back in the dorm.");
-            Assert.That(director.State.ClueIds,Does.Contain("CLUE_02"));
-            Assert.That(player.IsTransitionLocked,Is.False);
-            Assert.That(monster.DamageBorderAlpha,Is.Zero);
-            var stress=player.GetComponent<StressBarometer>();
-            Assert.That(stress.CurrentStress,Is.EqualTo(100f).Within(0.01f),"Being caught by Shadow must spike stress to 100%.");
-            Assert.That(stress.IsWarningActive,Is.True);
-            Assert.That(world.RequiresBreathRecovery,Is.True);
-            Assert.That(player.IsBreathRecoveryRequired,Is.True,"Player must regulate breath with [Tab] before continuing.");
-            var breathing=player.GetComponent<BreathingMinigame>();
-            Assert.That(breathing.StartBreathing(),Is.True);
-            for(int step=0;step<40 && stress.CurrentStress >= StressBarometer.HighStressWarningThreshold;step++)
-                breathing.Tick(0.10f, breathing.IndicatorValue <= breathing.TargetCenter);
-            breathing.StopBreathing();
-            Assert.That(stress.CurrentStress,Is.LessThan(StressBarometer.HighStressWarningThreshold));
-            world.TickCorridorStress(0.02f);
-            Assert.That(world.RequiresBreathRecovery,Is.False);
-            Assert.That(player.IsBreathRecoveryRequired,Is.False);
+            var originalDirector = director;
+            float restartDeadline = Time.realtimeSinceStartup + 15f;
+            while (Time.realtimeSinceStartup < restartDeadline)
+            {
+                var fresh = Object.FindFirstObjectByType<ChapterDirector>();
+                if (fresh != null && fresh != originalDirector && fresh.State != null)
+                {
+                    director = fresh;
+                    break;
+                }
+                yield return null;
+            }
+            Assert.That(director, Is.Not.SameAs(originalDirector), "Maximum stress must reload the chapter.");
+            Assert.That(director.BeatIndex, Is.EqualTo(1));
+            Assert.That(director.ChapterOneFinished, Is.False);
+            Assert.That(director.State.ClueIds, Does.Contain("CLUE_02"));
+            var freshPlayer = director.GetComponent<FirstPersonPlayer>();
+            Assert.That(freshPlayer.GetComponent<ChapterOneCorridorShift>().Expanded, Is.False);
+            Assert.That(freshPlayer.transform.position.x, Is.LessThan(2f), "Chapter 1 restarts in the dorm.");
         }
         [UnityTest] public IEnumerator PhysicalTraversalConnectsEntry_LongLoop_AndWardrobeExit()
         {

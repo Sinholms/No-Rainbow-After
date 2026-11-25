@@ -24,7 +24,7 @@ namespace NoRainbowAfter.Player
         public void SetBreathRecoveryRequired(bool required)
         {
             IsBreathRecoveryRequired = required;
-            if (motor != null) motor.StopMotion();
+            if (motor != null) motor.SetRecoveryCrouch(required);
         }
         public event Action InteractRequested;
         public event Action FightRequested;
@@ -70,7 +70,7 @@ namespace NoRainbowAfter.Player
         private void RequestPause() => PauseRequested?.Invoke();
         private void RequestFight()
         {
-            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || IsHiding || Time.frameCount == unpausedFrame) return;
+            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || IsHiding || IsBreathRecoveryRequired || Time.frameCount == unpausedFrame) return;
             FightRequested?.Invoke();
         }
 
@@ -78,7 +78,7 @@ namespace NoRainbowAfter.Player
         {
             if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || input == null) return;
             FirstPersonFrame frame = input.ReadFrame();
-            if (IsHiding || IsBreathRecoveryRequired) { frame.Move = Vector2.zero; frame.SprintHeld = false; frame.CrouchPressed = false; }
+            if (IsHiding) { frame.Move = Vector2.zero; frame.SprintHeld = false; frame.CrouchPressed = false; }
             if (discardNextLook) { frame.Look = Vector2.zero; discardNextLook = false; }
             motor.Simulate(frame, Time.deltaTime);
         }

@@ -34,9 +34,11 @@ namespace NoRainbowAfter.Narrative
         public event Action<int> LoopChanged;
         public event Action<string> BeatCompleted;
         public event Action ChapterTransitionRequested;
+        public event Action ChapterThreeTransitionRequested;
         public GameState State { get; private set; }
         public int LoopIndex { get; private set; }
         public int BeatIndex { get; private set; }
+        public int PreviewChapter { get; private set; }
         public bool HasReadOvertimeSlip => BeatIndex >= 3;
         public bool AwaitingEncounter => (BeatIndex == 3 || BeatIndex == 4) && !encounterBegun && !resolved;
         public bool IsCurrentEncounter(IShadowEncounter candidate) => ReferenceEquals(encounter, candidate);
@@ -50,6 +52,7 @@ namespace NoRainbowAfter.Narrative
         private int generation;
         private IShadowEncounter encounter;
         private string storagePath;
+        private static (int chapter, GameState state) pendingRestart;
 
         public void Configure(PlayerInteractor source, FirstPersonPlayer input, FirstPersonMotor movement, Transform actor, float doorwayZ)
         {
@@ -61,10 +64,36 @@ namespace NoRainbowAfter.Narrative
             if (State != null) throw new InvalidOperationException("State already initialized");
             storagePath = path; pathConfigured = true;
         }
+        public void ConfigureChapterPreview(int chapter)
+        {
+            if (State != null) throw new InvalidOperationException("State already initialized");
+            if (chapter < 1 || chapter > 2) throw new ArgumentOutOfRangeException(nameof(chapter));
+            PreviewChapter = chapter;
+        }
+
+        public void PrepareChapterRestart(int chapter) => pendingRestart = (chapter, State);
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        public static void CancelChapterRestart() => pendingRestart = default;
+
         private void OnEnable() => Bind();
         private void Start()
         {
-            State = new GameState(pathConfigured ? storagePath : StoragePathOverride ?? Path.Combine(Application.persistentDataPath, "clues-v1.json"));
+            var mainStorage = pathConfigured ? storagePath : StoragePathOverride ??
+                Path.Combine(Application.persistentDataPath, "clues-v1.json");
+            if (pendingRestart.state != null && pendingRestart.chapter == PreviewChapter)
+            {
+                State = pendingRestart.state;
+                CancelChapterRestart();
+                State.ResetChapterForRestart(PreviewChapter);
+                BeatIndex = State.Chapter1Beat;
+                LoopIndex = State.LoopIndex;
+                if (interactor != null)
+                    foreach (string objective in State.CompletedObjectives) interactor.Flags.Set(objective);
+            }
+            else
+                State = new GameState(PreviewChapter == 0 ? mainStorage : null);
+            SetStressFloor(PreviewChapter == 2 ? 2 : 1);
             foreach (var target in FindObjectsByType<SceneInteractable>(FindObjectsInactive.Include))
                 if (target.gameObject.scene == gameObject.scene && target.StableId == "INT_OVERTIME")
                 {
@@ -72,7 +101,14 @@ namespace NoRainbowAfter.Narrative
                     overtimeSlip.SetAvailable(false);
                     break;
                 }
-            Complete("C1-01", "Raka", "Hari ini aku harus berangkat.", "c1_wake");
+            if (PreviewChapter < 2)
+            {
+                Complete("C1-01", "Raka", "Hari ini aku harus berangkat.", "c1_wake");
+                return;
+            }
+
+            ChapterOneFinished = true;
+            State.ActiveChapter = "Chapter2";
         }
         private void OnDisable() { Unbind(); generation++; SetEncounter(null); }
         private void Bind()
@@ -119,7 +155,7 @@ namespace NoRainbowAfter.Narrative
         }
         private void Update()
         {
-            if (State == null || playerTransform == null || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
+            if (State == null || ChapterOneFinished || playerTransform == null || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
             if (Mathf.Abs(playerTransform.position.x) > 1.3f) ResetCrossing();
             else SamplePosition(playerTransform.position.z);
             TryBeginEncounter();
@@ -127,7 +163,7 @@ namespace NoRainbowAfter.Narrative
         // Hysteresis requires an excursion into the corridor and a return to the room.
         public void SamplePosition(float z)
         {
-            if (State == null || BeatIndex > 4 || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
+            if (State == null || ChapterOneFinished || BeatIndex > 4 || player == null || player.IsPaused || player.IsInspecting || player.IsUsingLaptop) return;
             bool taskReady = interactor != null && (interactor.Flags.Contains("objective.laptop") || interactor.Flags.Contains("objective.book"));
             if (!outside && z >= thresholdZ + 1f && taskReady)
             {
@@ -172,7 +208,46 @@ namespace NoRainbowAfter.Narrative
         {
             if (State == null || BeatIndex < 6 || ChapterOneFinished) return false;
             ChapterOneFinished = true;
+            SetStressFloor(2);
             ChapterTransitionRequested?.Invoke();
+            return true;
+        }
+
+        private void SetStressFloor(int chapter)
+        {
+            var stress = GetComponent<StressBarometer>();
+            if (stress != null)
+                stress.SetMinimumStress(chapter == 2 ? StressBarometer.ChapterTwoMinimumStress : StressBarometer.ChapterOneMinimumStress);
+        }
+        public bool RecordEllaMessage()
+        {
+            if (State == null || State.EllaMessageSent ||
+                (State.Chapter2Beat != ChapterTwoBeat.WokeInDorm && State.Chapter2Beat != ChapterTwoBeat.OvertimeRequested))
+                return false;
+            State.EllaMessageSent = true;
+            return true;
+        }
+
+        public bool AdvanceChapterTwo(ChapterTwoBeat next)
+        {
+            if (!ChapterOneFinished || State == null) return false;
+            bool allowed = (State.Chapter2Beat, next) switch
+            {
+                (ChapterTwoBeat.None, ChapterTwoBeat.WokeInDorm) => true,
+                (ChapterTwoBeat.WokeInDorm, ChapterTwoBeat.StayedInBed) => true,
+                (ChapterTwoBeat.WokeInDorm, ChapterTwoBeat.OvertimeRequested) => true,
+                (ChapterTwoBeat.StayedInBed, ChapterTwoBeat.WokeInDorm) => true,
+                (ChapterTwoBeat.OvertimeRequested, ChapterTwoBeat.StreetEntered) => true,
+                (ChapterTwoBeat.StreetEntered, ChapterTwoBeat.ShelterReached) => true,
+                (ChapterTwoBeat.ShelterReached, ChapterTwoBeat.BoardedBus) => true,
+                _ => false
+            };
+            if (!allowed) return false;
+            if (next == ChapterTwoBeat.WokeInDorm) State.EllaMessageSent = false;
+            State.Chapter2Beat = next;
+            State.ActiveChapter = next == ChapterTwoBeat.BoardedBus ? "Chapter3" : "Chapter2";
+            BeatCompleted?.Invoke($"C2-{(int)next:00}");
+            if (next == ChapterTwoBeat.BoardedBus) ChapterThreeTransitionRequested?.Invoke();
             return true;
         }
         private void Complete(string id, string speaker, string text, string audio)

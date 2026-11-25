@@ -169,7 +169,8 @@ namespace NoRainbowAfter.AI
         {
             captureFeedback?.ResetFeedback();
             UnbindEvents();
-            if (player != null && player.IsTransitionLocked)
+            if (player != null && player.IsTransitionLocked &&
+                (State == ShadowEncounterState.Grabbed || State == ShadowEncounterState.Caught))
                 player.SetTransitionLocked(false);
 
             activeResolve = null;
@@ -683,7 +684,7 @@ namespace NoRainbowAfter.AI
                 captureFeedback?.ResetFeedback();
                 RestoreSafeCheckpointPose();
                 string caughtLine = shiftedWorld != null && shiftedWorld.Expanded
-                    ? "Stresku memuncak... aku harus mengatur napas dulu sebelum melangkah lagi."
+                    ? "Stresku memuncak..."
                     : "Napas dulu... aku harus menenangkan diri.";
                 CueRequested?.Invoke(new NarrativeCue("Raka", caughtLine, 2.8f, "AUD_C1_CAUGHT"));
             }
@@ -713,34 +714,28 @@ namespace NoRainbowAfter.AI
             internalCheckpointRestore = true;
             try
             {
-                bool restored = false;
-                if (shiftedWorld != null && shiftedWorld.Expanded)
+                if (shiftedWorld != null && shiftedWorld.OwnsPlayer)
                 {
-                    restored = shiftedWorld.TryRespawnAtCorridorStart();
+                    // A corridor capture reaches maximum stress and restarts the chapter.
+                    // Do not depend on a safe teleport pose before applying the penalty.
+                    player?.GetComponent<StressBarometer>()?.SetStress(StressBarometer.MaxStress);
+                    return;
                 }
 
-                if (!restored)
+                bool restored = checkpoint != null && checkpoint.TryRestore();
+                if (!restored && motor != null)
                 {
-                    restored = checkpoint != null && checkpoint.TryRestore();
-                    if (!restored && motor != null)
+                    Quaternion fallbackRot = Quaternion.Euler(0f, 10f, 0f);
+                    for (int i = 0; i < DormFallbackSpawns.Length; i++)
                     {
-                        Quaternion fallbackRot = Quaternion.Euler(0f, 10f, 0f);
-                        for (int i = 0; i < DormFallbackSpawns.Length; i++)
+                        if (motor.TryRestorePose(DormFallbackSpawns[i], fallbackRot))
                         {
-                            if (motor.TryRestorePose(DormFallbackSpawns[i], fallbackRot))
-                            {
-                                restored = true;
-                                break;
-                            }
+                            break;
                         }
                     }
-
-                    if (player != null)
-                    {
-                        var barometer = player.GetComponent<StressBarometer>();
-                        barometer?.SetStress(StressBarometer.MaxStress);
-                    }
                 }
+
+                player?.GetComponent<StressBarometer>()?.SetStress(StressBarometer.MaxStress);
 
                 // Always clear corridor crossing state so encounter waits until player re-enters trigger threshold.
                 director?.ResetCrossing();
