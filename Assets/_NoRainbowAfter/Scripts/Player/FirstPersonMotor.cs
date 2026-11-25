@@ -47,6 +47,9 @@ namespace NoRainbowAfter.Player
         private float verticalVelocity;
         private float pitch;
         private float breathingPitchOffset;
+        private float breathingFovOffset;
+        private float breathingEyeOffsetY;
+        private Vector2 breathingShakeOffset;
         private float sinceSprint;
         private float gaitPhase;
         private float idleSwayClock;
@@ -198,8 +201,7 @@ namespace NoRainbowAfter.Player
                 StressRollOffset = 0f;
                 StressPitchOffset = 0f;
                 StressEyeOffset = Vector3.zero;
-                if (viewCamera != null && !Mathf.Approximately(viewCamera.fieldOfView, fieldOfView))
-                    viewCamera.fieldOfView = fieldOfView;
+                ApplyFieldOfView(0f, 1f);
                 return;
             }
 
@@ -242,10 +244,10 @@ namespace NoRainbowAfter.Player
                 float tunnel = stress > StressTunnelOnset
                     ? Mathf.InverseLerp(StressTunnelOnset, StressBarometer.MaxStress, stress)
                     : 0f;
-                float targetFov = tunnel > 0.001f
-                    ? Mathf.Clamp(fieldOfView - 4.2f * tunnel + Mathf.Sin(idleSwayClock * 1.4f) * 0.65f * tunnel, 60f, 95f)
-                    : fieldOfView;
-                viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView, targetFov, smooth);
+                float tunnelOffset = tunnel > 0.001f
+                    ? -4.2f * tunnel + Mathf.Sin(idleSwayClock * 1.4f) * 0.65f * tunnel
+                    : 0f;
+                ApplyFieldOfView(tunnelOffset, smooth);
             }
         }
 
@@ -286,6 +288,7 @@ namespace NoRainbowAfter.Player
             controller.enabled = false;
             transform.SetPositionAndRotation(position, rotation);
             horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f; breathingPitchOffset = 0f;
+            breathingFovOffset = 0f; breathingEyeOffsetY = 0f; breathingShakeOffset = Vector2.zero;
             gaitPhase = 0f; idleSwayClock = 0f; gaitBlend = 0f;
             StressGaitIntensity = 0f; StressSpeedMultiplier = 1f;
             StressRollOffset = 0f; StressPitchOffset = 0f; StressEyeOffset = Vector3.zero;
@@ -304,12 +307,35 @@ namespace NoRainbowAfter.Player
             ApplyViewRotation();
         }
 
+        public void SetBreathingCameraEffects(float pitchOffsetDegrees, float fovOffsetDegrees, float eyeHeightOffsetMeters, Vector2 shakeDegrees)
+        {
+            breathingPitchOffset = Mathf.Clamp(pitchOffsetDegrees, -15f, 15f);
+            breathingFovOffset = Mathf.Clamp(fovOffsetDegrees, -5f, 6f);
+            breathingEyeOffsetY = Mathf.Clamp(eyeHeightOffsetMeters, -0.08f, 0.08f);
+            breathingShakeOffset = new Vector2(
+                Mathf.Clamp(shakeDegrees.x, -3f, 3f),
+                Mathf.Clamp(shakeDegrees.y, -3f, 3f));
+            ApplyViewRotation();
+            ApplyFieldOfView(0f, 1f);
+            if (controller != null && viewCamera != null) UpdateEyeHeight();
+        }
+
+        private void ApplyFieldOfView(float stressTunnelOffset, float blend)
+        {
+            if (viewCamera == null) return;
+            float targetFov = Mathf.Clamp(fieldOfView + stressTunnelOffset + breathingFovOffset, 60f, 95f);
+            viewCamera.fieldOfView = blend >= 0.999f
+                ? targetFov
+                : Mathf.Lerp(viewCamera.fieldOfView, targetFov, blend);
+        }
+
         private void ApplyViewRotation()
         {
             if (viewCamera != null)
             {
-                float combinedPitch = Mathf.Clamp(pitch + breathingPitchOffset + StressPitchOffset, -85f, 85f);
-                viewCamera.transform.localRotation = Quaternion.Euler(combinedPitch, 0f, StressRollOffset);
+                float combinedPitch = Mathf.Clamp(pitch + breathingPitchOffset + StressPitchOffset + breathingShakeOffset.x, -85f, 85f);
+                float combinedYaw = breathingShakeOffset.y;
+                viewCamera.transform.localRotation = Quaternion.Euler(combinedPitch, combinedYaw, StressRollOffset);
             }
         }
 
@@ -342,7 +368,7 @@ namespace NoRainbowAfter.Player
         private void UpdateEyeHeight()
         {
             float blend = Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height);
-            viewCamera.transform.localPosition = Vector3.up * Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend) + StressEyeOffset;
+            viewCamera.transform.localPosition = Vector3.up * (Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend) + breathingEyeOffsetY) + StressEyeOffset;
         }
     }
 }

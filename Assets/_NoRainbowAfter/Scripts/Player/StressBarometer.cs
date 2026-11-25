@@ -156,7 +156,7 @@ namespace NoRainbowAfter.Player
         public void SetMinimumStress(float value)
         {
             MinimumStress = Mathf.Clamp(value, 0f, MaxStress);
-            minimumWarningText = $"STRES TINGGI • Batas pemulihan bab ini {Mathf.RoundToInt(MinimumStress)}%.";
+            minimumWarningText = $"STRES TINGGI • Batas minimum stress saat ini adalah {Mathf.RoundToInt(MinimumStress)}%.";
             if (currentStress < MinimumStress) SetStress(currentStress);
         }
 
@@ -246,7 +246,7 @@ namespace NoRainbowAfter.Player
             warningLabel.fontStyle = FontStyle.Bold;
             warningLabel.alignment = TextAnchor.MiddleCenter;
             warningLabel.color = new Color(1.0f, 0.28f, 0.24f, 1f);
-            warningLabel.text = "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
+            warningLabel.text = "PERINGATAN: STRESS TINGGI!  Cari tempat aman & tekan [TAB] untuk mengatur napas";
             warningLabel.raycastTarget = false;
             warningLabel.enabled = false;
             var warnOutline = warnObj.gameObject.AddComponent<Outline>();
@@ -308,7 +308,7 @@ namespace NoRainbowAfter.Player
             if (statusLabel != null)
             {
                 int displayedStress = currentStress >= MaxStress ? (int)MaxStress : Mathf.Min((int)MaxStress - 1, Mathf.RoundToInt(currentStress));
-                statusLabel.text = "STRES  " + displayedStress + "%";
+                statusLabel.text = "STRESS  " + displayedStress + "%";
             }
             if (fillRect != null)
                 fillRect.anchorMax = new Vector2(NormalizedStress, 1f);
@@ -344,12 +344,12 @@ namespace NoRainbowAfter.Player
                     bool recoveryLocked = ownerPlayer != null && ownerPlayer.IsBreathRecoveryRequired;
                     if (recoveryLocked)
                         warningLabel.text = ownerPlayer.IsUsingLaptop
-                            ? "STRES 100%!  Tekan [TAB] untuk keluar dari laptop, lalu [TAB] lagi untuk atur napas."
-                            : "STRES 100%!  Tekan [TAB] untuk mengatur napas di bar hijau sebelum melanjutkan!";
+                            ? "STRES 100%!  Tekan [TAB] untuk keluar dari laptop, lalu [TAB] lagi untuk mengatur napas."
+                            : "STRES 100%!  Tekan [TAB] untuk mengatur napas sebelum melanjutkan!";
                     else if (currentStress <= MinimumStress)
                         warningLabel.text = minimumWarningText;
                     else
-                        warningLabel.text = "PERINGATAN: STRES TINGGI!  Cari tempat persembunyian & tekan [TAB] untuk mengatur napas";
+                        warningLabel.text = "PERINGATAN: STRES TINGGI!  Cari tempat aman & tekan [TAB] untuk mengatur napas";
                     warningLabel.color = new Color(1.0f, 0.28f, 0.24f, blinkAlpha);
                 }
             }
