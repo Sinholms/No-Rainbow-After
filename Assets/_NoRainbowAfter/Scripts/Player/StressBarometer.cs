@@ -161,6 +161,7 @@ namespace NoRainbowAfter.Player
             if (currentStress < MinimumStress) SetStress(currentStress);
         }
 
+        // Sistem lain mengirim perubahan bertanda: napas negatif, penalti tertangkap sorot positif.
         public void AddStress(float amount)
         {
             if (Mathf.Approximately(amount, 0f)) return;
@@ -304,6 +305,7 @@ namespace NoRainbowAfter.Player
             return uiRoot.transform.Find("GameplayHUD");
         }
 
+        // HUD memakai nilai yang sama: teks persentase, panjang bar, warna, dan peringatan.
         private void RefreshUi()
         {
             if (statusLabel != null)
@@ -317,6 +319,7 @@ namespace NoRainbowAfter.Player
             RefreshWarningEffects();
         }
 
+        // Pada ambang stres tinggi, vignette dan pesan membantu pemain mengenali kondisi.
         private void RefreshWarningEffects()
         {
             bool highStress = IsWarningActive;

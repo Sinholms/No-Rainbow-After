@@ -102,6 +102,7 @@ namespace NoRainbowAfter.AI
             Encounter.Caught += OnCaught;
             Encounter.ConfigureBeam(0, 42f, 14f);
             Encounter.ConfigureBeam(1, 42f, 14f);
+            // Atur sudut, durasi siklus, dan offset fase supaya kedua sorot menyapu jalan dengan ritme berbeda.
             Encounter.ConfigureSweep(0, 27f, 7.6f);
             Encounter.ConfigureSweep(1, 25f, 8.6f, 1.3f);
             Physics.SyncTransforms();
@@ -313,6 +314,7 @@ namespace NoRainbowAfter.AI
             mRend.receiveShadows = false;
         }
 
+        // Encounter menangani pemulihan posisi. Jalan menambah stres setiap kali pemain tertangkap.
         private void OnCaught(int segment)
         {
             if (player != null) player.GetComponent<StressBarometer>()?.AddStress(StressPerCapture);
@@ -436,11 +438,13 @@ namespace NoRainbowAfter.AI
         {
             if (motor == null || AtShelter) return;
             Vector3 feet = motor.transform.position;
+            // Ukur kemajuan pada sumbu Z lokal jalan. Segmen baru menjadi tujuan pemulihan berikutnya.
             if (Checkpoints != null && Segment + 1 < Checkpoints.Length && Checkpoints[Segment + 1] != null &&
                 transform.InverseTransformPoint(feet).z >= transform.InverseTransformPoint(Checkpoints[Segment + 1].position).z)
                 Encounter.SetSegment(++Segment);
             if (Shelter == null || !Shelter.bounds.Contains(feet + Vector3.up * .5f)) return;
 
+            // Pemeriksaan volume halte menandai akhir area patroli dan mematikan deteksi sorot.
             AtShelter = true;
             if (Encounter != null) Encounter.enabled = false;
             if (Bag != null) Bag.SetAvailable(true);

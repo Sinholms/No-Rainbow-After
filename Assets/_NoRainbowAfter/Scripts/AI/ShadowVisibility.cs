@@ -71,6 +71,8 @@ namespace NoRainbowAfter.AI
             Transform monsterRoot,
             float crouchedGazeHalfAngle = 35f)
         {
+            // Cover biasa bukan interaksi lemari: pemain harus jongkok di CoverZone, lalu terlindung
+            // oleh dinding atau berada di luar sudut pandang. Controller menunggu bayangan lewat atau menjauh cukup lama.
             var result = new CoverEvaluation();
             if (motor == null) return result;
 

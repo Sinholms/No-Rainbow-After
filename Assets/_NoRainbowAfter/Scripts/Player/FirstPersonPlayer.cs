@@ -21,7 +21,16 @@ namespace NoRainbowAfter.Player
         public bool IsTransitionLocked { get; private set; }
         public bool IsHiding { get; private set; }
         public int LaptopClosedFrame { get; private set; } = -1;
-        public void SetHiding(bool hiding) { IsHiding = hiding; motor.StopMotion(); }
+        // Lemari memanggil ini setelah Raka berhasil masuk atau keluar. Hentikan sisa gerak
+        // supaya kecepatan lari sebelum masuk tidak terbawa ke posisi baru.
+        public void SetHiding(bool hiding)
+        {
+            IsHiding = hiding;
+            motor.StopMotion();
+        }
+
+        private bool CanReadMovement => !IsPaused && !IsInspecting && !IsUsingLaptop &&
+            !IsBreathing && !IsTransitionLocked;
         public void SetBreathRecoveryRequired(bool required)
         {
             IsBreathRecoveryRequired = required;
@@ -71,16 +80,28 @@ namespace NoRainbowAfter.Player
         private void RequestPause() => PauseRequested?.Invoke();
         private void RequestFight()
         {
-            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || IsHiding || IsBreathRecoveryRequired || Time.frameCount == unpausedFrame) return;
+            // Klik untuk menutup menu jeda bisa jatuh pada frame yang sama dengan klik serangan.
+            if (!CanReadMovement || IsHiding || IsBreathRecoveryRequired || Time.frameCount == unpausedFrame) return;
             FightRequested?.Invoke();
         }
 
         private void Update()
         {
-            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || input == null) return;
+            if (!CanReadMovement || input == null) return;
             FirstPersonFrame frame = input.ReadFrame();
-            if (IsHiding) { frame.Move = Vector2.zero; frame.SprintHeld = false; frame.CrouchPressed = false; }
-            if (discardNextLook) { frame.Look = Vector2.zero; discardNextLook = false; }
+            // Di dalam lemari, Raka masih bisa menoleh dan menekan E untuk keluar.
+            // Kosongkan input langkah supaya WASD, sprint, dan jongkok tidak menggeser tubuhnya.
+            if (IsHiding)
+            {
+                frame.Move = Vector2.zero;
+                frame.SprintHeld = false;
+                frame.CrouchPressed = false;
+            }
+            if (discardNextLook)
+            {
+                frame.Look = Vector2.zero;
+                discardNextLook = false;
+            }
             motor.Simulate(frame, Time.deltaTime);
         }
 
@@ -126,8 +147,9 @@ namespace NoRainbowAfter.Player
         // Input global tetap tersedia saat peta gameplay dimatikan untuk mode lain.
         private void ApplyInputAndCursorState()
         {
-            input?.SetGameplayEnabled(!IsPaused && !IsInspecting && !IsUsingLaptop && !IsBreathing && !IsTransitionLocked);
+            input?.SetGameplayEnabled(CanReadMovement);
             motor.StopMotion();
+            // Abaikan delta mouse pertama setelah berganti mode supaya kamera tidak meloncat.
             discardNextLook = true;
             bool unlockCursor = IsPaused || IsInspecting || IsUsingLaptop;
             Cursor.lockState = unlockCursor ? CursorLockMode.None : CursorLockMode.Locked;

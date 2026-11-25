@@ -218,6 +218,8 @@ namespace NoRainbowAfter.AI
         {
             if (!isActiveAndEnabled || permanentlyResolved || resolve == null) return;
 
+            // Director memberikan callback ini saat encounter dimulai; hanya jalur berhasil yang memanggilnya.
+            // Percobaan baru mereset pukulan, hitungan sembunyi, dan jeda setelah tertangkap.
             activeResolve = resolve;
             postCaughtGraceTimer = 0f;
             successfulHits = 0;
@@ -275,6 +277,7 @@ namespace NoRainbowAfter.AI
 
             switch (State)
             {
+                // Spawn memberi jeda sebelum Pursue; setelah itu tiap frame menjalankan aturan fase aktifnya.
                 case ShadowEncounterState.Spawn:
                     TickSpawn(dt);
                     break;
@@ -323,8 +326,9 @@ namespace NoRainbowAfter.AI
             var wardrobe = HidingWardrobe.Occupied;
             if (wardrobe != null && wardrobe.Occupant == motor)
             {
+                // Shadow mengingat apakah ia melihat Raka masuk. Setelah dua detik ia mencoba
+                // menangkap Raka yang ketahuan. Jika tidak terlihat, bertahan enam detik menyelesaikan persembunyian.
                 wardrobeHideTime += dt;
-                // Jika pemain terlihat masuk, bayangan menarik pemain keluar dari lemari setelah dua detik.
                 if (wardrobe.Spotted)
                 {
                     placeholderVisual?.TickVisual(ShadowEncounterState.Pursue, dt, 0f, 0f, motor.transform, true);
@@ -392,6 +396,8 @@ namespace NoRainbowAfter.AI
 
         private void UpdateHideProgress(CoverEvaluation cover, float dt)
         {
+            // Cover biasa baru mulai menghitung bila pemain jongkok di zona. Pindah zona atau berdiri
+            // menghapus timer; masuk dari dekat, terlihat, dan tanpa penghalang menandai pemain spotted.
             if (!cover.IsCrouchedInCover || cover.ActiveZone == null)
             {
                 ResetHideTracking();
@@ -613,6 +619,7 @@ namespace NoRainbowAfter.AI
             {
                 if (successfulHits >= 3)
                 {
+                    // Tiga pukulan yang valid (masing-masing setelah jeda animasi) menyelesaikan Fight.
                     CompleteSuccessResolution(EncounterResponse.Fight);
                     return;
                 }
@@ -628,6 +635,7 @@ namespace NoRainbowAfter.AI
             float t = Mathf.Clamp01(stateTimer / hideResolveDuration);
             placeholderVisual?.TickVisual(ShadowEncounterState.HideResolved, dt, 0f, t, motor.transform);
 
+            // Sembunyi baru mengirim hasil setelah animasi pendek selesai, seperti jalur Fight.
             if (stateTimer >= hideResolveDuration)
                 CompleteSuccessResolution(EncounterResponse.Hide);
         }
@@ -642,6 +650,7 @@ namespace NoRainbowAfter.AI
             Action<EncounterResponse> callback = activeResolve;
             activeResolve = null;
             RefreshUi();
+            // Hanya di sini hasil Fight/Hide diteruskan ke callback ChapterDirector.
             callback?.Invoke(response);
         }
 
@@ -689,7 +698,8 @@ namespace NoRainbowAfter.AI
             caughtRestoredPose = false;
             ResetHideTracking();
 
-            // Batalkan percobaan agar tertangkap mengarah ke checkpoint tanpa memajukan tahap cerita.
+            // Tertangkap membatalkan callback aktif agar Director tidak mencatat respons/beat berhasil;
+            // setelah fade, pemain dipulihkan ke checkpoint dan encounter dapat dimulai ulang.
             activeResolve = null;
             director?.ResetActiveEncounter();
             player?.SetTransitionLocked(true);

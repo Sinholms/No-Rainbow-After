@@ -72,6 +72,8 @@ namespace NoRainbowAfter.Player
         public float StressRollOffset { get; private set; }
         public float StressPitchOffset { get; private set; }
         public Vector3 StressEyeOffset { get; private set; }
+        // Sorot polisi memakai nilai ini untuk menurunkan titik uji kepala dan dada
+        // secara bertahap saat kapsul pemain berubah dari berdiri (0) ke jongkok (1).
         public float CrouchBlend => controller != null
             ? 1f - Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height)
             : (IsCrouched ? 1f : 0f);
@@ -102,7 +104,8 @@ namespace NoRainbowAfter.Player
             if (viewCamera != null) viewCamera.fieldOfView = fieldOfView;
         }
 
-        /// <summary>The input driver calls once per frame. Mouse delta is deliberately not multiplied by dt.</summary>
+        /// <summary>Menerapkan input satu frame. Delta mouse sudah menyatakan perpindahan sejak
+        /// frame terakhir, sementara kecepatan berjalan dikalikan durasi frame untuk menghitung jarak.</summary>
         public void Simulate(FirstPersonFrame input, float deltaTime)
         {
             if (!enabled || !controller.enabled || deltaTime <= 0f) return;
@@ -119,6 +122,7 @@ namespace NoRainbowAfter.Player
             pitch = Mathf.Clamp(pitch - input.Look.y * mouseSensitivity, -85f, 85f);
             if (recoveryCrouch)
             {
+                // Ketika pemulihan napas diwajibkan, Raka tetap bisa menoleh sambil diam di tempat.
                 UpdateStressCamera(stress, 0f, dt);
                 ApplyViewRotation();
                 UpdateEyeHeight();
@@ -267,7 +271,7 @@ namespace NoRainbowAfter.Player
         {
             float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
             Vector3 feet = transform.position;
-            // Only check the additional torso/head volume; floor and stair risers are already occupied safely.
+            // Periksa ruang tambahan yang dibutuhkan kepala dan badan saat berdiri di balik penghalang.
             int count = Physics.OverlapCapsuleNonAlloc(feet + Vector3.up * Mathf.Max(radius + 0.025f, crouchingHeight - radius),
                 feet + Vector3.up * (standingHeight - radius), radius, overlaps, obstructionMask,
                 QueryTriggerInteraction.Ignore);
@@ -278,6 +282,8 @@ namespace NoRainbowAfter.Player
 
         public bool TryRestorePose(Vector3 position, Quaternion rotation, bool notify = true)
         {
+            // Lemari dan checkpoint memakai pemeriksaan yang sama. Pastikan kapsul muat di tujuan
+            // sebelum memindahkan pemain agar titik yang terhalang tidak membuatnya tersangkut.
             if (controller == null || !controller.enabled || viewCamera == null) return false;
             float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
             int count = Physics.OverlapCapsuleNonAlloc(position + Vector3.up * (radius + 0.05f),
@@ -297,6 +303,8 @@ namespace NoRainbowAfter.Player
             viewCamera.transform.localRotation = Quaternion.identity;
             SetHeight(recoveryCrouch ? crouchingHeight : standingHeight);
             controller.enabled = true;
+            // Perpindahan biasa memberi tahu pendengar seperti lemari. Lemari sendiri
+            // memakai notify = false saat masuk atau keluar karena ia mengurus status penghuninya.
             if (notify) PoseRestored?.Invoke();
             return true;
         }

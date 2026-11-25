@@ -116,6 +116,7 @@ namespace NoRainbowAfter.Player
             else StartBreathing();
         }
 
+        // Bersembunyi tidak melarang mode ini: pemain dapat mengatur napas di dalam lemari.
         public bool StartBreathing()
         {
             CacheReferences();
@@ -133,6 +134,7 @@ namespace NoRainbowAfter.Player
             CurrentCameraPitchOffset = 0f;
             wasInhalingAudio = false;
 
+            // Nonaktifkan kendali gerak selama latihan; status bersembunyi tidak diubah.
             player?.SetBreathing(true);
             motor?.SetBreathingPitchOffset(0f);
             UpdateZoneCheck();
@@ -184,6 +186,7 @@ namespace NoRainbowAfter.Player
             if (!IsActive) return;
             float dt = Mathf.Max(0f, deltaTime);
 
+            // Waktu siklus menggerakkan target; input pemain menggerakkan indikator secara terpisah.
             cycleTime = (cycleTime + dt) % BreathCycleDuration;
             float halfCycle = BreathCycleDuration * 0.5f;
             CurrentPhase = cycleTime < halfCycle ? BreathingPhase.Inhale : BreathingPhase.Exhale;
@@ -193,6 +196,7 @@ namespace NoRainbowAfter.Player
             IndicatorValue = Mathf.Clamp01(IndicatorValue + deltaParam);
 
             UpdateZoneCheck();
+            // Pemulihan hanya terjadi di zona hijau dan tetap dibatasi minimum stres bab.
             if (IsInGreenZone && stressBarometer != null)
                 stressBarometer.AddStress(-StressReliefPerSecond * dt);
 

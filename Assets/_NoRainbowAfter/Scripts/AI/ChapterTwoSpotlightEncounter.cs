@@ -10,6 +10,8 @@ namespace NoRainbowAfter.AI
         public bool AutoTick = true;
         public bool RenderFootprints = true;
         public bool ShowFloorFootprint = false;
+        // Paparan diukur dalam detik. Dengan pengaturan awal, dua detik tersorot memicu penangkapan.
+        // Saat Raka berlindung, DecayPerSecond menentukan seberapa cepat paparan yang terkumpul berkurang.
         public float CatchSeconds = 2f;
         public float DecayPerSecond = 2f;
         public float Range = 12f;
@@ -19,6 +21,8 @@ namespace NoRainbowAfter.AI
         public bool IsIlluminated { get; private set; }
         public int CatchCount { get; private set; }
         public event System.Action<int> Caught;
+
+        private float ExposureRatio => CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
 
         private const int FootprintSectors = 44;
         private const int FootprintRings = 22;
@@ -298,13 +302,14 @@ namespace NoRainbowAfter.AI
         private void Update()
         {
             bool paused = player != null && (player.IsTransitionLocked || player.IsPaused);
-            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
+            float ratio = ExposureRatio;
             if (tensionSource != null)
             {
                 if (paused && tensionSource.isPlaying) tensionSource.Pause();
                 else if (!paused && ratio > 0.01f && !tensionSource.isPlaying) tensionSource.UnPause();
             }
             if (catchFlash > 0f && !paused) catchFlash = Mathf.Max(0f, catchFlash - Time.deltaTime * 1.4f);
+            // Jeda dan transisi membekukan posisi sorot sekaligus penambahan paparan.
             if (AutoTick && !paused) ManualTick(Time.deltaTime);
         }
 
@@ -366,6 +371,7 @@ namespace NoRainbowAfter.AI
                     warned = false;
                     catchFlash = 0.85f;
                     if (warningSource != null && catchClip != null) warningSource.PlayOneShot(catchClip, 1f);
+                    // Coba pindahkan pemain sebelum memberi tahu ChapterTwoStreet untuk menambah stres.
                     TryRestoreCheckpoint();
                     CatchCount++;
                     Caught?.Invoke(Segment);
@@ -384,6 +390,7 @@ namespace NoRainbowAfter.AI
             bool illuminationChanged = wasIlluminated != IsIlluminated;
             wasIlluminated = IsIlluminated;
             visualClock += dt;
+            // Perbarui mesh langsung saat status terdeteksi berubah, atau sekitar 30 kali per detik.
             if (RenderFootprints && (illuminationChanged || visualClock >= .033f))
             {
                 visualClock = 0f;
@@ -394,7 +401,7 @@ namespace NoRainbowAfter.AI
         private void UpdateTensionAudio()
         {
             if (tensionSource == null || tensionClip == null) return;
-            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
+            float ratio = ExposureRatio;
             if (ratio > 0.01f)
             {
                 tensionSource.volume = Mathf.Lerp(0.08f, 0.55f, ratio);
@@ -410,7 +417,7 @@ namespace NoRainbowAfter.AI
         private void UpdateBeamLights(float dt)
         {
             if (beams == null) return;
-            float exposureRatio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
+            float exposureRatio = ExposureRatio;
             foreach (var beam in beams)
             {
                 if (beam.light == null) continue;
@@ -426,6 +433,7 @@ namespace NoRainbowAfter.AI
             foreach (var beam in beams)
             {
                 if (beam.emitter == null) continue;
+                // PingPong bergerak dari 0 ke 1 lalu kembali. Offset fase membedakan posisi tiap lampu.
                 float rawPhase = beam.period > 0f
                     ? Mathf.PingPong((clock + beam.phaseOffset) / beam.period * 2f, 1f)
                     : .5f;
@@ -467,6 +475,7 @@ namespace NoRainbowAfter.AI
             if (planarDistance > beam.range + .01f || planarDistance < .001f ||
                 Vector3.Angle(forward, planar) > beam.angle * .5f + .05f) return false;
 
+            // Uji ruang antara lensa dan titik sasaran. Collider trigger tidak menutup cahaya.
             int hitCount = Physics.RaycastNonAlloc(origin, delta / distance, beam.hits, distance - 0.02f, ~0, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < hitCount; i++)
             {
@@ -474,6 +483,7 @@ namespace NoRainbowAfter.AI
                 if (IsIgnoredObstacle(beam, hit)) continue;
                 return false;
             }
+            // Jika buffer penuh, anggap titik tertutup karena mungkin ada penghalang yang tidak tercatat.
             return hitCount < beam.hits.Length;
         }
 
@@ -828,7 +838,7 @@ namespace NoRainbowAfter.AI
         {
             if (motor == null) return;
             if (player != null && (player.IsPaused || player.IsTransitionLocked)) return;
-            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
+            float ratio = ExposureRatio;
             if (ratio <= 0.001f && catchFlash <= 0.001f) return;
 
             EnsureHudAssets();
