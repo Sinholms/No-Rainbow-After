@@ -35,7 +35,7 @@ namespace NoRainbowAfter.Narrative
             }
             if (director.State.ActiveChapter == "Chapter3")
             {
-                ShowGuidance("Berangkat kerja", "");
+                ShowGuidance("???", "");
                 return;
             }
             if (director.State.ActiveChapter == "Chapter2")

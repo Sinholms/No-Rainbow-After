@@ -71,6 +71,8 @@ namespace NoRainbowAfter.Interaction
         private const float EssaySectionSeconds = 45f;
         private AudioSource typingSource;
         private AudioClip typingClip;
+        private AudioClip submitClip;
+        private AudioClip errorClip;
 
         public string StableId => "INT_LAPTOP";
         public string DisplayName => "Laptop Raka";
@@ -107,6 +109,14 @@ namespace NoRainbowAfter.Interaction
             LoadNextSentence();
         }
 
+        public void SkipEssay()
+        {
+            if (!IsEssay || IsEssayComplete) return;
+            if (IsActive) CloseLaptop();
+            CompletedSentences = Mathf.Max(1, CompletedSentences);
+            JudgedEssaySections = essaySections.Length;
+        }
+
         private void Awake()
         {
             BuildUi();
@@ -123,6 +133,8 @@ namespace NoRainbowAfter.Interaction
             UnhookTextInput();
             if (overlayCanvas != null) Destroy(overlayCanvas.gameObject);
             if (typingClip != null) Destroy(typingClip);
+            if (submitClip != null) Destroy(submitClip);
+            if (errorClip != null) Destroy(errorClip);
         }
 
         public void SetFocused(bool focused) { }
@@ -154,12 +166,12 @@ namespace NoRainbowAfter.Interaction
                 player.BreatheRequested -= OnTabCloseRequested;
                 player.BreatheRequested += OnTabCloseRequested;
             }
-            if (IsEssay) PrepareTypingSound();
-            else LoadNextSentence();
+            PrepareTypingSound();
+            if (!IsEssay) LoadNextSentence();
             HookTextInput();
             if (feedbackLabel != null)
                 feedbackLabel.text = IsEssay ? "Ketik bagian esai. Tekan [ENTER] untuk kirim."
-                    : "Ketik 5 kalimat tugas dengan tepat. Tekan [ENTER] untuk kirim, tekan [TAB] untuk keluar.";
+                    : "Ketik bagian tugas. Tekan [ENTER] untuk kirim.";
             RefreshUi();
             SessionStateChanged?.Invoke(true);
         }
@@ -262,9 +274,9 @@ namespace NoRainbowAfter.Interaction
             if (!isCorrect)
             {
                 stressBarometer?.AddStress(TypoStressPenalty);
+                PlayErrorSound();
                 if (feedbackLabel != null)
-                    feedbackLabel.text = IsEssay ? "<color=#FF5555>Periksa huruf yang merah.</color>"
-                        : "<color=#FF5555>Salah ketik! Stres meningkat (+2%).</color>";
+                    feedbackLabel.text = "<color=#FF5555>Periksa huruf yang merah.</color>";
             }
             else if (feedbackLabel != null && CurrentInput.Length == TargetSentence.Length)
             {
@@ -293,6 +305,7 @@ namespace NoRainbowAfter.Interaction
             {
                 CompletedSentences++;
                 MarkObjectiveProgress();
+                PlaySubmitSound();
                 SentenceSubmitted?.Invoke(true);
 
                 if (CompletedSentences >= RequiredSentences)
@@ -302,15 +315,16 @@ namespace NoRainbowAfter.Interaction
                 }
 
                 if (feedbackLabel != null)
-                    feedbackLabel.text = $"<color=#8BE78B>Kalimat terkirim tepat waktu! ({CompletedSentences}/{RequiredSentences})</color>";
+                    feedbackLabel.text = "<color=#8BE78B>Bagian terkirim.</color>";
             }
             else
             {
+                PlayErrorSound();
                 if (feedbackLabel != null)
                 {
                     feedbackLabel.text = fromTimeout
-                        ? $"<color=#FF4D4D>Waktu habis! Input terkirim otomatis belum selesai — Stres +{Mathf.RoundToInt(penalty)}%.</color>"
-                        : $"<color=#FF4D4D>Ketikan belum selesai atau masih salah! Stres +{Mathf.RoundToInt(penalty)}%.</color>";
+                        ? "<color=#FF5555>Waktu habis. Lanjut ke bagian berikutnya.</color>"
+                        : "<color=#FF5555>Bagian belum tepat. Perbaiki sebelum waktu habis.</color>";
                 }
                 SentenceSubmitted?.Invoke(false);
             }
@@ -323,12 +337,21 @@ namespace NoRainbowAfter.Interaction
         {
             if (!passed && !fromTimeout)
             {
+                PlayErrorSound();
                 feedbackLabel.text = "<color=#FF5555>Bagian belum tepat. Perbaiki sebelum waktu habis.</color>";
                 SentenceSubmitted?.Invoke(false);
                 return;
             }
 
-            if (passed) CompletedSentences++;
+            if (passed)
+            {
+                CompletedSentences++;
+                PlaySubmitSound();
+            }
+            else
+            {
+                PlayErrorSound();
+            }
             JudgedEssaySections++;
             if (IsEssayComplete)
             {
@@ -378,28 +401,69 @@ namespace NoRainbowAfter.Interaction
 
         private void PrepareTypingSound()
         {
-            if (typingClip != null) return;
-            const int sampleRate = 22050;
-            var samples = new float[2205];
-            var noise = new System.Random(34);
-            for (int i = 0; i < samples.Length; i++)
+            if (typingClip == null)
             {
-                float seconds = i / (float)sampleRate;
-                float click = (float)(noise.NextDouble() * 2 - 1) * Mathf.Exp(-seconds * 128f);
-                float resonance = Mathf.Sin(seconds * 2f * Mathf.PI * 620f) * Mathf.Exp(-seconds * 68f);
-                samples[i] = (click * .5f + resonance * .18f) * Mathf.Clamp01(i / 8f);
+                const int sampleRate = 22050;
+                var samples = new float[2205];
+                var noise = new System.Random(34);
+                for (int i = 0; i < samples.Length; i++)
+                {
+                    float seconds = i / (float)sampleRate;
+                    float click = (float)(noise.NextDouble() * 2 - 1) * Mathf.Exp(-seconds * 128f);
+                    float resonance = Mathf.Sin(seconds * 2f * Mathf.PI * 620f) * Mathf.Exp(-seconds * 68f);
+                    samples[i] = (click * .5f + resonance * .18f) * Mathf.Clamp01(i / 8f);
+                }
+                typingClip = AudioClip.Create("Report keystroke", samples.Length, 1, sampleRate, false);
+                typingClip.SetData(samples, 0);
             }
-            typingClip = AudioClip.Create("Report keystroke", samples.Length, 1, sampleRate, false);
-            typingClip.SetData(samples, 0);
-            typingSource = gameObject.AddComponent<AudioSource>();
-            typingSource.playOnAwake = false;
-            typingSource.volume = .25f;
-            typingSource.clip = typingClip;
+            if (submitClip == null)
+            {
+                const int sampleRate = 22050;
+                var samples = new float[(int)(sampleRate * 0.14f)];
+                for (int i = 0; i < samples.Length; i++)
+                {
+                    float s = i / (float)sampleRate;
+                    float env = Mathf.Exp(-s * 18f) * Mathf.Clamp01(i / 24f);
+                    samples[i] = (Mathf.Sin(2f * Mathf.PI * 660f * s) * 0.45f + Mathf.Sin(2f * Mathf.PI * 880f * s) * 0.35f) * env * 0.4f;
+                }
+                submitClip = AudioClip.Create("Laptop submit", samples.Length, 1, sampleRate, false);
+                submitClip.SetData(samples, 0);
+            }
+            if (errorClip == null)
+            {
+                const int sampleRate = 22050;
+                var samples = new float[(int)(sampleRate * 0.10f)];
+                for (int i = 0; i < samples.Length; i++)
+                {
+                    float s = i / (float)sampleRate;
+                    float env = Mathf.Exp(-s * 28f) * Mathf.Clamp01(i / 16f);
+                    samples[i] = Mathf.Sin(2f * Mathf.PI * 155f * s) * env * 0.35f;
+                }
+                errorClip = AudioClip.Create("Laptop error", samples.Length, 1, sampleRate, false);
+                errorClip.SetData(samples, 0);
+            }
+            if (typingSource == null)
+            {
+                typingSource = gameObject.AddComponent<AudioSource>();
+                typingSource.playOnAwake = false;
+                typingSource.volume = .25f;
+                typingSource.clip = typingClip;
+            }
         }
 
         private void PlayTypingSound()
         {
-            if (IsEssay && typingSource != null) typingSource.Play();
+            if (typingSource != null && typingClip != null) typingSource.PlayOneShot(typingClip, 1f);
+        }
+
+        private void PlaySubmitSound()
+        {
+            if (typingSource != null && submitClip != null) typingSource.PlayOneShot(submitClip, 0.85f);
+        }
+
+        private void PlayErrorSound()
+        {
+            if (typingSource != null && errorClip != null) typingSource.PlayOneShot(errorClip, 0.75f);
         }
 
         private void OnTextInput(char ch)
@@ -435,7 +499,7 @@ namespace NoRainbowAfter.Interaction
             {
                 headerLabel.text = IsEssay
                     ? $"ESAI KULIAH  ·  Bagian {JudgedEssaySections + 1}/{RequiredSentences}  ·  Terkirim {CompletedSentences}"
-                    : $"TUGAS KULIAH — MENGETIK LAPORAN  ({CompletedSentences}/{RequiredSentences})";
+                    : $"TUGAS KULIAH  ·  Bagian {Mathf.Min(CompletedSentences + 1, RequiredSentences)}/{RequiredSentences}  ·  Terkirim {CompletedSentences}";
             }
             if (timerLabel != null)
                 timerLabel.text = $"Sisa waktu: {Mathf.Max(0f, RemainingTime):F1} dtk";

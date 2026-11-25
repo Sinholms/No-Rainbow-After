@@ -29,8 +29,8 @@ namespace NoRainbowAfter.Player
         public const float StressReliefPerSecond = 10f;
         public const float MaxCameraNodDegrees = 6.0f;
 
-        private const float LungSmoothTime = 0.72f;
-        private const float LungMaxSpeed = 0.34f;
+        private const float LungSmoothTime = 1.05f;
+        private const float LungMaxSpeed = 0.22f;
         private const float MaxBreathFovBoost = 2.1f;
         private const float MaxBreathEyeLift = 0.032f;
         private const float AmbientDuckFactor = 0.38f;
@@ -268,7 +268,7 @@ namespace NoRainbowAfter.Player
             TargetCenter = EvaluateTargetCenter(cycleTime);
 
             // Lung-like inertia: quick initial draw/release, tapering smoothly near capacity
-            float lungGoal = holdInhale ? 0.90f : 0.12f;
+            float lungGoal = holdInhale ? 0.86f : 0.16f;
             IndicatorValue = Mathf.Clamp01(Mathf.SmoothDamp(
                 IndicatorValue,
                 lungGoal,

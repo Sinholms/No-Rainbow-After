@@ -228,6 +228,11 @@ namespace NoRainbowAfter.Narrative
             return true;
         }
 
+        public void EnterChapterThree()
+        {
+            if (State != null) State.ActiveChapter = "Chapter3";
+        }
+
         public bool AdvanceChapterTwo(ChapterTwoBeat next)
         {
             if (!ChapterOneFinished || State == null) return false;

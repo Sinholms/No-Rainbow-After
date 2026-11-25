@@ -42,6 +42,7 @@ namespace NoRainbowAfter.AI
             if (motor != null) motor.PoseRestored += OnPlayerPoseRestored;
             objectives=GetComponent<ObjectiveTracker>();
             chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
+            if (GetComponent<ChapterThreeFlow>() == null) gameObject.AddComponent<ChapterThreeFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
             if(Corridor != null) { CreateExitDoor(); Corridor.SetActive(false); }
             SharedExit = SharedCorridorDoor.ReplaceEndWall(player, CanCrossSharedExit, CrossSharedExit);
@@ -147,21 +148,42 @@ namespace NoRainbowAfter.AI
             var door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "C1_ExitDoor";
             door.transform.SetParent(Corridor.transform, false);
-            door.transform.localPosition = new Vector3(18.6f, 1.1f, 1.02f);
-            door.transform.localScale = new Vector3(1.15f, 2.2f, .12f);
+            door.transform.localPosition = new Vector3(18.6f, 1.1f, 0.81f);
+            door.transform.localScale = new Vector3(1.15f, 2.2f, .06f);
             var wardrobe = Corridor.GetComponentInChildren<HidingWardrobe>(true);
             var source = wardrobe != null ? wardrobe.GetComponentInChildren<Renderer>(true) : null;
             if (source != null) door.GetComponent<Renderer>().sharedMaterial = source.sharedMaterial;
             door.AddComponent<ChapterOneExitDoor>().Initialize(this, director);
+
+            // Flush wooden/metal door frame jambs around the recessed exit door
+            var frameMat = source != null ? source.sharedMaterial : null;
+            foreach (float sx in new[] { -0.615f, 0.615f })
+            {
+                var jamb = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                jamb.name = sx < 0 ? "C1_ExitJamb_L" : "C1_ExitJamb_R";
+                jamb.transform.SetParent(Corridor.transform, false);
+                jamb.transform.localPosition = new Vector3(18.6f + sx, 1.12f, 0.82f);
+                jamb.transform.localScale = new Vector3(0.08f, 2.24f, 0.08f);
+                if (frameMat != null) jamb.GetComponent<Renderer>().sharedMaterial = frameMat;
+                Destroy(jamb.GetComponent<Collider>());
+            }
+            var lintel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            lintel.name = "C1_ExitJamb_Top";
+            lintel.transform.SetParent(Corridor.transform, false);
+            lintel.transform.localPosition = new Vector3(18.6f, 2.24f, 0.82f);
+            lintel.transform.localScale = new Vector3(1.31f, 0.08f, 0.08f);
+            if (frameMat != null) lintel.GetComponent<Renderer>().sharedMaterial = frameMat;
+            Destroy(lintel.GetComponent<Collider>());
+
             var handle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             handle.name = "Handle";
             handle.transform.SetParent(door.transform, false);
-            handle.transform.localPosition = new Vector3(.35f, -.03f, .7f);
-            handle.transform.localScale = new Vector3(.065f, .035f, .45f);
+            handle.transform.localPosition = new Vector3(.35f, -.03f, .95f);
+            handle.transform.localScale = new Vector3(.065f, .035f, .65f);
             Destroy(handle.GetComponent<Collider>());
             var lamp = new GameObject("Exit Light");
             lamp.transform.SetParent(Corridor.transform, false);
-            lamp.transform.localPosition = new Vector3(18.6f, 2.35f, 1.6f);
+            lamp.transform.localPosition = new Vector3(18.6f, 2.35f, 1.18f);
             var light = lamp.AddComponent<Light>(); light.type = LightType.Point;
             light.color = new Color(.75f, .87f, 1f); light.range = 3f; light.intensity = 1.4f;
         }
