@@ -66,7 +66,7 @@ Shader "NoRainbowAfter/SpotlightBeam"
                 float3 viewDir = normalize(GetCameraPositionWS() - input.positionWS);
                 float3 n = normalize(input.normalWS);
                 float facing = abs(dot(n, viewDir));
-                float softEdge = pow(saturate(facing), 1.35);
+                float softEdge = pow(saturate(facing), 1.55);
 
                 // Subtle rain/mist streaks drifting downward through the flashlight cone.
                 float2 mistUv = float2(input.positionWS.x * 0.7 + input.positionWS.z * 0.7, input.positionWS.y * 1.4 + _Time.y * 0.65);
@@ -77,10 +77,10 @@ Shader "NoRainbowAfter/SpotlightBeam"
                 float nearFade = smoothstep(0.35, 1.25, camDist);
 
                 // Smooth fade along length from bright lens core to misty tail.
-                float lengthFade = pow(saturate(1.0 - input.uv.y), 1.45);
-                float lensCore = smoothstep(0.0, 0.06, input.uv.y);
+                float lengthFade = pow(saturate(1.0 - input.uv.y), 1.15);
+                float lensCore = smoothstep(0.0, 0.04, input.uv.y);
 
-                half alpha = input.color.a * (half)(softEdge * nearFade * lengthFade * lensCore * lerp(0.72, 1.28, mist));
+                half alpha = input.color.a * (half)(softEdge * nearFade * lengthFade * lensCore * lerp(0.76, 1.26, mist));
                 return half4(input.color.rgb, saturate(alpha));
             }
             ENDHLSL

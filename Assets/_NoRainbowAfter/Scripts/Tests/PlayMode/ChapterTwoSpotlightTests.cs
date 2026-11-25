@@ -176,5 +176,43 @@ namespace NoRainbowAfter.Tests
             Assert.That(encounter.IsFloorPointVisible(0, origin + new Vector3(1.5f, .12f, 5f)), Is.True);
             Assert.That(encounter.IsFloorPointVisible(0, origin + new Vector3(-1.5f, 1f, 5f)), Is.False);
         }
+        [Test]
+        public void DefaultSpotlightUsesSpotLightAndVolumetricConeAndShiftsColorOnExposure()
+        {
+            Vector3 origin = new Vector3(1100, 0, 0);
+            Box(origin + Vector3.down * .25f, new Vector3(30, .5f, 30));
+            var actor = New("player"); actor.transform.position = origin + Vector3.forward * 4;
+            var camera = New("camera"); camera.transform.SetParent(actor.transform); camera.AddComponent<Camera>();
+            actor.AddComponent<CharacterController>(); var motor = actor.AddComponent<FirstPersonMotor>();
+            var emitter = New("light").transform; emitter.position = origin + Vector3.up;
+            var checkpoint = New("checkpoint").transform; checkpoint.position = origin + Vector3.right * 5;
+            var encounter = New("encounter").AddComponent<ChapterTwoSpotlightEncounter>(); encounter.AutoTick = false;
+            Assert.That(encounter.ShowFloorFootprint, Is.False);
+            encounter.Configure(motor, new[] { emitter }, new[] { checkpoint });
+            encounter.RebuildFootprints();
+
+            Assert.That(encounter.transform.Find("Spotlight floor footprint"), Is.Null);
+            var spotLight = emitter.GetComponent<Light>();
+            Assert.That(spotLight, Is.Not.Null);
+            Assert.That(spotLight.type, Is.EqualTo(LightType.Spot));
+            Assert.That(spotLight.enabled, Is.True);
+
+            var coneTransform = encounter.transform.Find("Spotlight volumetric cone");
+            Assert.That(coneTransform, Is.Not.Null);
+            Assert.That(coneTransform.gameObject.activeInHierarchy, Is.True);
+            var coneFilter = coneTransform.GetComponent<MeshFilter>();
+            Assert.That(coneFilter, Is.Not.Null);
+            Assert.That(coneFilter.sharedMesh, Is.Not.Null);
+            Assert.That(coneFilter.sharedMesh.vertexCount, Is.GreaterThan(0));
+
+            Physics.SyncTransforms(); encounter.ManualTick(.2f);
+            Assert.That(encounter.IsIlluminated, Is.True);
+            Assert.That(spotLight.color.r, Is.GreaterThan(spotLight.color.b));
+
+            Box(origin + new Vector3(0, 1, 2), new Vector3(2, 2, .5f));
+            Physics.SyncTransforms(); encounter.ManualTick(.2f);
+            Assert.That(encounter.IsIlluminated, Is.False);
+            Assert.That(spotLight.color.b, Is.GreaterThan(spotLight.color.r));
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace NoRainbowAfter.AI
     {
         public bool AutoTick = true;
         public bool RenderFootprints = true;
+        public bool ShowFloorFootprint = false;
         public float CatchSeconds = 2f;
         public float DecayPerSecond = 2f;
         public float Range = 12f;
@@ -21,11 +22,11 @@ namespace NoRainbowAfter.AI
 
         private const int FootprintSectors = 44;
         private const int FootprintRings = 22;
-        private const int ConeSegments = 28;
+        private const int ConeSegments = 36;
         private const float FootprintStartRadius = 0.42f;
         private const float MaxWalkableFloorRise = 0.38f;
-        private const float BaseLightIntensity = 36f;
-        private const float AlertLightIntensity = 52f;
+        private const float BaseLightIntensity = 62f;
+        private const float AlertLightIntensity = 94f;
 
         private static readonly Color CalmBeamColor = new Color(0.84f, 0.93f, 1.0f);
         private static readonly Color AlertBeamColor = new Color(1.0f, 0.18f, 0.14f);
@@ -86,8 +87,12 @@ namespace NoRainbowAfter.AI
             checkpoints = segmentCheckpoints;
             beams = new Beam[emitters.Length];
 
-            var footprintShader = Resources.Load<Shader>("SpotlightFootprint");
-            if (footprintShader == null) footprintShader = Shader.Find("Universal Render Pipeline/Unlit");
+            Shader footprintShader = null;
+            if (ShowFloorFootprint)
+            {
+                footprintShader = Resources.Load<Shader>("SpotlightFootprint");
+                if (footprintShader == null) footprintShader = Shader.Find("Universal Render Pipeline/Unlit");
+            }
             var beamShader = Resources.Load<Shader>("SpotlightBeam");
 
             for (int i = 0; i < beams.Length; i++)
@@ -114,27 +119,30 @@ namespace NoRainbowAfter.AI
                 beam.light.enabled = true;
                 beam.light.type = LightType.Spot;
                 beam.light.color = CalmBeamColor;
-                beam.light.range = Range + 2f;
-                beam.light.spotAngle = Mathf.Min(170f, ConeAngle + 4f);
-                beam.light.innerSpotAngle = ConeAngle * 0.48f;
+                beam.light.range = Range + 2.5f;
+                beam.light.spotAngle = Mathf.Min(170f, ConeAngle + 3f);
+                beam.light.innerSpotAngle = ConeAngle * 0.62f;
                 beam.light.intensity = BaseLightIntensity;
                 beam.light.shadows = LightShadows.Soft;
-                beam.light.shadowStrength = 0.92f;
-                beam.light.shadowBias = 0.03f;
-                beam.light.shadowNormalBias = 0.18f;
+                beam.light.shadowStrength = 0.94f;
+                beam.light.shadowBias = 0.025f;
+                beam.light.shadowNormalBias = 0.14f;
                 beam.light.shadowNearPlane = 0.25f;
 
-                var footprint = new GameObject("Spotlight floor footprint");
-                footprint.transform.SetParent(transform, false);
-                beam.filter = footprint.AddComponent<MeshFilter>();
-                beam.mesh = new Mesh { name = "Spotlight footprint" };
-                beam.mesh.MarkDynamic();
-                beam.filter.sharedMesh = beam.mesh;
-                var renderer = footprint.AddComponent<MeshRenderer>();
-                beam.material = new Material(footprintShader);
-                renderer.sharedMaterial = beam.material;
-                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                renderer.receiveShadows = false;
+                if (ShowFloorFootprint)
+                {
+                    var footprint = new GameObject("Spotlight floor footprint");
+                    footprint.transform.SetParent(transform, false);
+                    beam.filter = footprint.AddComponent<MeshFilter>();
+                    beam.mesh = new Mesh { name = "Spotlight footprint" };
+                    beam.mesh.MarkDynamic();
+                    beam.filter.sharedMesh = beam.mesh;
+                    var renderer = footprint.AddComponent<MeshRenderer>();
+                    beam.material = new Material(footprintShader);
+                    renderer.sharedMaterial = beam.material;
+                    renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                    renderer.receiveShadows = false;
+                }
 
                 if (beamShader != null)
                 {
@@ -225,9 +233,9 @@ namespace NoRainbowAfter.AI
             beam.range = range;
             if (beam.light != null)
             {
-                beam.light.spotAngle = Mathf.Min(170f, fullAngleDegrees + 4f);
-                beam.light.innerSpotAngle = fullAngleDegrees * 0.48f;
-                beam.light.range = range + 2f;
+                beam.light.spotAngle = Mathf.Min(170f, fullAngleDegrees + 3f);
+                beam.light.innerSpotAngle = fullAngleDegrees * 0.62f;
+                beam.light.range = range + 2.5f;
             }
         }
 
@@ -282,7 +290,7 @@ namespace NoRainbowAfter.AI
             foreach (var beam in beams)
             {
                 if (beam.emitter == null) continue;
-                RebuildFootprint(beam);
+                if (ShowFloorFootprint && beam.mesh != null) RebuildFootprint(beam);
                 RebuildVolumetricCone(beam);
             }
         }
@@ -634,8 +642,8 @@ namespace NoRainbowAfter.AI
             Vector3 up = beam.emitter.up;
 
             // Outer misty cone + brighter inner core cone, both ray-clipped against crates/walls.
-            AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.48f, 0.055f, 0.18f);
-            AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.24f, 0.032f, 0.24f);
+            AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.49f, 0.055f, 0.18f);
+            AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.27f, 0.032f, 0.23f);
 
             beam.coneMesh.Clear();
             beam.coneMesh.SetVertices(verts);
