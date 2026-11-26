@@ -204,7 +204,7 @@ namespace NoRainbowAfter.Editor
                 {
                     float z = -2.15f + 5.50f * i;
                     if (side == -1 && i == 1) continue;
-                    var house = Place("RukoPasar", ground, new Vector3(side * 7.51f, 0, z), new Vector3(1, .89f + .105f * ((i + side + 3) % 4), 1), -90 * side);
+                    var house = Place("RukoPasar", ground, new Vector3(side * 6.84f, 0, z), new Vector3(1, .89f + .105f * ((i + side + 3) % 4), 1), -90 * side);
                     // Only two lonely upper windows are dimly lit, leaving the rest of the market dead dark.
                     if ((side == 1 && i == 1) || (side == -1 && i == 5))
                     {
@@ -280,7 +280,7 @@ namespace NoRainbowAfter.Editor
             {
                 var plate = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 plate.name = sign.Item1; plate.transform.SetParent(ground, false);
-                plate.transform.localPosition = new Vector3(sign.Item2 * 7.29f, 3.06f, sign.Item3);
+                plate.transform.localPosition = new Vector3(sign.Item2 * 6.62f, 3.06f, sign.Item3);
                 plate.transform.localRotation = Quaternion.Euler(0, 90f * sign.Item2, 0);
                 plate.transform.localScale = new Vector3(4.2f, .52f, .08f);
                 plate.GetComponent<Renderer>().sharedMaterial = mats["C2_Petrol"];
@@ -356,7 +356,7 @@ namespace NoRainbowAfter.Editor
             go.transform.SetParent(root, false);
             go.transform.localRotation = Quaternion.Euler(49, -34, 0);
             var moon = go.AddComponent<Light>(); moon.type = LightType.Directional;
-            moon.color = new Color(.44f, .58f, .76f); moon.intensity = .38f;
+            moon.color = new Color(.44f, .58f, .76f); moon.intensity = .20f;
             moon.shadows = LightShadows.Soft; moon.shadowStrength = .86f;
 
             var probe = new GameObject("Pantulan jalan").AddComponent<ReflectionProbe>();
@@ -368,7 +368,7 @@ namespace NoRainbowAfter.Editor
 
             var grade = new GameObject("Suasana pasar malam").AddComponent<Volume>();
             grade.transform.SetParent(root, false);
-            grade.transform.localPosition = new Vector3(0f, 4f, 21f);
+            grade.transform.localPosition = new Vector3(0f, 4f, 52f);
             grade.isGlobal = false;
             grade.priority = 5f;
             grade.weight = 1f;
@@ -385,7 +385,7 @@ namespace NoRainbowAfter.Editor
             tonemapping.mode.Override(TonemappingMode.ACES);
 
             var color = GetOrAdd<ColorAdjustments>(profile);
-            color.postExposure.Override(0.18f);
+            color.postExposure.Override(-0.08f);
             color.contrast.Override(14f);
             color.saturation.Override(-18f);
             color.colorFilter.Override(new Color(0.92f, 0.96f, 1.0f));
@@ -424,7 +424,7 @@ namespace NoRainbowAfter.Editor
             grade.sharedProfile = profile;
             var bounds = grade.gameObject.AddComponent<BoxCollider>();
             bounds.isTrigger = true;
-            bounds.size = new Vector3(26f, 14f, 62f);
+            bounds.size = new Vector3(36f, 16f, 160f);
         }
 
         private static T GetOrAdd<T>(VolumeProfile profile) where T : VolumeComponent

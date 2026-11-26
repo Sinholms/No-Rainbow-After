@@ -50,6 +50,10 @@ namespace NoRainbowAfter.Editor
                 for (int side = -1; side <= 1; side += 2)
                 {
                     Box(ground, "Trotoar", side * 5.8f, -.06f, roadMiddle, 2, .36f, roadLength, concrete);
+                    // Continuous paved apron under roadside buildings so no gap appears along the street edges.
+                    Box(ground, "Apron trotoar", side * 9.8f, -.065f, roadMiddle, 7.8f, .36f, roadLength, concrete, false);
+                    Box(ground, "Latar belakang ruko", side * 8.55f, 2.8f, (CordonZ + 4f + roadStart) * .5f,
+                        .25f, 5.8f, CordonZ + 4f - roadStart, ink, false);
                     // The shoulders carry the ground beneath the more widely spaced roadside buildings.
                     const float shoulderStart = CordonZ + 2f;
                     Box(ground, "Bahu jalan raya", side * 18.8f, -.16f, (RoadEndZ + shoulderStart) * .5f,
@@ -90,8 +94,8 @@ namespace NoRainbowAfter.Editor
                 Box(stop, "Canopy", 0, 3.02f, 0, 5.6f, .2f, 3.12f, teal);
                 Box(stop, "Illuminated destination", 0, 3.36f, -1.40f, 5.4f, .77f, .17f, warm);
                 Sign(stop, "HALTE   PASAR", 0, 3.36f, -1.50f, .48f, ink.color, 0);
-                // Lonely teal-green safe haven glow visible from spawn through the night fog.
-                LightAt(stop, "Lampu tunggu", 0, 2.67f, -.3f, new Color(.48f, .86f, .74f), 4.8f, 9.5f);
+                // Lonely dim teal-green safe haven glow near the bus shelter.
+                LightAt(stop, "Lampu tunggu", 0, 2.67f, -.3f, new Color(.48f, .86f, .74f), 2.1f, 6.8f);
                 var zone = Node(stop, "Zona aman", 0, 1.2f, -.10f).gameObject.AddComponent<BoxCollider>();
                 zone.isTrigger = true; zone.size = new Vector3(5.5f, 2.6f, 3.15f);
                 street.Shelter = zone;
@@ -133,7 +137,7 @@ namespace NoRainbowAfter.Editor
                     var lantern = Box(t, "Lentera", x - Mathf.Sign(x) * 1.21f, 5.26f, z, .47f, .12f, .73f, warm, false);
                     var lamp = LightAt(t, "Cahaya jalan", x - Mathf.Sign(x) * 1.21f, 5.05f, z,
                         i == 1 ? new Color(.56f, .82f, .78f) : new Color(.96f, .68f, .38f),
-                        i == 1 ? 13.5f : 11.5f, 14.5f);
+                        i == 0 ? 11.5f : (i == 1 ? 8.5f : 5.2f), i == 2 ? 11f : 14.5f);
                     lamp.type = LightType.Spot;
                     lamp.spotAngle = 100f;
                     lamp.innerSpotAngle = 56f;
@@ -145,19 +149,20 @@ namespace NoRainbowAfter.Editor
                     }
                 }
 
-                // Distant streetlamps beyond the cordon are dimmer so the road vanishes into the storm fog.
+                // Distant streetlamps beyond the cordon are kept very dim so the police-tape end stays darker than spawn.
                 for (int i = 0; i < 6; i++)
                 {
                     float side = i % 2 == 0 ? -1f : 1f;
-                    float z = 45f + i * 14f;
+                    float z = 52f + i * 14f;
                     var pole = Node(ground, "PJU jalan raya", side * 5.85f, 0, z);
                     Box(pole, "Tiang", 0, 3.2f, 0, .115f, 6.4f, .115f, ink, false);
                     Box(pole, "Lengan", -side * .68f, 6.35f, 0, 1.45f, .085f, .10f, ink, false);
                     Box(pole, "Lampu", -side * 1.34f, 6.28f, 0, .46f, .11f, .63f, warm, false);
                     var lamp = LightAt(pole, "Cahaya aspal", -side * 1.34f, 6.16f, 0,
-                        i % 3 == 0 ? new Color(.90f, .60f, .32f) : new Color(.48f, .68f, .76f), 9.2f, 15f);
+                        i % 3 == 0 ? new Color(.90f, .60f, .32f) : new Color(.48f, .68f, .76f),
+                        Mathf.Lerp(1.6f, 0.45f, i / 5f), 8.5f);
                     lamp.type = LightType.Spot;
-                    lamp.spotAngle = 96f;
+                    lamp.spotAngle = 82f;
                     lamp.transform.localRotation = Quaternion.LookRotation(new Vector3(-side * .48f, -1, 0));
                 }
 
@@ -321,36 +326,35 @@ namespace NoRainbowAfter.Editor
 
         private static void AddBus(ChapterTwoStreet street, Transform root, Material trim, Material warm)
         {
-            var bus = Node(root, "Bus terakhir", 2.78f, 0f, 38.62f);
-            var model = PlaceModel("PROP_TKPShuttle", "Front windshield", bus);
-            model.localRotation *= Quaternion.Euler(0f, 180f, 0f);
+            var bus = Node(root, "Bus terakhir", 2.78f, 0f, 37.80f);
+            PlaceModel("PROP_TKPShuttle", "Front windshield", bus);
             Box(bus, "Lantai kabin", 0, .48f, 0, 2.32f, .50f, 5.78f, trim, false);
             ColliderAt(bus, "Pijakan kabin", new Vector3(0, .42f, 0), new Vector3(2.32f, .58f, 5.74f));
             ColliderAt(bus, "Dinding kiri", new Vector3(-1.1f, 1.65f, 0), new Vector3(.13f, 1.85f, 5.78f));
-            ColliderAt(bus, "Dinding kanan belakang", new Vector3(1.10f, 1.65f, .73f), new Vector3(.13f, 1.85f, 4.25f));
-            ColliderAt(bus, "Dinding kanan depan", new Vector3(1.10f, 1.65f, -2.58f), new Vector3(.13f, 1.85f, .53f));
-            ColliderAt(bus, "Kaca depan", new Vector3(0, 1.65f, -2.80f), new Vector3(2.25f, 1.90f, .19f));
-            ColliderAt(bus, "Dinding belakang", new Vector3(0, 1.65f, 2.80f), new Vector3(2.25f, 1.90f, .19f));
+            ColliderAt(bus, "Dinding kanan belakang", new Vector3(1.10f, 1.65f, -.73f), new Vector3(.13f, 1.85f, 4.25f));
+            ColliderAt(bus, "Dinding kanan depan", new Vector3(1.10f, 1.65f, 2.58f), new Vector3(.13f, 1.85f, .53f));
+            ColliderAt(bus, "Kaca depan", new Vector3(0, 1.65f, 2.80f), new Vector3(2.25f, 1.90f, .19f));
+            ColliderAt(bus, "Dinding belakang", new Vector3(0, 1.65f, -2.80f), new Vector3(2.25f, 1.90f, .19f));
             ColliderAt(bus, "Atap kabin", new Vector3(0, 2.58f, 0), new Vector3(2.2f, .12f, 5.5f));
 
-            var door = ColliderAt(bus, "Pintu bus", new Vector3(1.21f, 1.20f, -1.64f), new Vector3(.12f, 2.40f, 1.13f));
+            var door = ColliderAt(bus, "Pintu bus", new Vector3(1.21f, 1.20f, 1.64f), new Vector3(.12f, 2.40f, 1.13f));
             street.BusDoor = door.gameObject.AddComponent<ChapterTwoBusDoor>();
-            street.BusSeat = Node(bus, "Lorong kabin bus", 0, .734f, .05f, 180f);
+            street.BusSeat = Node(bus, "Lorong kabin bus", 0, .734f, -.05f, 0f);
             var queueLight = LightAt(root.Find("Halte"), "Lampu antre", 1.6f, 2.72f, -.98f,
-                new Color(.56f, .86f, .76f), 6.2f, 8.5f);
+                new Color(.56f, .86f, .76f), 2.4f, 6.2f);
             queueLight.type = LightType.Spot;
             queueLight.spotAngle = 102f;
             queueLight.transform.localRotation = Quaternion.LookRotation(new Vector3(.10f, -.64f, -1f));
-            LightAt(bus, "Lampu kabin", 0, 2.35f, 0, new Color(.78f, .90f, .78f), 2.1f, 4.2f);
-            Box(bus, "Panel rute", 0, 2.37f, -2.98f, 1.44f, .20f, .022f, trim, false);
-            ChapterTwoStreetArt.Lettering(bus, "04   PASAR  -  TERMINAL", new Vector3(0, 2.37f, -3.004f),
-                Quaternion.identity, 1.41f, .19f, .105f, new Color(1f, .72f, .33f));
-            ChapterTwoStreetArt.Lettering(bus, "B  7104  SR", new Vector3(0, .594f, -3.082f),
-                Quaternion.identity, .48f, .13f, .069f, new Color(.07f, .065f, .05f));
-            foreach (float row in new[] { -.80f, .15f, 1.10f, 2.02f })
+            LightAt(bus, "Lampu kabin", 0, 2.35f, 0, new Color(.78f, .90f, .78f), 1.8f, 4.0f);
+            Box(bus, "Panel rute", 0, 2.37f, 2.98f, 1.44f, .20f, .022f, trim, false);
+            ChapterTwoStreetArt.Lettering(bus, "04   PASAR  -  TERMINAL", new Vector3(0, 2.37f, 3.004f),
+                Quaternion.Euler(0f, 180f, 0f), 1.41f, .19f, .105f, new Color(1f, .72f, .33f));
+            ChapterTwoStreetArt.Lettering(bus, "B  7104  SR", new Vector3(0, .594f, 3.082f),
+                Quaternion.Euler(0f, 180f, 0f), .48f, .13f, .069f, new Color(.07f, .065f, .05f));
+            foreach (float row in new[] { .80f, -.15f, -1.10f, -2.02f })
             {
                 Box(bus, "Dudukan kursi", -.77f, .97f, row, .54f, .15f, .49f, trim, false);
-                Box(bus, "Sandaran kursi", -.77f, 1.24f, row + .19f, .54f, .52f, .10f, trim, false);
+                Box(bus, "Sandaran kursi", -.77f, 1.24f, row - .19f, .54f, .52f, .10f, trim, false);
             }
         }
 
