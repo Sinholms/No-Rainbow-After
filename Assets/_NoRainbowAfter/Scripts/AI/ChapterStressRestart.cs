@@ -5,7 +5,10 @@ using UnityEngine.SceneManagement;
 
 namespace NoRainbowAfter.AI
 {
-    // Memuat ulang scene awal bab untuk membangun kembali dunia dan progres cerita bab itu.
+    /// <summary>
+    /// Memuat ulang scene awal bab (Chapter1 / Chapter2) ketika stres mencapai 100% di area berbahaya,
+    /// sambil mempertahankan clue yang sudah dikumpulkan melalui ChapterDirector.PrepareChapterRestart.
+    /// </summary>
     public sealed class ChapterStressRestart : MonoBehaviour
     {
         private ChapterDirector director;
@@ -18,28 +21,46 @@ namespace NoRainbowAfter.AI
             director = GetComponent<ChapterDirector>();
             corridor = GetComponent<ChapterOneCorridorShift>();
             stress = GetComponent<StressBarometer>();
-            if (stress != null) stress.StressChanged += OnStressChanged;
+            if (stress != null)
+            {
+                stress.StressChanged += OnStressChanged;
+            }
         }
 
         private void OnDestroy()
         {
-            if (stress != null) stress.StressChanged -= OnStressChanged;
+            if (stress != null)
+            {
+                stress.StressChanged -= OnStressChanged;
+            }
         }
 
         private void Update()
         {
             // Periksa juga pemain yang memasuki area berbahaya saat stresnya sudah maksimum.
             if (stress != null && stress.CurrentStress >= StressBarometer.MaxStress)
+            {
                 OnStressChanged(stress.CurrentStress);
+            }
         }
 
         private void OnStressChanged(float value)
         {
-            if (restarting || value < StressBarometer.MaxStress || director == null || director.State == null) return;
-            int chapter = !director.ChapterOneFinished && corridor != null && corridor.OwnsPlayer ? 1 :
-                director.State.Chapter2Beat >= ChapterTwoBeat.StreetEntered &&
-                director.State.Chapter2Beat < ChapterTwoBeat.BoardedBus ? 2 : 0;
-            if (chapter == 0) return;
+            if (restarting || value < StressBarometer.MaxStress || director == null || director.State == null)
+            {
+                return;
+            }
+
+            int chapter = !director.ChapterOneFinished && corridor != null && corridor.OwnsPlayer
+                ? 1
+                : director.State.Chapter2Beat >= ChapterTwoBeat.StreetEntered &&
+                  director.State.Chapter2Beat < ChapterTwoBeat.BoardedBus
+                    ? 2
+                    : 0;
+            if (chapter == 0)
+            {
+                return;
+            }
 
             string path = "Assets/_NoRainbowAfter/Scenes/Chapter" + chapter + ".unity";
             if (!Application.CanStreamedLevelBeLoaded(path))
@@ -47,17 +68,22 @@ namespace NoRainbowAfter.AI
                 Debug.LogError("[NRA] Cannot restart chapter: scene is missing from build settings: " + path, this);
                 return;
             }
+
             restarting = true;
             director.PrepareChapterRestart(chapter);
             Time.timeScale = 1f;
             try
             {
-                if (SceneManager.LoadSceneAsync(path, LoadSceneMode.Single) != null) return;
+                if (SceneManager.LoadSceneAsync(path, LoadSceneMode.Single) != null)
+                {
+                    return;
+                }
             }
             catch (System.Exception exception)
             {
                 Debug.LogException(exception, this);
             }
+
             ChapterDirector.CancelChapterRestart();
             restarting = false;
         }

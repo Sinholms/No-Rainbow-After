@@ -3,6 +3,10 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.UI
 {
+    /// <summary>
+    /// Mengendalikan RawImage ber-shader masker pandang melingkar (NoRainbowAfter/UI/CircularViewMask),
+    /// memperbarui rasio aspek layar, radius, dan kelembutan tepi secara real-time di LateUpdate.
+    /// </summary>
     public sealed class CircularViewMask : MonoBehaviour
     {
         [SerializeField] private RawImage target;
@@ -19,7 +23,10 @@ namespace NoRainbowAfter.UI
 
         private void Awake()
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
             target.raycastTarget = false;
             originalMaterial = target.material;
             Shader shader = maskShader != null ? maskShader : Shader.Find("NoRainbowAfter/UI/CircularViewMask");
@@ -46,14 +53,21 @@ namespace NoRainbowAfter.UI
 
         private void Refresh()
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
             target.enabled = effectEnabled && runtimeMaterial != null;
-            if (runtimeMaterial == null) return;
+            if (runtimeMaterial == null)
+            {
+                return;
+            }
 
             Rect rect = target.rectTransform.rect;
             Vector3 scale = target.rectTransform.lossyScale;
             float width = Mathf.Abs(rect.width * scale.x);
             float height = Mathf.Abs(rect.height * scale.y);
+
             runtimeMaterial.SetFloat("_Aspect", height > 0 ? width / height : 1f);
             runtimeMaterial.SetFloat("_Radius", radius);
             runtimeMaterial.SetFloat("_Softness", Mathf.Max(0.001f, softness));
@@ -62,9 +76,13 @@ namespace NoRainbowAfter.UI
         private void OnDestroy()
         {
             if (target != null && target.material == runtimeMaterial)
+            {
                 target.material = originalMaterial;
+            }
             if (runtimeMaterial != null)
+            {
                 Destroy(runtimeMaterial);
+            }
         }
     }
 }

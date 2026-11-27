@@ -1,15 +1,18 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Attaches Raka's student body (ACT_Raka_StudentBody) beneath
-    /// Player_Raka_FPP and animates the Generic Armature rig with grounded 2-bone leg IK and
-    /// camera-safe continuous crouch posture synchronized with FirstPersonMotor.CrouchBlend.
+    /// Memasang tubuh mahasiswa Raka (ACT_Raka_StudentBody) di bawah Player_Raka_FPP dan
+    /// menganimasikan rig secara prosedural dengan 2-Bone Leg IK serta postur jongkok kontinu.
+    ///
+    /// [GRAFIKA KOMPUTER &amp; KINEMATIKA INVERSE]
+    /// - SolveLegIK() memecahkan kinematika dua segmen tulang (paha &amp; betis) memakai Hukum Kosinus
+    ///   agar kedua kaki tetap menapak di lantai saat Raka berdiri maupun jongkok penuh.
+    /// - Dipecah menjadi FirstPersonBodyVisual.cs &amp; FirstPersonBodyVisual.RigBinding.cs.
     /// </summary>
     [RequireComponent(typeof(FirstPersonMotor))]
-    public sealed class FirstPersonBodyVisual : MonoBehaviour
+    public sealed partial class FirstPersonBodyVisual : MonoBehaviour
     {
         private struct BoneRest
         {
@@ -87,20 +90,16 @@ namespace NoRainbowAfter.Player
             BindRig();
         }
 
-        private void LateUpdate()
-        {
-            ApplyPoseNow(Time.deltaTime);
-        }
+        private void LateUpdate() => ApplyPoseNow(Time.deltaTime);
 
-        /// <summary>
-        /// Evaluates the full FPP armature pose immediately for the current motor stance and camera pitch.
-        /// Exposed so PlayMode tests can assert exact bone clearances synchronously after Simulate steps.
-        /// </summary>
         public void ApplyPoseNow(float deltaTime)
         {
             if (motor == null) motor = GetComponent<FirstPersonMotor>();
             BindRig();
-            if (bodyInstance == null || motor == null || !HasArmatureRig) return;
+            if (bodyInstance == null || motor == null || !HasArmatureRig)
+            {
+                return;
+            }
 
             // Kecepatan dihitung dari perpindahan nyata, sehingga langkah berhenti saat gerak terhalang.
             float speed = 0f;
@@ -112,9 +111,13 @@ namespace NoRainbowAfter.Player
                 lastPosition = transform.position;
 
                 if (speed > 0.12f)
+                {
                     walkCycle += deltaTime * (motor.IsSprinting ? 10.5f : 7.0f) * Mathf.Lerp(1f, 0.84f, motor.StressGaitIntensity);
+                }
                 else
+                {
                     walkCycle = Mathf.MoveTowards(walkCycle, 0f, deltaTime * 4f);
+                }
             }
 
             float stress = motor.StressGaitIntensity;
@@ -127,7 +130,7 @@ namespace NoRainbowAfter.Player
             // Mulai dari pose dasar setiap frame agar rotasi prosedural tidak menumpuk.
             RestoreRestPose();
 
-            // Keep feet grounded on y = 0 while pulling torso further back under the crouched camera & spotlight
+            // Jaga telapak kaki menapak di y = 0 sambil menarik dada agak ke belakang agar aman di kamera FPP.
             bodyInstance.transform.localPosition = new Vector3(
                 bodyLocalOffset.x,
                 0f,
@@ -136,16 +139,18 @@ namespace NoRainbowAfter.Player
             float walkDip = speedFactor * (1f - crouch) * (0.015f + 0.018f * stress) * Mathf.Abs(Mathf.Sin(walkCycle));
             pelvisBone.position += transform.up * (-0.50f * crouch - walkDip) + transform.forward * (-0.04f * crouch);
 
-            // Progressive forward slouch when moving or under heavy stress, keeping idle rest posture upright.
-            float stressSlouch = Mathf.InverseLerp(0.45f, 1f, stress) * (1f - crouch * 0.65f) * Mathf.Max(speedFactor, Mathf.InverseLerp(0.65f, 1f, stress));
+            float stressSlouch = Mathf.InverseLerp(0.45f, 1f, stress) * (1f - crouch * 0.65f) *
+                                 Mathf.Max(speedFactor, Mathf.InverseLerp(0.65f, 1f, stress));
             float torsoRoll = motor.StressRollOffset * 0.45f;
+
             spineBone.rotation = Quaternion.AngleAxis(7f * crouch + 5.5f * stressSlouch, transform.right)
                 * Quaternion.AngleAxis(torsoRoll, transform.forward)
                 * spineBone.rotation;
             chestBone.rotation = Quaternion.AngleAxis(7f * crouch + 4.5f * stressSlouch, transform.right)
                 * Quaternion.AngleAxis(torsoRoll * 0.6f, transform.forward)
                 * chestBone.rotation;
-            lanyardBone.rotation = Quaternion.AngleAxis(6f * crouch + 3.5f * stressSlouch, transform.right) * lanyardBone.rotation;
+            lanyardBone.rotation = Quaternion.AngleAxis(6f * crouch + 3.5f * stressSlouch, transform.right)
+                * lanyardBone.rotation;
 
             if (upperArmL != null)
             {
@@ -172,30 +177,29 @@ namespace NoRainbowAfter.Player
 
             // IK menghitung posisi kedua kaki berdasarkan langkah dan perubahan tinggi saat jongkok.
             float strideExtent = speedFactor * (motor.IsSprinting ? 0.24f : 0.15f);
-            SolveLegIK(
-                thighL, shinL, footL,
-                upperLegLengthL, lowerLegLengthL,
-                leftAnkleRestLocal, leftFootRestRotRelBody,
-                -1f, crouch, walkCycle, strideExtent);
-
-            SolveLegIK(
-                thighR, shinR, footR,
-                upperLegLengthR, lowerLegLengthR,
-                rightAnkleRestLocal, rightFootRestRotRelBody,
-                1f, crouch, walkCycle + Mathf.PI, strideExtent);
+            SolveLegIK(thighL, shinL, footL, upperLegLengthL, lowerLegLengthL,
+                leftAnkleRestLocal, leftFootRestRotRelBody, -1f, crouch, walkCycle, strideExtent);
+            SolveLegIK(thighR, shinR, footR, upperLegLengthR, lowerLegLengthR,
+                rightAnkleRestLocal, rightFootRestRotRelBody, 1f, crouch, walkCycle + Mathf.PI, strideExtent);
         }
 
         private void RestoreRestPose()
         {
-            if (restTransforms == null) return;
+            if (restTransforms == null)
+            {
+                return;
+            }
             for (int i = 0; i < restTransforms.Length; i++)
             {
                 BoneRest r = restTransforms[i];
                 if (r.Bone != null)
+                {
                     r.Bone.SetLocalPositionAndRotation(r.LocalPos, r.LocalRot);
+                }
             }
         }
 
+        // Analytic 2-Bone IK berbasis Hukum Kosinus untuk menambatkan telapak kaki di lantai.
         private void SolveLegIK(
             Transform thigh, Transform shin, Transform foot,
             float upper, float lower,
@@ -214,7 +218,9 @@ namespace NoRainbowAfter.Player
 
             float minFloorAnkleY = transform.position.y + ankleRestLocal.y;
             if (target.y < minFloorAnkleY)
+            {
                 target.y = minFloorAnkleY;
+            }
 
             Vector3 hip = thigh.position;
             Vector3 delta = target - hip;
@@ -225,7 +231,9 @@ namespace NoRainbowAfter.Player
             float along = (upper * upper - lower * lower + reach * reach) / (2f * reach);
             Vector3 pole = Vector3.ProjectOnPlane(transform.forward + transform.right * (sideSign * 0.10f), axis);
             if (pole.sqrMagnitude < 1e-6f)
+            {
                 pole = Vector3.ProjectOnPlane(transform.forward, axis);
+            }
             pole.Normalize();
 
             Vector3 knee = hip + axis * along + pole * Mathf.Sqrt(Mathf.Max(0f, upper * upper - along * along));
@@ -233,107 +241,6 @@ namespace NoRainbowAfter.Player
             thigh.rotation = Quaternion.FromToRotation((shin.position - thigh.position).normalized, (knee - thigh.position).normalized) * thigh.rotation;
             shin.rotation = Quaternion.FromToRotation((foot.position - shin.position).normalized, (target - shin.position).normalized) * shin.rotation;
             foot.rotation = bodyTf.rotation * footRestRotRelBody;
-        }
-
-        private void BindRig()
-        {
-            if (bodyInstance == null)
-            {
-                Transform existing = transform.Find("ACT_Raka_StudentBody");
-                if (existing != null) bodyInstance = existing.gameObject;
-            }
-            if (bodyInstance == null || boundInstance == bodyInstance) return;
-
-            // Never allow FPP body visuals to block CharacterController or raycast interactions.
-            foreach (Collider col in bodyInstance.GetComponentsInChildren<Collider>(true))
-                Destroy(col);
-
-            // Prevent Animator from fighting procedural LateUpdate bone posing.
-            foreach (Animator anim in bodyInstance.GetComponentsInChildren<Animator>(true))
-            {
-                anim.enabled = false;
-                anim.applyRootMotion = false;
-            }
-
-            // Ensure SkinnedMeshRenderer bounds do not cull arms/legs when pitch changes steeply.
-            int headLayer = LayerMask.NameToLayer("PlayerHead");
-            foreach (SkinnedMeshRenderer smr in bodyInstance.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-            {
-                smr.updateWhenOffscreen = true;
-                if (smr.name != "SM_Raka_Head" || headLayer < 0) continue;
-
-                smr.gameObject.layer = headLayer;
-                smr.shadowCastingMode = ShadowCastingMode.Off;
-                if (motor != null && motor.ViewCamera != null)
-                    motor.ViewCamera.cullingMask &= ~(1 << headLayer);
-            }
-
-            rootBone = FindDeepChild(bodyInstance.transform, "Root");
-            pelvisBone = FindDeepChild(bodyInstance.transform, "Pelvis");
-            spineBone = FindDeepChild(bodyInstance.transform, "Spine");
-            chestBone = FindDeepChild(bodyInstance.transform, "Chest");
-            lanyardBone = FindDeepChild(bodyInstance.transform, "Lanyard");
-
-            upperArmL = FindDeepChild(bodyInstance.transform, "UpperArm.L");
-            forearmL = FindDeepChild(bodyInstance.transform, "Forearm.L");
-            handL = FindDeepChild(bodyInstance.transform, "Hand.L");
-            upperArmR = FindDeepChild(bodyInstance.transform, "UpperArm.R");
-            forearmR = FindDeepChild(bodyInstance.transform, "Forearm.R");
-            handR = FindDeepChild(bodyInstance.transform, "Hand.R");
-
-            thighL = FindDeepChild(bodyInstance.transform, "Thigh.L");
-            shinL = FindDeepChild(bodyInstance.transform, "Shin.L");
-            footL = FindDeepChild(bodyInstance.transform, "Foot.L");
-            thighR = FindDeepChild(bodyInstance.transform, "Thigh.R");
-            shinR = FindDeepChild(bodyInstance.transform, "Shin.R");
-            footR = FindDeepChild(bodyInstance.transform, "Foot.R");
-
-            Transform[] candidates =
-            {
-                rootBone, pelvisBone, spineBone, chestBone, lanyardBone,
-                upperArmL, forearmL, handL, upperArmR, forearmR, handR,
-                thighL, shinL, footL, thighR, shinR, footR
-            };
-            var captured = new System.Collections.Generic.List<BoneRest>(candidates.Length);
-            for (int i = 0; i < candidates.Length; i++)
-            {
-                Transform b = candidates[i];
-                if (b != null)
-                {
-                    captured.Add(new BoneRest
-                    {
-                        Bone = b,
-                        LocalPos = b.localPosition,
-                        LocalRot = b.localRotation
-                    });
-                }
-            }
-            restTransforms = captured.ToArray();
-
-            Transform bodyTf = bodyInstance.transform;
-            if (thighL != null && shinL != null && footL != null)
-            {
-                upperLegLengthL = Vector3.Distance(thighL.position, shinL.position);
-                lowerLegLengthL = Vector3.Distance(shinL.position, footL.position);
-                leftAnkleRestLocal = bodyTf.InverseTransformPoint(footL.position);
-                leftFootRestRotRelBody = Quaternion.Inverse(bodyTf.rotation) * footL.rotation;
-            }
-            if (thighR != null && shinR != null && footR != null)
-            {
-                upperLegLengthR = Vector3.Distance(thighR.position, shinR.position);
-                lowerLegLengthR = Vector3.Distance(shinR.position, footR.position);
-                rightAnkleRestLocal = bodyTf.InverseTransformPoint(footR.position);
-                rightFootRestRotRelBody = Quaternion.Inverse(bodyTf.rotation) * footR.rotation;
-            }
-
-            boundInstance = bodyInstance;
-        }
-
-        private static Transform FindDeepChild(Transform root, string targetName)
-        {
-            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
-                if (t.name == targetName) return t;
-            return null;
         }
     }
 }

@@ -5,10 +5,15 @@ using UnityEngine.Rendering.Universal;
 namespace NoRainbowAfter.Quality
 {
     /// <summary>
-    /// Applies scene-level URP atmosphere scaling for MasterGameplay across Low / Medium / High:
-    /// secondary dust/mist particles, ceiling water drips, reflection probes, player view light shadows,
-    /// camera anti-aliasing, and non-destructive runtime post-processing overrides without altering
-    /// gameplay logic or dirtying VolumeProfile assets on disk.
+    /// Mengatur penskalaan atmosfer URP tingkat scene (Low / Medium / High) untuk partikel kabut/debu,
+    /// tetesan air langit-langit, ReflectionProbe, bayangan lampu pemain, anti-aliasing kamera,
+    /// dan override VolumeProfile runtime tanpa mengotori aset di disk.
+    ///
+    /// [GRAFIKA KOMPUTER]
+    /// Mengendalikan parameter render per-tier kualitas:
+    /// - Camera AA (None -> FXAA -> SMAA), LightShadows (None -> Soft),
+    /// - Box-projected ReflectionProbe (mati -> 128px -> 256px),
+    /// - ParticleSystem emission scaling, serta ACES Tonemapping, Bloom, &amp; FilmGrain.
     /// </summary>
     public sealed class QualityAtmosphereController : MonoBehaviour
     {
@@ -35,7 +40,9 @@ namespace NoRainbowAfter.Quality
                 {
                     ParticleSystem ps = secondaryDustSystems[i];
                     if (ps != null && ps.gameObject.activeInHierarchy && ps.isPlaying)
+                    {
                         count++;
+                    }
                 }
                 return count;
             }
@@ -51,7 +58,9 @@ namespace NoRainbowAfter.Quality
                 {
                     ParticleSystem ps = primaryDripSystems[i];
                     if (ps != null && ps.gameObject.activeInHierarchy && ps.isPlaying)
+                    {
                         count++;
+                    }
                 }
                 return count;
             }
@@ -73,7 +82,9 @@ namespace NoRainbowAfter.Quality
             secondaryDustSystems = dust;
             CacheDustBaseRates();
             if (Application.isPlaying && isActiveAndEnabled)
+            {
                 ApplySceneQuality(GraphicsQualityService.CurrentPreset);
+            }
         }
 
         private void Awake()
@@ -89,15 +100,14 @@ namespace NoRainbowAfter.Quality
             ApplySceneQuality(GraphicsQualityService.CurrentPreset);
         }
 
-        private void OnDisable()
-        {
-            GraphicsQualityService.PresetChanged -= ApplySceneQuality;
-        }
+        private void OnDisable() => GraphicsQualityService.PresetChanged -= ApplySceneQuality;
 
         private void OnDestroy()
         {
             if (postProcessVolume != null && sourceSharedProfile != null)
+            {
                 postProcessVolume.sharedProfile = sourceSharedProfile;
+            }
             if (runtimeProfile != null)
             {
                 Destroy(runtimeProfile);
@@ -110,7 +120,9 @@ namespace NoRainbowAfter.Quality
             AppliedPreset = preset;
 
             if (gameplayCamera != null)
+            {
                 GraphicsQualityService.ApplyCameraAntialiasing(gameplayCamera, preset);
+            }
 
             if (playerViewLight != null)
             {
@@ -138,12 +150,14 @@ namespace NoRainbowAfter.Quality
         private void EnsureRuntimeVolumeProfile()
         {
             if (!Application.isPlaying || postProcessVolume == null || runtimeProfile != null)
+            {
                 return;
-
+            }
             sourceSharedProfile = postProcessVolume.sharedProfile;
             if (sourceSharedProfile == null)
+            {
                 return;
-
+            }
             runtimeProfile = Instantiate(sourceSharedProfile);
             runtimeProfile.name = sourceSharedProfile.name + "_RuntimeT07";
             postProcessVolume.profile = runtimeProfile;
@@ -151,7 +165,10 @@ namespace NoRainbowAfter.Quality
 
         private void ApplyReflectionProbes(QualityPreset preset)
         {
-            if (reflectionProbes == null) return;
+            if (reflectionProbes == null)
+            {
+                return;
+            }
             bool enableProbes = preset != QualityPreset.Low;
             int targetRes = preset == QualityPreset.High ? 256 : 128;
 
@@ -167,7 +184,9 @@ namespace NoRainbowAfter.Quality
                     probe.resolution = targetRes;
                     probe.boxProjection = true;
                     if (Application.isPlaying && (enabledChanged || resChanged) && probe.mode == ReflectionProbeMode.Realtime)
+                    {
                         probe.RenderProbe();
+                    }
                 }
             }
         }
@@ -197,7 +216,9 @@ namespace NoRainbowAfter.Quality
             if (secondaryDustSystems != null)
             {
                 if (baseDustEmissionRates == null || baseDustEmissionRates.Length != secondaryDustSystems.Length)
+                {
                     CacheDustBaseRates();
+                }
 
                 for (int i = 0; i < secondaryDustSystems.Length; i++)
                 {
@@ -224,12 +245,18 @@ namespace NoRainbowAfter.Quality
 
         private void ApplyPostProcessing(QualityPreset preset)
         {
-            if (!Application.isPlaying) return;
+            if (!Application.isPlaying)
+            {
+                return;
+            }
             EnsureRuntimeVolumeProfile();
             VolumeProfile profile = runtimeProfile != null
                 ? runtimeProfile
                 : (postProcessVolume != null ? postProcessVolume.sharedProfile : null);
-            if (profile == null) return;
+            if (profile == null)
+            {
+                return;
+            }
 
             if (profile.TryGet<Tonemapping>(out var tone))
             {
@@ -237,19 +264,16 @@ namespace NoRainbowAfter.Quality
                 tone.mode.overrideState = true;
                 tone.mode.value = TonemappingMode.ACES;
             }
-
             if (profile.TryGet<ColorAdjustments>(out var color))
             {
                 color.active = true;
             }
-
             if (profile.TryGet<FilmGrain>(out var grain))
             {
                 grain.active = preset != QualityPreset.Low;
                 grain.intensity.overrideState = true;
                 grain.intensity.value = preset == QualityPreset.High ? 0.11f : 0.07f;
             }
-
             if (profile.TryGet<Bloom>(out var bloom))
             {
                 bloom.active = preset != QualityPreset.Low;

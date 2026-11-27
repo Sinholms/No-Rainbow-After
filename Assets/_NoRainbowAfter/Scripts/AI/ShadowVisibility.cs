@@ -15,7 +15,13 @@ namespace NoRainbowAfter.AI
     }
 
     /// <summary>
-    /// Memeriksa penghalang fisik, persembunyian, dan syarat serangan terhadap bayangan.
+    /// Memeriksa garis pandang fisik (Line of Sight), persembunyian jongkok di balik objek,
+    /// dan kelayakan serangan balik terhadap monster bayangan.
+    ///
+    /// [GRAFIKA KOMPUTER &amp; MATEMATIKA 3D]
+    /// - RaycastNonAlloc bebas alokasi memori untuk uji okulasi antara dua titik 3D.
+    /// - Dot/Angle vektor arah hadap digunakan untuk mengevaluasi kerucut pandang monster &amp; aim pemain.
+    /// - Bounds.ClosestPoint menghitung jarak terdekat kamera ke kotak batas (AABB) tubuh monster.
     /// </summary>
     public static class ShadowVisibility
     {
@@ -25,7 +31,10 @@ namespace NoRainbowAfter.AI
         {
             Vector3 delta = target - origin;
             float distance = delta.magnitude;
-            if (distance <= 0.02f) return true;
+            if (distance <= 0.02f)
+            {
+                return true;
+            }
 
             int count = Physics.RaycastNonAlloc(
                 origin,
@@ -49,7 +58,10 @@ namespace NoRainbowAfter.AI
 
         public static bool HasAnyClearSightlineToPlayer(Vector3 monsterEye, FirstPersonMotor motor, Transform monsterRoot)
         {
-            if (motor == null) return false;
+            if (motor == null)
+            {
+                return false;
+            }
             Transform playerRoot = motor.transform;
             Vector3 eyePoint = motor.ViewCamera != null
                 ? motor.ViewCamera.transform.position
@@ -71,10 +83,13 @@ namespace NoRainbowAfter.AI
             Transform monsterRoot,
             float crouchedGazeHalfAngle = 35f)
         {
-            // Cover biasa bukan interaksi lemari: pemain harus jongkok di CoverZone, lalu terlindung
-            // oleh dinding atau berada di luar sudut pandang. Controller menunggu bayangan lewat atau menjauh cukup lama.
+            // Cover biasa mengharuskan pemain jongkok di dalam CoverZone lalu terlindung tembok
+            // atau berada di luar sudut pandang bayangan.
             var result = new CoverEvaluation();
-            if (motor == null) return result;
+            if (motor == null)
+            {
+                return result;
+            }
 
             if (coverZones != null)
             {
@@ -92,6 +107,7 @@ namespace NoRainbowAfter.AI
 
             var cc = motor.GetComponent<CharacterController>();
             float currentHeight = cc != null ? cc.height : (motor.IsCrouched ? 1.1f : 1.8f);
+
             // Pemain perlu berada di zona dan sudah cukup rendah untuk dinilai sedang bersembunyi.
             result.IsCrouchedInCover = result.PlayerInsideVolume && motor.IsCrouched && currentHeight <= 1.28f;
             result.IsPhysicallyOccluded = !HasAnyClearSightlineToPlayer(monsterEye, motor, monsterRoot);
@@ -105,7 +121,7 @@ namespace NoRainbowAfter.AI
                 ? Vector3.Angle(fwd, toPlayer.normalized)
                 : 0f;
 
-            // Saat jongkok di zona, dinding atau posisi di luar sudut pandang bayangan dapat menyembunyikan pemain.
+            // Saat jongkok di zona, dinding atau posisi di luar sudut pandang bayangan menyembunyikan pemain.
             result.IsConcealedFromMonster = result.IsCrouchedInCover &&
                 (result.IsPhysicallyOccluded || result.AngleFromMonsterGaze > crouchedGazeHalfAngle);
 
@@ -121,7 +137,10 @@ namespace NoRainbowAfter.AI
             float maxRange = 2.75f,
             float maxAimAngle = 34f)
         {
-            if (playerCamera == null || playerRoot == null || monsterRoot == null) return false;
+            if (playerCamera == null || playerRoot == null || monsterRoot == null)
+            {
+                return false;
+            }
 
             Vector3 camPos = playerCamera.transform.position;
             Vector3 camFwd = playerCamera.transform.forward;
@@ -132,7 +151,10 @@ namespace NoRainbowAfter.AI
                 new Vector3(0.58f, height, 0.58f));
 
             Vector3 closest = bodyBounds.ClosestPoint(camPos);
-            if (Vector3.Distance(camPos, closest) > maxRange) return false;
+            if (Vector3.Distance(camPos, closest) > maxRange)
+            {
+                return false;
+            }
 
             float topSampleY = Mathf.Min(1.75f, height - 0.14f);
             float[] sampleHeights = { 0.92f, 1.32f, topSampleY };
@@ -143,7 +165,10 @@ namespace NoRainbowAfter.AI
                 float dist = toSample.magnitude;
                 if (dist > maxRange + 0.35f || dist <= 0.02f) continue;
                 if (Vector3.Angle(camFwd, toSample / dist) > maxAimAngle) continue;
-                if (IsLineOfSightClear(camPos, sample, playerRoot, monsterRoot)) return true;
+                if (IsLineOfSightClear(camPos, sample, playerRoot, monsterRoot))
+                {
+                    return true;
+                }
             }
             return false;
         }

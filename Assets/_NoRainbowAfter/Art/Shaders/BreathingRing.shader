@@ -1,3 +1,12 @@
+// ============================================================================
+// Shader: NoRainbowAfter/UI/BreathingRing (Cincin Napas SDF Prosedural)
+// ============================================================================
+// [GRAFIKA KOMPUTER — KONSEP UTAMA]
+// - Signed Distance Field (SDF) 2D Lingkaran: abs(length(uv - 0.5) - _Radius) menggambar
+//   cincin tajam pada resolusi apa pun tanpa pecah piksel.
+// - Gaussian Glow Halo: exp(-pow(ringDist / haloWidth, 2.0)) menghasilkan pendar cahaya
+//   halus di sekitar cincin saat pemain tepat berada di zona ritme hijau.
+// ============================================================================
 Shader "NoRainbowAfter/UI/BreathingRing"
 {
     Properties
@@ -94,17 +103,17 @@ Shader "NoRainbowAfter/UI/BreathingRing"
                 float halfThick = max(0.001, _Thickness * 0.5);
                 float soft = max(0.002, _Softness);
 
-                // Core ring with soft edge falloff
+                // Inti cincin SDF dengan tepi lembut.
                 float core = 1.0 - smoothstep(halfThick, halfThick + soft, ringDist);
 
-                // Soft atmospheric halo / glow around the ring
+                // Halo cahaya Gaussian halus di sekeliling cincin.
                 float haloWidth = halfThick + soft * (2.5 + _FogFalloff * 2.5);
                 float halo = exp(-pow(ringDist / max(0.004, haloWidth), 2.0));
 
-                // Optional subtle inner mist when _FogFalloff > 0
+                // Kabut tipis di bagian dalam cincin saat _FogFalloff > 0.
                 float innerMist = _FogFalloff * 0.14 * (1.0 - smoothstep(0.0, max(0.01, _Radius), dist));
 
-                // Guarantee alpha fades smoothly to 0 well before the quad UV edge (0.5)
+                // Pastikan alfa habis mulus sebelum menyentuh tepi quad UV (0.5).
                 float edgeFade = smoothstep(0.495, 0.34, dist);
 
                 float intensity = saturate(core + halo * 0.45 * _GlowIntensity + innerMist) * edgeFade;

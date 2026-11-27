@@ -9,16 +9,31 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.AI
 {
     /// <summary>
-    /// Orchestrates Chapter 3: wide open underground basement parking arena, ??? objective,
-    /// faint 2-minute countdown timer, Shadow monster pursuit, and resolution into
-    /// Good (Approach), Bad (Hide/Survive without C2 phone), or Hidden (Hide/Survive with C2 phone).
+    /// Mengatur alur Chapter 3: arena parkir basemen bawah tanah terbuka, objektif "???",
+    /// penghitung waktu mundur samar 2 menit, pengejaran monster bayangan di atas NavMesh,
+    /// serta penyelesaian Good (Approach), Bad (Hide tanpa pesan Ella), atau Hidden (Hide dengan pesan Ella).
+    ///
+    /// [TEKNIS KODING]
+    /// Dipecah menjadi 2 file partial class:
+    /// 1. ChapterThreeFlow.cs (siklus hidup, autostart scene Chapter 3, loop kejaran, NavMesh pathfinding, resolusi ending)
+    /// 2. ChapterThreeFlow.Setup.cs (spawn monster bayangan &amp; visual rig, audio detak kejaran, UI timer samar)
     /// </summary>
-    public sealed class ChapterThreeFlow : MonoBehaviour
+    public sealed partial class ChapterThreeFlow : MonoBehaviour
     {
+        // =========================================================================
+        // Konstanta Kecepatan & Konfigurasi SerializeField
+        // =========================================================================
+
         public const float SurvivalDurationSeconds = 120f;
         public const float ApproachTriggerDistance = 1.80f;
         public const float ChaseSpeed = 2.45f;
         public const float PatrolSpeed = 2.15f;
+
+        [SerializeField] private GameObject monsterVisualPrefab;
+
+        // =========================================================================
+        // Referensi Komponen, State Monster, Audio, & UI Timer
+        // =========================================================================
 
         private FirstPersonPlayer player;
         private FirstPersonMotor motor;
@@ -50,12 +65,40 @@ namespace NoRainbowAfter.AI
 
         public event Action<StoryEnding> EndingResolved;
 
+        // =========================================================================
+        // Siklus Hidup, Autostart Scene Chapter 3, & Transisi Masuk Arena
+        // =========================================================================
+
         private void Awake()
         {
             player = GetComponent<FirstPersonPlayer>();
             motor = GetComponent<FirstPersonMotor>();
             director = GetComponent<ChapterDirector>();
             endingPresenter = GetComponent<EndingPresentationController>() ?? gameObject.AddComponent<EndingPresentationController>();
+
+            // Temukan ChapterThreeArena yang sudah diletakkan di scene agar dapat dipakai ulang.
+            foreach (var existing in FindObjectsByType<ChapterThreeArena>(FindObjectsInactive.Include))
+            {
+                if (existing.gameObject.scene != gameObject.scene)
+                {
+                    continue;
+                }
+                arena = existing;
+                arena.gameObject.SetActive(false);
+                break;
+            }
+        }
+
+        private void Start() => StartCoroutine(AutoStartIfChapterThreeScene());
+
+        private IEnumerator AutoStartIfChapterThreeScene()
+        {
+            // Tunggu satu frame agar ChapterDirector.Start() selesai memulihkan state & clue lintas scene.
+            yield return null;
+            if (director != null && director.SceneChapter == 3 && !IsActive)
+            {
+                BeginChapterThree();
+            }
         }
 
         private void OnEnable()
@@ -71,7 +114,9 @@ namespace NoRainbowAfter.AI
         private void OnDisable()
         {
             if (director != null)
+            {
                 director.ChapterThreeTransitionRequested -= OnChapterThreeRequested;
+            }
         }
 
         private void OnDestroy()
@@ -85,19 +130,26 @@ namespace NoRainbowAfter.AI
         private void OnChapterThreeRequested()
         {
             if (!IsActive && !transitioning)
+            {
                 StartCoroutine(EnterChapterThreeRoutine());
+            }
         }
 
         private IEnumerator EnterChapterThreeRoutine()
         {
             transitioning = true;
             while (player != null && player.IsTransitionLocked)
+            {
                 yield return null;
+            }
 
             player?.SetTransitionLocked(true);
 
             var street = FindAnyObjectByType<ChapterTwoStreet>();
-            if (street != null) street.Leave();
+            if (street != null)
+            {
+                street.Leave();
+            }
 
             yield return null;
 
@@ -105,12 +157,17 @@ namespace NoRainbowAfter.AI
             player?.SetTransitionLocked(false);
             transitioning = false;
             if (!entered)
+            {
                 Debug.LogError("[NRA] Failed to enter Chapter 3 arena.", this);
+            }
         }
 
         public bool BeginChapterThree()
         {
-            if (IsActive) return true;
+            if (IsActive)
+            {
+                return true;
+            }
             if (motor == null) motor = GetComponent<FirstPersonMotor>();
             if (player == null) player = GetComponent<FirstPersonPlayer>();
             if (director == null) director = GetComponent<ChapterDirector>();
@@ -126,7 +183,10 @@ namespace NoRainbowAfter.AI
                 arena = Instantiate(prefab).GetComponent<ChapterThreeArena>();
             }
 
-            if (arena == null || !arena.Enter(motor)) return false;
+            if (arena == null || !arena.Enter(motor))
+            {
+                return false;
+            }
 
             director?.EnterChapterThree();
 
@@ -145,15 +205,25 @@ namespace NoRainbowAfter.AI
             return true;
         }
 
+        // =========================================================================
+        // Update Harian, Pengejaran NavMesh, & Resolusi Akhir Cerita
+        // =========================================================================
+
         private void Update()
         {
-            if (!IsActive || !AutoTick) return;
+            if (!IsActive || !AutoTick)
+            {
+                return;
+            }
             TickChase(Time.deltaTime);
         }
 
         public void TickChase(float deltaTime)
         {
-            if (!IsActive || ResolvedEnding != StoryEnding.None) return;
+            if (!IsActive || ResolvedEnding != StoryEnding.None)
+            {
+                return;
+            }
 
             bool paused = player != null && (player.IsPaused || player.IsTransitionLocked);
             arena?.SetAudioPaused(paused);
@@ -163,17 +233,22 @@ namespace NoRainbowAfter.AI
                 if (paused && chaseAudio.isPlaying) chaseAudio.Pause();
                 else if (!paused && !chaseAudio.isPlaying) chaseAudio.UnPause();
             }
-            if (paused) return;
+            if (paused)
+            {
+                return;
+            }
 
             float dt = Mathf.Clamp(deltaTime, 0f, 0.1f);
             RemainingSeconds = Mathf.Max(0f, RemainingSeconds - dt);
             RefreshTimerUi();
 
-            // Bertahan sampai waktu habis memilih Hide, termasuk saat Raka masih di luar lemari.
+            // Bertahan sampai waktu habis memilih Hide, termasuk saat Raka masih berada di luar lemari.
             if (RemainingSeconds <= 0f)
             {
                 if (HidingWardrobe.Occupied != null)
+                {
                     HidingWardrobe.Occupied.Release();
+                }
                 TriggerEnding(FinalChoice.Hide);
                 return;
             }
@@ -183,7 +258,10 @@ namespace NoRainbowAfter.AI
 
         private void UpdateMonsterChase(float dt)
         {
-            if (monsterObject == null || monsterController == null || motor == null) return;
+            if (monsterObject == null || monsterController == null || motor == null)
+            {
+                return;
+            }
 
             bool hiding = player != null && player.IsHiding;
             Vector3 monsterPos = monsterObject.transform.position;
@@ -195,7 +273,7 @@ namespace NoRainbowAfter.AI
                     new Vector3(monsterPos.x, 0f, monsterPos.z),
                     new Vector3(playerPos.x, 0f, playerPos.z));
 
-                // Saat Raka berada di luar lemari, jarak horizontal yang cukup dekat memilih Approach.
+                // Saat Raka berada di luar lemari, jarak horizontal yang cukup dekat memicu Approach (Good Ending).
                 if (flatDist <= ApproachTriggerDistance)
                 {
                     TriggerEnding(FinalChoice.Approach);
@@ -203,7 +281,7 @@ namespace NoRainbowAfter.AI
                 }
             }
 
-            // Monster mengejar posisi Raka. Saat Raka bersembunyi, tujuannya beralih ke titik patroli arena.
+            // Monster mengejar Raka. Saat Raka bersembunyi di lemari, monster berpatroli memutari arena.
             Vector3 targetPos = playerPos;
             float speed = ChaseSpeed;
 
@@ -250,7 +328,9 @@ namespace NoRainbowAfter.AI
             }
 
             if (monsterController.isGrounded && monsterVerticalVelocity < 0f)
+            {
                 monsterVerticalVelocity = -2f;
+            }
             monsterVerticalVelocity += -20f * dt;
 
             monsterController.Move((moveStep + Vector3.up * monsterVerticalVelocity) * dt);
@@ -289,7 +369,9 @@ namespace NoRainbowAfter.AI
                     {
                         Vector3 corner = path.corners[i];
                         if (Vector3.Distance(new Vector3(from.x, 0f, from.z), new Vector3(corner.x, 0f, corner.z)) > 0.35f)
+                        {
                             return corner;
+                        }
                     }
                     return hitTo.position;
                 }
@@ -299,7 +381,10 @@ namespace NoRainbowAfter.AI
 
         public StoryEnding TriggerEnding(FinalChoice choice)
         {
-            if (ResolvedEnding != StoryEnding.None) return ResolvedEnding;
+            if (ResolvedEnding != StoryEnding.None)
+            {
+                return ResolvedEnding;
+            }
 
             IsActive = false;
             ResolvedChoice = choice;
@@ -312,125 +397,6 @@ namespace NoRainbowAfter.AI
             EndingResolved?.Invoke(ResolvedEnding);
             endingPresenter?.Show(ResolvedEnding);
             return ResolvedEnding;
-        }
-
-        private void SpawnMonster()
-        {
-            if (monsterObject != null) Destroy(monsterObject);
-
-            Vector3 spawnPos = arena.MonsterSpawn != null
-                ? arena.MonsterSpawn.position
-                : arena.transform.position + new Vector3(0f, 0.12f, 19.5f);
-            Quaternion spawnRot = arena.MonsterSpawn != null
-                ? arena.MonsterSpawn.rotation
-                : Quaternion.Euler(0f, 180f, 0f);
-
-            monsterObject = new GameObject("C3_ShadowMonster", typeof(CharacterController));
-            monsterObject.transform.SetPositionAndRotation(spawnPos, spawnRot);
-            monsterController = monsterObject.GetComponent<CharacterController>();
-            monsterController.radius = 0.34f;
-            monsterController.height = 2.0f;
-            monsterController.center = new Vector3(0f, 1.0f, 0f);
-
-            // Reuse the Chapter 1 shadow monster visual if present in scene; fallback to C1ShadowMotion prefab
-            Transform visualWrapper = null;
-            var existingController = FindAnyObjectByType<ShadowEncounterController>(FindObjectsInactive.Include);
-            if (existingController != null && existingController.transform.childCount > 0)
-            {
-                var cloned = Instantiate(existingController.transform.GetChild(0).gameObject, monsterObject.transform);
-                cloned.SetActive(true);
-                visualWrapper = cloned.transform;
-            }
-            else
-            {
-                var motionPrefab = Resources.Load<GameObject>("C1ShadowMotion");
-                if (motionPrefab != null)
-                {
-                    var cloned = Instantiate(motionPrefab, monsterObject.transform);
-                    visualWrapper = cloned.transform;
-                }
-            }
-
-            if (visualWrapper != null)
-            {
-                monsterVisual = monsterObject.AddComponent<ShadowPlaceholderVisual>();
-                monsterVisual.Configure(visualWrapper, null);
-                monsterVisual.SetVisible(true);
-                monsterVisual.ResetPostureImmediate();
-            }
-        }
-
-        private void StartChaseAudio()
-        {
-            if (chaseAudio == null)
-            {
-                chaseAudio = gameObject.AddComponent<AudioSource>();
-                chaseAudio.playOnAwake = false;
-                chaseAudio.loop = true;
-                chaseAudio.spatialBlend = 0f;
-                chaseAudio.volume = 0.14f;
-
-                const int rate = 22050;
-                const float dur = 0.85f;
-                int count = Mathf.RoundToInt(rate * dur);
-                var data = new float[count];
-                for (int i = 0; i < count; i++)
-                {
-                    float t = (float)i / rate;
-                    float beat1 = Mathf.Exp(-Mathf.Pow((t - 0.12f) / 0.04f, 2f)) * Mathf.Sin(2f * Mathf.PI * 50f * t);
-                    float beat2 = Mathf.Exp(-Mathf.Pow((t - 0.30f) / 0.05f, 2f)) * Mathf.Sin(2f * Mathf.PI * 44f * t) * 0.72f;
-                    data[i] = Mathf.Clamp((beat1 + beat2) * 0.85f, -1f, 1f);
-                }
-                chaseClip = AudioClip.Create("Chapter3ChasePulse", count, 1, rate, false);
-                chaseClip.SetData(data, 0);
-                chaseAudio.clip = chaseClip;
-            }
-            if (!chaseAudio.isPlaying) chaseAudio.Play();
-        }
-
-        private void BuildTimerUi()
-        {
-            if (timerCanvas != null)
-            {
-                timerCanvas.enabled = true;
-                return;
-            }
-
-            var go = new GameObject("ChapterThreeTimerUI", typeof(Canvas), typeof(CanvasScaler));
-            go.transform.SetParent(transform, false);
-            timerCanvas = go.GetComponent<Canvas>();
-            timerCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            timerCanvas.sortingOrder = 14;
-            var scaler = go.GetComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            var labelGo = new GameObject("FaintCountdown", typeof(RectTransform), typeof(Text));
-            labelGo.transform.SetParent(go.transform, false);
-            var rect = (RectTransform)labelGo.transform;
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.anchoredPosition = new Vector2(0f, -26f);
-            rect.sizeDelta = new Vector2(220f, 44f);
-
-            faintTimerLabel = labelGo.GetComponent<Text>();
-            faintTimerLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            faintTimerLabel.fontSize = 24;
-            faintTimerLabel.alignment = TextAnchor.MiddleCenter;
-            // Faint, desaturated low-opacity countdown as requested
-            faintTimerLabel.color = new Color(0.68f, 0.76f, 0.76f, 0.36f);
-            faintTimerLabel.raycastTarget = false;
-        }
-
-        private void RefreshTimerUi()
-        {
-            if (faintTimerLabel == null) return;
-            int total = Mathf.CeilToInt(Mathf.Max(0f, RemainingSeconds));
-            int mins = total / 60;
-            int secs = total % 60;
-            faintTimerLabel.text = $"{mins:00}:{secs:00}";
         }
     }
 }

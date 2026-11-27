@@ -7,31 +7,60 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.AI
 {
+    /// <summary>
+    /// Properti interaktif tersembunyi ponsel Raka di kamar kos (Chapter 2) untuk membaca
+    /// draf pesan kepada Ella dan menentukan cabang menuju Hidden Ending / Bad Ending.
+    ///
+    /// [GRAFIKA KOMPUTER]
+    /// - BuildProps() menyusun bodi & layar ponsel prosedural dengan material URP/Lit
+    ///   serta kanal Emissive (_EMISSION) agar layar ponsel tetap bercahaya redup di kamar gelap.
+    /// - BuildUi() membangun kanvas ScreenSpaceOverlay dengan CanvasScaler adaptif (1920x1080).
+    ///
+    /// [TEKNIS KODING]
+    /// - Mengimplementasikan IHiddenInteractable: dapat di-raycast tanpa memunculkan prompt di crosshair.
+    /// - Callback Func&lt;bool&gt; sendMessage menghubungkan aksi UI langsung ke ChapterDirector/GameState.
+    /// </summary>
     public sealed class ChapterTwoPhone : MonoBehaviour, IHiddenInteractable
     {
+        // =========================================================================
+        // Konstanta Pesan & Status Internal
+        // =========================================================================
+
         private const string Draft = "El, maaf ya. Aku kangen denger suara kamu. Aku masih ingat janji kita buat wisuda bareng.";
+
         private FirstPersonPlayer player;
         private Func<bool> sendMessage;
         private Action onDraftRead;
         private Canvas canvas;
-        private GameObject draftPanel, sentPanel;
-        private Button declineButton, closeButton;
-        private Material caseMaterial, displayMaterial;
-        private bool open, sent;
+        private GameObject draftPanel;
+        private GameObject sentPanel;
+        private Button declineButton;
+        private Button closeButton;
+        private Material caseMaterial;
+        private Material displayMaterial;
+        private bool open;
+        private bool sent;
 
         public string StableId => "INT_C2_PHONE";
         public string DisplayName => "Ponsel Raka";
         public string Prompt => null;
+
         public void SetFocused(bool focused) { }
+
+        // =========================================================================
+        // Pembuatan Objek di Kamar & Interaksi Pemain
+        // =========================================================================
 
         public static ChapterTwoPhone Create(Transform laptop, FirstPersonPlayer owner, Func<bool> onSend, Action onReadDraft)
         {
             var prop = new GameObject("C2 Raka Phone", typeof(BoxCollider), typeof(ChapterTwoPhone));
             prop.transform.SetParent(laptop.parent, false);
             prop.transform.SetPositionAndRotation(laptop.position + new Vector3(.30f, 0f, -.01f), Quaternion.Euler(0f, 12f, 0f));
+
             var collider = prop.GetComponent<BoxCollider>();
             collider.center = Vector3.up * .014f;
             collider.size = new Vector3(.12f, .03f, .18f);
+
             var phone = prop.GetComponent<ChapterTwoPhone>();
             phone.player = owner;
             phone.sendMessage = onSend;
@@ -42,8 +71,14 @@ namespace NoRainbowAfter.AI
 
         public void Interact(PlayerInteractor interactor)
         {
-            if (open || player.IsPaused || player.IsInspecting || player.IsTransitionLocked || player.IsUsingLaptop) return;
-            if (canvas == null) BuildUi();
+            if (open || player.IsPaused || player.IsInspecting || player.IsTransitionLocked || player.IsUsingLaptop)
+            {
+                return;
+            }
+            if (canvas == null)
+            {
+                BuildUi();
+            }
             open = true;
             player.SetInspecting(true);
             player.CloseInspectRequested += Close;
@@ -55,51 +90,79 @@ namespace NoRainbowAfter.AI
 
         public bool TrySendMessage()
         {
-            if (!open || sent || player.IsPaused || !sendMessage()) return false;
+            if (!open || sent || player.IsPaused || !sendMessage())
+            {
+                return false;
+            }
             sent = true;
             RefreshUi();
             return true;
         }
 
+        // =========================================================================
+        // Siklus Update & Penutupan UI
+        // =========================================================================
+
         private void Update()
         {
-            if (open) canvas.enabled = !player.IsPaused;
+            if (open)
+            {
+                canvas.enabled = !player.IsPaused;
+            }
         }
 
         private void Close()
         {
-            if (player.IsPaused) return;
+            if (player.IsPaused)
+            {
+                return;
+            }
             Dismiss();
         }
 
         private void Dismiss()
         {
-            if (!open) return;
+            if (!open)
+            {
+                return;
+            }
             open = false;
             if (player != null)
             {
                 player.CloseInspectRequested -= Close;
                 player.SetInspecting(false);
             }
-            if (canvas != null) canvas.enabled = false;
+            if (canvas != null)
+            {
+                canvas.enabled = false;
+            }
         }
 
         private void OnDisable() => Dismiss();
+
         private void OnDestroy()
         {
             Destroy(caseMaterial);
             Destroy(displayMaterial);
         }
 
+        // =========================================================================
+        // Konstruksi & Pembaruan UI Chat Ella (ScreenSpaceOverlay)
+        // =========================================================================
+
         private void RefreshUi()
         {
             canvas.enabled = open && !player.IsPaused;
             draftPanel.SetActive(!sent);
             sentPanel.SetActive(sent);
+
             if (canvas.enabled && EventSystem.current != null)
             {
                 var target = !sent ? declineButton : closeButton;
-                if (target != null) EventSystem.current.SetSelectedGameObject(target.gameObject);
+                if (target != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(target.gameObject);
+                }
             }
         }
 
@@ -110,6 +173,7 @@ namespace NoRainbowAfter.AI
             canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 28;
+
             var scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -119,6 +183,7 @@ namespace NoRainbowAfter.AI
             backdrop.anchorMin = Vector2.zero;
             backdrop.anchorMax = Vector2.one;
             backdrop.offsetMin = backdrop.offsetMax = Vector2.zero;
+
             var frame = Panel(backdrop, "Messages", Vector2.zero, new Vector2(776f, 744f), new Color(.056f, .076f, .091f));
             var header = Panel(frame, "Contact", new Vector2(0f, 327f), new Vector2(776f, 90f), new Color(.09f, .13f, .16f));
             Label(header, "Contact Name", "Ella", new Vector2(-132f, 0f), new Vector2(440f, 55f), 34, TextAnchor.MiddleLeft);
@@ -184,6 +249,10 @@ namespace NoRainbowAfter.AI
             return rect;
         }
 
+        // =========================================================================
+        // Visual 3D Prosedural Ponsel (URP/Lit + Emission Layar)
+        // =========================================================================
+
         private void BuildProps()
         {
             var shader = Shader.Find("Universal Render Pipeline/Lit");
@@ -191,9 +260,9 @@ namespace NoRainbowAfter.AI
             displayMaterial = new Material(shader) { color = new Color(.20f, .39f, .46f) };
             displayMaterial.EnableKeyword("_EMISSION");
             displayMaterial.SetColor("_EmissionColor", new Color(.10f, .33f, .38f));
+
             PhonePiece("Case", new Vector3(0f, .008f, 0f), new Vector3(.083f, .016f, .156f), caseMaterial);
             PhonePiece("Screen", new Vector3(0f, .017f, 0f), new Vector3(.075f, .004f, .142f), displayMaterial);
-
         }
 
         private void PhonePiece(string name, Vector3 position, Vector3 scale, Material material)
@@ -203,11 +272,12 @@ namespace NoRainbowAfter.AI
             piece.transform.SetParent(transform, false);
             piece.transform.localPosition = position;
             piece.transform.localScale = scale;
+
+            // Collider pada anak dilepas karena raycast cukup memakai BoxCollider induk.
             var collider = piece.GetComponent<Collider>();
             collider.enabled = false;
             Destroy(collider);
             piece.GetComponent<Renderer>().sharedMaterial = material;
         }
-
     }
 }

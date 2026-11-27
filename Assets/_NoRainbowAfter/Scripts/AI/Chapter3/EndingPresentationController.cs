@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using NoRainbowAfter.Narrative;
 using NoRainbowAfter.Player;
@@ -10,8 +9,8 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.AI
 {
     /// <summary>
-    /// Full-screen epilogue presentation for Good (Reality), Bad, and Hidden endings
-    /// with transitions to Credits or MainMenu.
+    /// Layar epilog layar penuh untuk Good (Reality), Bad, dan Hidden Ending di Chapter 3,
+    /// lengkap dengan animasi fade-in Time.unscaledDeltaTime serta tombol menuju Credits atau MainMenu.
     /// </summary>
     public sealed class EndingPresentationController : MonoBehaviour
     {
@@ -30,7 +29,10 @@ namespace NoRainbowAfter.AI
 
         public void Show(StoryEnding ending)
         {
-            if (IsShowing || ending == StoryEnding.None) return;
+            if (IsShowing || ending == StoryEnding.None)
+            {
+                return;
+            }
             player = GetComponent<FirstPersonPlayer>();
             ShownEnding = ending;
             IsShowing = true;
@@ -51,7 +53,10 @@ namespace NoRainbowAfter.AI
 
         private void OnDestroy()
         {
-            if (canvas != null) Destroy(canvas.gameObject);
+            if (canvas != null)
+            {
+                Destroy(canvas.gameObject);
+            }
         }
 
         private IEnumerator PresentSequence(StoryEnding ending)
@@ -105,8 +110,13 @@ namespace NoRainbowAfter.AI
             {
                 t += Time.unscaledDeltaTime;
                 float a = Mathf.Clamp01(t / 0.9f);
-                var hc = headerText.color; hc.a = a; headerText.color = hc;
-                var bc = bodyText.color; bc.a = a; bodyText.color = bc;
+                var hc = headerText.color;
+                hc.a = a;
+                headerText.color = hc;
+
+                var bc = bodyText.color;
+                bc.a = a;
+                bodyText.color = bc;
                 yield return null;
             }
 
@@ -114,18 +124,24 @@ namespace NoRainbowAfter.AI
             buttonGroup.interactable = true;
             buttonGroup.blocksRaycasts = true;
             if (EventSystem.current != null && creditsButton != null)
+            {
                 EventSystem.current.SetSelectedGameObject(creditsButton.gameObject);
+            }
         }
 
         private void BuildUi()
         {
-            if (canvas != null) return;
+            if (canvas != null)
+            {
+                return;
+            }
 
             var root = new GameObject("EndingPresentationUI", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
             root.transform.SetParent(transform, false);
             canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 60;
+
             var scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -167,7 +183,9 @@ namespace NoRainbowAfter.AI
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             if (Application.CanStreamedLevelBeLoaded(path))
+            {
                 SceneManager.LoadSceneAsync(path, LoadSceneMode.Single);
+            }
         }
 
         private static Text CreateText(string name, Transform parent, string text, int size, FontStyle style, Vector2 pos, Vector2 bounds)

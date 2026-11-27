@@ -1,4 +1,3 @@
-using System;
 using NoRainbowAfter.Player;
 using UnityEngine;
 using UnityEngine.AI;
@@ -7,9 +6,13 @@ using UnityEngine.Rendering;
 namespace NoRainbowAfter.AI
 {
     /// <summary>
-    /// Open underground basement parking arena for Chapter 3's 2-minute chase.
-    /// Manages NavMesh registration, dark foggy atmosphere, flickering overhead lights,
-    /// ambient hum audio, and clean spawn/cleanup.
+    /// Arena parkir basemen bawah tanah terbuka untuk kejar-kejaran 2 menit pada Chapter 3.
+    ///
+    /// [GRAFIKA KOMPUTER &amp; NAVIGASI]
+    /// - Mendaftarkan NavMeshData yang sudah di-bake di transform.position arena.
+    /// - Menerapkan FogMode.ExponentialSquared dingin pekat (density 0.052) serta pencahayaan
+    ///   ambien Trilight gelap.
+    /// - Mengedipkan lampu plafon basemen dan material emisifnya menggunakan MaterialPropertyBlock.
     /// </summary>
     public sealed class ChapterThreeArena : MonoBehaviour
     {
@@ -35,13 +38,19 @@ namespace NoRainbowAfter.AI
         private FogMode savedFogMode;
         private float savedFogDensity;
         private AmbientMode savedAmbientMode;
-        private Color savedAmbientSky, savedAmbientEquator, savedAmbientGround;
+        private Color savedAmbientSky;
+        private Color savedAmbientEquator;
+        private Color savedAmbientGround;
 
         public bool IsEntered { get; private set; }
 
         public void Stage()
         {
-            transform.position = new Vector3(480f, 0f, 180f);
+            // Hanya geser arena ke koordinat jauh jika berjalan satu scene dengan Chapter1Root.
+            if (GameObject.Find("Chapter1Root") != null)
+            {
+                transform.position = new Vector3(480f, 0f, 180f);
+            }
             gameObject.SetActive(true);
             EnsureNavMesh();
             InitFlicker();
@@ -50,11 +59,17 @@ namespace NoRainbowAfter.AI
 
         public bool Enter(FirstPersonMotor target)
         {
-            if (target == null) return false;
+            if (target == null)
+            {
+                return false;
+            }
             Stage();
             Vector3 spawnPos = PlayerSpawn != null ? PlayerSpawn.position : transform.position + Vector3.up * 0.08f;
             Quaternion spawnRot = PlayerSpawn != null ? PlayerSpawn.rotation : Quaternion.identity;
-            if (!target.TryRestorePose(spawnPos, spawnRot)) return false;
+            if (!target.TryRestorePose(spawnPos, spawnRot))
+            {
+                return false;
+            }
 
             IsEntered = true;
             ApplyBasementAtmosphere();
@@ -74,7 +89,10 @@ namespace NoRainbowAfter.AI
 
         public void SetAudioPaused(bool paused)
         {
-            if (humAudio == null) return;
+            if (humAudio == null)
+            {
+                return;
+            }
             if (paused && humAudio.isPlaying) humAudio.Pause();
             else if (!paused && IsEntered && !humAudio.isPlaying) humAudio.UnPause();
         }
@@ -88,36 +106,47 @@ namespace NoRainbowAfter.AI
 
         private void Update()
         {
-            if (!IsEntered || FlickerLights == null) return;
+            if (!IsEntered || FlickerLights == null)
+            {
+                return;
+            }
             float now = Time.time;
             for (int i = 0; i < FlickerLights.Length; i++)
             {
                 Light l = FlickerLights[i];
-                if (l == null || nextToggle == null || i >= nextToggle.Length) continue;
-                if (now < nextToggle[i]) continue;
+                if (l == null || nextToggle == null || i >= nextToggle.Length || now < nextToggle[i])
+                {
+                    continue;
+                }
 
                 lightOn[i] = !lightOn[i];
                 l.intensity = lightOn[i] ? baseIntensities[i] : baseIntensities[i] * 0.14f;
                 if (FlickerEmissives != null && i < FlickerEmissives.Length && FlickerEmissives[i] != null)
                 {
                     emissiveBlock ??= new MaterialPropertyBlock();
-                    emissiveBlock.SetColor("_EmissionColor",
+                    emissiveBlock.SetColor(
+                        "_EmissionColor",
                         lightOn[i] ? new Color(0.45f, 0.54f, 0.56f) : new Color(0.06f, 0.08f, 0.09f));
                     FlickerEmissives[i].SetPropertyBlock(emissiveBlock);
                 }
-                nextToggle[i] = now + (lightOn[i] ? UnityEngine.Random.Range(1.8f, 5.2f) : UnityEngine.Random.Range(0.06f, 0.24f));
+                nextToggle[i] = now + (lightOn[i] ? Random.Range(1.8f, 5.2f) : Random.Range(0.06f, 0.24f));
             }
         }
 
         private void EnsureNavMesh()
         {
             if (Navigation != null && !navInstance.valid)
+            {
                 navInstance = NavMesh.AddNavMeshData(Navigation, transform.position, transform.rotation);
+            }
         }
 
         private void InitFlicker()
         {
-            if (FlickerLights == null || baseIntensities != null) return;
+            if (FlickerLights == null || baseIntensities != null)
+            {
+                return;
+            }
             baseIntensities = new float[FlickerLights.Length];
             nextToggle = new float[FlickerLights.Length];
             lightOn = new bool[FlickerLights.Length];
@@ -156,7 +185,10 @@ namespace NoRainbowAfter.AI
 
         private void RestoreAtmosphere()
         {
-            if (!atmosphereSaved) return;
+            if (!atmosphereSaved)
+            {
+                return;
+            }
             RenderSettings.fog = savedFog;
             RenderSettings.fogColor = savedFogColor;
             RenderSettings.fogMode = savedFogMode;
@@ -180,7 +212,10 @@ namespace NoRainbowAfter.AI
                 humClip = CreateBasementHumClip();
                 humAudio.clip = humClip;
             }
-            if (!humAudio.isPlaying) humAudio.Play();
+            if (!humAudio.isPlaying)
+            {
+                humAudio.Play();
+            }
         }
 
         private static AudioClip CreateBasementHumClip()

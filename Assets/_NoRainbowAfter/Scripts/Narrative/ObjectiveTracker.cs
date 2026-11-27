@@ -5,35 +5,74 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.Narrative
 {
+    /// <summary>
+    /// Menampilkan judul &amp; petunjuk objektif aktif di pojok kiri atas HUD sesuai
+    /// bab dan beat cerita saat ini pada ChapterDirector.
+    /// </summary>
     public sealed class ObjectiveTracker : MonoBehaviour
     {
         [SerializeField] private ChapterDirector director;
         [SerializeField] private PlayerInteractor interactor;
-        [SerializeField] private Text objective, hint;
-        private static readonly string[] KnownFlags = { "objective.laptop", "objective.book", "objective.overtime", "objective.doorChecked" };
+        [SerializeField] private Text objective;
+        [SerializeField] private Text hint;
+
+        private static readonly string[] KnownFlags =
+        {
+            "objective.laptop",
+            "objective.book",
+            "objective.overtime",
+            "objective.doorChecked"
+        };
+
         public event Action<string> ObjectiveCompleted;
-        private string chapterTitle, chapterHint;
+
+        private string chapterTitle;
+        private string chapterHint;
         private Text bulletLabel;
         private bool layoutApplied;
         private Vector2 lastObjectivePos;
 
-        public void SetChapterGuidance(string title, string detail) { chapterTitle=title; chapterHint=detail; }
+        public void SetChapterGuidance(string title, string detail)
+        {
+            chapterTitle = title;
+            chapterHint = detail;
+        }
+
         public void Configure(ChapterDirector source, PlayerInteractor interaction, Text title, Text detail)
-        { director = source; interactor = interaction; objective = title; hint = detail; layoutApplied = false; }
-        public bool IsCompleted(string flag) => director != null && director.State != null && director.State.HasObjective(flag);
+        {
+            director = source;
+            interactor = interaction;
+            objective = title;
+            hint = detail;
+            layoutApplied = false;
+        }
+
+        public bool IsCompleted(string flag) =>
+            director != null && director.State != null && director.State.HasObjective(flag);
 
         private void Awake() => EnsureTopLeftObjectiveLayout();
 
         private void Update()
         {
             EnsureTopLeftObjectiveLayout();
-            if (director == null || interactor == null || director.State == null) return;
+            if (director == null || interactor == null || director.State == null)
+            {
+                return;
+            }
+
             // Flag interaksi diubah menjadi catatan progres satu kali agar objective tidak tercatat ulang.
             foreach (string flag in KnownFlags)
             {
-                if (flag == "objective.overtime" && !director.HasReadOvertimeSlip) continue;
-                if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag)) ObjectiveCompleted?.Invoke(flag);
+                if (flag == "objective.overtime" && !director.HasReadOvertimeSlip)
+                {
+                    continue;
+                }
+                if (interactor.Flags.Contains(flag) && director.State.CompleteObjective(flag))
+                {
+                    ObjectiveCompleted?.Invoke(flag);
+                }
             }
+
             if (director.State.ActiveChapter == "Chapter3")
             {
                 ShowGuidance("???", "");
@@ -51,25 +90,40 @@ namespace NoRainbowAfter.Narrative
             }
             if (!string.IsNullOrEmpty(chapterTitle))
             {
-                if (objective != null) objective.text=chapterTitle;
-                if (hint != null) hint.text=chapterHint;
+                if (objective != null) objective.text = chapterTitle;
+                if (hint != null) hint.text = chapterHint;
                 return;
             }
-            if (objective != null) objective.text = "Mengerjakan tugas";
-            if (hint == null) return;
+
+            if (objective != null)
+            {
+                objective.text = "Mengerjakan tugas";
+            }
+            if (hint == null)
+            {
+                return;
+            }
+
             bool taskDone = interactor.Flags.Contains("objective.laptop") || interactor.Flags.Contains("objective.book");
-            if (director.BeatIndex >= 6) hint.text = "";
-            else if (!taskDone) hint.text = "Kerjakan tugas di laptop meja belajar. Arahkan pandangan ke laptop dan tekan E.";
-            else if (director.LoopIndex == 0) hint.text = "Telusuri lorong, lalu kembali ke kamar.";
-            else if (!director.HasReadOvertimeSlip) hint.text = "Periksa slip lembur di kamar.";
-            else if (director.BeatIndex < 4) hint.text = "Buka pintu di ujung lorong, lalu melangkah keluar.";
-            else hint.text = "Hadapi atau hindari sosok di lorong.";
+            if (director.BeatIndex >= 6)
+                hint.text = "";
+            else if (!taskDone)
+                hint.text = "Kerjakan tugas di laptop meja belajar. Arahkan pandangan ke laptop dan tekan E.";
+            else if (director.LoopIndex == 0)
+                hint.text = "Telusuri lorong, lalu kembali ke kamar.";
+            else if (!director.HasReadOvertimeSlip)
+                hint.text = "Periksa slip lembur di kamar.";
+            else if (director.BeatIndex < 4)
+                hint.text = "Buka pintu di ujung lorong, lalu melangkah keluar.";
+            else
+                hint.text = "Hadapi atau hindari sosok di lorong.";
+
             UpdateBulletVisibility();
         }
 
         private void ShowChapterTwoGuidance(ChapterTwoBeat beat)
         {
-            // Petunjuk mengikuti beat aktif, jadi perubahan beat menjadi sumber progres UI bab 2.
+            // Petunjuk mengikuti beat aktif agar perubahan cerita otomatis memperbarui HUD Chapter 2.
             switch (beat)
             {
                 case ChapterTwoBeat.WokeInDorm:
@@ -99,15 +153,23 @@ namespace NoRainbowAfter.Narrative
 
         private void EnsureTopLeftObjectiveLayout()
         {
-            if (objective == null || hint == null) return;
+            if (objective == null || hint == null)
+            {
+                return;
+            }
             RectTransform objRect = objective.rectTransform;
-            if (layoutApplied && objRect.anchoredPosition == lastObjectivePos) return;
+            if (layoutApplied && objRect.anchoredPosition == lastObjectivePos)
+            {
+                return;
+            }
             layoutApplied = true;
             lastObjectivePos = objRect.anchoredPosition;
 
             RectTransform hintRect = hint.rectTransform;
             if (hintRect.parent != objRect.parent)
+            {
                 hintRect.SetParent(objRect.parent, false);
+            }
 
             hintRect.anchorMin = objRect.anchorMin;
             hintRect.anchorMax = objRect.anchorMax;
@@ -129,7 +191,10 @@ namespace NoRainbowAfter.Narrative
             if (bulletLabel == null)
             {
                 Transform existing = objRect.parent != null ? objRect.parent.Find("ObjectiveBullet") : null;
-                if (existing != null) bulletLabel = existing.GetComponent<Text>();
+                if (existing != null)
+                {
+                    bulletLabel = existing.GetComponent<Text>();
+                }
             }
             if (bulletLabel == null)
             {
@@ -157,7 +222,9 @@ namespace NoRainbowAfter.Narrative
         private void UpdateBulletVisibility()
         {
             if (bulletLabel != null)
+            {
                 bulletLabel.enabled = hint != null && !string.IsNullOrWhiteSpace(hint.text);
+            }
         }
     }
 }

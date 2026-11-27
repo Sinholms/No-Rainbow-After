@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.Narrative
 {
-    /// <summary>Displays queued narrative cues as subtitles without requiring voice audio.</summary>
+    /// <summary>Menampilkan antrean dialog/monolog naratif sebagai teks takarir (subtitle) di bawah layar.</summary>
     public sealed class SubtitlePlaceholder : MonoBehaviour
     {
         [SerializeField] private ChapterDirector director;
@@ -22,10 +22,17 @@ namespace NoRainbowAfter.Narrative
 
         public string CurrentText => label != null ? label.text : string.Empty;
         public int PendingCount => pending.Count + (hasCurrentCue ? 1 : 0);
+
         public void ClearQueuedCues()
         {
-            pending.Clear();hasCurrentCue=false;currentCue=null;remaining=0;
-            if(label != null)label.text=string.Empty;
+            pending.Clear();
+            hasCurrentCue = false;
+            currentCue = null;
+            remaining = 0;
+            if (label != null)
+            {
+                label.text = string.Empty;
+            }
             RefreshVisibility();
         }
 
@@ -50,7 +57,7 @@ namespace NoRainbowAfter.Narrative
             if (canvas != null) Destroy(canvas.gameObject);
         }
 
-        /// <summary>Assigns runtime dependencies and safely moves the cue subscription.</summary>
+        /// <summary>Memasang dependensi runtime dan memindahkan langganan cue dengan aman.</summary>
         public void Configure(ChapterDirector source, FirstPersonPlayer firstPersonPlayer, MonoBehaviour optionalEncounterSource = null)
         {
             DetachDirector();
@@ -77,13 +84,19 @@ namespace NoRainbowAfter.Narrative
 
         private void EnqueueOptionalCue(NarrativeCue cue)
         {
-            if (cue == null || string.IsNullOrWhiteSpace(cue.Text)) return;
+            if (cue == null || string.IsNullOrWhiteSpace(cue.Text))
+            {
+                return;
+            }
             EnqueueCue(cue);
         }
 
         private void EnqueueCue(NarrativeCue cue)
         {
-            if (cue == null) return;
+            if (cue == null)
+            {
+                return;
+            }
             pending.Enqueue(cue);
             StartNextCueIfReady();
             RefreshVisibility();
@@ -98,7 +111,10 @@ namespace NoRainbowAfter.Narrative
                 return;
             }
 
-            if (!hasCurrentCue) StartNextCueIfReady();
+            if (!hasCurrentCue)
+            {
+                StartNextCueIfReady();
+            }
             if (hasCurrentCue)
             {
                 remaining -= Time.deltaTime;
@@ -115,7 +131,10 @@ namespace NoRainbowAfter.Narrative
 
         private void StartNextCueIfReady()
         {
-            if (hasCurrentCue || pending.Count == 0) return;
+            if (hasCurrentCue || pending.Count == 0)
+            {
+                return;
+            }
             currentCue = pending.Dequeue();
             hasCurrentCue = true;
             remaining = Mathf.Max(0f, currentCue.Duration);
@@ -125,7 +144,10 @@ namespace NoRainbowAfter.Narrative
 
         private void RefreshVisibility()
         {
-            if (subtitleRoot == null) return;
+            if (subtitleRoot == null)
+            {
+                return;
+            }
             bool suspended = player != null && (player.IsPaused || player.IsInspecting || player.IsUsingLaptop);
             subtitleRoot.SetActive(hasCurrentCue && !suspended);
         }
@@ -137,6 +159,7 @@ namespace NoRainbowAfter.Narrative
             canvas = root.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 20;
+
             var scaler = root.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
@@ -149,6 +172,7 @@ namespace NoRainbowAfter.Narrative
             panelRect.pivot = new Vector2(.5f, 0f);
             panelRect.anchoredPosition = new Vector2(0f, 290f);
             panelRect.sizeDelta = new Vector2(1420f, 140f);
+
             var panel = subtitleRoot.GetComponent<Image>();
             panel.color = new Color(.015f, .018f, .02f, .78f);
             panel.raycastTarget = false;
@@ -160,6 +184,7 @@ namespace NoRainbowAfter.Narrative
             textRect.anchorMax = Vector2.one;
             textRect.offsetMin = new Vector2(28f, 12f);
             textRect.offsetMax = new Vector2(-28f, -12f);
+
             label = labelObject.GetComponent<Text>();
             label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.fontSize = 30;
@@ -168,6 +193,7 @@ namespace NoRainbowAfter.Narrative
             label.verticalOverflow = VerticalWrapMode.Truncate;
             label.color = new Color(.97f, .96f, .92f);
             label.raycastTarget = false;
+
             var outline = labelObject.GetComponent<Outline>();
             outline.effectColor = new Color(0f, 0f, 0f, .95f);
             outline.effectDistance = new Vector2(1.5f, -1.5f);

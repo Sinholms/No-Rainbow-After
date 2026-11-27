@@ -4,15 +4,20 @@ using UnityEngine.InputSystem;
 
 namespace NoRainbowAfter.Player
 {
-    // Menghubungkan input dan motor; status UI menentukan kapan pemain boleh bergerak.
+    /// <summary>
+    /// Menghubungkan Input System dengan FirstPersonMotor serta mengatur kunci kursor dan mode
+    /// UI (IsPaused, IsInspecting, IsUsingLaptop, IsBreathing, IsHiding, IsTransitionLocked).
+    /// </summary>
     [RequireComponent(typeof(FirstPersonMotor))]
     public sealed class FirstPersonPlayer : MonoBehaviour
     {
         [SerializeField] private InputActionAsset actions;
+
         private FirstPersonInputSource input;
         private FirstPersonMotor motor;
         private bool discardNextLook = true;
         private int unpausedFrame = -1;
+
         public bool IsPaused { get; private set; }
         public bool IsInspecting { get; private set; }
         public bool IsUsingLaptop { get; private set; }
@@ -21,18 +26,28 @@ namespace NoRainbowAfter.Player
         public bool IsTransitionLocked { get; private set; }
         public bool IsHiding { get; private set; }
         public int LaptopClosedFrame { get; private set; } = -1;
-        public void SetHiding(bool hiding) { IsHiding = hiding; motor.StopMotion(); }
-        public void SetBreathRecoveryRequired(bool required)
-        {
-            IsBreathRecoveryRequired = required;
-            if (motor != null) motor.SetRecoveryCrouch(required);
-        }
+
         public event Action InteractRequested;
         public event Action FightRequested;
         public event Action PauseRequested;
         public event Action CloseInspectRequested;
         public event Action BreatheRequested;
         public event Action FocusLost;
+
+        public void SetHiding(bool hiding)
+        {
+            IsHiding = hiding;
+            motor.StopMotion();
+        }
+
+        public void SetBreathRecoveryRequired(bool required)
+        {
+            IsBreathRecoveryRequired = required;
+            if (motor != null)
+            {
+                motor.SetRecoveryCrouch(required);
+            }
+        }
 
         private void Awake()
         {
@@ -53,7 +68,10 @@ namespace NoRainbowAfter.Player
 
         private void OnEnable()
         {
-            if (input == null) return;
+            if (input == null)
+            {
+                return;
+            }
             input.Enable();
             IsTransitionLocked = false;
             SetPaused(false);
@@ -68,18 +86,29 @@ namespace NoRainbowAfter.Player
         }
 
         private void OnDestroy() => input?.Dispose();
+
         private void RequestPause() => PauseRequested?.Invoke();
+
         private void RequestFight()
         {
-            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || IsHiding || IsBreathRecoveryRequired || Time.frameCount == unpausedFrame) return;
+            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing ||
+                IsTransitionLocked || IsHiding || IsBreathRecoveryRequired ||
+                Time.frameCount == unpausedFrame)
+            {
+                return;
+            }
             FightRequested?.Invoke();
         }
 
         private void Update()
         {
-            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || input == null) return;
+            if (IsPaused || IsInspecting || IsUsingLaptop || IsBreathing || IsTransitionLocked || input == null)
+            {
+                return;
+            }
             FirstPersonFrame frame = input.ReadFrame();
-            // Di lemari, Raka bisa menoleh. Input berjalan, sprint, dan jongkok ditahan sampai ia keluar.
+
+            // Di dalam lemari, Raka tetap boleh menoleh; gerak & jongkok ditahan sampai ia keluar.
             if (IsHiding)
             {
                 frame.Move = Vector2.zero;
@@ -96,7 +125,10 @@ namespace NoRainbowAfter.Player
 
         private void OnApplicationFocus(bool focused)
         {
-            if (!focused) FocusLost?.Invoke();
+            if (!focused)
+            {
+                FocusLost?.Invoke();
+            }
         }
 
         public void SetInspecting(bool inspecting)
@@ -108,7 +140,9 @@ namespace NoRainbowAfter.Player
         public void SetUsingLaptop(bool usingLaptop)
         {
             if (IsUsingLaptop && !usingLaptop)
+            {
                 LaptopClosedFrame = Time.frameCount;
+            }
             IsUsingLaptop = usingLaptop;
             ApplyInputAndCursorState();
         }
@@ -129,15 +163,18 @@ namespace NoRainbowAfter.Player
         {
             bool wasPaused = IsPaused;
             IsPaused = paused;
-            if (wasPaused && !paused) unpausedFrame = Time.frameCount;
+            if (wasPaused && !paused)
+            {
+                unpausedFrame = Time.frameCount;
+            }
             ApplyInputAndCursorState();
         }
 
-        // Input global tetap tersedia saat peta gameplay dimatikan untuk mode lain.
         private void ApplyInputAndCursorState()
         {
             input?.SetGameplayEnabled(!IsPaused && !IsInspecting && !IsUsingLaptop && !IsBreathing && !IsTransitionLocked);
             motor.StopMotion();
+
             // Abaikan delta mouse pertama setelah berganti mode supaya kamera tidak meloncat.
             discardNextLook = true;
             bool unlockCursor = IsPaused || IsInspecting || IsUsingLaptop;

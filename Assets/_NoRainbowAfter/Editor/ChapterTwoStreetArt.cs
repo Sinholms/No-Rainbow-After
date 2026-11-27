@@ -6,23 +6,57 @@ using NoRainbowAfter.AI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace NoRainbowAfter.Editor
 {
-    internal static class ChapterTwoStreetArt
+    /// <summary>
+    /// Pemasang aset seni 3D (FBX Blender), material PBR URP/Lit, dan aspal basah Chapter 2.
+    ///
+    /// [GRAFIKA KOMPUTER — KONSEP UTAMA]
+    /// 1. Pipeline PBR (Physically Based Rendering) URP/Lit:
+    ///    - Albedo (_BaseMap + _BaseColor), Normal Map (_BumpMap + _NORMALMAP untuk detail permukaan),
+    ///      Ambient Occlusion (_OcclusionMap + _OCCLUSIONMAP), serta Smoothness di Albedo Alpha Channel
+    ///      (_SmoothnessTextureChannel = 1 + _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A) agar bagian basah & kering berbeda kilau.
+    /// 2. GPU Instancing (mat.enableInstancing = true):
+    ///    Mengizinkan ruko, trotoar, dan peti kembar digambar sekaligus dalam jumlah draw call jauh lebih sedikit.
+    /// 3. Transparent Blending Bus Glass:
+    ///    Kaca bus diatur ke Surface=Transparent, Blend SrcAlpha OneMinusSrcAlpha, ZWrite=0.
+    /// 4. World-Space UI Depth Testing:
+    ///    Lettering() memakai Canvas WorldSpace agar papan toko, rambu, & rute bus terhalang objek 3D lain (uji depth).
+    /// </summary>
+    internal static partial class ChapterTwoStreetArt
     {
-        const string Kit = ChapterTwoStreetBuilder.Art + "/Models/Environment/ChapterTwo";
-        const string Mats = ChapterTwoStreetBuilder.Art + "/Materials/ChapterTwo";
-        const string DormSurfaces = ChapterTwoStreetBuilder.Art + "/Textures/KosAtmosphere/";
-        [Serializable] class Palette { public Swatch[] materials; }
-        [Serializable] class Swatch { public string name, hex; public float smooth, metal, glow; }
+        private const string Kit = ChapterTwoStreetBuilder.Art + "/Models/Environment/ChapterTwo";
+        private const string Mats = ChapterTwoStreetBuilder.Art + "/Materials/ChapterTwo";
+        private const string DormSurfaces = ChapterTwoStreetBuilder.Art + "/Textures/KosAtmosphere/";
 
-        static Dictionary<string, Material> ImportKit()
+        [Serializable]
+        private class Palette
+        {
+            public Swatch[] materials;
+        }
+
+        [Serializable]
+        private class Swatch
+        {
+            public string name;
+            public string hex;
+            public float smooth;
+            public float metal;
+            public float glow;
+        }
+
+        // =========================================================================
+        // Impor Palet Material PBR & Remapping Model FBX
+        // =========================================================================
+
+        private static Dictionary<string, Material> ImportKit()
         {
             var palette = JsonUtility.FromJson<Palette>(File.ReadAllText("BlenderSources/Environment/ChapterTwoPalette.json"));
             var result = new Dictionary<string, Material>();
+
             foreach (var color in palette.materials)
             {
                 string path = Mats + "/" + color.name + ".mat";
@@ -32,14 +66,20 @@ namespace NoRainbowAfter.Editor
                     mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                     AssetDatabase.CreateAsset(mat, path);
                 }
+
                 ColorUtility.TryParseHtmlString("#" + color.hex, out Color tint);
                 mat.SetColor("_BaseColor", tint);
                 mat.SetFloat("_Smoothness", color.smooth);
                 mat.SetFloat("_Metallic", color.metal);
+
                 if (color.name == "C2_Aggregate" || color.name.StartsWith("C2_Paver", StringComparison.Ordinal))
+                {
                     mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Kit + "/MineralSurface.png"));
+                }
                 if (color.name == "C2 Sentry Raincoat" || color.name == "C2 Sentry Vest")
+                {
                     SetSurfaceNormal(mat, "Cloth", .27f);
+                }
                 if (color.name == "C2 Sentry Skin")
                 {
                     mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Kit + "/SentryFace.jpg"));
@@ -47,13 +87,16 @@ namespace NoRainbowAfter.Editor
                     mat.SetFloat("_BumpScale", .55f);
                     mat.EnableKeyword("_NORMALMAP");
                 }
+
                 DressSurface(mat, color.name);
+
                 if (color.glow > 0f)
                 {
                     mat.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
                     mat.EnableKeyword("_EMISSION");
                     mat.SetColor("_EmissionColor", tint * color.glow);
                 }
+
                 if (color.name == "C2 Smoked Bus Glass")
                 {
                     tint.a = .49f;
@@ -66,28 +109,42 @@ namespace NoRainbowAfter.Editor
                     mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
                     mat.renderQueue = (int)RenderQueue.Transparent;
                 }
+
                 mat.enableInstancing = true;
                 EditorUtility.SetDirty(mat);
                 result.Add(color.name, mat);
             }
+
             foreach (string path in Directory.GetFiles(Kit, "*.fbx"))
             {
                 var importer = (ModelImporter)AssetImporter.GetAtPath(path.Replace('\\', '/'));
                 importer.importCameras = importer.importLights = importer.importAnimation = false;
                 importer.bakeAxisConversion = true;
-                // Imported slot labels map to the same URP material on every instance of the kit.
+
+                // Petakan seluruh nama slot material FBX ke aset URP Material yang seragam.
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(importer.assetPath);
-                var slotNames = model.GetComponentsInChildren<MeshRenderer>().SelectMany(r => r.sharedMaterials)
-                    .Where(m => m != null).Select(m => m.name).Distinct().ToArray();
-                foreach (var id in importer.GetExternalObjectMap().Keys.ToArray()) importer.RemoveRemap(id);
+                var slotNames = model.GetComponentsInChildren<MeshRenderer>()
+                    .SelectMany(r => r.sharedMaterials)
+                    .Where(m => m != null)
+                    .Select(m => m.name)
+                    .Distinct()
+                    .ToArray();
+
+                foreach (var id in importer.GetExternalObjectMap().Keys.ToArray())
+                {
+                    importer.RemoveRemap(id);
+                }
                 foreach (string slot in slotNames)
+                {
                     importer.AddRemap(new AssetImporter.SourceAssetIdentifier(typeof(Material), slot), result[slot]);
+                }
                 importer.SaveAndReimport();
             }
+
             return result;
         }
 
-        static void SetSurfaceNormal(Material material, string surface, float strength)
+        private static void SetSurfaceNormal(Material material, string surface, float strength)
         {
             var path = DormSurfaces + surface + "_Normal.png";
             material.SetTexture("_BumpMap", AssetDatabase.LoadAssetAtPath<Texture2D>(path));
@@ -95,7 +152,7 @@ namespace NoRainbowAfter.Editor
             material.EnableKeyword("_NORMALMAP");
         }
 
-        static void DressSurface(Material material, string name)
+        private static void DressSurface(Material material, string name)
         {
             switch (name)
             {
@@ -135,28 +192,41 @@ namespace NoRainbowAfter.Editor
             }
         }
 
-        static void ApplyDormSurface(Material material, string surface, float relief, float occlusion, float tiling)
+        private static void ApplyDormSurface(Material material, string surface, float relief, float occlusion, float tiling)
         {
             material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(DormSurfaces + surface + "_BaseColor.png"));
             material.SetTextureScale("_BaseMap", Vector2.one * tiling);
             SetSurfaceNormal(material, surface, relief);
-            if (occlusion <= 0f) return;
+            if (occlusion <= 0f)
+            {
+                return;
+            }
             material.SetTexture("_OcclusionMap", AssetDatabase.LoadAssetAtPath<Texture2D>(DormSurfaces + surface + "_AO.png"));
             material.SetFloat("_OcclusionStrength", occlusion);
             material.EnableKeyword("_OCCLUSIONMAP");
         }
 
+        // =========================================================================
+        // Pemasangan Prop FBX, Ruko, Lapak, Aspal Basah, & Kubah Langit
+        // =========================================================================
+
         public static void Dress(ChapterTwoStreet street, List<Light> flickerLights = null, List<Renderer> flickerEmissives = null)
         {
             var mats = ImportKit();
             Transform root = street.transform;
-            Transform ground = root.Find("Jalan"), stop = root.Find("Halte"), shop = root.Find("Warung");
+            Transform ground = root.Find("Jalan");
+            Transform stop = root.Find("Halte");
+            Transform shop = root.Find("Warung");
+
+            // Tentukan orientasi depan/belakang hasil impor FBX langsung dari posisi submesh lampu mobil patroli.
             var sedan = AssetDatabase.LoadAssetAtPath<GameObject>(Kit + "/SedanPatroli.fbx");
-            // Determine the FBX importer's longitudinal orientation from the actual headlamp mesh.
             var filter = sedan.GetComponentInChildren<MeshFilter>();
             var slots = filter.GetComponent<Renderer>().sharedMaterials;
             int headlight = Array.IndexOf(slots, mats["C2_Lamp"]);
-            if (headlight < 0) throw new InvalidDataException("Missing imported headlamp material");
+            if (headlight < 0)
+            {
+                throw new InvalidDataException("Missing imported headlamp material");
+            }
             float lensZ = filter.transform.TransformPoint(filter.sharedMesh.GetSubMesh(headlight).bounds.center).z;
             float yaw = lensZ < 0 ? 180f : 0f;
 
@@ -164,7 +234,10 @@ namespace NoRainbowAfter.Editor
             {
                 string path = Kit + "/" + model + ".fbx";
                 var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (asset == null) throw new FileNotFoundException(path);
+                if (asset == null)
+                {
+                    throw new FileNotFoundException(path);
+                }
                 var obj = (GameObject)PrefabUtility.InstantiatePrefab(asset, parent);
                 obj.transform.localPosition = localPosition;
                 obj.transform.localRotation = Quaternion.Euler(0, yaw + angle, 0);
@@ -172,52 +245,84 @@ namespace NoRainbowAfter.Editor
                 return obj.transform;
             }
 
+            // Warung, Halte, Tas, & Mobil Patroli
             RemoveVisuals(shop);
             Place("WarungSri", shop, Vector3.zero, Vector3.one);
             var counter = shop.gameObject.AddComponent<BoxCollider>();
-            counter.center = new Vector3(-.48f, .49f, .77f); counter.size = new Vector3(3.62f, .97f, .88f);
+            counter.center = new Vector3(-.48f, .49f, .77f);
+            counter.size = new Vector3(3.62f, .97f, .88f);
+
             RemoveVisuals(stop);
             Place("HaltePasar", stop, Vector3.zero, Vector3.one);
-            // Bag's box is also the interactable raycast target.
             Place("TasRaka", stop, new Vector3(.50f, .654f, .48f), Vector3.one);
+
             RemoveVisuals(street.PatrolCar);
             Place("SedanPatroli", street.PatrolCar, Vector3.zero, Vector3.one);
+
+            // Ganti peti/beton box primitif dengan model FBX detail sambil mempertahankan BoxCollider cover.
             foreach (Transform prop in root.Find("Cover"))
             {
                 RemoveVisuals(prop);
                 if (prop.name == "Peti B" || prop.name == "Peti C" || prop.name == "Peti warung")
+                {
                     Place("MuatanPasar", prop, Vector3.down * .5f, Vector3.one);
+                }
                 else if (prop.name.StartsWith("Peti", StringComparison.Ordinal))
+                {
                     Place("PetiKayu", prop, Vector3.down * .5f, Vector3.one);
+                }
                 else
-                    // Match 1.04m concrete barrier height cleanly.
+                {
                     Place("BetonPolisi", prop, Vector3.zero, new Vector3(1f, 1.106f, 1f));
+                }
             }
+
+            // Trotoar & Ruko di sepanjang koridor TKP
             foreach (Transform curb in ground)
+            {
                 if (curb.name == "Trotoar" || curb.name == "Kerb joint" || curb.name == "Batas gang")
+                {
                     RemoveVisuals(curb);
+                }
+            }
+
             for (int side = -1; side <= 1; side += 2)
             {
                 for (int z = -3; z < ChapterTwoStreetBuilder.CordonZ + 2; z += 2)
+                {
                     Place("Trotoar", ground, new Vector3(side * 5.8f, 0, z), Vector3.one, side < 0 ? 180 : 0);
+                }
                 for (int i = 0; i < 9; i++)
                 {
                     float z = -2.15f + 5.50f * i;
-                    if (side == -1 && i == 1) continue;
-                    var house = Place("RukoPasar", ground, new Vector3(side * 6.84f, 0, z), new Vector3(1, .89f + .105f * ((i + side + 3) % 4), 1), -90 * side);
-                    // Only two lonely upper windows are dimly lit, leaving the rest of the market dead dark.
+                    if (side == -1 && i == 1)
+                    {
+                        continue;
+                    }
+                    var house = Place(
+                        "RukoPasar",
+                        ground,
+                        new Vector3(side * 6.84f, 0, z),
+                        new Vector3(1, .89f + .105f * ((i + side + 3) % 4), 1),
+                        -90 * side);
+
+                    // Hanya dua jendela lantai atas yang menyala redup agar suasana malam tetap sepi mencekam.
                     if ((side == 1 && i == 1) || (side == -1 && i == 5))
                     {
                         var lamp = new GameObject("Lampu lantai atas").AddComponent<Light>();
                         lamp.transform.SetParent(house, false);
                         lamp.transform.localPosition = new Vector3(0, 4.0f, yaw == 0 ? .78f : -.78f);
-                        lamp.type = LightType.Point; lamp.range = 4.6f; lamp.intensity = 1.05f;
+                        lamp.type = LightType.Point;
+                        lamp.range = 4.6f;
+                        lamp.intensity = 1.05f;
                         lamp.color = new Color(.86f, .62f, .38f);
                     }
                 }
             }
-            // Beyond the cordon, setbacks and gaps open the market onto a longer street.
+
+            // Ruko di luar batas polisi memberi ilusi jalan raya yang berlanjut jauh.
             for (int side = -1; side <= 1; side += 2)
+            {
                 for (int i = 0; i < 8; i++)
                 {
                     float z = 49f + 8.2f * i + (side > 0 ? 2.7f : 0f);
@@ -225,13 +330,16 @@ namespace NoRainbowAfter.Editor
                     Place("RukoPasar", ground, new Vector3(side * setback, 0, z),
                         new Vector3(1.15f, .78f + (i % 3) * .17f, 1f), -90f * side);
                 }
-            // The end wall still closes the road behind the spawn, dressed as another bank of shutters.
+            }
+
             RemoveVisuals(ground.Find("Di belakang warung"));
             for (int i = -1; i <= 1; i++)
+            {
                 Place("RukoPasar", ground, new Vector3(i * 5.55f, 0, -5.2f), Vector3.one);
+            }
             Place("GapuraPasar", ground, new Vector3(0, 0, 12.5f), Vector3.one);
 
-            // Dim hooded sign lamp so the market archway looms overhead in shadow while staying readable.
+            // Lampu papan Gapura Pasar
             var gateLamp = new GameObject("Lampu papan pasar").AddComponent<Light>();
             gateLamp.transform.SetParent(ground, false);
             gateLamp.transform.localPosition = new Vector3(-1.6f, 5.75f, 11.65f);
@@ -242,56 +350,15 @@ namespace NoRainbowAfter.Editor
             gateLamp.color = new Color(.84f, .72f, .48f);
             gateLamp.intensity = 3.8f;
 
-            foreach (var stall in new[] {
-                (model: "LapakBumbu", side: -1, z: 12.0f, lit: true),
-                (model: "LapakIkan", side: 1, z: 21.7f, lit: true),
-                (model: "LapakBumbu", side: 1, z: 33.4f, lit: false),
-                (model: "LapakIkan", side: -1, z: 23.7f, lit: false) })
-            {
-                var centre = new Vector3(stall.side * 6.04f, .15f, stall.z);
-                Place(stall.model, ground, centre, Vector3.one, -90f * stall.side);
-                var stallCounter = new GameObject("Meja lapak").AddComponent<BoxCollider>();
-                stallCounter.transform.SetParent(ground, false);
-                stallCounter.transform.localPosition = centre + Vector3.up * .45f;
-                stallCounter.size = new Vector3(.99f, .90f, 3.06f);
-                if (stall.lit)
-                {
-                    var bulb = new GameObject("Bohlam lapak").AddComponent<Light>();
-                    bulb.transform.SetParent(ground, false);
-                    float lampX = stall.model == "LapakIkan" ? -.58f : .49f;
-                    bulb.transform.localPosition = centre + new Vector3(-stall.side * .12f, 1.96f, -stall.side * lampX);
-                    bulb.type = LightType.Spot;
-                    bulb.transform.localRotation = Quaternion.LookRotation(new Vector3(-stall.side * .41f, -1f, 0f));
-                    bulb.spotAngle = 98f;
-                    bulb.innerSpotAngle = 62f;
-                    bulb.color = stall.model == "LapakIkan" ? new Color(.38f, .72f, .65f) : new Color(.94f, .52f, .24f);
-                    bulb.range = 5.4f;
-                    bulb.intensity = 4.0f;
-                    bulb.shadows = LightShadows.Soft;
-                    if (stall.model == "LapakBumbu" && flickerLights != null)
-                    {
-                        flickerLights.Add(bulb);
-                        flickerEmissives?.Add(null);
-                    }
-                }
-            }
-            var signs = new[] { ("BENGKEL SURYA", 1, 14.35f), ("CUCI  SETRIKA", -1, 19.85f), ("TOKO  BERAS", 1, 30.85f) };
-            foreach (var sign in signs)
-            {
-                var plate = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                plate.name = sign.Item1; plate.transform.SetParent(ground, false);
-                plate.transform.localPosition = new Vector3(sign.Item2 * 6.62f, 3.06f, sign.Item3);
-                plate.transform.localRotation = Quaternion.Euler(0, 90f * sign.Item2, 0);
-                plate.transform.localScale = new Vector3(4.2f, .52f, .08f);
-                plate.GetComponent<Renderer>().sharedMaterial = mats["C2_Petrol"];
-                Object.DestroyImmediate(plate.GetComponent<Collider>());
-                Lettering(ground, sign.Item1, plate.transform.localPosition - new Vector3(sign.Item2 * .052f, 0, 0),
-                    plate.transform.localRotation, 4.17f, .50f, .28f, new Color(.74f, .70f, .56f));
-            }
+            // Lapak pasar & plang nama toko
+            DressStallsAndSigns(ground, mats, flickerLights, flickerEmissives, Place);
 
+            // Tekstur Aspal Basah (Albedo Alpha = Smoothness + Normal Map)
             var tar = ground.Find("Two lanes").GetComponent<Renderer>().sharedMaterial;
             var normal = (TextureImporter)AssetImporter.GetAtPath(Kit + "/WetAsphaltNormal.png");
-            normal.textureType = TextureImporterType.NormalMap; normal.SaveAndReimport();
+            normal.textureType = TextureImporterType.NormalMap;
+            normal.SaveAndReimport();
+
             var wetMap = AssetDatabase.LoadAssetAtPath<Texture2D>(Kit + "/WetAsphalt.png");
             tar.SetColor("_BaseColor", new Color(.76f, .80f, .86f));
             tar.SetTexture("_BaseMap", wetMap);
@@ -304,154 +371,135 @@ namespace NoRainbowAfter.Editor
             tar.EnableKeyword("_NORMALMAP");
             EditorUtility.SetDirty(tar);
 
+            // Pencahayaan global, Reflection Probe, Volume Post-Processing, Kabel Udara, & Kubah Langit
             AddStreetLight(root);
             AddCables(root, mats["C2_Ink"]);
+            AddOvercastSkyDome(root);
 
-            var sky = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sky.name = "Langit mendung"; sky.transform.SetParent(root, false);
-            sky.transform.localPosition = new Vector3(0, 0, 19); sky.transform.localScale = Vector3.one * 128;
-            Object.DestroyImmediate(sky.GetComponent<Collider>());
-            var skyMat = AssetDatabase.LoadAssetAtPath<Material>(Mats + "/Overcast.mat");
-            if (skyMat == null) { skyMat = new Material(Shader.Find("NoRainbowAfter/OvercastStreet")); AssetDatabase.CreateAsset(skyMat, Mats + "/Overcast.mat"); }
-            var skyRenderer = sky.GetComponent<Renderer>();
-            skyRenderer.sharedMaterial = skyMat; skyRenderer.shadowCastingMode = ShadowCastingMode.Off; skyRenderer.receiveShadows = false;
             Debug.Log("[C2 art] Street kit placed. Headlight z = " + lensZ + "; kit yaw = " + yaw);
         }
 
-        // World-space UI depth-tests against cover. Legacy TextMesh uses an overlay font material.
+        private static void DressStallsAndSigns(
+            Transform ground,
+            Dictionary<string, Material> mats,
+            List<Light> flickerLights,
+            List<Renderer> flickerEmissives,
+            Func<string, Transform, Vector3, Vector3, float, Transform> placeModel)
+        {
+            foreach (var stall in new[]
+            {
+                (model: "LapakBumbu", side: -1, z: 12.0f, lit: true),
+                (model: "LapakIkan", side: 1, z: 21.7f, lit: true),
+                (model: "LapakBumbu", side: 1, z: 33.4f, lit: false),
+                (model: "LapakIkan", side: -1, z: 23.7f, lit: false)
+            })
+            {
+                var centre = new Vector3(stall.side * 6.04f, .15f, stall.z);
+                placeModel(stall.model, ground, centre, Vector3.one, -90f * stall.side);
+
+                var stallCounter = new GameObject("Meja lapak").AddComponent<BoxCollider>();
+                stallCounter.transform.SetParent(ground, false);
+                stallCounter.transform.localPosition = centre + Vector3.up * .45f;
+                stallCounter.size = new Vector3(.99f, .90f, 3.06f);
+
+                if (!stall.lit)
+                {
+                    continue;
+                }
+
+                var bulb = new GameObject("Bohlam lapak").AddComponent<Light>();
+                bulb.transform.SetParent(ground, false);
+                float lampX = stall.model == "LapakIkan" ? -.58f : .49f;
+                bulb.transform.localPosition = centre + new Vector3(-stall.side * .12f, 1.96f, -stall.side * lampX);
+                bulb.type = LightType.Spot;
+                bulb.transform.localRotation = Quaternion.LookRotation(new Vector3(-stall.side * .41f, -1f, 0f));
+                bulb.spotAngle = 98f;
+                bulb.innerSpotAngle = 62f;
+                bulb.color = stall.model == "LapakIkan" ? new Color(.38f, .72f, .65f) : new Color(.94f, .52f, .24f);
+                bulb.range = 5.4f;
+                bulb.intensity = 4.0f;
+                bulb.shadows = LightShadows.Soft;
+
+                if (stall.model == "LapakBumbu" && flickerLights != null)
+                {
+                    flickerLights.Add(bulb);
+                    flickerEmissives?.Add(null);
+                }
+            }
+
+            var signs = new[]
+            {
+                ("BENGKEL SURYA", 1, 14.35f),
+                ("CUCI  SETRIKA", -1, 19.85f),
+                ("TOKO  BERAS", 1, 30.85f)
+            };
+            foreach (var sign in signs)
+            {
+                var plate = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                plate.name = sign.Item1;
+                plate.transform.SetParent(ground, false);
+                plate.transform.localPosition = new Vector3(sign.Item2 * 6.62f, 3.06f, sign.Item3);
+                plate.transform.localRotation = Quaternion.Euler(0, 90f * sign.Item2, 0);
+                plate.transform.localScale = new Vector3(4.2f, .52f, .08f);
+                plate.GetComponent<Renderer>().sharedMaterial = mats["C2_Petrol"];
+                Object.DestroyImmediate(plate.GetComponent<Collider>());
+
+                Lettering(
+                    ground,
+                    sign.Item1,
+                    plate.transform.localPosition - new Vector3(sign.Item2 * .052f, 0, 0),
+                    plate.transform.localRotation,
+                    4.17f,
+                    .50f,
+                    .28f,
+                    new Color(.74f, .70f, .56f));
+            }
+        }
+
+        // UI World-Space tetap diuji terhadap depth buffer (terhalang peti/tiang), tidak seperti TextMesh standar.
         internal static void Lettering(Transform parent, string value, Vector3 position, Quaternion rotation,
             float width, float height, float typeHeight, Color color)
         {
             const float pixelsPerMetre = 200f;
             var go = new GameObject(value, typeof(RectTransform), typeof(Canvas));
             var rect = (RectTransform)go.transform;
-            rect.SetParent(parent, false); rect.localPosition = position; rect.localRotation = rotation;
+            rect.SetParent(parent, false);
+            rect.localPosition = position;
+            rect.localRotation = rotation;
             rect.sizeDelta = new Vector2(width, height) * pixelsPerMetre;
             rect.localScale = Vector3.one / pixelsPerMetre;
             go.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
-            var letters = new GameObject("Cetakan", typeof(RectTransform), typeof(UnityEngine.UI.Text));
-            var text = letters.GetComponent<UnityEngine.UI.Text>(); var area = text.rectTransform;
-            area.SetParent(rect, false); area.anchorMin = Vector2.zero; area.anchorMax = Vector2.one;
+
+            var letters = new GameObject("Cetakan", typeof(RectTransform), typeof(Text));
+            var text = letters.GetComponent<Text>();
+            var area = text.rectTransform;
+            area.SetParent(rect, false);
+            area.anchorMin = Vector2.zero;
+            area.anchorMax = Vector2.one;
             area.offsetMin = area.offsetMax = Vector2.zero;
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.text = value;
-            text.alignment = TextAnchor.MiddleCenter; text.fontSize = Mathf.RoundToInt(typeHeight * pixelsPerMetre);
-            text.color = color; text.raycastTarget = false;
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.text = value;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.fontSize = Mathf.RoundToInt(typeHeight * pixelsPerMetre);
+            text.color = color;
+            text.raycastTarget = false;
         }
 
-        static void RemoveVisuals(Transform target)
+        private static void RemoveVisuals(Transform target)
         {
             foreach (var r in target.GetComponentsInChildren<Renderer>(true))
             {
                 var text = r.GetComponent<TextMesh>();
-                if (text != null) Object.DestroyImmediate(text);
+                if (text != null)
+                {
+                    Object.DestroyImmediate(text);
+                }
                 Object.DestroyImmediate(r);
             }
-            foreach (var f in target.GetComponentsInChildren<MeshFilter>(true)) Object.DestroyImmediate(f);
-        }
-
-        static void AddStreetLight(Transform root)
-        {
-            // Cold midnight moonlight: strong enough to silhouette crates, ruko, and sentries, dark enough for dread.
-            var go = new GameObject("Cahaya langit setelah hujan");
-            go.transform.SetParent(root, false);
-            go.transform.localRotation = Quaternion.Euler(49, -34, 0);
-            var moon = go.AddComponent<Light>(); moon.type = LightType.Directional;
-            moon.color = new Color(.44f, .58f, .76f); moon.intensity = .20f;
-            moon.shadows = LightShadows.Soft; moon.shadowStrength = .86f;
-
-            var probe = new GameObject("Pantulan jalan").AddComponent<ReflectionProbe>();
-            probe.transform.SetParent(root, false); probe.transform.localPosition = new Vector3(0, 2.1f, 18.8f);
-            probe.size = new Vector3(17, 13, 47); probe.resolution = 128;
-            probe.mode = ReflectionProbeMode.Realtime; probe.refreshMode = ReflectionProbeRefreshMode.OnAwake;
-            probe.timeSlicingMode = ReflectionProbeTimeSlicingMode.AllFacesAtOnce; probe.boxProjection = true;
-            probe.clearFlags = ReflectionProbeClearFlags.SolidColor; probe.backgroundColor = new Color(.026f, .040f, .056f);
-
-            var grade = new GameObject("Suasana pasar malam").AddComponent<Volume>();
-            grade.transform.SetParent(root, false);
-            grade.transform.localPosition = new Vector3(0f, 4f, 52f);
-            grade.isGlobal = false;
-            grade.priority = 5f;
-            grade.weight = 1f;
-
-            string gradePath = Mats + "/PasarMalam.asset";
-            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(gradePath);
-            if (profile == null)
+            foreach (var f in target.GetComponentsInChildren<MeshFilter>(true))
             {
-                AssetDatabase.CopyAsset(ChapterTwoStreetBuilder.Art + "/Materials/KosAtmosphere/KosAtmosphereVolume.asset", gradePath);
-                profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(gradePath);
+                Object.DestroyImmediate(f);
             }
-
-            var tonemapping = GetOrAdd<Tonemapping>(profile);
-            tonemapping.mode.Override(TonemappingMode.ACES);
-
-            var color = GetOrAdd<ColorAdjustments>(profile);
-            color.postExposure.Override(-0.08f);
-            color.contrast.Override(14f);
-            color.saturation.Override(-18f);
-            color.colorFilter.Override(new Color(0.92f, 0.96f, 1.0f));
-
-            var bloom = GetOrAdd<Bloom>(profile);
-            bloom.threshold.Override(0.90f);
-            bloom.intensity.Override(0.48f);
-            bloom.scatter.Override(0.68f);
-            bloom.highQualityFiltering.Override(true);
-
-            var vignette = GetOrAdd<Vignette>(profile);
-            vignette.color.Override(new Color(0.015f, 0.025f, 0.04f));
-            vignette.intensity.Override(0.28f);
-            vignette.smoothness.Override(0.45f);
-
-            var grain = GetOrAdd<FilmGrain>(profile);
-            grain.type.Override(FilmGrainLookup.Medium1);
-            grain.intensity.Override(0.20f);
-            grain.response.Override(0.72f);
-
-            var chromatic = GetOrAdd<ChromaticAberration>(profile);
-            chromatic.intensity.Override(0.06f);
-
-            var shadows = GetOrAdd<LiftGammaGain>(profile);
-            shadows.lift.Override(new Vector4(0.985f, 0.995f, 1.015f, 0.0f));
-
-            EditorUtility.SetDirty(tonemapping);
-            EditorUtility.SetDirty(color);
-            EditorUtility.SetDirty(bloom);
-            EditorUtility.SetDirty(vignette);
-            EditorUtility.SetDirty(grain);
-            EditorUtility.SetDirty(chromatic);
-            EditorUtility.SetDirty(shadows);
-            EditorUtility.SetDirty(profile);
-
-            grade.sharedProfile = profile;
-            var bounds = grade.gameObject.AddComponent<BoxCollider>();
-            bounds.isTrigger = true;
-            bounds.size = new Vector3(36f, 16f, 160f);
-        }
-
-        private static T GetOrAdd<T>(VolumeProfile profile) where T : VolumeComponent
-        {
-            if (!profile.TryGet(out T component))
-            {
-                component = profile.Add<T>();
-                AssetDatabase.AddObjectToAsset(component, profile);
-            }
-            return component;
-        }
-
-        static void AddCables(Transform root, Material cable)
-        {
-            for (int side = -1; side <= 1; side += 2)
-                for (int wire = 0; wire < 3; wire++)
-                {
-                    var line = new GameObject("Kabel udara").AddComponent<LineRenderer>();
-                    line.transform.SetParent(root, false); line.useWorldSpace = false;
-                    line.sharedMaterial = cable; line.startWidth = line.endWidth = .022f;
-                    line.positionCount = 37;
-                    for (int i = 0; i < 37; i++)
-                    {
-                        float sag = Mathf.Sin(Mathf.PI * (i % 12) / 12f);
-                        line.SetPosition(i, new Vector3(side * (5.65f + .17f * wire), 6.8f - .76f * sag + .10f * wire, -4 + i * 1.34f));
-                    }
-                }
         }
     }
 }

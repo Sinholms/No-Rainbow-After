@@ -103,7 +103,7 @@ namespace NoRainbowAfter.UI
                 return;
             }
 
-            if (flow.Load(GameScene.MasterGameplay)) ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
+            if (flow.Load(GameScene.Chapter1)) ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
         }
 
         private void OnEnable()

@@ -74,7 +74,7 @@ namespace NoRainbowAfter.Quality
     public sealed class StandaloneBenchmarkRunner : MonoBehaviour
     {
         public const string BenchmarkFlag = "--nra-benchmark";
-        private const string MasterGameplayPath = "Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity";
+        private const string ChapterOneScenePath = "Assets/_NoRainbowAfter/Scenes/Chapter1.unity";
 
         private static StandaloneBenchmarkRunner instance;
 
@@ -182,13 +182,13 @@ namespace NoRainbowAfter.Quality
 
         private IEnumerator RunBenchmarkRoutine()
         {
-            // Allow boot/initial scene settle before forcing MasterGameplay.
+            // Beri waktu inisialisasi sebelum memuat scene Chapter 1 secara penuh.
             yield return null;
             yield return null;
 
-            if (SceneManager.GetActiveScene().path != MasterGameplayPath)
+            if (SceneManager.GetActiveScene().path != ChapterOneScenePath)
             {
-                AsyncOperation load = SceneManager.LoadSceneAsync(MasterGameplayPath, LoadSceneMode.Single);
+                AsyncOperation load = SceneManager.LoadSceneAsync(ChapterOneScenePath, LoadSceneMode.Single);
                 while (load != null && !load.isDone)
                     yield return null;
             }

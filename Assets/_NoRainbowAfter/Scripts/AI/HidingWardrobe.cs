@@ -4,16 +4,24 @@ using UnityEngine;
 
 namespace NoRainbowAfter.AI
 {
+    /// <summary>
+    /// Lemari persembunyian untuk Chapter 1 dan Chapter 3. Mencatat apakah monster melihat
+    /// pemain saat masuk (Spotted) dan memindahkan pemain masuk/keluar melalui TryRestorePose.
+    /// </summary>
     public sealed class HidingWardrobe : MonoBehaviour, IInteractable
     {
         public static HidingWardrobe Occupied { get; private set; }
+
         public string StableId => "C1_WARDROBE_" + name;
         public string DisplayName => "Lemari";
         public string Prompt => Occupied == this ? "Keluar lemari" : "Masuk dan sembunyi";
         public bool Spotted { get; private set; }
         public FirstPersonMotor Occupant { get; private set; }
+
         private FirstPersonPlayer player;
+
         public void SetFocused(bool focused) { }
+
         public void Interact(PlayerInteractor interactor)
         {
             if (Occupied == this)
@@ -21,18 +29,35 @@ namespace NoRainbowAfter.AI
                 TryExit();
                 return;
             }
-            if (Occupied != null) return;
+            if (Occupied != null)
+            {
+                return;
+            }
+
             var actor = interactor.GetComponent<FirstPersonPlayer>();
             var motor = interactor.GetComponent<FirstPersonMotor>();
-            if (actor == null || motor == null || actor.IsPaused || actor.IsInspecting) return;
+            if (actor == null || motor == null || actor.IsPaused || actor.IsInspecting)
+            {
+                return;
+            }
 
             // Catat apakah Shadow melihat Raka di depan lemari sebelum memindahkannya ke dalam.
             var monster = FindAnyObjectByType<ShadowEncounterController>();
-            bool spotted = monster != null && monster.State == ShadowEncounterState.Pursue &&
-                Vector3.Distance(monster.transform.position, motor.transform.position) < 3.1f &&
-                ShadowVisibility.HasAnyClearSightlineToPlayer(monster.transform.position + Vector3.up * 1.6f, motor, monster.transform);
-            if (!motor.TryRestorePose(transform.TransformPoint(new Vector3(0, .06f, 0)),
-                    transform.rotation * Quaternion.Euler(0, 180, 0), false)) return;
+            bool spotted = monster != null &&
+                           monster.State == ShadowEncounterState.Pursue &&
+                           Vector3.Distance(monster.transform.position, motor.transform.position) < 3.1f &&
+                           ShadowVisibility.HasAnyClearSightlineToPlayer(
+                               monster.transform.position + Vector3.up * 1.6f,
+                               motor,
+                               monster.transform);
+
+            if (!motor.TryRestorePose(
+                    transform.TransformPoint(new Vector3(0, .06f, 0)),
+                    transform.rotation * Quaternion.Euler(0, 180, 0),
+                    false))
+            {
+                return;
+            }
 
             Occupant = motor;
             player = actor;
@@ -42,11 +67,15 @@ namespace NoRainbowAfter.AI
             motor.PoseRestored += Release;
             player.InteractRequested += OnExitRequested;
         }
+
         private void OnExitRequested()
         {
             if (player != null && !player.IsPaused && !player.IsInspecting && !player.IsBreathing)
+            {
                 TryExit();
+            }
         }
+
         public bool TryExit()
         {
             if (Occupant == null)
@@ -54,12 +83,20 @@ namespace NoRainbowAfter.AI
                 Release();
                 return true;
             }
+
             // Keluar hanya berhasil jika pose di depan lemari tidak bertabrakan; bila gagal, tetap sembunyi.
-            if (!Occupant.TryRestorePose(transform.TransformPoint(new Vector3(0, .06f, -1.35f)),
-                    transform.rotation * Quaternion.Euler(0, 180, 0), false)) return false;
+            if (!Occupant.TryRestorePose(
+                    transform.TransformPoint(new Vector3(0, .06f, -1.35f)),
+                    transform.rotation * Quaternion.Euler(0, 180, 0),
+                    false))
+            {
+                return false;
+            }
+
             Release();
             return true;
         }
+
         public void Release()
         {
             if (Occupant != null) Occupant.PoseRestored -= Release;
@@ -71,8 +108,12 @@ namespace NoRainbowAfter.AI
             Occupant = null;
             player = null;
             Spotted = false;
-            if (Occupied == this) Occupied = null;
+            if (Occupied == this)
+            {
+                Occupied = null;
+            }
         }
+
         private void OnDisable() => Release();
     }
 }

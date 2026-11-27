@@ -1,3 +1,16 @@
+// ============================================================================
+// Shader: NoRainbowAfter/SpotlightFootprint (Jejak Sorot di Aspal Basah Chapter 2)
+// ============================================================================
+// [GRAFIKA KOMPUTER — KONSEP UTAMA]
+// 1. Additive Blending (Blend SrcAlpha One, ZWrite Off):
+//    Menambahkan pancaran cahaya di atas tekstur aspal basah di jalan pasar malam.
+// 2. World-Space Procedural Puddle Noise (input.positionWS.xz):
+//    Memakai koordinat dunia XZ agar variasi pantulan genangan air tetap tertambat di aspal
+//    walaupun mesh proyeksi sorot ikut berputar menyapu kiri dan kanan.
+// 3. Atenuasi UV & Vertex Color:
+//    Menggabungkan simetri melintang (uv.x -> beamCore) dan jatuh jarak memanjang (uv.y -> distFade)
+//    dengan warna merah/biru-putih dari vertex color (C# ChapterTwoSpotlightEncounter).
+// ============================================================================
 Shader "NoRainbowAfter/SpotlightFootprint"
 {
     SubShader
@@ -60,12 +73,15 @@ Shader "NoRainbowAfter/SpotlightFootprint"
 
             half4 frag(Varyings input) : SV_Target
             {
-                // Wet-asphalt specular sheen and soft beam falloff, additively illuminating the road underneath.
+                // Kilau genangan aspal basah (world-space XZ) + distribusi inti berkas cahaya melintang.
                 float2 wp = input.positionWS.xz;
                 float puddle = noise2(wp * 0.95) * 0.65 + noise2(wp * 2.8 + float2(0.0, _Time.y * 0.14)) * 0.35;
+
+                // Ubah uv.x [0..1] menjadi jarak dari tepi ke tengah [0..1..0].
                 float across = 1.0 - abs(input.uv.x * 2.0 - 1.0);
                 float beamCore = smoothstep(0.0, 0.72, across);
                 float distFade = pow(saturate(1.0 - input.uv.y), 0.75);
+
                 half3 col = input.color.rgb * lerp(0.65h, 1.35h, (half)(puddle * 0.45 + beamCore * 0.55));
                 half alpha = input.color.a * (half)(lerp(0.68, 1.15, puddle) * lerp(0.55, 1.0, beamCore) * lerp(0.45, 1.0, distFade));
                 return half4(col, saturate(alpha));

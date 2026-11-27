@@ -13,9 +13,8 @@ namespace NoRainbowAfter.Quality
     }
 
     /// <summary>
-    /// Owns the three canonical T07 graphics quality presets (Low / Medium / High),
-    /// synchronises Unity QualitySettings + active URP pipeline assets, and persists
-    /// the player's selection in PlayerPrefs ("NRA.QualityPreset").
+    /// Mengelola 3 preset kualitas grafis (Low / Medium / High), menyinkronkan Unity QualitySettings
+    /// beserta aset UniversalRenderPipelineAsset aktif dan anti-aliasing kamera, serta menyimpannya ke PlayerPrefs.
     /// </summary>
     public static class GraphicsQualityService
     {
@@ -35,7 +34,9 @@ namespace NoRainbowAfter.Quality
             get
             {
                 if (!initialized)
+                {
                     currentPreset = LoadSavedPreset();
+                }
                 return currentPreset;
             }
         }
@@ -49,16 +50,10 @@ namespace NoRainbowAfter.Quality
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void ApplyOnStartup()
-        {
-            ApplySavedPreset();
-        }
+        private static void ApplyOnStartup() => ApplySavedPreset();
 
-        public static QualityPreset LoadSavedPreset()
-        {
-            int raw = PlayerPrefs.GetInt(PreferenceKey, (int)DefaultPreset);
-            return ClampPreset(raw);
-        }
+        public static QualityPreset LoadSavedPreset() =>
+            ClampPreset(PlayerPrefs.GetInt(PreferenceKey, (int)DefaultPreset));
 
         public static QualityPreset ApplySavedPreset()
         {
@@ -90,29 +85,27 @@ namespace NoRainbowAfter.Quality
             PresetChanged?.Invoke(clamped);
         }
 
-        public static string GetDisplayLabel(QualityPreset preset)
-        {
-            int index = (int)ClampPreset((int)preset);
-            return DisplayLabels[index];
-        }
+        public static string GetDisplayLabel(QualityPreset preset) =>
+            DisplayLabels[(int)ClampPreset((int)preset)];
 
-        public static string GetCanonicalName(QualityPreset preset)
-        {
-            int index = (int)ClampPreset((int)preset);
-            return CanonicalLevelNames[index];
-        }
+        public static string GetCanonicalName(QualityPreset preset) =>
+            CanonicalLevelNames[(int)ClampPreset((int)preset)];
 
-        public static UniversalRenderPipelineAsset GetActiveUrpAsset()
-        {
-            return GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset
-                   ?? QualitySettings.renderPipeline as UniversalRenderPipelineAsset;
-        }
+        public static UniversalRenderPipelineAsset GetActiveUrpAsset() =>
+            GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset
+            ?? QualitySettings.renderPipeline as UniversalRenderPipelineAsset;
 
         public static void ApplyCameraAntialiasing(Camera camera, QualityPreset preset)
         {
-            if (camera == null) return;
+            if (camera == null)
+            {
+                return;
+            }
             var data = camera.GetComponent<UniversalAdditionalCameraData>();
-            if (data == null) return;
+            if (data == null)
+            {
+                return;
+            }
 
             switch (ClampPreset((int)preset))
             {
@@ -135,13 +128,17 @@ namespace NoRainbowAfter.Quality
         {
             string[] names = QualitySettings.names;
             if (names == null || names.Length == 0)
+            {
                 return -1;
+            }
 
             string targetName = GetCanonicalName(preset);
             for (int i = 0; i < names.Length; i++)
             {
                 if (string.Equals(names[i], targetName, StringComparison.OrdinalIgnoreCase))
+                {
                     return i;
+                }
             }
 
             return Mathf.Clamp((int)preset, 0, names.Length - 1);
@@ -154,7 +151,9 @@ namespace NoRainbowAfter.Quality
             {
                 Camera cam = cameras[i];
                 if (cam != null && cam.cameraType == CameraType.Game)
+                {
                     ApplyCameraAntialiasing(cam, preset);
+                }
             }
         }
 

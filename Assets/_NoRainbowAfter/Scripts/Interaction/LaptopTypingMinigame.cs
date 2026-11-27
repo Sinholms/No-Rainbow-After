@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using NoRainbowAfter.Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,20 +8,29 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.Interaction
 {
     /// <summary>
-    /// Monkeytype-style typing minigame on Raka's study desk laptop (INT_LAPTOP).
-    /// - Objective: "Mengerjakan tugas" with generated Indonesian college-themed sentences (5 sentences).
-    /// - Wrong keystrokes, incomplete/incorrect Enter submission, or timer expiration raise StressBarometer.
-    /// - Press [Enter] once to submit the current sentence; auto-exits once all 5 sentences are finished.
-    /// - Press [Tab] once to exit the laptop back to first-person exploration at any time.
+    /// Minigame mengetik gaya Monkeytype pada laptop di meja belajar Raka (INT_LAPTOP).
+    /// Dipakai di Chapter 1 ("Kerjakan Tugas" 5 kalimat) maupun Chapter 2 ("Kerjakan esai" 3 bagian).
+    ///
+    /// [TEKNIS KODING]
+    /// Dipecah menjadi 3 file partial class:
+    /// 1. LaptopTypingMinigame.cs (logika input ketikan, pengatur waktu kalimat, penilaian tugas/esai)
+    /// 2. LaptopTypingMinigame.Ui.cs (kanvas UI, Rich Text pewarnaan per karakter, bilah timer)
+    /// 3. LaptopTypingMinigame.Audio.cs (sintesis klik keyboard mekanikal & suara kirim/salah)
     /// </summary>
-    public sealed class LaptopTypingMinigame : MonoBehaviour, IInteractable
+    public sealed partial class LaptopTypingMinigame : MonoBehaviour, IInteractable
     {
+        // =========================================================================
+        // Konstanta Aturan & Bank Kalimat Kuliah
+        // =========================================================================
+
         public const float SentenceTimeLimit = 60f;
         public const float MinSentenceTimeLimit = 30f;
         public const int RequiredSentencesForObjective = 5;
         public const float TypoStressPenalty = 2f;
         public const float IncompleteSubmitStressPenalty = 10f;
         public const float TimeoutStressPenalty = 15f;
+
+        private const float EssaySectionSeconds = 45f;
 
         public static float GetTimeLimitForSentence(int completedCount) => completedCount switch
         {
@@ -51,6 +59,10 @@ namespace NoRainbowAfter.Interaction
             "meski waktu istirahat hampir habis"
         };
 
+        // =========================================================================
+        // Referensi Scene, Komponen UI, Audio, & State Pengetikan
+        // =========================================================================
+
         private PlayerInteractor activeInteractor;
         private FirstPersonPlayer player;
         private StressBarometer stressBarometer;
@@ -68,7 +80,7 @@ namespace NoRainbowAfter.Interaction
         private int sentenceIndex;
         private int openedFrame = -1;
         private string[] essaySections;
-        private const float EssaySectionSeconds = 45f;
+
         private AudioSource typingSource;
         private AudioClip typingClip;
         private AudioClip submitClip;
@@ -87,6 +99,7 @@ namespace NoRainbowAfter.Interaction
         public int SubmittedAttempts { get; private set; }
         public int JudgedEssaySections { get; private set; }
         public bool IsEssayComplete => IsEssay && JudgedEssaySections == essaySections.Length;
+
         private bool IsEssay => essaySections != null;
         private int RequiredSentences => essaySections?.Length ?? RequiredSentencesForObjective;
 
@@ -94,38 +107,59 @@ namespace NoRainbowAfter.Interaction
         public event Action<bool> SentenceSubmitted;
         public event Action<int> EssayFinished;
 
+        // =========================================================================
+        // Konfigurasi Mode Esai (Chapter 2) & Siklus Hidup
+        // =========================================================================
+
         public void ConfigureEssay(IReadOnlyList<string> sections)
         {
-            if (IsActive || sections == null || sections.Count == 0) return;
+            if (IsActive || sections == null || sections.Count == 0)
+            {
+                return;
+            }
             essaySections = new string[sections.Count];
-            for (int i = 0; i < sections.Count; i++) essaySections[i] = sections[i];
+            for (int i = 0; i < sections.Count; i++)
+            {
+                essaySections[i] = sections[i];
+            }
             ResetEssay();
         }
 
         public void ResetEssay()
         {
-            if (!IsEssay || IsActive) return;
-            JudgedEssaySections = CompletedSentences = SubmittedAttempts = 0;
+            if (!IsEssay || IsActive)
+            {
+                return;
+            }
+            JudgedEssaySections = 0;
+            CompletedSentences = 0;
+            SubmittedAttempts = 0;
             LoadNextSentence();
         }
 
         public void SkipEssay()
         {
-            if (!IsEssay || IsEssayComplete) return;
-            if (IsActive) CloseLaptop();
+            if (!IsEssay || IsEssayComplete)
+            {
+                return;
+            }
+            if (IsActive)
+            {
+                CloseLaptop();
+            }
             CompletedSentences = Mathf.Max(1, CompletedSentences);
             JudgedEssaySections = essaySections.Length;
         }
 
-        private void Awake()
-        {
-            BuildUi();
-        }
+        private void Awake() => BuildUi();
 
         private void OnDisable()
         {
             UnhookTextInput();
-            if (IsActive) CloseLaptop();
+            if (IsActive)
+            {
+                CloseLaptop();
+            }
         }
 
         private void OnDestroy()
@@ -137,52 +171,78 @@ namespace NoRainbowAfter.Interaction
             if (errorClip != null) Destroy(errorClip);
         }
 
+        // =========================================================================
+        // Interaksi, Buka/Tutup Sesi Laptop, & Loop Input Karakter
+        // =========================================================================
+
         public void SetFocused(bool focused) { }
 
         public void Interact(PlayerInteractor interactor)
         {
-            if (interactor == null || IsActive || IsEssayComplete) return;
+            if (interactor == null || IsActive || IsEssayComplete)
+            {
+                return;
+            }
             activeInteractor = interactor;
             player = interactor.GetComponent<FirstPersonPlayer>();
             stressBarometer = interactor.GetComponent<StressBarometer>();
             if (stressBarometer == null && player != null)
+            {
                 stressBarometer = player.GetComponent<StressBarometer>();
-
+            }
             OpenLaptop();
         }
 
         // Membuka sesi mengetik dan mengalihkan kendali pemain ke laptop.
         public void OpenLaptop()
         {
-            if (IsActive || IsEssayComplete) return;
+            if (IsActive || IsEssayComplete)
+            {
+                return;
+            }
             BuildUi();
             if (!IsEssay && CompletedSentences >= RequiredSentencesForObjective)
+            {
                 CompletedSentences = 0;
+            }
+
             IsActive = true;
             openedFrame = Time.frameCount;
-
             if (player != null)
             {
                 player.SetUsingLaptop(true);
                 player.BreatheRequested -= OnTabCloseRequested;
                 player.BreatheRequested += OnTabCloseRequested;
             }
+
             PrepareTypingSound();
-            if (!IsEssay) LoadNextSentence();
+            if (!IsEssay)
+            {
+                LoadNextSentence();
+            }
             HookTextInput();
+
             if (feedbackLabel != null)
-                feedbackLabel.text = IsEssay ? "Ketik bagian esai. Tekan [ENTER] untuk kirim."
+            {
+                feedbackLabel.text = IsEssay
+                    ? "Ketik bagian esai. Tekan [ENTER] untuk kirim."
                     : "Ketik bagian tugas. Tekan [ENTER] untuk kirim.";
+            }
             RefreshUi();
             SessionStateChanged?.Invoke(true);
         }
 
         public void CloseLaptop()
         {
-            if (!IsActive) return;
+            if (!IsActive)
+            {
+                return;
+            }
             IsActive = false;
             if (player != null)
+            {
                 player.BreatheRequested -= OnTabCloseRequested;
+            }
             UnhookTextInput();
             if (typingSource != null) typingSource.Stop();
             if (panelRoot != null) panelRoot.SetActive(false);
@@ -194,19 +254,27 @@ namespace NoRainbowAfter.Interaction
         private void OnTabCloseRequested()
         {
             if (IsActive && Time.frameCount != openedFrame)
+            {
                 CloseLaptop();
+            }
         }
 
         private void Update()
         {
-            if (!IsActive) return;
+            if (!IsActive)
+            {
+                return;
+            }
             if (player != null && player.IsPaused)
             {
                 if (overlayCanvas != null) overlayCanvas.enabled = false;
                 if (typingSource != null && typingSource.isPlaying) typingSource.Stop();
                 return;
             }
-            if (overlayCanvas != null && !overlayCanvas.enabled) overlayCanvas.enabled = true;
+            if (overlayCanvas != null && !overlayCanvas.enabled)
+            {
+                overlayCanvas.enabled = true;
+            }
 
             bool enterPressed = false;
             bool tabPressed = false;
@@ -220,10 +288,12 @@ namespace NoRainbowAfter.Interaction
             Tick(Time.unscaledDeltaTime, enterPressed, tabPressed);
         }
 
-        /// <summary>Deterministic update step for runtime typing timer, [Enter] submission, and 1x [Tab] exit.</summary>
         public void Tick(float deltaTime, bool enterPressed, bool tabPressed = false)
         {
-            if (!IsActive) return;
+            if (!IsActive)
+            {
+                return;
+            }
             if (tabPressed)
             {
                 CloseLaptop();
@@ -241,7 +311,10 @@ namespace NoRainbowAfter.Interaction
             if (enterPressed)
             {
                 SubmitInput(fromTimeout: false);
-                if (!IsActive) return;
+                if (!IsActive)
+                {
+                    return;
+                }
             }
 
             RefreshUi();
@@ -250,8 +323,10 @@ namespace NoRainbowAfter.Interaction
         // Karakter dibandingkan dengan posisi yang sama pada kalimat target.
         public void ProcessTypedCharacter(char c)
         {
-            if (!IsActive) return;
-            if (Time.frameCount == openedFrame) return;
+            if (!IsActive || Time.frameCount == openedFrame)
+            {
+                return;
+            }
 
             if (c == '\b')
             {
@@ -264,8 +339,10 @@ namespace NoRainbowAfter.Interaction
                 return;
             }
 
-            if (char.IsControl(c)) return;
-            if (CurrentInput.Length >= TargetSentence.Length + 12) return;
+            if (char.IsControl(c) || CurrentInput.Length >= TargetSentence.Length + 12)
+            {
+                return;
+            }
 
             int idx = CurrentInput.Length;
             bool isCorrect = idx < TargetSentence.Length &&
@@ -278,7 +355,9 @@ namespace NoRainbowAfter.Interaction
                 stressBarometer?.AddStress(TypoStressPenalty);
                 PlayErrorSound();
                 if (feedbackLabel != null)
+                {
                     feedbackLabel.text = "<color=#FF5555>Periksa huruf yang merah.</color>";
+                }
             }
             else if (feedbackLabel != null && CurrentInput.Length == TargetSentence.Length)
             {
@@ -288,17 +367,28 @@ namespace NoRainbowAfter.Interaction
             RefreshUi();
         }
 
-        // Nilai ketikan saat Enter atau waktu habis, lalu lanjutkan sesuai mode.
+        // =========================================================================
+        // Evaluasi Pengiriman Kalimat & Transisi Kalimat Berikutnya
+        // =========================================================================
+
+        // Nilai ketikan saat Enter atau waktu habis, lalu lanjutkan sesuai mode (Tugas / Esai).
         public void SubmitInput(bool fromTimeout = false)
         {
-            if (!IsActive) return;
+            if (!IsActive)
+            {
+                return;
+            }
             SubmittedAttempts++;
 
             bool exactMatch = string.Equals(CurrentInput, TargetSentence, StringComparison.OrdinalIgnoreCase);
             // Pada tugas biasa, kalimat tepat tetap dihitung saat waktu habis. Esai harus dikirim sebelum itu.
             bool passed = exactMatch && (!IsEssay || !fromTimeout);
             float penalty = fromTimeout ? TimeoutStressPenalty : IncompleteSubmitStressPenalty;
-            if (!passed) stressBarometer?.AddStress(penalty);
+            if (!passed)
+            {
+                stressBarometer?.AddStress(penalty);
+            }
+
             if (IsEssay)
             {
                 SubmitEssaySection(passed, fromTimeout);
@@ -319,7 +409,9 @@ namespace NoRainbowAfter.Interaction
                 }
 
                 if (feedbackLabel != null)
+                {
                     feedbackLabel.text = "<color=#8BE78B>Bagian terkirim.</color>";
+                }
             }
             else
             {
@@ -356,6 +448,7 @@ namespace NoRainbowAfter.Interaction
             {
                 PlayErrorSound();
             }
+
             JudgedEssaySections++;
             if (IsEssayComplete)
             {
@@ -364,7 +457,9 @@ namespace NoRainbowAfter.Interaction
                 EssayFinished?.Invoke(CompletedSentences);
                 return;
             }
-            feedbackLabel.text = passed ? "<color=#8BE78B>Bagian terkirim.</color>"
+
+            feedbackLabel.text = passed
+                ? "<color=#8BE78B>Bagian terkirim.</color>"
                 : "<color=#FF5555>Waktu habis. Lanjut ke bagian berikutnya.</color>";
             LoadNextSentence();
             RefreshUi();
@@ -374,7 +469,10 @@ namespace NoRainbowAfter.Interaction
         // Setelah jumlah kalimat objektif tercapai, simpan flag dan kirim pemberitahuan.
         private void MarkObjectiveProgress()
         {
-            if (activeInteractor == null) return;
+            if (activeInteractor == null)
+            {
+                return;
+            }
             if (CompletedSentences >= RequiredSentencesForObjective)
             {
                 activeInteractor.Flags.Set("objective.laptop");
@@ -392,6 +490,7 @@ namespace NoRainbowAfter.Interaction
                 CurrentSentenceTimeLimit = RemainingTime = EssaySectionSeconds;
                 return;
             }
+
             string baseSentence = CollegeSentenceBank[sentenceIndex % CollegeSentenceBank.Length];
             TargetSentence = baseSentence;
             if (sentenceIndex >= CollegeSentenceBank.Length)
@@ -404,77 +503,12 @@ namespace NoRainbowAfter.Interaction
             RemainingTime = CurrentSentenceTimeLimit;
         }
 
-        private void PrepareTypingSound()
-        {
-            if (typingClip == null)
-            {
-                const int sampleRate = 22050;
-                var samples = new float[2205];
-                var noise = new System.Random(34);
-                for (int i = 0; i < samples.Length; i++)
-                {
-                    float seconds = i / (float)sampleRate;
-                    float click = (float)(noise.NextDouble() * 2 - 1) * Mathf.Exp(-seconds * 128f);
-                    float resonance = Mathf.Sin(seconds * 2f * Mathf.PI * 620f) * Mathf.Exp(-seconds * 68f);
-                    samples[i] = (click * .5f + resonance * .18f) * Mathf.Clamp01(i / 8f);
-                }
-                typingClip = AudioClip.Create("Report keystroke", samples.Length, 1, sampleRate, false);
-                typingClip.SetData(samples, 0);
-            }
-            if (submitClip == null)
-            {
-                const int sampleRate = 22050;
-                var samples = new float[(int)(sampleRate * 0.14f)];
-                for (int i = 0; i < samples.Length; i++)
-                {
-                    float s = i / (float)sampleRate;
-                    float env = Mathf.Exp(-s * 18f) * Mathf.Clamp01(i / 24f);
-                    samples[i] = (Mathf.Sin(2f * Mathf.PI * 660f * s) * 0.45f + Mathf.Sin(2f * Mathf.PI * 880f * s) * 0.35f) * env * 0.4f;
-                }
-                submitClip = AudioClip.Create("Laptop submit", samples.Length, 1, sampleRate, false);
-                submitClip.SetData(samples, 0);
-            }
-            if (errorClip == null)
-            {
-                const int sampleRate = 22050;
-                var samples = new float[(int)(sampleRate * 0.10f)];
-                for (int i = 0; i < samples.Length; i++)
-                {
-                    float s = i / (float)sampleRate;
-                    float env = Mathf.Exp(-s * 28f) * Mathf.Clamp01(i / 16f);
-                    samples[i] = Mathf.Sin(2f * Mathf.PI * 155f * s) * env * 0.35f;
-                }
-                errorClip = AudioClip.Create("Laptop error", samples.Length, 1, sampleRate, false);
-                errorClip.SetData(samples, 0);
-            }
-            if (typingSource == null)
-            {
-                typingSource = gameObject.AddComponent<AudioSource>();
-                typingSource.playOnAwake = false;
-                typingSource.volume = .25f;
-                typingSource.clip = typingClip;
-            }
-        }
-
-        private void PlayTypingSound()
-        {
-            if (typingSource != null && typingClip != null) typingSource.PlayOneShot(typingClip, 1f);
-        }
-
-        private void PlaySubmitSound()
-        {
-            if (typingSource != null && submitClip != null) typingSource.PlayOneShot(submitClip, 0.85f);
-        }
-
-        private void PlayErrorSound()
-        {
-            if (typingSource != null && errorClip != null) typingSource.PlayOneShot(errorClip, 0.75f);
-        }
-
         private void OnTextInput(char ch)
         {
-            if (!IsActive) return;
-            if (player != null && player.IsPaused) return;
+            if (!IsActive || (player != null && player.IsPaused))
+            {
+                return;
+            }
             ProcessTypedCharacter(ch);
         }
 
@@ -491,160 +525,10 @@ namespace NoRainbowAfter.Interaction
         private void UnhookTextInput()
         {
             var kb = Keyboard.current;
-            if (kb != null) kb.onTextInput -= OnTextInput;
-        }
-
-        private void RefreshUi()
-        {
-            if (panelRoot != null) panelRoot.SetActive(IsActive);
-            if (overlayCanvas != null) overlayCanvas.enabled = IsActive && (player == null || !player.IsPaused);
-            if (!IsActive) return;
-
-            if (headerLabel != null)
+            if (kb != null)
             {
-                headerLabel.text = IsEssay
-                    ? $"ESAI KULIAH  ·  Bagian {JudgedEssaySections + 1}/{RequiredSentences}  ·  Terkirim {CompletedSentences}"
-                    : $"TUGAS KULIAH  ·  Bagian {Mathf.Min(CompletedSentences + 1, RequiredSentences)}/{RequiredSentences}  ·  Terkirim {CompletedSentences}";
+                kb.onTextInput -= OnTextInput;
             }
-            if (timerLabel != null)
-                timerLabel.text = $"Sisa waktu: {Mathf.Max(0f, RemainingTime):F1} dtk";
-            if (timerFill != null)
-                timerFill.anchorMax = new Vector2(Mathf.Clamp01(RemainingTime / Mathf.Max(1f, CurrentSentenceTimeLimit)), 1f);
-
-            if (targetDisplay != null)
-                targetDisplay.text = BuildMonkeytypeRichText(TargetSentence, CurrentInput);
-
-            if (typedDisplay != null)
-                typedDisplay.text = string.IsNullOrEmpty(CurrentInput) ? "<color=#5A6870>Mulai mengetik di keyboard...</color>" : CurrentInput + "_";
-
-            if (exitHintLabel != null)
-                exitHintLabel.text = "Tekan [ENTER] untuk kirim kalimat  •  Tekan [TAB] untuk keluar laptop";
-        }
-
-        public static string BuildMonkeytypeRichText(string target, string typed)
-        {
-            var sb = new StringBuilder(target.Length * 22);
-            int maxLen = target.Length;
-            for (int i = 0; i < maxLen; i++)
-            {
-                char expected = target[i];
-                if (i < typed.Length)
-                {
-                    bool match = char.ToLowerInvariant(typed[i]) == char.ToLowerInvariant(expected);
-                    if (match)
-                        sb.Append("<color=#FFD54F>").Append(expected).Append("</color>");
-                    else
-                        sb.Append("<color=#FF3B3B>").Append(expected == ' ' ? '·' : expected).Append("</color>");
-                }
-                else if (i == typed.Length)
-                {
-                    sb.Append("<color=#FFF176>").Append(expected).Append("</color>");
-                }
-                else
-                {
-                    sb.Append("<color=#67757D>").Append(expected).Append("</color>");
-                }
-            }
-            return sb.ToString();
-        }
-
-        private void BuildUi()
-        {
-            if (overlayCanvas != null) return;
-
-            var canvasGo = new GameObject("LaptopTypingUI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-            canvasGo.transform.SetParent(transform, false);
-            overlayCanvas = canvasGo.GetComponent<Canvas>();
-            overlayCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            overlayCanvas.sortingOrder = 15;
-            var scaler = canvasGo.GetComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            panelRoot = new GameObject("MonkeytypePanel", typeof(RectTransform), typeof(Image));
-            panelRoot.transform.SetParent(canvasGo.transform, false);
-            var bgRect = (RectTransform)panelRoot.transform;
-            bgRect.anchorMin = Vector2.zero;
-            bgRect.anchorMax = Vector2.one;
-            bgRect.offsetMin = bgRect.offsetMax = Vector2.zero;
-            var bg = panelRoot.GetComponent<Image>();
-            bg.color = new Color(0.055f, 0.068f, 0.078f, 0.96f);
-            bg.raycastTarget = false;
-
-            // Header
-            headerLabel = CreateText("Header", panelRoot.transform, $"TUGAS KULIAH — MENGETIK LAPORAN (0/{RequiredSentencesForObjective})", 28, FontStyle.Bold, TextAnchor.MiddleCenter,
-                new Color(0.84f, 0.89f, 0.90f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 320f), new Vector2(1200f, 50f));
-
-            // Timer bar + text
-            timerLabel = CreateText("TimerText", panelRoot.transform, "Sisa waktu: 60.0 dtk", 24, FontStyle.Bold, TextAnchor.MiddleCenter,
-                new Color(0.96f, 0.72f, 0.28f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 250f), new Vector2(600f, 36f));
-            var tTrack = CreateRect("TimerTrack", panelRoot.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 215f), new Vector2(960f, 10f));
-            tTrack.gameObject.AddComponent<Image>().color = new Color(0.14f, 0.17f, 0.19f, 1f);
-            timerFill = CreateRect("TimerFill", tTrack, Vector2.zero, Vector2.one, new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
-            timerFill.gameObject.AddComponent<Image>().color = new Color(0.95f, 0.69f, 0.25f, 1f);
-
-            // Monkeytype center target block
-            targetDisplay = CreateText("TargetDisplay", panelRoot.transform, "", 38, FontStyle.Normal, TextAnchor.MiddleLeft,
-                Color.white, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 65f), new Vector2(1180f, 190f));
-            targetDisplay.supportRichText = true;
-            targetDisplay.horizontalOverflow = HorizontalWrapMode.Wrap;
-            targetDisplay.verticalOverflow = VerticalWrapMode.Overflow;
-
-            // Live typed input box
-            var inputBox = CreateRect("InputBox", panelRoot.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -105f), new Vector2(1180f, 96f));
-            inputBox.gameObject.AddComponent<Image>().color = new Color(0.09f, 0.115f, 0.135f, 0.98f);
-            typedDisplay = CreateText("TypedDisplay", inputBox, "", 28, FontStyle.Normal, TextAnchor.MiddleLeft,
-                new Color(0.92f, 0.95f, 0.96f, 1f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f),
-                Vector2.zero, new Vector2(-40f, -16f));
-
-            // Status / penalty feedback
-            feedbackLabel = CreateText("Feedback", panelRoot.transform, "", 24, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Color(0.84f, 0.88f, 0.86f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -205f), new Vector2(1180f, 52f));
-            feedbackLabel.supportRichText = true;
-
-            // Single [TAB] exit hint
-            exitHintLabel = CreateText("ExitHintLabel", panelRoot.transform, "Tekan [ENTER] untuk kirim kalimat  •  Tekan [TAB] untuk keluar laptop", 22, FontStyle.Normal, TextAnchor.MiddleCenter,
-                new Color(0.82f, 0.84f, 0.82f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -335f), new Vector2(960f, 36f));
-
-            panelRoot.SetActive(false);
-            overlayCanvas.enabled = false;
-        }
-
-        private static RectTransform CreateRect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax,
-            Vector2 pivot, Vector2 pos, Vector2 size)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var rect = (RectTransform)go.transform;
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.pivot = pivot;
-            rect.anchoredPosition = pos;
-            rect.sizeDelta = size;
-            return rect;
-        }
-
-        private static Text CreateText(string name, Transform parent, string value, int fontSize, FontStyle style,
-            TextAnchor align, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 pos, Vector2 size)
-        {
-            var rect = CreateRect(name, parent, anchorMin, anchorMax, pivot, pos, size);
-            var txt = rect.gameObject.AddComponent<Text>();
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            txt.fontSize = fontSize;
-            txt.fontStyle = style;
-            txt.alignment = align;
-            txt.color = color;
-            txt.text = value;
-            txt.raycastTarget = false;
-            return txt;
         }
     }
 }

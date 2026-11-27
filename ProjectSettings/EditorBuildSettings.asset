@@ -12,8 +12,14 @@ EditorBuildSettings:
     path: Assets/_NoRainbowAfter/Scenes/MainMenu.unity
     guid: b61b1693986d71c4786e9b009965630e
   - enabled: 1
-    path: Assets/_NoRainbowAfter/Scenes/MasterGameplay.unity
-    guid: ada28062cab6a3b41beb522f2bc00cbf
+    path: Assets/_NoRainbowAfter/Scenes/Chapter1.unity
+    guid: 34dcbb0ac0ba4af2a04a6cca3909f02c
+  - enabled: 1
+    path: Assets/_NoRainbowAfter/Scenes/Chapter2.unity
+    guid: e3ecfe8995094ced87a43c5207ac55db
+  - enabled: 1
+    path: Assets/_NoRainbowAfter/Scenes/Chapter3.unity
+    guid: cb2eef89749b4492ae0a9d67f1487d79
   - enabled: 1
     path: Assets/_NoRainbowAfter/Scenes/Credits.unity
     guid: 48aebcf17865fd3469161f01cb8eb517
@@ -23,11 +29,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_NoRainbowAfter/Scenes/FirstPersonTest.unity
     guid: 2fd8575386d6be845ae4c0fa2db4a338
-  - enabled: 1
-    path: Assets/_NoRainbowAfter/Scenes/Chapter1.unity
-    guid: 34dcbb0ac0ba4af2a04a6cca3909f02c
-  - enabled: 1
-    path: Assets/_NoRainbowAfter/Scenes/Chapter2.unity
-    guid: e3ecfe8995094ced87a43c5207ac55db
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

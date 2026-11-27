@@ -1,3 +1,12 @@
+// ============================================================================
+// Shader: NoRainbowAfter/UI/CircularViewMask (Masker Bidang Pandang Melingkar)
+// ============================================================================
+// [GRAFIKA KOMPUTER — KONSEP UTAMA]
+// - Koreksi Rasio Aspek UV: (i.uv - 0.5) * float2(_Aspect, 1.0) memastikan bentuk lubang
+//   tetap bulat sempurna di monitor widescreen (16:9 / 21:9), bukan lonjong elips.
+// - Smoothstep SDF: Menghitung jarak radial ke tepi radius (_Radius - _Softness -> _Radius)
+//   untuk transisi vignette hitam mulus yang menjaga fokus pemain di lingkungan gelap.
+// ============================================================================
 Shader "NoRainbowAfter/UI/CircularViewMask"
 {
     Properties
@@ -33,8 +42,21 @@ Shader "NoRainbowAfter/UI/CircularViewMask"
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
 
-            struct appdata { float4 vertex : POSITION; float4 color : COLOR; float2 uv : TEXCOORD0; };
-            struct v2f { float4 vertex : SV_POSITION; float4 color : COLOR; float2 uv : TEXCOORD0; float4 world : TEXCOORD1; };
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float4 color : COLOR;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float4 vertex : SV_POSITION;
+                float4 color : COLOR;
+                float2 uv : TEXCOORD0;
+                float4 world : TEXCOORD1;
+            };
+
             float4 _Color, _ClipRect;
             float _Aspect, _Radius, _Softness;
 
@@ -50,9 +72,11 @@ Shader "NoRainbowAfter/UI/CircularViewMask"
 
             float4 frag(v2f i) : SV_Target
             {
+                // Koreksi koordinat UV terhadap rasio aspek layar agar lingkaran simetris.
                 float2 offset = (i.uv - 0.5) * float2(_Aspect, 1.0);
                 float alpha = smoothstep(_Radius - _Softness, _Radius, length(offset));
                 float4 result = float4(0, 0, 0, alpha * i.color.a);
+
                 #ifdef UNITY_UI_CLIP_RECT
                 result.a *= UnityGet2DClipping(i.world.xy, _ClipRect);
                 #endif

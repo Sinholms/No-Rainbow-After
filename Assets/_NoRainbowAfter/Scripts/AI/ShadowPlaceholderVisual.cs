@@ -1,10 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace NoRainbowAfter.AI
 {
     /// <summary>
-    /// Drives procedural posture, doorway stooping, and brief state feedback on the T06 placeholder mesh.
-    /// Kept separate from encounter logic so T13 can replace visuals/Animator without altering T06/T11 behavior.
+    /// Menggerakkan postur prosedural monster bayangan, membungkuk saat melewati kusen pintu,
+    /// serta meneruskan animasi reaksi ke Animator atau ShadowMotionPlayback.
+    ///
+    /// [GRAFIKA KOMPUTER &amp; ANIMASI]
+    /// - ComputeTargetStoop() menembakkan Physics.SphereCastNonAlloc ke atas untuk mendeteksi
+    ///   langit-langit atau kusen rendah sehingga kepala monster membungkuk halus tanpa tembus tembok.
+    /// - ApplyPosture() memodifikasi rotasi tulang punggung (upperPivot) dengan kuaternion komposit.
     /// </summary>
     public sealed class ShadowPlaceholderVisual : MonoBehaviour
     {
@@ -16,6 +22,7 @@ namespace NoRainbowAfter.AI
         [SerializeField] private float doorwaySinkY = 0.08f;
 
         private static readonly RaycastHit[] CeilingHits = new RaycastHit[16];
+
         private Renderer[] renderers;
         private Quaternion upperRestOffset = Quaternion.identity;
         private Vector3 wrapperBaseLocalPos;
@@ -27,13 +34,15 @@ namespace NoRainbowAfter.AI
         private Animator heroAnimator;
         private string currentHeroState;
         private bool finalHit;
-        public float HitDuration(bool final) => motion != null ? motion.HitDuration(final) : .52f;
-        public void SetHitVariant(bool final) { finalHit = final; }
         private Transform[] grabArms;
         private Vector3[] armPositions;
         private Quaternion[] armRotations;
 
         public float CurrentVisualHeight => Mathf.Lerp(standingVisualHeight, stoopedVisualHeight, stoopBlend);
+
+        public float HitDuration(bool final) => motion != null ? motion.HitDuration(final) : .52f;
+
+        public void SetHitVariant(bool final) => finalHit = final;
 
         public void Configure(Transform wrapper, Transform upper)
         {
@@ -47,16 +56,24 @@ namespace NoRainbowAfter.AI
 
         private void EnsureInitialized()
         {
-            // Configure is also called by the prefab installer. Runtime rigs must never be baked into that asset.
-            if (!Application.isPlaying) return;
-            if (initialized) return;
+            // Configure juga dipanggil di Editor oleh installer prefab. Rig runtime tidak boleh terbawa ke aset prefab.
+            if (!Application.isPlaying || initialized)
+            {
+                return;
+            }
             if (visualWrapper == null && transform.childCount > 0)
+            {
                 visualWrapper = transform.GetChild(0);
+            }
             if (upperPivot == null && visualWrapper != null)
             {
                 foreach (var t in visualWrapper.GetComponentsInChildren<Transform>(true))
                 {
-                    if (t.name == "PIV_ShadowUpper") { upperPivot = t; break; }
+                    if (t.name == "PIV_ShadowUpper")
+                    {
+                        upperPivot = t;
+                        break;
+                    }
                 }
             }
             if (visualWrapper != null)
@@ -70,12 +87,17 @@ namespace NoRainbowAfter.AI
                 upperPivot.localRotation = Quaternion.identity;
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
             }
+
             motion = visualWrapper != null ? ShadowMotionPlayback.Attach(visualWrapper) : null;
             if (visualWrapper != null)
             {
                 foreach (var anim in visualWrapper.GetComponentsInChildren<Animator>(true))
                 {
-                    if (anim.runtimeAnimatorController != null) { heroAnimator = anim; break; }
+                    if (anim.runtimeAnimatorController != null)
+                    {
+                        heroAnimator = anim;
+                        break;
+                    }
                 }
             }
             if (motion != null)
@@ -83,16 +105,30 @@ namespace NoRainbowAfter.AI
                 upperPivot = motion.Spine;
                 upperRestOffset = Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
                 if (heroAnimator == null)
+                {
                     renderers = motion.GetComponentsInChildren<Renderer>(true);
+                }
             }
+
             initialized = true;
-            if(visualWrapper != null)
+            if (visualWrapper != null)
             {
-                var arms=new System.Collections.Generic.List<Transform>();
-                foreach(var t in visualWrapper.GetComponentsInChildren<Transform>(true))
-                    if(t.name.StartsWith("SM_ACT_ShadowArm")) arms.Add(t);
-                grabArms=arms.ToArray();armPositions=new Vector3[grabArms.Length];armRotations=new Quaternion[grabArms.Length];
-                for(int i=0;i<grabArms.Length;i++){armPositions[i]=grabArms[i].localPosition;armRotations[i]=grabArms[i].localRotation;}
+                var arms = new List<Transform>();
+                foreach (var t in visualWrapper.GetComponentsInChildren<Transform>(true))
+                {
+                    if (t.name.StartsWith("SM_ACT_ShadowArm"))
+                    {
+                        arms.Add(t);
+                    }
+                }
+                grabArms = arms.ToArray();
+                armPositions = new Vector3[grabArms.Length];
+                armRotations = new Quaternion[grabArms.Length];
+                for (int i = 0; i < grabArms.Length; i++)
+                {
+                    armPositions[i] = grabArms[i].localPosition;
+                    armRotations[i] = grabArms[i].localRotation;
+                }
             }
         }
 
@@ -100,7 +136,9 @@ namespace NoRainbowAfter.AI
         {
             EnsureInitialized();
             if (visualWrapper != null)
+            {
                 visualWrapper.gameObject.SetActive(visible);
+            }
         }
 
         public void ResetPostureImmediate(Transform ignoredPlayerRoot = null)
@@ -117,7 +155,9 @@ namespace NoRainbowAfter.AI
         {
             EnsureInitialized();
             if (visualWrapper != null && visualWrapper.gameObject.activeInHierarchy)
+            {
                 motion?.SampleHair(deltaTime);
+            }
         }
 
         public void TickVisual(
@@ -129,8 +169,12 @@ namespace NoRainbowAfter.AI
             bool searching = false)
         {
             EnsureInitialized();
-            if (visualWrapper == null || !visualWrapper.gameObject.activeSelf) return;
+            if (visualWrapper == null || !visualWrapper.gameObject.activeSelf)
+            {
+                return;
+            }
             RestoreArms();
+
             if (heroAnimator != null && heroAnimator.isActiveAndEnabled && heroAnimator.runtimeAnimatorController != null)
             {
                 string desiredState = state == ShadowEncounterState.Spawn ? "Idle_Breath" :
@@ -143,6 +187,7 @@ namespace NoRainbowAfter.AI
                     heroAnimator.CrossFadeInFixedTime(desiredState, 0.12f, 0);
                 }
             }
+
             if (motion != null)
             {
                 if (state == ShadowEncounterState.FightResolved)
@@ -196,33 +241,63 @@ namespace NoRainbowAfter.AI
         public float GetHighestRenderedY()
         {
             EnsureInitialized();
-            if (renderers == null || renderers.Length == 0) return transform.position.y + CurrentVisualHeight;
+            if (renderers == null || renderers.Length == 0)
+            {
+                return transform.position.y + CurrentVisualHeight;
+            }
             float maxY = transform.position.y;
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer r = renderers[i];
                 if (r != null && r.enabled && r.gameObject.activeInHierarchy)
+                {
                     maxY = Mathf.Max(maxY, r.bounds.max.y);
+                }
             }
             return maxY;
         }
+
         private void RestoreArms()
         {
-            if(grabArms == null)return;
-            for(int i=0;i<grabArms.Length;i++)if(grabArms[i] != null)grabArms[i].SetLocalPositionAndRotation(armPositions[i],armRotations[i]);
+            if (grabArms == null)
+            {
+                return;
+            }
+            for (int i = 0; i < grabArms.Length; i++)
+            {
+                if (grabArms[i] != null)
+                {
+                    grabArms[i].SetLocalPositionAndRotation(armPositions[i], armRotations[i]);
+                }
+            }
         }
+
         public void AnimateGrab(float progress)
         {
-            EnsureInitialized();RestoreArms();
-            if (motion != null) { motion.SampleGrab(progress); return; }
-            float reach=Mathf.Sin(Mathf.Clamp01(progress)*Mathf.PI);
-            ApplyPosture(18*reach,Mathf.Sin(progress*28)*2*reach,Mathf.Sin(progress*36)*3*reach,new Vector3(0,-.07f*reach,.18f*reach));
-            if(grabArms == null)return;
-            foreach(var arm in grabArms)
+            EnsureInitialized();
+            RestoreArms();
+            if (motion != null)
             {
-                float side=arm.name.Contains("Left") ? -1 : 1;
-                Vector3 shoulder=transform.position+Vector3.up*1.8f+transform.right*(.27f*side);
-                arm.RotateAround(shoulder,transform.right,-72*reach);
+                motion.SampleGrab(progress);
+                return;
+            }
+
+            float reach = Mathf.Sin(Mathf.Clamp01(progress) * Mathf.PI);
+            ApplyPosture(
+                18 * reach,
+                Mathf.Sin(progress * 28) * 2 * reach,
+                Mathf.Sin(progress * 36) * 3 * reach,
+                new Vector3(0, -.07f * reach, .18f * reach));
+
+            if (grabArms == null)
+            {
+                return;
+            }
+            foreach (var arm in grabArms)
+            {
+                float side = arm.name.Contains("Left") ? -1 : 1;
+                Vector3 shoulder = transform.position + Vector3.up * 1.8f + transform.right * (.27f * side);
+                arm.RotateAround(shoulder, transform.right, -72 * reach);
             }
         }
 
@@ -238,7 +313,7 @@ namespace NoRainbowAfter.AI
         private float ComputeTargetStoop(Transform ignoredPlayerRoot)
         {
             float z = transform.position.z;
-            // Dorm doorway lintel sits around z = 5.0 with min.y = 2.05m; begin stooping smoothly before entering.
+            // Kusen pintu kos berada di z = 5.0 (min.y = 2.05m); mulai membungkuk sebelum masuk.
             float doorwayFactor = 0f;
             if (z >= 4.25f && z <= 6.25f)
             {
@@ -246,7 +321,7 @@ namespace NoRainbowAfter.AI
                 doorwayFactor = Mathf.Clamp01(1f - (distFromDoor - 0.35f) / 0.75f);
             }
 
-            // Also probe actual overhead solid geometry so any low header/lintel prevents mesh clipping.
+            // Uji pula geometri langit-langit nyata di atas kepala agar mesh tidak tembus balok/kusen.
             Vector3 probeOrigin = transform.position + Vector3.up * 1.35f;
             int hitCount = Physics.SphereCastNonAlloc(
                 probeOrigin,
@@ -290,10 +365,14 @@ namespace NoRainbowAfter.AI
             {
                 float totalPitch = doorwayStoopPitch * stoopBlend + extraPitch;
                 if (motion != null)
+                {
                     upperPivot.rotation = transform.rotation * Quaternion.Euler(totalPitch, swayYaw, swayRoll) *
                         Quaternion.Inverse(transform.rotation) * upperPivot.rotation;
+                }
                 else
+                {
                     upperPivot.rotation = transform.rotation * Quaternion.Euler(totalPitch, swayYaw, swayRoll) * upperRestOffset;
+                }
             }
         }
     }

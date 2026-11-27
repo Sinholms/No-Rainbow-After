@@ -5,9 +5,15 @@ using UnityEngine;
 
 namespace NoRainbowAfter.AI
 {
+    /// <summary>
+    /// Pintu logam di ujung lorong kos normal yang menggantikan dinding akhir saat runtime.
+    /// Pada Chapter 1 membawa ke lorong horor (setelah baca slip lembur); pada Chapter 2
+    /// membawa ke jalan pasar malam (setelah pesan lembur diterima).
+    /// </summary>
     public sealed class SharedCorridorDoor : MonoBehaviour, IInteractable
     {
         private const float Threshold = .28f;
+
         private FirstPersonPlayer player;
         private Transform hinge;
         private Material metal;
@@ -25,12 +31,16 @@ namespace NoRainbowAfter.AI
         {
             var wall = GameObject.Find("SM_ENV_CorridorEnd");
             var renderer = wall != null ? wall.GetComponent<Renderer>() : null;
-            if (renderer == null) return null;
+            if (renderer == null)
+            {
+                return null;
+            }
 
             Bounds bounds = renderer.bounds;
             var host = new GameObject("Pintu Ujung Lorong", typeof(SharedCorridorDoor));
             host.transform.SetParent(wall.transform.parent, false);
             host.transform.SetPositionAndRotation(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z), Quaternion.identity);
+
             var door = host.GetComponent<SharedCorridorDoor>();
             door.player = owner;
             door.canExit = gate;
@@ -50,6 +60,7 @@ namespace NoRainbowAfter.AI
             const float opening = 1.20f;
             const float head = 2.17f;
             float sideWidth = (wallSize.x - opening) / 2f;
+
             foreach (int side in new[] { -1, 1 })
             {
                 Cube(transform, "Dinding samping", new Vector3(side * (opening + sideWidth) / 2f, wallSize.y / 2f, 0),
@@ -59,6 +70,7 @@ namespace NoRainbowAfter.AI
                 Cube(transform, "Sisi ambang", new Vector3(side * .66f, 1.10f, .49f),
                     new Vector3(.17f, 2.2f, 1.02f), plaster);
             }
+
             Cube(transform, "Dinding atas", new Vector3(0, (wallSize.y + head) / 2f, 0),
                 new Vector3(opening, wallSize.y - head, wallSize.z), plaster);
             Cube(transform, "Kusen atas", new Vector3(0, head, -.045f), new Vector3(1.26f, .09f, .22f), metal);
@@ -69,6 +81,7 @@ namespace NoRainbowAfter.AI
             hinge = new GameObject("Engsel").transform;
             hinge.SetParent(transform, false);
             hinge.localPosition = new Vector3(-.56f, 0, 0);
+
             Cube(hinge, "Daun pintu logam", new Vector3(.56f, 1.06f, 0), new Vector3(1.12f, 2.12f, .095f), metal);
             Cube(hinge, "Panel pintu", new Vector3(.56f, 1.29f, -.052f), new Vector3(.86f, 1.30f, .012f), metal);
             Cube(hinge, "Plat gagang", new Vector3(.97f, 1.05f, -.06f), new Vector3(.10f, .24f, .025f), metal);
@@ -89,7 +102,10 @@ namespace NoRainbowAfter.AI
 
         public void Interact(PlayerInteractor interactor)
         {
-            if (IsOpen || !canExit()) return;
+            if (IsOpen || !canExit())
+            {
+                return;
+            }
             IsOpen = true;
             previousZ = transform.InverseTransformPoint(player.transform.position).z;
         }
@@ -104,19 +120,33 @@ namespace NoRainbowAfter.AI
 
         private void LateUpdate()
         {
-            if (!IsOpen || player.IsPaused || player.IsTransitionLocked) return;
+            if (!IsOpen || player.IsPaused || player.IsTransitionLocked)
+            {
+                return;
+            }
             angle = Mathf.MoveTowards(angle, 92f, 235f * Time.deltaTime);
             hinge.localRotation = Quaternion.Euler(0f, -angle, 0f);
+
             Vector3 feet = transform.InverseTransformPoint(player.transform.position);
-            bool steppedThrough = previousZ < Threshold && feet.z >= Threshold && feet.z < 1f &&
-                Mathf.Abs(feet.x) < .62f && feet.y > -.15f && feet.y < .45f;
+            bool steppedThrough = previousZ < Threshold &&
+                                  feet.z >= Threshold &&
+                                  feet.z < 1f &&
+                                  Mathf.Abs(feet.x) < .62f &&
+                                  feet.y > -.15f &&
+                                  feet.y < .45f;
             previousZ = feet.z;
-            if (steppedThrough && canExit()) crossed();
+            if (steppedThrough && canExit())
+            {
+                crossed();
+            }
         }
 
         private void OnDestroy()
         {
-            if (metal != null) Destroy(metal);
+            if (metal != null)
+            {
+                Destroy(metal);
+            }
         }
     }
 }
