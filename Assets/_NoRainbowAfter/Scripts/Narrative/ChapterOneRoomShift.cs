@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.Narrative
 {
-    // Saat Raka pertama kali kembali dari lorong, LoopChanged memicu perubahan suasana kamar.
-    // Layar digelapkan sebentar untuk menyembunyikan pergantian perabot dan pencahayaan.
+    // One deliberate transition on the first return; papers used by the narrative stay intact.
     public sealed class ChapterOneRoomShift : MonoBehaviour
     {
         [SerializeField] private ChapterDirector director;

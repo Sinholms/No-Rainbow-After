@@ -4,7 +4,6 @@ using UnityEngine.InputSystem;
 
 namespace NoRainbowAfter.Player
 {
-    // Membaca action Input System sebagai data per frame atau event.
     public sealed class FirstPersonInputSource : IDisposable
     {
         private readonly InputActionAsset ownedAsset;
@@ -21,7 +20,6 @@ namespace NoRainbowAfter.Player
         public FirstPersonInputSource(InputActionAsset asset)
         {
             if (asset == null) throw new ArgumentNullException(nameof(asset));
-            // Setiap pemain mengatur salinannya sendiri, termasuk saat menonaktifkan kontrol gerak.
             ownedAsset = UnityEngine.Object.Instantiate(asset);
             gameplay = ownedAsset.FindActionMap("Player", true);
             global = ownedAsset.FindActionMap("Global", true);
@@ -48,7 +46,6 @@ namespace NoRainbowAfter.Player
             if (enabled) gameplay.Enable(); else gameplay.Disable();
         }
 
-        // Sprint mengikuti tombol selama ditahan. Jongkok berubah sekali pada frame tombol ditekan.
         public FirstPersonFrame ReadFrame() => !gameplay.enabled ? default : new FirstPersonFrame
         {
             Move = move.ReadValue<Vector2>(),

@@ -103,9 +103,7 @@ namespace NoRainbowAfter.UI
                 return;
             }
 
-            // Mulai Baru menampilkan ingatan kecelakaan saat pemain masuk ke kos.
-            if (flow.Load(GameScene.MasterGameplay))
-                ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
+            if (flow.Load(GameScene.MasterGameplay)) ChapterOneCorridorShift.ShowCrashMemoryOnStart = true;
         }
 
         private void OnEnable()

@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.Interaction
 {
-    // Mencari objek di arah kamera dan meneruskan permintaan interaksi.
     [RequireComponent(typeof(FirstPersonPlayer))]
     public sealed class PlayerInteractor : MonoBehaviour
     {
@@ -21,10 +20,6 @@ namespace NoRainbowAfter.Interaction
         public void NotifyInteraction(string stableId) => InteractionCompleted?.Invoke(stableId);
         public bool IsInspecting => overlay != null && overlay.activeSelf;
         public IInteractable Focused => focused;
-
-        // Bidikan dan tombol interaksi memakai aturan yang sama saat menu atau minigame terbuka.
-        private bool CanInteractWithWorld => !player.IsPaused && !player.IsInspecting &&
-            !player.IsUsingLaptop && !player.IsBreathing && !player.IsTransitionLocked;
 
         private void Awake()
         {
@@ -59,24 +54,14 @@ namespace NoRainbowAfter.Interaction
         private void Update()
         {
             if (canvas != null) canvas.enabled = !player.IsPaused;
-            bool showWorldUi = CanInteractWithWorld;
+            bool showWorldUi = !player.IsPaused && !player.IsInspecting && !player.IsUsingLaptop && !player.IsBreathing && !player.IsTransitionLocked;
             reticle.enabled = showWorldUi;
             prompt.enabled = showWorldUi;
-            if (!showWorldUi || viewCamera == null)
-            {
-                SetFocus(null);
-                return;
-            }
-            if (player.IsHiding)
-            {
-                SetFocus(null);
-                prompt.text = "[E] Keluar lemari";
-                return;
-            }
+            if (!showWorldUi || viewCamera == null) { SetFocus(null); return; }
+            if (player.IsHiding) { SetFocus(null); prompt.text="[E] Keluar lemari"; return; }
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
         }
-        // Sinar dari kamera berhenti di collider padat terdekat. Dinding pun bisa menutupi
-        // target, sehingga tombol E tidak dapat mengaktifkan objek di baliknya.
+        // The first non-trigger solid on any layer wins, even if it has no interactable.
         public static IInteractable FindTarget(Ray ray, Transform ignoredRoot = null)
         {
             var hits = Physics.RaycastAll(ray, Reach, ~0, QueryTriggerInteraction.Ignore);
@@ -85,11 +70,7 @@ namespace NoRainbowAfter.Interaction
             foreach (var hit in hits)
             {
                 if (ignoredRoot != null && hit.collider.transform.IsChildOf(ignoredRoot)) continue;
-                if (hit.distance < nearest)
-                {
-                    nearest = hit.distance;
-                    closest = hit.collider;
-                }
+                if (hit.distance < nearest) { nearest = hit.distance; closest = hit.collider; }
             }
             return closest != null ? closest.GetComponentInParent<IInteractable>() : null;
         }
@@ -103,7 +84,7 @@ namespace NoRainbowAfter.Interaction
         }
         public void Interact()
         {
-            if (!CanInteractWithWorld || player.IsHiding || viewCamera == null) return;
+            if (player.IsPaused || player.IsInspecting || player.IsUsingLaptop || player.IsBreathing || player.IsHiding || player.IsTransitionLocked || viewCamera == null) return;
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
             focused?.Interact(this);
         }

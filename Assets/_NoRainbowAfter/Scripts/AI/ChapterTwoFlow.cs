@@ -16,9 +16,9 @@ namespace NoRainbowAfter.AI
         private static readonly Quaternion RoomFacing = Quaternion.Euler(0f, 18f, 0f);
         private static readonly string[] Essay =
         {
-            "hujan mengurangi jarak pandang di persimpangan dekat halte.",
-            "kejadian itu menunjukkan betapa pentingnya perhatian saat berkendara.",
-            "menjaga jarak memberi kita waktu untuk bereaksi di jalan yang basah."
+            "hujan mengurangi jarak pandang di persimpangan dekat halte",
+            "kejadian itu menunjukkan betapa pentingnya perhatian saat berkendara",
+            "menjaga jarak memberi kita waktu untuk bereaksi di jalan yang basah"
         };
 
         private FirstPersonPlayer player;
@@ -32,6 +32,8 @@ namespace NoRainbowAfter.AI
         private GameObject dorm, roomPostProcessing;
         private ChapterTwoPhone phone;
         private ChapterTwoStreet street;
+        private SceneInteractable waterGallon;
+        private BoxCollider addedGallonCollider;
         private Canvas transitionCanvas;
         private Image fadeImage;
         private Button retryButton;
@@ -39,10 +41,9 @@ namespace NoRainbowAfter.AI
         private AudioClip stepClip;
         private Vector3 lastStepPosition;
         private float stepDistance;
-        private bool transitioning, retryVisible;
+        private bool transitioning, retryVisible, pendingGallonSkip;
         private Material[] photoMaterials;
 
-        // Beat adalah tahap cerita yang disimpan oleh ChapterDirector. Pintu jalan terbuka setelah pesan lembur.
         private ChapterTwoBeat Beat => director.State.Chapter2Beat;
         internal bool CanEnterStreet => !transitioning && Beat == ChapterTwoBeat.OvertimeRequested;
 
@@ -55,6 +56,7 @@ namespace NoRainbowAfter.AI
             checkpoint = GetComponent<DormCheckpoint>();
             stress = GetComponent<StressBarometer>();
             subtitles = GetComponent<SubtitlePlaceholder>();
+            if (GetComponent<ChapterThreeFlow>() == null) gameObject.AddComponent<ChapterThreeFlow>();
         }
 
         private void OnDestroy()
@@ -62,6 +64,8 @@ namespace NoRainbowAfter.AI
             if (checkpoint != null && laptop != null) checkpoint.SetChapterRestore(null);
             if (interactor != null) interactor.InteractionCompleted -= RegisterOptionalClue;
             if (laptop != null) laptop.EssayFinished -= OnEssayFinished;
+            if (waterGallon != null) Destroy(waterGallon);
+            if (addedGallonCollider != null) Destroy(addedGallonCollider);
             if (street != null) Destroy(street.gameObject);
             if (photoMaterials != null)
                 foreach (var material in photoMaterials) Destroy(material);
@@ -69,7 +73,6 @@ namespace NoRainbowAfter.AI
 
         public void PlayOpeningMemory() => StartCoroutine(OpeningMemory());
 
-        // Pakai salinan jalan untuk cuplikan kecelakaan, lalu kembalikan pose kamera semula.
         private IEnumerator OpeningMemory()
         {
             var memory = CreateStreet();
@@ -113,7 +116,6 @@ namespace NoRainbowAfter.AI
             if (director.PreviewChapter == 2) yield return WakeInDorm(null);
         }
 
-        // Pastikan pemain berhasil dipindah ke kamar sebelum menutup bab pertama dan menyiapkan tugas laptop.
         private IEnumerator WakeInDorm(Action leaveChapterOne)
         {
             if (transitioning || Beat != ChapterTwoBeat.None) yield break;
@@ -145,6 +147,7 @@ namespace NoRainbowAfter.AI
                 () => director.State.AddClue("CLUE_03"));
             laptop.ConfigureEssay(Essay);
             laptop.EssayFinished += OnEssayFinished;
+            SetupWaterGallon();
             CreateGraduationPhoto();
             interactor.InteractionCompleted += RegisterOptionalClue;
             motor.MovementScale = .75f;
@@ -156,7 +159,6 @@ namespace NoRainbowAfter.AI
             yield return GetOutOfBed();
         }
 
-        // Interpolasi posisi dan rotasi kamera selama fade memberi kesan Raka bangkit dari kasur.
         private IEnumerator GetOutOfBed()
         {
             var camera = motor.ViewCamera.transform;
@@ -181,7 +183,6 @@ namespace NoRainbowAfter.AI
             return new Pose(center + Vector3.up * .18f, Quaternion.Euler(-58f, 110f, 30f));
         }
 
-        // Jumlah kalimat yang selesai menentukan cabang cerita. Nol kalimat memicu adegan rebahan.
         private void OnEssayFinished(int completed)
         {
             if (transitioning || Beat != ChapterTwoBeat.WokeInDorm) return;
@@ -192,6 +193,12 @@ namespace NoRainbowAfter.AI
                 return;
             }
 
+            AdvanceToOvertimeRequested();
+        }
+
+        private void AdvanceToOvertimeRequested()
+        {
+            if (transitioning || Beat != ChapterTwoBeat.WokeInDorm) return;
             director.AdvanceChapterTwo(ChapterTwoBeat.OvertimeRequested);
             interactor.ShowInspection("Pesan dari tempat kerja",
                 "Raka, malam ini lembur lagi. Naik bus terakhir dari halte pasar, ya.");
@@ -258,6 +265,7 @@ namespace NoRainbowAfter.AI
         {
             if (!retryVisible || player.IsPaused || !RestoreDorm()) return;
             retryVisible = false;
+            pendingGallonSkip = false;
             SetTransition(true);
             player.SetInspecting(false);
             retryButton.transform.parent.gameObject.SetActive(false);
@@ -280,7 +288,6 @@ namespace NoRainbowAfter.AI
             return null;
         }
 
-        // Pasang event jalan saat prefab dibuat. Tahap cerita maju setelah posisi pemain berhasil dipindah.
         private IEnumerator EnterStreet()
         {
             SetTransition(true);
@@ -319,7 +326,6 @@ namespace NoRainbowAfter.AI
                 StartCoroutine(BoardBus());
         }
 
-        // Pemain naik bus setelah mencapai tempat aman. Gerak normal dipulihkan jika berhasil naik.
         private IEnumerator BoardBus()
         {
             SetTransition(true);
@@ -388,13 +394,42 @@ namespace NoRainbowAfter.AI
             piece.GetComponent<Renderer>().sharedMaterial = material;
         }
 
+        private void SetupWaterGallon()
+        {
+            var jug = GameObject.Find("SM_T07_WaterJugBody");
+            if (jug == null) return;
+            if (jug.GetComponent<Collider>() == null)
+            {
+                addedGallonCollider = jug.AddComponent<BoxCollider>();
+                var mf = jug.GetComponent<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    var b = mf.sharedMesh.bounds;
+                    addedGallonCollider.center = b.center + new Vector3(0f, 0.05f, 0f);
+                    addedGallonCollider.size = new Vector3(Mathf.Max(b.size.x, 0.28f), b.size.y + 0.14f, Mathf.Max(b.size.z, 0.28f));
+                }
+                else
+                {
+                    addedGallonCollider.center = new Vector3(0f, 0.06f, 0f);
+                    addedGallonCollider.size = new Vector3(0.32f, 0.48f, 0.32f);
+                }
+            }
+            waterGallon = jug.GetComponent<SceneInteractable>() ?? jug.AddComponent<SceneInteractable>();
+            waterGallon.Configure("INT_C2_GALLON", "Galon air", "Periksa galon", "c2.gallon",
+                "Galon air", "Air galon biasa. Masih tersisa lebih dari setengah di sudut kamar.", false);
+        }
+
         private void RegisterOptionalClue(string id)
         {
             if (id == "INT_C2_PHOTO") director.State.AddClue("CLUE_01");
             if (id == "INT_C2_BAG") director.State.AddClue("CLUE_04");
+            if (id == "INT_C2_GALLON" && !transitioning && Beat == ChapterTwoBeat.WokeInDorm)
+            {
+                laptop?.SkipEssay();
+                pendingGallonSkip = true;
+            }
         }
 
-        // Pilih checkpoint jalan atau kamar berdasarkan tahap cerita. Tolak pemulihan selama transisi.
         private bool RestoreCheckpoint()
         {
             if (transitioning) return false;
@@ -411,6 +446,12 @@ namespace NoRainbowAfter.AI
 
         private void Update()
         {
+            if (pendingGallonSkip && !transitioning && Beat == ChapterTwoBeat.WokeInDorm && (interactor == null || !interactor.IsInspecting))
+            {
+                pendingGallonSkip = false;
+                AdvanceToOvertimeRequested();
+                return;
+            }
             if (retryVisible)
             {
                 transitionCanvas.enabled = !player.IsPaused;
@@ -457,7 +498,6 @@ namespace NoRainbowAfter.AI
             transitionCanvas.enabled = active && !player.IsPaused;
         }
 
-        // Fade dan animasi yang mengikutinya berhenti selama menu jeda terbuka.
         private IEnumerator Fade(float from, float to, float duration, Action<float> animate = null)
         {
             float elapsed = 0f;

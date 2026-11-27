@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace NoRainbowAfter.AI
 {
-    // Deteksi dan visual sorot memakai waktu simulasi yang sama. Keduanya terpisah dari pengaturan kualitas bayangan Unity.
+    // Encounter clock owns both sensing and its visualisation, independent of light/shadow quality settings.
     public sealed class ChapterTwoSpotlightEncounter : MonoBehaviour
     {
         public bool AutoTick = true;
         public bool RenderFootprints = true;
         public bool ShowFloorFootprint = false;
-        // Paparan diukur dalam detik. Dengan pengaturan awal, dua detik tersorot memicu penangkapan.
-        // Saat Raka berlindung, DecayPerSecond menentukan seberapa cepat paparan yang terkumpul berkurang.
         public float CatchSeconds = 2f;
         public float DecayPerSecond = 2f;
         public float Range = 12f;
@@ -21,8 +19,6 @@ namespace NoRainbowAfter.AI
         public bool IsIlluminated { get; private set; }
         public int CatchCount { get; private set; }
         public event System.Action<int> Caught;
-
-        private float ExposureRatio => CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
 
         private const int FootprintSectors = 44;
         private const int FootprintRings = 22;
@@ -182,7 +178,7 @@ namespace NoRainbowAfter.AI
             tensionSource.volume = 0f;
 
             const int rate = 44100;
-            // Bunyi peringatan menggabungkan dua nada berdekatan dengan bunyi metalik singkat.
+            // Alert sting: unsettling dissonant minor-second pulse + quick metallic swell.
             int alertSamples = (int)(rate * 0.32f);
             var alertData = new float[alertSamples];
             for (int i = 0; i < alertSamples; i++)
@@ -197,7 +193,7 @@ namespace NoRainbowAfter.AI
             alertClip = AudioClip.Create("Exposure alert", alertSamples, 1, rate, false);
             alertClip.SetData(alertData, 0);
 
-            // Detak jantung dan dengung rendah berulang selama pemain terpapar.
+            // Looping heartbeat + low tense drone while exposed.
             int tensionSamples = rate; // 1.0s seamless loop
             var tensionData = new float[tensionSamples];
             for (int i = 0; i < tensionSamples; i++)
@@ -212,7 +208,7 @@ namespace NoRainbowAfter.AI
             tensionClip.SetData(tensionData, 0);
             tensionSource.clip = tensionClip;
 
-            // Bunyi tertangkap menggabungkan hentakan rendah dan derau seperti radio.
+            // Catch shock: heavy low impact + radio static burst.
             int catchSamples = (int)(rate * 0.55f);
             var catchData = new float[catchSamples];
             var rng = new System.Random(2026);
@@ -253,7 +249,7 @@ namespace NoRainbowAfter.AI
             AimFlashlights();
         }
 
-        // Segmen baru memperbarui tujuan checkpoint. Paparan cahaya yang sedang berlangsung tetap dihitung.
+        // Advance checkpoint segment without wiping active exposure mid-beam.
         public void SetSegment(int index)
         {
             if (checkpoints == null || checkpoints.Length == 0) return;
@@ -302,18 +298,16 @@ namespace NoRainbowAfter.AI
         private void Update()
         {
             bool paused = player != null && (player.IsTransitionLocked || player.IsPaused);
-            float ratio = ExposureRatio;
+            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
             if (tensionSource != null)
             {
                 if (paused && tensionSource.isPlaying) tensionSource.Pause();
                 else if (!paused && ratio > 0.01f && !tensionSource.isPlaying) tensionSource.UnPause();
             }
             if (catchFlash > 0f && !paused) catchFlash = Mathf.Max(0f, catchFlash - Time.deltaTime * 1.4f);
-            // Jeda dan transisi membekukan posisi sorot sekaligus penambahan paparan.
             if (AutoTick && !paused) ManualTick(Time.deltaTime);
         }
 
-        // Reset sapuan lampu dan paparan setelah posisi pemain berhasil dipulihkan.
         public bool TryRestoreCheckpoint()
         {
             if (motor == null || checkpoints == null || Segment >= checkpoints.Length || checkpoints[Segment] == null) return false;
@@ -340,7 +334,6 @@ namespace NoRainbowAfter.AI
             return true;
         }
 
-        // Setiap lampu diuji terpisah. Paparan bertambah sekali per frame jika ada lampu yang melihat pemain.
         public void ManualTick(float dt)
         {
             if (motor == null || beams == null || dt <= 0f) return;
@@ -371,7 +364,6 @@ namespace NoRainbowAfter.AI
                     warned = false;
                     catchFlash = 0.85f;
                     if (warningSource != null && catchClip != null) warningSource.PlayOneShot(catchClip, 1f);
-                    // Coba pindahkan pemain sebelum memberi tahu ChapterTwoStreet untuk menambah stres.
                     TryRestoreCheckpoint();
                     CatchCount++;
                     Caught?.Invoke(Segment);
@@ -379,7 +371,6 @@ namespace NoRainbowAfter.AI
             }
             else
             {
-                // Paparan turun perlahan di luar sorot. Peringatan bisa berbunyi lagi setelah paparan habis.
                 Exposure = Mathf.Max(0f, Exposure - DecayPerSecond * dt);
                 if (Exposure <= 0f) warned = false;
             }
@@ -390,7 +381,6 @@ namespace NoRainbowAfter.AI
             bool illuminationChanged = wasIlluminated != IsIlluminated;
             wasIlluminated = IsIlluminated;
             visualClock += dt;
-            // Perbarui mesh langsung saat status terdeteksi berubah, atau sekitar 30 kali per detik.
             if (RenderFootprints && (illuminationChanged || visualClock >= .033f))
             {
                 visualClock = 0f;
@@ -401,7 +391,7 @@ namespace NoRainbowAfter.AI
         private void UpdateTensionAudio()
         {
             if (tensionSource == null || tensionClip == null) return;
-            float ratio = ExposureRatio;
+            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
             if (ratio > 0.01f)
             {
                 tensionSource.volume = Mathf.Lerp(0.08f, 0.55f, ratio);
@@ -417,7 +407,7 @@ namespace NoRainbowAfter.AI
         private void UpdateBeamLights(float dt)
         {
             if (beams == null) return;
-            float exposureRatio = ExposureRatio;
+            float exposureRatio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
             foreach (var beam in beams)
             {
                 if (beam.light == null) continue;
@@ -433,14 +423,13 @@ namespace NoRainbowAfter.AI
             foreach (var beam in beams)
             {
                 if (beam.emitter == null) continue;
-                // PingPong bergerak dari 0 ke 1 lalu kembali. Offset fase membedakan posisi tiap lampu.
                 float rawPhase = beam.period > 0f
                     ? Mathf.PingPong((clock + beam.phaseOffset) / beam.period * 2f, 1f)
                     : .5f;
-                // SmoothStep memperlambat sapuan di kedua ujung sebelum lampu berbalik arah.
+                // SmoothStep lingers slightly at the extremes like a sentry scanning dark corners.
                 float phase = Mathf.SmoothStep(0f, 1f, rawPhase);
                 float yaw = (phase * 2f - 1f) * beam.yaw;
-                // Kalikan rotasi sapuan pada rotasi dasar agar lampu berputar di sumbu vertikal tiang.
+                // Apply horizontal yaw around the post's vertical axis first, then local pitch, avoiding roll drift.
                 beam.emitter.localRotation = Quaternion.Euler(0f, yaw, 0f) * beam.baseRotation;
                 if (beam.gaze != null)
                     beam.gaze.localRotation = Quaternion.AngleAxis(yaw * .82f, beam.gazeAxis) * beam.restingGaze;
@@ -453,14 +442,14 @@ namespace NoRainbowAfter.AI
             if (controller == null) return false;
             Vector3 bottom = motor.transform.TransformPoint(controller.center - Vector3.up * controller.height * .5f);
             float crouchBlend = motor.CrouchBlend;
-            // Jongkok menurunkan titik uji kepala dan dada. Satu titik yang terlihat sudah cukup untuk mendeteksi pemain.
+            // Crouching tucks head & shoulders behind waist-high barriers (1.0m) and low crates (1.12m),
+            // while standing exposes torso and head cleanly above low cover.
             float torsoHeight = controller.height * Mathf.Lerp(.55f, .46f, crouchBlend);
             float headHeight = controller.height * Mathf.Lerp(.90f, .74f, crouchBlend);
             return Visible(beam, bottom + Vector3.up * torsoHeight) ||
                    Visible(beam, bottom + Vector3.up * headHeight);
         }
 
-        // Titik harus berada dalam sudut dan jarak horizontal lampu serta memiliki garis pandang tanpa penghalang.
         private bool Visible(Beam beam, Vector3 point)
         {
             Vector3 origin = beam.emitter.position;
@@ -475,7 +464,6 @@ namespace NoRainbowAfter.AI
             if (planarDistance > beam.range + .01f || planarDistance < .001f ||
                 Vector3.Angle(forward, planar) > beam.angle * .5f + .05f) return false;
 
-            // Uji ruang antara lensa dan titik sasaran. Collider trigger tidak menutup cahaya.
             int hitCount = Physics.RaycastNonAlloc(origin, delta / distance, beam.hits, distance - 0.02f, ~0, QueryTriggerInteraction.Ignore);
             for (int i = 0; i < hitCount; i++)
             {
@@ -483,7 +471,6 @@ namespace NoRainbowAfter.AI
                 if (IsIgnoredObstacle(beam, hit)) continue;
                 return false;
             }
-            // Jika buffer penuh, anggap titik tertutup karena mungkin ada penghalang yang tidak tercatat.
             return hitCount < beam.hits.Length;
         }
 
@@ -492,7 +479,7 @@ namespace NoRainbowAfter.AI
             Transform hitTransform = hit.collider.transform;
             if (motor != null && hitTransform.IsChildOf(motor.transform)) return true;
             if (hitTransform.IsChildOf(beam.emitter)) return true;
-            // Abaikan badan penjaga yang berada di dekat lensa agar lampunya tidak langsung terhalang.
+            // Prevent the flashlight from self-occluding against the sentry's own body right next to the lens.
             if (beam.post != null && hitTransform == beam.post && hit.distance < 0.75f) return true;
             return false;
         }
@@ -531,7 +518,7 @@ namespace NoRainbowAfter.AI
                 }
             }
 
-            // Perinci batas bayangan agar jejak cahaya mengikuti tepi peti dan trotoar.
+            // Refine radial shadow transitions so the footprint hugs crates and curbs cleanly.
             for (int x = 0; x < FootprintSectors; x++)
             {
                 float angleA = -beam.angle * .5f + beam.angle * x / FootprintSectors;
@@ -557,7 +544,7 @@ namespace NoRainbowAfter.AI
 
                     if (!vc || !vd)
                     {
-                        // Gunakan pencarian biner di sepanjang sinar untuk memperkirakan awal bayangan.
+                        // Binary-search exact boundary along each ray where the shadow begins.
                         float rNear = Mathf.Lerp(FootprintStartRadius, beam.range, (float)z / FootprintRings);
                         float rFar = Mathf.Lerp(FootprintStartRadius, beam.range, alongFar);
                         if (!vc)
@@ -654,7 +641,7 @@ namespace NoRainbowAfter.AI
             Vector3 right = beam.emitter.right;
             Vector3 up = beam.emitter.up;
 
-            // Pangkas kerucut cahaya luar dan inti yang lebih terang pada peti dan dinding.
+            // Outer misty cone + brighter inner core cone, both ray-clipped against crates/walls.
             AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.49f, 0.055f, 0.18f);
             AppendConeShell(beam, origin, fwd, right, up, beam.angle * 0.27f, 0.032f, 0.23f);
 
@@ -838,12 +825,12 @@ namespace NoRainbowAfter.AI
         {
             if (motor == null) return;
             if (player != null && (player.IsPaused || player.IsTransitionLocked)) return;
-            float ratio = ExposureRatio;
+            float ratio = CatchSeconds > 0f ? Mathf.Clamp01(Exposure / CatchSeconds) : 0f;
             if (ratio <= 0.001f && catchFlash <= 0.001f) return;
 
             EnsureHudAssets();
 
-            // Efek merah menguat saat paparan naik dan berkedip saat pemain tertangkap.
+            // Red danger vignette scaling with exposure + dramatic flash on catch.
             float pulse = 0.85f + 0.15f * Mathf.Sin(Time.unscaledTime * Mathf.Lerp(6f, 18f, ratio));
             float edgeAlpha = Mathf.Clamp01(ratio * 0.62f * pulse + catchFlash * 0.72f);
             if (edgeAlpha > 0.01f)
@@ -865,14 +852,14 @@ namespace NoRainbowAfter.AI
                 float x = (Screen.width - barWidth) * 0.5f;
                 float y = Screen.height * 0.84f;
 
-                // Judul indikator paparan.
+                // Subtle label above meter
                 warningLabelStyle.normal.textColor = new Color(1f, Mathf.Lerp(0.82f, 0.28f, ratio), Mathf.Lerp(0.65f, 0.24f, ratio), Mathf.Clamp01(ratio * 3f));
                 GUI.color = Color.white;
                 GUI.Label(new Rect(x - 40f, y - 28f, barWidth + 80f, 24f),
                     ratio > 0.65f ? "TERDETEKSI — CARI PERLINDUNGAN!" : "TERSOROT SENTER",
                     warningLabelStyle);
 
-                // Bingkai dan latar indikator.
+                // Frame & dark backing
                 GUI.color = new Color(0.04f, 0.05f, 0.07f, 0.88f);
                 GUI.DrawTexture(new Rect(x - 3f, y - 3f, barWidth + 6f, barHeight + 6f), hudTexture);
                 GUI.color = new Color(0.32f, 0.10f, 0.10f, 0.65f);
@@ -880,7 +867,7 @@ namespace NoRainbowAfter.AI
                 GUI.color = new Color(0.08f, 0.08f, 0.10f, 0.92f);
                 GUI.DrawTexture(new Rect(x, y, barWidth, barHeight), hudTexture);
 
-                // Isi indikator mengikuti rasio paparan.
+                // Fill bar
                 GUI.color = Color.Lerp(new Color(0.95f, 0.52f, 0.14f, 0.95f), new Color(1f, 0.12f, 0.10f, 0.98f), ratio) * pulse;
                 GUI.DrawTexture(new Rect(x, y, barWidth * ratio, barHeight), hudTexture);
             }

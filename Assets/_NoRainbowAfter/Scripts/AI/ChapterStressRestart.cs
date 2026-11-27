@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace NoRainbowAfter.AI
 {
-    // Memuat ulang scene awal bab untuk membangun kembali dunia dan progres cerita bab itu.
+    // Re-enter the authored chapter entry scene so its runtime world and story start cleanly.
     public sealed class ChapterStressRestart : MonoBehaviour
     {
         private ChapterDirector director;
@@ -28,7 +28,7 @@ namespace NoRainbowAfter.AI
 
         private void Update()
         {
-            // Periksa juga pemain yang memasuki area berbahaya saat stresnya sudah maksimum.
+            // Also handle arriving in a dangerous area already at maximum stress.
             if (stress != null && stress.CurrentStress >= StressBarometer.MaxStress)
                 OnStressChanged(stress.CurrentStress);
         }
@@ -36,15 +36,10 @@ namespace NoRainbowAfter.AI
         private void OnStressChanged(float value)
         {
             if (restarting || value < StressBarometer.MaxStress || director == null || director.State == null) return;
-            // Stres maksimum mengulang bab selama pemain berada di area berbahaya.
-            int chapter;
-            if (!director.ChapterOneFinished && corridor != null && corridor.OwnsPlayer)
-                chapter = 1;
-            else if (director.State.Chapter2Beat >= ChapterTwoBeat.StreetEntered &&
-                director.State.Chapter2Beat < ChapterTwoBeat.BoardedBus)
-                chapter = 2;
-            else
-                return;
+            int chapter = !director.ChapterOneFinished && corridor != null && corridor.OwnsPlayer ? 1 :
+                director.State.Chapter2Beat >= ChapterTwoBeat.StreetEntered &&
+                director.State.Chapter2Beat < ChapterTwoBeat.BoardedBus ? 2 : 0;
+            if (chapter == 0) return;
 
             string path = "Assets/_NoRainbowAfter/Scenes/Chapter" + chapter + ".unity";
             if (!Application.CanStreamedLevelBeLoaded(path))

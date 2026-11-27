@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace NoRainbowAfter.Core
 {
-    // Saat Chapter1 atau Chapter2 dibuka langsung, keduanya memakai objek dari MasterGameplay.
+    // A chapter entry loads the same authored gameplay as the normal run.
     public sealed class ChapterSceneEntry : MonoBehaviour
     {
         [SerializeField, Range(1, 2)] private int chapter = 1;
@@ -31,8 +31,7 @@ namespace NoRainbowAfter.Core
             yield return load;
             SceneManager.sceneLoaded -= PrepareGameplay;
 
-            // Tunggu satu frame agar Start milik ChapterDirector dan ChapterTwoFlow selesai
-            // sebelum memindahkan pemain ke kondisi awal bab yang dipilih.
+            // Both the director and the chapter flow initialize in Start.
             yield return null;
             if (director == null || director.State == null || load == null)
             {
@@ -53,8 +52,7 @@ namespace NoRainbowAfter.Core
         private void PrepareGameplay(Scene scene, LoadSceneMode mode)
         {
             if (scene.path != GameplayPath) return;
-            // Scene bab tetap terbuka. Unity memakai pencahayaan MasterGameplay dan
-            // menempatkan objek baru di sana setelah scene itu dijadikan aktif.
+            // Make the shared scene active so its lighting and runtime objects are used.
             SceneManager.SetActiveScene(scene);
             foreach (var root in scene.GetRootGameObjects())
             {

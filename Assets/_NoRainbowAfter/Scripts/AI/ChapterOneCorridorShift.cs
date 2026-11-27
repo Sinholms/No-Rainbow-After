@@ -42,6 +42,7 @@ namespace NoRainbowAfter.AI
             if (motor != null) motor.PoseRestored += OnPlayerPoseRestored;
             objectives=GetComponent<ObjectiveTracker>();
             chapterTwo = gameObject.AddComponent<ChapterTwoFlow>();
+            if (GetComponent<ChapterThreeFlow>() == null) gameObject.AddComponent<ChapterThreeFlow>();
             if(Navigation != null) instance=NavMesh.AddNavMeshData(Navigation);
             if(Corridor != null) { CreateExitDoor(); Corridor.SetActive(false); }
             SharedExit = SharedCorridorDoor.ReplaceEndWall(player, CanCrossSharedExit, CrossSharedExit);
@@ -59,7 +60,7 @@ namespace NoRainbowAfter.AI
         }
         private void OnPlayerPoseRestored()
         {
-            // Saat checkpoint mengembalikan pemain ke kamar, tutup versi lorong horor.
+            // Checkpoint recovery may return the player to the dorm during an encounter.
             if (Expanded && !shifting && !OwnsPlayer) LeaveCorridor();
         }
         private void LateUpdate()
@@ -108,7 +109,7 @@ namespace NoRainbowAfter.AI
             if (!OwnsPlayer || shifting || player.IsPaused || player.IsTransitionLocked) return;
             if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
 
-            // Kenaikan stres berhenti sementara saat pemain di lemari atau sedang mengatur napas.
+            // Inside hiding wardrobe or while actively breathing, stress stops escalating so player can calm down cleanly.
             if (player.IsHiding || player.IsBreathing) return;
 
             corridorStressTimer += Mathf.Max(0f, deltaTime);
@@ -119,7 +120,6 @@ namespace NoRainbowAfter.AI
             }
         }
 
-        // Layar ditutup sebelum memindahkan pemain ke lorong horor yang dimuat dari scene yang sama.
         private IEnumerator Shift()
         {
             shifting=true;
@@ -148,21 +148,42 @@ namespace NoRainbowAfter.AI
             var door = GameObject.CreatePrimitive(PrimitiveType.Cube);
             door.name = "C1_ExitDoor";
             door.transform.SetParent(Corridor.transform, false);
-            door.transform.localPosition = new Vector3(18.6f, 1.1f, 1.02f);
-            door.transform.localScale = new Vector3(1.15f, 2.2f, .12f);
+            door.transform.localPosition = new Vector3(18.6f, 1.1f, 0.81f);
+            door.transform.localScale = new Vector3(1.15f, 2.2f, .06f);
             var wardrobe = Corridor.GetComponentInChildren<HidingWardrobe>(true);
             var source = wardrobe != null ? wardrobe.GetComponentInChildren<Renderer>(true) : null;
             if (source != null) door.GetComponent<Renderer>().sharedMaterial = source.sharedMaterial;
             door.AddComponent<ChapterOneExitDoor>().Initialize(this, director);
+
+            // Flush wooden/metal door frame jambs around the recessed exit door
+            var frameMat = source != null ? source.sharedMaterial : null;
+            foreach (float sx in new[] { -0.615f, 0.615f })
+            {
+                var jamb = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                jamb.name = sx < 0 ? "C1_ExitJamb_L" : "C1_ExitJamb_R";
+                jamb.transform.SetParent(Corridor.transform, false);
+                jamb.transform.localPosition = new Vector3(18.6f + sx, 1.12f, 0.82f);
+                jamb.transform.localScale = new Vector3(0.08f, 2.24f, 0.08f);
+                if (frameMat != null) jamb.GetComponent<Renderer>().sharedMaterial = frameMat;
+                Destroy(jamb.GetComponent<Collider>());
+            }
+            var lintel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            lintel.name = "C1_ExitJamb_Top";
+            lintel.transform.SetParent(Corridor.transform, false);
+            lintel.transform.localPosition = new Vector3(18.6f, 2.24f, 0.82f);
+            lintel.transform.localScale = new Vector3(1.31f, 0.08f, 0.08f);
+            if (frameMat != null) lintel.GetComponent<Renderer>().sharedMaterial = frameMat;
+            Destroy(lintel.GetComponent<Collider>());
+
             var handle = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             handle.name = "Handle";
             handle.transform.SetParent(door.transform, false);
-            handle.transform.localPosition = new Vector3(.35f, -.03f, .7f);
-            handle.transform.localScale = new Vector3(.065f, .035f, .45f);
+            handle.transform.localPosition = new Vector3(.35f, -.03f, .95f);
+            handle.transform.localScale = new Vector3(.065f, .035f, .65f);
             Destroy(handle.GetComponent<Collider>());
             var lamp = new GameObject("Exit Light");
             lamp.transform.SetParent(Corridor.transform, false);
-            lamp.transform.localPosition = new Vector3(18.6f, 2.35f, 1.6f);
+            lamp.transform.localPosition = new Vector3(18.6f, 2.35f, 1.18f);
             var light = lamp.AddComponent<Light>(); light.type = LightType.Point;
             light.color = new Color(.75f, .87f, 1f); light.range = 3f; light.intensity = 1.4f;
         }
@@ -188,27 +209,14 @@ namespace NoRainbowAfter.AI
             Physics.SyncTransforms();
             director.ResetCrossing();
         }
-        // Cari jalur NavMesh lengkap, lalu gunakan belokan berikutnya sebagai tujuan gerak bayangan.
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {
-            if (!NavMesh.SamplePosition(from, out NavMeshHit start, 2f, NavMesh.AllAreas) ||
-                !NavMesh.SamplePosition(to, out NavMeshHit destination, 2f, NavMesh.AllAreas))
-                return from;
-
-            var path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(start.position, destination.position, NavMesh.AllAreas, path) ||
-                path.status != NavMeshPathStatus.PathComplete)
-                return from;
-
-            Vector3 floorStart = new Vector3(from.x, 0f, from.z);
-            foreach (var corner in path.corners)
-            {
-                Vector3 floorCorner = new Vector3(corner.x, 0f, corner.z);
-                if (Vector3.Distance(floorStart, floorCorner) > .2f)
-                    return corner;
-            }
-
-            return destination.position;
+            NavMeshHit a,b;
+            if(!NavMesh.SamplePosition(from,out a,2f,NavMesh.AllAreas) || !NavMesh.SamplePosition(to,out b,2f,NavMesh.AllAreas)) return from;
+            var path=new NavMeshPath();
+            if(!NavMesh.CalculatePath(a.position,b.position,NavMesh.AllAreas,path) || path.status!=NavMeshPathStatus.PathComplete) return from;
+            foreach(var corner in path.corners) if(Vector3.Distance(new Vector3(from.x,0,from.z),new Vector3(corner.x,0,corner.z))>.2f) return corner;
+            return b.position;
         }
     }
     public sealed class ChapterOneExitDoor : MonoBehaviour, IInteractable

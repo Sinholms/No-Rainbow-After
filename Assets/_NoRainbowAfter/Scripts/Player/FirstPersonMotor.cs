@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace NoRainbowAfter.Player
 {
-    // Paket input yang dibaca sekali per frame oleh pengendali pemain.
     public struct FirstPersonFrame
     {
         public Vector2 Move;
@@ -48,6 +47,9 @@ namespace NoRainbowAfter.Player
         private float verticalVelocity;
         private float pitch;
         private float breathingPitchOffset;
+        private float breathingFovOffset;
+        private float breathingEyeOffsetY;
+        private Vector2 breathingShakeOffset;
         private float sinceSprint;
         private float gaitPhase;
         private float idleSwayClock;
@@ -72,8 +74,6 @@ namespace NoRainbowAfter.Player
         public float StressRollOffset { get; private set; }
         public float StressPitchOffset { get; private set; }
         public Vector3 StressEyeOffset { get; private set; }
-        // Sorot polisi memakai nilai ini untuk menurunkan titik uji kepala dan dada
-        // secara bertahap saat kapsul pemain berubah dari berdiri (0) ke jongkok (1).
         public float CrouchBlend => controller != null
             ? 1f - Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height)
             : (IsCrouched ? 1f : 0f);
@@ -104,8 +104,7 @@ namespace NoRainbowAfter.Player
             if (viewCamera != null) viewCamera.fieldOfView = fieldOfView;
         }
 
-        /// <summary>Menerapkan input satu frame. Delta mouse sudah menyatakan perpindahan sejak
-        /// frame terakhir, sementara kecepatan berjalan dikalikan durasi frame untuk menghitung jarak.</summary>
+        /// <summary>The input driver calls once per frame. Mouse delta is deliberately not multiplied by dt.</summary>
         public void Simulate(FirstPersonFrame input, float deltaTime)
         {
             if (!enabled || !controller.enabled || deltaTime <= 0f) return;
@@ -122,14 +121,12 @@ namespace NoRainbowAfter.Player
             pitch = Mathf.Clamp(pitch - input.Look.y * mouseSensitivity, -85f, 85f);
             if (recoveryCrouch)
             {
-                // Ketika pemulihan napas diwajibkan, Raka tetap bisa menoleh sambil diam di tempat.
                 UpdateStressCamera(stress, 0f, dt);
                 ApplyViewRotation();
                 UpdateEyeHeight();
                 return;
             }
 
-            // Jongkok adalah toggle; halangan di atas dapat mencegah pemain berdiri.
             if (input.CrouchPressed) crouchRequested = !crouchRequested;
             bool alreadyLow = controller.height < standingHeight - 0.001f;
             IsCrouched = crouchRequested || (alreadyLow && !CanStand());
@@ -143,7 +140,7 @@ namespace NoRainbowAfter.Player
                 controller.height >= standingHeight - 0.02f && !exhausted && StaminaSeconds > 0f;
             float speed = IsCrouched ? crouchSpeed : sprint ? sprintSpeed : walkSpeed;
 
-            // Saat stres tinggi, irama langkah memperlambat gerak dan membuat Raka sedikit oleng.
+            // Severe stress introduces a slight uneven heavy-step drag and unsteady lateral drift while walking.
             float limpFactor = stress > StressLimpOnset
                 ? Mathf.InverseLerp(StressLimpOnset, StressBarometer.MaxStress, stress)
                 : 0f;
@@ -157,7 +154,7 @@ namespace NoRainbowAfter.Player
                 target += perp * weave;
             }
 
-            // Stres mengurangi percepatan saat pemain mulai melangkah.
+            // Starting to move feels heavier under high stress while stopping remains crisp.
             float accelScale = move.sqrMagnitude > .01f ? MovementScale * Mathf.Lerp(1f, 0.70f, StressGaitIntensity) : 1f;
             horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, acceleration * accelScale * dt);
             if (controller.isGrounded && verticalVelocity < 0) verticalVelocity = -2f;
@@ -167,7 +164,6 @@ namespace NoRainbowAfter.Player
             if ((flags & CollisionFlags.Above) != 0 && verticalVelocity > 0) verticalVelocity = 0;
             if ((flags & CollisionFlags.Below) != 0 && verticalVelocity < 0) verticalVelocity = -2f;
 
-            // Stamina sprint berkurang ketika pemain benar-benar berpindah.
             Vector3 travelled = transform.position - before;
             travelled.y = 0;
             float actualSpeed = travelled.magnitude / dt;
@@ -205,8 +201,7 @@ namespace NoRainbowAfter.Player
                 StressRollOffset = 0f;
                 StressPitchOffset = 0f;
                 StressEyeOffset = Vector3.zero;
-                if (viewCamera != null && !Mathf.Approximately(viewCamera.fieldOfView, fieldOfView))
-                    viewCamera.fieldOfView = fieldOfView;
+                ApplyFieldOfView(0f, 1f);
                 return;
             }
 
@@ -249,10 +244,10 @@ namespace NoRainbowAfter.Player
                 float tunnel = stress > StressTunnelOnset
                     ? Mathf.InverseLerp(StressTunnelOnset, StressBarometer.MaxStress, stress)
                     : 0f;
-                float targetFov = tunnel > 0.001f
-                    ? Mathf.Clamp(fieldOfView - 4.2f * tunnel + Mathf.Sin(idleSwayClock * 1.4f) * 0.65f * tunnel, 60f, 95f)
-                    : fieldOfView;
-                viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView, targetFov, smooth);
+                float tunnelOffset = tunnel > 0.001f
+                    ? -4.2f * tunnel + Mathf.Sin(idleSwayClock * 1.4f) * 0.65f * tunnel
+                    : 0f;
+                ApplyFieldOfView(tunnelOffset, smooth);
             }
         }
 
@@ -271,7 +266,7 @@ namespace NoRainbowAfter.Player
         {
             float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
             Vector3 feet = transform.position;
-            // Periksa ruang tambahan yang dibutuhkan kepala dan badan saat berdiri di balik penghalang.
+            // Only check the additional torso/head volume; floor and stair risers are already occupied safely.
             int count = Physics.OverlapCapsuleNonAlloc(feet + Vector3.up * Mathf.Max(radius + 0.025f, crouchingHeight - radius),
                 feet + Vector3.up * (standingHeight - radius), radius, overlaps, obstructionMask,
                 QueryTriggerInteraction.Ignore);
@@ -282,8 +277,6 @@ namespace NoRainbowAfter.Player
 
         public bool TryRestorePose(Vector3 position, Quaternion rotation, bool notify = true)
         {
-            // Lemari dan checkpoint memakai pemeriksaan yang sama. Pastikan kapsul muat di tujuan
-            // sebelum memindahkan pemain agar titik yang terhalang tidak membuatnya tersangkut.
             if (controller == null || !controller.enabled || viewCamera == null) return false;
             float radius = Mathf.Max(0.05f, controller.radius - controller.skinWidth - 0.01f);
             int count = Physics.OverlapCapsuleNonAlloc(position + Vector3.up * (radius + 0.05f),
@@ -295,6 +288,7 @@ namespace NoRainbowAfter.Player
             controller.enabled = false;
             transform.SetPositionAndRotation(position, rotation);
             horizontalVelocity = Vector3.zero; verticalVelocity = 0f; pitch = 0f; breathingPitchOffset = 0f;
+            breathingFovOffset = 0f; breathingEyeOffsetY = 0f; breathingShakeOffset = Vector2.zero;
             gaitPhase = 0f; idleSwayClock = 0f; gaitBlend = 0f;
             StressGaitIntensity = 0f; StressSpeedMultiplier = 1f;
             StressRollOffset = 0f; StressPitchOffset = 0f; StressEyeOffset = Vector3.zero;
@@ -303,8 +297,6 @@ namespace NoRainbowAfter.Player
             viewCamera.transform.localRotation = Quaternion.identity;
             SetHeight(recoveryCrouch ? crouchingHeight : standingHeight);
             controller.enabled = true;
-            // Perpindahan biasa memberi tahu pendengar seperti lemari. Lemari sendiri
-            // memakai notify = false saat masuk atau keluar karena ia mengurus status penghuninya.
             if (notify) PoseRestored?.Invoke();
             return true;
         }
@@ -315,12 +307,35 @@ namespace NoRainbowAfter.Player
             ApplyViewRotation();
         }
 
+        public void SetBreathingCameraEffects(float pitchOffsetDegrees, float fovOffsetDegrees, float eyeHeightOffsetMeters, Vector2 shakeDegrees)
+        {
+            breathingPitchOffset = Mathf.Clamp(pitchOffsetDegrees, -15f, 15f);
+            breathingFovOffset = Mathf.Clamp(fovOffsetDegrees, -5f, 6f);
+            breathingEyeOffsetY = Mathf.Clamp(eyeHeightOffsetMeters, -0.08f, 0.08f);
+            breathingShakeOffset = new Vector2(
+                Mathf.Clamp(shakeDegrees.x, -3f, 3f),
+                Mathf.Clamp(shakeDegrees.y, -3f, 3f));
+            ApplyViewRotation();
+            ApplyFieldOfView(0f, 1f);
+            if (controller != null && viewCamera != null) UpdateEyeHeight();
+        }
+
+        private void ApplyFieldOfView(float stressTunnelOffset, float blend)
+        {
+            if (viewCamera == null) return;
+            float targetFov = Mathf.Clamp(fieldOfView + stressTunnelOffset + breathingFovOffset, 60f, 95f);
+            viewCamera.fieldOfView = blend >= 0.999f
+                ? targetFov
+                : Mathf.Lerp(viewCamera.fieldOfView, targetFov, blend);
+        }
+
         private void ApplyViewRotation()
         {
             if (viewCamera != null)
             {
-                float combinedPitch = Mathf.Clamp(pitch + breathingPitchOffset + StressPitchOffset, -85f, 85f);
-                viewCamera.transform.localRotation = Quaternion.Euler(combinedPitch, 0f, StressRollOffset);
+                float combinedPitch = Mathf.Clamp(pitch + breathingPitchOffset + StressPitchOffset + breathingShakeOffset.x, -85f, 85f);
+                float combinedYaw = breathingShakeOffset.y;
+                viewCamera.transform.localRotation = Quaternion.Euler(combinedPitch, combinedYaw, StressRollOffset);
             }
         }
 
@@ -353,7 +368,7 @@ namespace NoRainbowAfter.Player
         private void UpdateEyeHeight()
         {
             float blend = Mathf.InverseLerp(crouchingHeight, standingHeight, controller.height);
-            viewCamera.transform.localPosition = Vector3.up * Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend) + StressEyeOffset;
+            viewCamera.transform.localPosition = Vector3.up * (Mathf.Lerp(crouchingEyeHeight, standingEyeHeight, blend) + breathingEyeOffsetY) + StressEyeOffset;
         }
     }
 }

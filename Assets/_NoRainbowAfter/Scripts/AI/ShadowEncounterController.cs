@@ -19,9 +19,9 @@ namespace NoRainbowAfter.AI
     }
 
     /// <summary>
-    /// Mengatur fase pertemuan dengan bayangan pada bab pertama.
-    /// Dari Dormant, bayangan muncul (Spawn) lalu mengejar (Pursue).
-    /// Percobaan berakhir saat pemain berhasil melawan, bersembunyi, atau tertangkap.
+    /// Chapter 1 playable placeholder shadow encounter (T06).
+    /// Implements Dormant -> Spawn -> Pursue -> FightResolved / HideResolved / Caught
+    /// on top of T05's IShadowEncounter contract without modifying story canon or erasing clues.
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
     public sealed class ShadowEncounterController : MonoBehaviour, IShadowEncounter, IAudioCueSource
@@ -213,13 +213,10 @@ namespace NoRainbowAfter.AI
                 director.SetEncounter(this);
         }
 
-        // Simpan callback penyelesaian saat memulai percobaan. Cerita maju jika pemain berhasil melawan atau bersembunyi.
         public void Begin(Action<EncounterResponse> resolve)
         {
             if (!isActiveAndEnabled || permanentlyResolved || resolve == null) return;
 
-            // Director memberikan callback ini saat encounter dimulai; hanya jalur berhasil yang memanggilnya.
-            // Percobaan baru mereset pukulan, hitungan sembunyi, dan jeda setelah tertangkap.
             activeResolve = resolve;
             postCaughtGraceTimer = 0f;
             successfulHits = 0;
@@ -248,7 +245,7 @@ namespace NoRainbowAfter.AI
 
         public void TickEncounter(float deltaTime)
         {
-            // Hentikan encounter lokal jika ChapterDirector sudah menggantinya dengan pengendali lain.
+            // If ChapterDirector swapped in a different encounter provider (e.g. a test double), yield cleanly.
             if (director != null && State != ShadowEncounterState.Dormant && !permanentlyResolved && !director.IsCurrentEncounter(this))
             {
                 AbortToDormant(notifyDirectorReset: false);
@@ -258,14 +255,13 @@ namespace NoRainbowAfter.AI
             bool suspended = player != null && (player.IsPaused || player.IsInspecting || player.IsUsingLaptop);
             if (suspended)
             {
-                captureFeedback?.Tick(0f, true, 0f);
+                captureFeedback?.Tick(0f,true,0f);
                 RefreshUi();
                 return;
             }
 
             float dt = Mathf.Clamp(deltaTime, 0f, 0.1f);
-            float grabProgress = State == ShadowEncounterState.Grabbed ? stateTimer / GrabDuration : 0f;
-            captureFeedback?.Tick(dt, false, grabProgress);
+            captureFeedback?.Tick(dt,false,State==ShadowEncounterState.Grabbed ? stateTimer/GrabDuration : 0f);
             if (postCaughtGraceTimer > 0f)
                 postCaughtGraceTimer = Mathf.Max(0f, postCaughtGraceTimer - dt);
 
@@ -277,7 +273,6 @@ namespace NoRainbowAfter.AI
 
             switch (State)
             {
-                // Spawn memberi jeda sebelum Pursue; setelah itu tiap frame menjalankan aturan fase aktifnya.
                 case ShadowEncounterState.Spawn:
                     TickSpawn(dt);
                     break;
@@ -323,42 +318,29 @@ namespace NoRainbowAfter.AI
                 placeholderVisual?.AnimateRecovery(1f - postCaughtGraceTimer / EscapeRecoveryDuration);
                 return;
             }
-            var wardrobe = HidingWardrobe.Occupied;
-            if (wardrobe != null && wardrobe.Occupant == motor)
+            var wardrobe=HidingWardrobe.Occupied;
+            if(wardrobe != null && wardrobe.Occupant == motor)
             {
-                // Shadow mengingat apakah ia melihat Raka masuk. Setelah dua detik ia mencoba
-                // menangkap Raka yang ketahuan. Jika tidak terlihat, bertahan enam detik menyelesaikan persembunyian.
                 wardrobeHideTime += dt;
-                if (wardrobe.Spotted)
+                if(wardrobe.Spotted)
                 {
                     placeholderVisual?.TickVisual(ShadowEncounterState.Pursue, dt, 0f, 0f, motor.transform, true);
-                    if (wardrobeHideTime > 2f)
-                    {
-                        wardrobe.TryExit();
-                        wardrobe.Release();
-                        EnterCaught();
-                        wardrobeHideTime = 0f;
-                    }
+                    if(wardrobeHideTime > 2f) { wardrobe.TryExit(); wardrobe.Release(); EnterCaught(); wardrobeHideTime=0f; }
                     return;
                 }
-
-                // Saat lemari tidak diketahui, bayangan mencari selama enam detik sebelum pergi.
-                Vector3 search = shiftedWorld != null
-                    ? shiftedWorld.MonsterSpawn + Vector3.left * 6f
-                    : new Vector3(0f, 0f, 17f);
-                Vector3 next = shiftedWorld != null ? shiftedWorld.Navigate(transform.position, search) : search;
-                float searchSpeed = MoveAlongFloor(next, searchPassSpeed, dt);
-                placeholderVisual?.TickVisual(ShadowEncounterState.Pursue, dt, searchSpeed / searchPassSpeed, 0f, motor.transform, true);
-                if (wardrobeHideTime >= 6f)
+                Vector3 search=shiftedWorld != null ? shiftedWorld.MonsterSpawn+Vector3.left*6f : new Vector3(0,0,17);
+                Vector3 next=shiftedWorld != null ? shiftedWorld.Navigate(transform.position,search) : search;
+                float searchSpeed = MoveAlongFloor(next,searchPassSpeed,dt);
+                placeholderVisual?.TickVisual(ShadowEncounterState.Pursue,dt,searchSpeed / searchPassSpeed,0f,motor.transform,true);
+                if(wardrobeHideTime >= 6f)
                 {
-                    stateTimer = 0f;
-                    CueRequested?.Invoke(new NarrativeCue("Raka", "Langkahnya menjauh...", 2.5f, "AUD_C1_HIDE"));
+                    stateTimer=0f;
+                    CueRequested?.Invoke(new NarrativeCue("Raka","Langkahnya menjauh...",2.5f,"AUD_C1_HIDE"));
                     SetState(ShadowEncounterState.HideResolved);
                 }
                 return;
             }
-
-            wardrobeHideTime = 0f;
+            wardrobeHideTime=0f;
             Vector3 eyePos = GetMonsterEyePosition();
             CoverEvaluation cover = ShadowVisibility.EvaluateCover(
                 motor,
@@ -372,14 +354,9 @@ namespace NoRainbowAfter.AI
             if (State != ShadowEncounterState.Pursue) return;
 
             bool concealed = cover.IsConcealedFromMonster && !spottedEnteringCover;
-            // Lorong panjang memakai NavMesh. Area awal memakai rute tetap untuk pengejaran dan pencarian.
-            Vector3 destination;
-            if (shiftedWorld != null && shiftedWorld.OwnsPlayer)
-                destination = shiftedWorld.Navigate(transform.position, motor.transform.position);
-            else if (concealed)
-                destination = SelectSearchPassWaypoint(dt);
-            else
-                destination = SelectPursuitWaypoint(motor.transform.position);
+            Vector3 destination = shiftedWorld != null && shiftedWorld.OwnsPlayer
+                ? shiftedWorld.Navigate(transform.position,motor.transform.position)
+                : concealed ? SelectSearchPassWaypoint(dt) : SelectPursuitWaypoint(motor.transform.position);
             float moveSpeed = concealed ? searchPassSpeed : pursueSpeed;
 
             float actualHorizontalSpeed = MoveAlongFloor(destination, moveSpeed, dt);
@@ -396,8 +373,6 @@ namespace NoRainbowAfter.AI
 
         private void UpdateHideProgress(CoverEvaluation cover, float dt)
         {
-            // Cover biasa baru mulai menghitung bila pemain jongkok di zona. Pindah zona atau berdiri
-            // menghapus timer; masuk dari dekat, terlihat, dan tanpa penghalang menandai pemain spotted.
             if (!cover.IsCrouchedInCover || cover.ActiveZone == null)
             {
                 ResetHideTracking();
@@ -412,7 +387,7 @@ namespace NoRainbowAfter.AI
                 hideTimer = 0f;
 
                 float horizontalDist = HorizontalDistance(transform.position, motor.transform.position);
-                // Bayangan mengingat pemain yang mulai jongkok dari dekat di dalam sudut pandang tanpa penghalang.
+                // Ducking right in front of the creature at close unoccluded gaze does not fool it.
                 spottedEnteringCover = !cover.IsPhysicallyOccluded &&
                     cover.AngleFromMonsterGaze <= crouchedGazeHalfAngle &&
                     horizontalDist <= 3.1f;
@@ -431,7 +406,6 @@ namespace NoRainbowAfter.AI
 
             hideTimer += dt;
 
-            // Tunggu hingga bayangan melewati zona, atau menjauh cukup lama saat pemain tetap tertutup.
             bool passedSouth = sawMonsterNorthOfCover && deltaZ <= -coverPassClearanceZ;
             bool passedNorth = sawMonsterSouthOfCover && deltaZ >= coverPassClearanceZ;
             bool farAndOccluded = Mathf.Abs(deltaZ) >= 3.6f && cover.IsPhysicallyOccluded && hideTimer >= requiredHideDuration + 1.0f;
@@ -455,7 +429,7 @@ namespace NoRainbowAfter.AI
 
         private Vector3 SelectSearchPassWaypoint(float dt)
         {
-            // Keluar lewat pintu kamar sebelum mulai menyusuri lorong untuk mencari pemain.
+            // If monster previously chased the player into the dorm room before losing them, exit doorway first.
             if (transform.position.z < 5.45f)
             {
                 if (Mathf.Abs(transform.position.x - 0.16f) > 0.16f && transform.position.z < 4.70f)
@@ -483,7 +457,7 @@ namespace NoRainbowAfter.AI
             const float doorThresholdZ = 5.45f;
             const float doorLaneX = 0.16f;
 
-            // Sejajarkan bayangan dengan celah pintu di x = 0,16 sebelum masuk ke kamar.
+            // Crossing from corridor into dorm room through the 0.66m clear doorway gap at x = +0.16
             if (pos.z > doorThresholdZ && playerPos.z < 5.05f)
             {
                 if (pos.z > 6.10f || Mathf.Abs(pos.x - doorLaneX) > 0.14f)
@@ -491,7 +465,7 @@ namespace NoRainbowAfter.AI
                 return new Vector3(doorLaneX, 0f, 4.50f);
             }
 
-            // Keluar dari kamar melalui celah pintu yang sama.
+            // Crossing from dorm room back out to corridor
             if (pos.z <= doorThresholdZ && playerPos.z >= doorThresholdZ)
             {
                 if (pos.z < 4.45f || Mathf.Abs(pos.x - doorLaneX) > 0.14f)
@@ -499,11 +473,12 @@ namespace NoRainbowAfter.AI
                 return new Vector3(doorLaneX, 0f, 6.10f);
             }
 
-            // Bila pemain berada di ceruk lorong, dekati bukaan ceruk sebelum masuk.
+            // Both in corridor
             if (pos.z > doorThresholdZ)
             {
                 if (Mathf.Abs(playerPos.x) > 0.92f)
                 {
+                    // Standing/exposed inside a cover niche: align with niche opening along corridor before entering.
                     float nicheCenterZ = playerPos.x < 0f ? 9.0f : 13.0f;
                     if (Mathf.Abs(pos.z - nicheCenterZ) > 0.42f)
                         return new Vector3(0f, 0f, nicheCenterZ);
@@ -512,7 +487,7 @@ namespace NoRainbowAfter.AI
                 return new Vector3(Mathf.Clamp(playerPos.x, -0.56f, 0.56f), 0f, Mathf.Clamp(playerPos.z, 5.75f, 18.4f));
             }
 
-            // Gunakan jalur tengah kamar jika furnitur menghalangi lintasan langsung setinggi pinggang.
+            // Both inside dorm room: check waist-high furniture clearance; route via central room spine if obstructed.
             Vector3 waistOrigin = new Vector3(pos.x, 0.55f, pos.z);
             Vector3 waistTarget = new Vector3(playerPos.x, 0.55f, playerPos.z);
             if (ShadowVisibility.IsLineOfSightClear(waistOrigin, waistTarget, transform, motor.transform))
@@ -563,7 +538,6 @@ namespace NoRainbowAfter.AI
             transform.rotation = Quaternion.RotateTowards(transform.rotation, desired, turnSpeedDegrees * dt);
         }
 
-        // Bayangan perlu berada dalam batas jarak horizontal dan vertikal serta punya garis pandang ke pemain.
         private bool ShouldTriggerCaught()
         {
             if (motor == null) return false;
@@ -581,7 +555,7 @@ namespace NoRainbowAfter.AI
             if (State != ShadowEncounterState.Spawn && State != ShadowEncounterState.Pursue) return;
             if (!CanFightRightNow()) return;
 
-            // Setiap pukulan memicu animasi mundur. Selama animasi itu, klik berikutnya tidak dihitung.
+            // Each accepted hit has a recoil window that prevents spam clicks.
             successfulHits++;
             placeholderVisual?.SetHitVariant(successfulHits >= 3);
             stateTimer = 0f;
@@ -617,15 +591,8 @@ namespace NoRainbowAfter.AI
 
             if (stateTimer >= duration)
             {
-                if (successfulHits >= 3)
-                {
-                    // Tiga pukulan yang valid (masing-masing setelah jeda animasi) menyelesaikan Fight.
-                    CompleteSuccessResolution(EncounterResponse.Fight);
-                    return;
-                }
-
-                stateTimer = 0f;
-                SetState(ShadowEncounterState.Pursue);
+                if (successfulHits >= 3) CompleteSuccessResolution(EncounterResponse.Fight);
+                else { stateTimer = 0f; SetState(ShadowEncounterState.Pursue); }
             }
         }
 
@@ -635,7 +602,6 @@ namespace NoRainbowAfter.AI
             float t = Mathf.Clamp01(stateTimer / hideResolveDuration);
             placeholderVisual?.TickVisual(ShadowEncounterState.HideResolved, dt, 0f, t, motor.transform);
 
-            // Sembunyi baru mengirim hasil setelah animasi pendek selesai, seperti jalur Fight.
             if (stateTimer >= hideResolveDuration)
                 CompleteSuccessResolution(EncounterResponse.Hide);
         }
@@ -650,7 +616,6 @@ namespace NoRainbowAfter.AI
             Action<EncounterResponse> callback = activeResolve;
             activeResolve = null;
             RefreshUi();
-            // Hanya di sini hasil Fight/Hide diteruskan ke callback ChapterDirector.
             callback?.Invoke(response);
         }
 
@@ -659,8 +624,7 @@ namespace NoRainbowAfter.AI
             if(State==ShadowEncounterState.Grabbed || State==ShadowEncounterState.Caught || permanentlyResolved)return;
             if (allowFirstEscape)
             {
-                // Pegangan pertama memberi kesempatan lepas jika fitur kabur aktif.
-                grabWillEscape = !escapeUsed;
+                grabWillEscape=!escapeUsed;
                 if(grabWillEscape)escapeUsed=true;
                 stateTimer=0f;
                 ResetHideTracking();
@@ -698,8 +662,7 @@ namespace NoRainbowAfter.AI
             caughtRestoredPose = false;
             ResetHideTracking();
 
-            // Tertangkap membatalkan callback aktif agar Director tidak mencatat respons/beat berhasil;
-            // setelah fade, pemain dipulihkan ke checkpoint dan encounter dapat dimulai ulang.
+            // Caught is NOT a Fight/Hide resolution: invalidate active attempt without advancing C1-05/C1-06.
             activeResolve = null;
             director?.ResetActiveEncounter();
             player?.SetTransitionLocked(true);
@@ -716,7 +679,7 @@ namespace NoRainbowAfter.AI
                 caughtRestoredPose = true;
                 currentBlackoutAlpha = 1f;
 
-                // Pindahkan dan nonaktifkan collider bayangan agar tidak menghalangi titik pemulihan pemain.
+                // Move and disable monster collider BEFORE checkpoint restore so monster never blocks corridor/dorm spawn.
                 SetMonsterActiveInWorld(false, dormantPosition, Quaternion.Euler(0f, 180f, 0f));
                 captureFeedback?.ResetFeedback();
                 RestoreSafeCheckpointPose();
@@ -753,7 +716,8 @@ namespace NoRainbowAfter.AI
             {
                 if (shiftedWorld != null && shiftedWorld.OwnsPlayer)
                 {
-                    // Tertangkap di lorong horor langsung memaksimalkan stres dan memicu pemuatan ulang bab.
+                    // A corridor capture reaches maximum stress and restarts the chapter.
+                    // Do not depend on a safe teleport pose before applying the penalty.
                     player?.GetComponent<StressBarometer>()?.SetStress(StressBarometer.MaxStress);
                     return;
                 }
@@ -773,7 +737,7 @@ namespace NoRainbowAfter.AI
 
                 player?.GetComponent<StressBarometer>()?.SetStress(StressBarometer.MaxStress);
 
-                // Reset status lintasan agar encounter menunggu pemain melewati batas pemicu lagi.
+                // Always clear corridor crossing state so encounter waits until player re-enters trigger threshold.
                 director?.ResetCrossing();
             }
             finally
@@ -817,7 +781,7 @@ namespace NoRainbowAfter.AI
         {
             if(shiftedWorld != null && shiftedWorld.OwnsPlayer) return shiftedWorld.MonsterSpawn;
             float playerZ = motor != null ? motor.transform.position.z : 6.0f;
-            // Uji kandidat posisi di ujung lorong yang lebih jauh dari pemain, lalu pilih posisi yang bebas collider.
+            // Default staging at 10.5-11.5m ahead in the far corridor, backlit/lit near Corridor Far (z=17.1).
             float[] candidates = playerZ <= 11.2f
                 ? new[] { Mathf.Clamp(playerZ + 10.6f, 16.2f, 17.6f), 17.4f, 16.4f, 15.2f }
                 : new[] { Mathf.Clamp(playerZ - 9.2f, 6.8f, 8.4f), 7.2f, 8.2f, 17.6f };

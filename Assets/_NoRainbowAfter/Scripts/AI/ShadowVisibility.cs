@@ -15,7 +15,7 @@ namespace NoRainbowAfter.AI
     }
 
     /// <summary>
-    /// Memeriksa penghalang fisik, persembunyian, dan syarat serangan terhadap bayangan.
+    /// Physics-backed sightline, occlusion, cover concealment, and contextual Fight checks for T06.
     /// </summary>
     public static class ShadowVisibility
     {
@@ -71,8 +71,6 @@ namespace NoRainbowAfter.AI
             Transform monsterRoot,
             float crouchedGazeHalfAngle = 35f)
         {
-            // Cover biasa bukan interaksi lemari: pemain harus jongkok di CoverZone, lalu terlindung
-            // oleh dinding atau berada di luar sudut pandang. Controller menunggu bayangan lewat atau menjauh cukup lama.
             var result = new CoverEvaluation();
             if (motor == null) return result;
 
@@ -92,7 +90,7 @@ namespace NoRainbowAfter.AI
 
             var cc = motor.GetComponent<CharacterController>();
             float currentHeight = cc != null ? cc.height : (motor.IsCrouched ? 1.1f : 1.8f);
-            // Pemain perlu berada di zona dan sudah cukup rendah untuk dinilai sedang bersembunyi.
+            // Merely touching CoverZone upright never counts as hiding; crouch posture must be active.
             result.IsCrouchedInCover = result.PlayerInsideVolume && motor.IsCrouched && currentHeight <= 1.28f;
             result.IsPhysicallyOccluded = !HasAnyClearSightlineToPlayer(monsterEye, motor, monsterRoot);
 
@@ -105,14 +103,14 @@ namespace NoRainbowAfter.AI
                 ? Vector3.Angle(fwd, toPlayer.normalized)
                 : 0f;
 
-            // Saat jongkok di zona, dinding atau posisi di luar sudut pandang bayangan dapat menyembunyikan pemain.
+            // Concealment requires crouched occupancy inside a valid CoverZone, plus either solid wall
+            // occlusion or remaining outside the bowed creature's narrow forward gaze as it stalks past.
             result.IsConcealedFromMonster = result.IsCrouchedInCover &&
                 (result.IsPhysicallyOccluded || result.AngleFromMonsterGaze > crouchedGazeHalfAngle);
 
             return result;
         }
 
-        // Uji jarak ke permukaan badan, lalu cek apakah kamera membidik salah satu titik pada tubuh bayangan.
         public static bool CanPlayerFightMonster(
             Camera playerCamera,
             Transform playerRoot,

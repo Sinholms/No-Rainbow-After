@@ -15,7 +15,7 @@ namespace NoRainbowAfter.Interaction
     // These props can be used through the normal raycast without revealing a prompt.
     public interface IHiddenInteractable : IInteractable { }
 
-    // Flag seperti objective.laptop memberi tahu sistem cerita bahwa tugas sudah selesai dalam sesi ini.
+    // Session objective flags remain independent of the T05 clue profile.
     public interface IObjectiveFlags { bool Set(string flag); bool Contains(string flag); }
     public sealed class SessionObjectiveFlags : IObjectiveFlags
     {

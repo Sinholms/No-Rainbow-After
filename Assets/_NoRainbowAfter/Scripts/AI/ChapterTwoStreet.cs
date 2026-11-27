@@ -102,7 +102,6 @@ namespace NoRainbowAfter.AI
             Encounter.Caught += OnCaught;
             Encounter.ConfigureBeam(0, 42f, 14f);
             Encounter.ConfigureBeam(1, 42f, 14f);
-            // Atur sudut, durasi siklus, dan offset fase supaya kedua sorot menyapu jalan dengan ritme berbeda.
             Encounter.ConfigureSweep(0, 27f, 7.6f);
             Encounter.ConfigureSweep(1, 25f, 8.6f, 1.3f);
             Physics.SyncTransforms();
@@ -126,12 +125,12 @@ namespace NoRainbowAfter.AI
             }
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(0.022f, 0.034f, 0.048f);
-            RenderSettings.fogDensity = 0.028f;
+            RenderSettings.fogColor = new Color(0.014f, 0.022f, 0.032f);
+            RenderSettings.fogDensity = 0.036f;
             RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = new Color(0.075f, 0.105f, 0.145f);
-            RenderSettings.ambientEquatorColor = new Color(0.045f, 0.058f, 0.072f);
-            RenderSettings.ambientGroundColor = new Color(0.022f, 0.026f, 0.034f);
+            RenderSettings.ambientSkyColor = new Color(0.055f, 0.078f, 0.11f);
+            RenderSettings.ambientEquatorColor = new Color(0.032f, 0.042f, 0.055f);
+            RenderSettings.ambientGroundColor = new Color(0.015f, 0.018f, 0.024f);
         }
 
         private void RestoreAtmosphere()
@@ -314,7 +313,6 @@ namespace NoRainbowAfter.AI
             mRend.receiveShadows = false;
         }
 
-        // Encounter menangani pemulihan posisi. Jalan menambah stres setiap kali pemain tertangkap.
         private void OnCaught(int segment)
         {
             if (player != null) player.GetComponent<StressBarometer>()?.AddStress(StressPerCapture);
@@ -438,13 +436,11 @@ namespace NoRainbowAfter.AI
         {
             if (motor == null || AtShelter) return;
             Vector3 feet = motor.transform.position;
-            // Ukur kemajuan pada sumbu Z lokal jalan. Segmen baru menjadi tujuan pemulihan berikutnya.
             if (Checkpoints != null && Segment + 1 < Checkpoints.Length && Checkpoints[Segment + 1] != null &&
                 transform.InverseTransformPoint(feet).z >= transform.InverseTransformPoint(Checkpoints[Segment + 1].position).z)
                 Encounter.SetSegment(++Segment);
             if (Shelter == null || !Shelter.bounds.Contains(feet + Vector3.up * .5f)) return;
 
-            // Pemeriksaan volume halte menandai akhir area patroli dan mematikan deteksi sorot.
             AtShelter = true;
             if (Encounter != null) Encounter.enabled = false;
             if (Bag != null) Bag.SetAvailable(true);

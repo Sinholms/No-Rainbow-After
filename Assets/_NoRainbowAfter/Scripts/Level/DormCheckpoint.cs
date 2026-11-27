@@ -45,14 +45,12 @@ namespace NoRainbowAfter.Level
 
         private void UpdateRoomRecovery(float value)
         {
-            // Saat stres mencapai maksimum di kamar kos, pemain wajib mengatur napas sebelum bergerak lagi.
             if (player != null)
                 player.SetBreathRecoveryRequired(value >= StressBarometer.MaxStress && IsInOwnRoom);
         }
 
         public void Configure(FirstPersonMotor playerMotor, Transform spawnPoint) { motor = playerMotor; spawn = spawnPoint; }
         public void SetChapterRestore(Func<bool> restore) => chapterRestore = restore;
-        // Gunakan pemulihan bab bila tersedia; jika tidak, pulihkan pose ke checkpoint kamar.
         public bool TryRestore() => chapterRestore != null ? chapterRestore() : TryRestoreDorm();
         public bool TryRestoreDorm() => motor != null && spawn != null && motor.TryRestorePose(spawn.position, spawn.rotation);
     }
