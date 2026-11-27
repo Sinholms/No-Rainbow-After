@@ -16,34 +16,62 @@ namespace NoRainbowAfter.AI
         public void SetFocused(bool focused) { }
         public void Interact(PlayerInteractor interactor)
         {
-            if (Occupied == this) { TryExit(); return; }
+            if (Occupied == this)
+            {
+                TryExit();
+                return;
+            }
             if (Occupied != null) return;
-            var actor=interactor.GetComponent<FirstPersonPlayer>();
-            var motor=interactor.GetComponent<FirstPersonMotor>();
-            if(actor == null || motor == null || actor.IsPaused || actor.IsInspecting) return;
-            var monster=FindAnyObjectByType<ShadowEncounterController>();
-            bool spotted=monster != null && monster.State==ShadowEncounterState.Pursue &&
-                Vector3.Distance(monster.transform.position,motor.transform.position)<3.1f &&
-                ShadowVisibility.HasAnyClearSightlineToPlayer(monster.transform.position+Vector3.up*1.6f,motor,monster.transform);
-            if(!motor.TryRestorePose(transform.TransformPoint(new Vector3(0,.06f,0)),transform.rotation*Quaternion.Euler(0,180,0),false)) return;
-            Occupant=motor; player=actor; Spotted=spotted; Occupied=this; player.SetHiding(true);
+            var actor = interactor.GetComponent<FirstPersonPlayer>();
+            var motor = interactor.GetComponent<FirstPersonMotor>();
+            if (actor == null || motor == null || actor.IsPaused || actor.IsInspecting) return;
+
+            // Catat apakah Shadow melihat Raka di depan lemari sebelum memindahkannya ke dalam.
+            var monster = FindAnyObjectByType<ShadowEncounterController>();
+            bool spotted = monster != null && monster.State == ShadowEncounterState.Pursue &&
+                Vector3.Distance(monster.transform.position, motor.transform.position) < 3.1f &&
+                ShadowVisibility.HasAnyClearSightlineToPlayer(monster.transform.position + Vector3.up * 1.6f, motor, monster.transform);
+            if (!motor.TryRestorePose(transform.TransformPoint(new Vector3(0, .06f, 0)),
+                    transform.rotation * Quaternion.Euler(0, 180, 0), false)) return;
+
+            Occupant = motor;
+            player = actor;
+            Spotted = spotted;
+            Occupied = this;
+            player.SetHiding(true);
             motor.PoseRestored += Release;
             player.InteractRequested += OnExitRequested;
         }
-        private void OnExitRequested() { if(player != null && !player.IsPaused && !player.IsInspecting && !player.IsBreathing) TryExit(); }
+        private void OnExitRequested()
+        {
+            if (player != null && !player.IsPaused && !player.IsInspecting && !player.IsBreathing)
+                TryExit();
+        }
         public bool TryExit()
         {
-            if(Occupant == null) { Release(); return true; }
-            // Keep the hiding state if a monster or another solid currently blocks the exit.
-            if(!Occupant.TryRestorePose(transform.TransformPoint(new Vector3(0,.06f,-1.35f)),transform.rotation*Quaternion.Euler(0,180,0),false)) return false;
-            Release(); return true;
+            if (Occupant == null)
+            {
+                Release();
+                return true;
+            }
+            // Keluar hanya berhasil jika pose di depan lemari tidak bertabrakan; bila gagal, tetap sembunyi.
+            if (!Occupant.TryRestorePose(transform.TransformPoint(new Vector3(0, .06f, -1.35f)),
+                    transform.rotation * Quaternion.Euler(0, 180, 0), false)) return false;
+            Release();
+            return true;
         }
         public void Release()
         {
-            if(Occupant != null) Occupant.PoseRestored -= Release;
-            if(player != null) { player.InteractRequested -= OnExitRequested; player.SetHiding(false); }
-            Occupant=null;player=null;Spotted=false;
-            if(Occupied==this) Occupied=null;
+            if (Occupant != null) Occupant.PoseRestored -= Release;
+            if (player != null)
+            {
+                player.InteractRequested -= OnExitRequested;
+                player.SetHiding(false);
+            }
+            Occupant = null;
+            player = null;
+            Spotted = false;
+            if (Occupied == this) Occupied = null;
         }
         private void OnDisable() => Release();
     }

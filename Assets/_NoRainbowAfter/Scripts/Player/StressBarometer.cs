@@ -5,8 +5,8 @@ using UnityEngine.UI;
 namespace NoRainbowAfter.Player
 {
     /// <summary>
-    /// Tracks Raka's stress level and renders a single, non-duplicated
-    /// red Stress Barometer overlay in the top-left corner of the HUD.
+    /// Menyimpan nilai stres Raka, menggambar bar merah di HUD, dan memberi tahu
+    /// sistem lain saat nilainya berubah melalui event StressChanged.
     /// </summary>
     public sealed class StressBarometer : MonoBehaviour
     {
@@ -143,6 +143,7 @@ namespace NoRainbowAfter.Player
             return clip;
         }
 
+        // Nilai dibatasi oleh minimum yang berlaku dan nilai maksimum stres.
         public void SetStress(float value)
         {
             float clamped = Mathf.Clamp(value, MinimumStress, MaxStress);
@@ -160,6 +161,7 @@ namespace NoRainbowAfter.Player
             if (currentStress < MinimumStress) SetStress(currentStress);
         }
 
+        // Sistem lain mengirim perubahan bertanda: napas negatif, penalti tertangkap sorot positif.
         public void AddStress(float amount)
         {
             if (Mathf.Approximately(amount, 0f)) return;
@@ -303,6 +305,7 @@ namespace NoRainbowAfter.Player
             return uiRoot.transform.Find("GameplayHUD");
         }
 
+        // HUD memakai nilai yang sama: teks persentase, panjang bar, warna, dan peringatan.
         private void RefreshUi()
         {
             if (statusLabel != null)
@@ -316,6 +319,7 @@ namespace NoRainbowAfter.Player
             RefreshWarningEffects();
         }
 
+        // Pada ambang stres tinggi, vignette dan pesan membantu pemain mengenali kondisi.
         private void RefreshWarningEffects()
         {
             bool highStress = IsWarningActive;

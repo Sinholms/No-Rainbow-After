@@ -178,7 +178,6 @@ namespace NoRainbowAfter.UI
 
         private void TogglePause()
         {
-            // Document inspection is closed with [F], and laptop minigame is exited with 1x [Tab].
             SetPaused(!IsPaused);
         }
 
@@ -191,6 +190,8 @@ namespace NoRainbowAfter.UI
         {
             bool changed = IsPaused != paused;
             IsPaused = paused;
+            // Hentikan waktu simulasi dan teruskan status jeda ke pengendali pemain.
+            // Animasi panel di Update memakai unscaledDeltaTime supaya menu tetap bergerak.
             Time.timeScale = paused ? 0 : 1;
             if (player != null) player.SetPaused(paused);
             if (pausePanel != null) pausePanel.SetActive(paused);

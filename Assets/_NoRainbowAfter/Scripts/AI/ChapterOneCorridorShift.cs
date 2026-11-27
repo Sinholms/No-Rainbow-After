@@ -60,7 +60,7 @@ namespace NoRainbowAfter.AI
         }
         private void OnPlayerPoseRestored()
         {
-            // Checkpoint recovery may return the player to the dorm during an encounter.
+            // Saat checkpoint mengembalikan pemain ke kamar, tutup versi lorong horor.
             if (Expanded && !shifting && !OwnsPlayer) LeaveCorridor();
         }
         private void LateUpdate()
@@ -109,7 +109,7 @@ namespace NoRainbowAfter.AI
             if (!OwnsPlayer || shifting || player.IsPaused || player.IsTransitionLocked) return;
             if (stressBarometer == null) stressBarometer = GetComponent<StressBarometer>();
 
-            // Inside hiding wardrobe or while actively breathing, stress stops escalating so player can calm down cleanly.
+            // Kenaikan stres berhenti sementara saat pemain di lemari atau sedang mengatur napas.
             if (player.IsHiding || player.IsBreathing) return;
 
             corridorStressTimer += Mathf.Max(0f, deltaTime);
@@ -120,6 +120,7 @@ namespace NoRainbowAfter.AI
             }
         }
 
+        // Layar ditutup sebelum memindahkan pemain ke lorong horor yang dimuat dari scene yang sama.
         private IEnumerator Shift()
         {
             shifting=true;
@@ -209,6 +210,7 @@ namespace NoRainbowAfter.AI
             Physics.SyncTransforms();
             director.ResetCrossing();
         }
+        // Cari jalur NavMesh lengkap, lalu gunakan belokan berikutnya sebagai tujuan gerak bayangan.
         public Vector3 Navigate(Vector3 from, Vector3 to)
         {
             NavMeshHit a,b;

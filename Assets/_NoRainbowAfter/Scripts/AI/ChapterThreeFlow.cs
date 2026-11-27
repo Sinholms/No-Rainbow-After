@@ -169,6 +169,7 @@ namespace NoRainbowAfter.AI
             RemainingSeconds = Mathf.Max(0f, RemainingSeconds - dt);
             RefreshTimerUi();
 
+            // Bertahan sampai waktu habis memilih Hide, termasuk saat Raka masih di luar lemari.
             if (RemainingSeconds <= 0f)
             {
                 if (HidingWardrobe.Occupied != null)
@@ -194,7 +195,7 @@ namespace NoRainbowAfter.AI
                     new Vector3(monsterPos.x, 0f, monsterPos.z),
                     new Vector3(playerPos.x, 0f, playerPos.z));
 
-                // Option A: Approaching the monster closely triggers Good Ending (Reality)
+                // Saat Raka berada di luar lemari, jarak horizontal yang cukup dekat memilih Approach.
                 if (flatDist <= ApproachTriggerDistance)
                 {
                     TriggerEnding(FinalChoice.Approach);
@@ -202,6 +203,7 @@ namespace NoRainbowAfter.AI
                 }
             }
 
+            // Monster mengejar posisi Raka. Saat Raka bersembunyi, tujuannya beralih ke titik patroli arena.
             Vector3 targetPos = playerPos;
             float speed = ChaseSpeed;
 

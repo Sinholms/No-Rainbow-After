@@ -102,6 +102,7 @@ namespace NoRainbowAfter.Player
             BindRig();
             if (bodyInstance == null || motor == null || !HasArmatureRig) return;
 
+            // Kecepatan dihitung dari perpindahan nyata, sehingga langkah berhenti saat gerak terhalang.
             float speed = 0f;
             if (deltaTime > 0.00001f)
             {
@@ -123,6 +124,7 @@ namespace NoRainbowAfter.Player
             float crouch = Mathf.Clamp01(motor.CrouchBlend);
             float lookDown = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(35f, 82f, motor.Pitch + motor.BreathingPitchOffset));
 
+            // Mulai dari pose dasar setiap frame agar rotasi prosedural tidak menumpuk.
             RestoreRestPose();
 
             // Keep feet grounded on y = 0 while pulling torso further back under the crouched camera & spotlight
@@ -168,6 +170,7 @@ namespace NoRainbowAfter.Player
                     * forearmR.rotation;
             }
 
+            // IK menghitung posisi kedua kaki berdasarkan langkah dan perubahan tinggi saat jongkok.
             float strideExtent = speedFactor * (motor.IsSprinting ? 0.24f : 0.15f);
             SolveLegIK(
                 thighL, shinL, footL,

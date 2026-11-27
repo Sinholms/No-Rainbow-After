@@ -44,6 +44,7 @@ namespace NoRainbowAfter.AI
         private bool transitioning, retryVisible, pendingGallonSkip;
         private Material[] photoMaterials;
 
+        // Beat adalah tahap cerita yang disimpan oleh ChapterDirector. Pintu jalan terbuka setelah pesan lembur.
         private ChapterTwoBeat Beat => director.State.Chapter2Beat;
         internal bool CanEnterStreet => !transitioning && Beat == ChapterTwoBeat.OvertimeRequested;
 
@@ -73,6 +74,7 @@ namespace NoRainbowAfter.AI
 
         public void PlayOpeningMemory() => StartCoroutine(OpeningMemory());
 
+        // Pakai salinan jalan untuk cuplikan kecelakaan, lalu kembalikan pose kamera semula.
         private IEnumerator OpeningMemory()
         {
             var memory = CreateStreet();
@@ -116,6 +118,7 @@ namespace NoRainbowAfter.AI
             if (director.PreviewChapter == 2) yield return WakeInDorm(null);
         }
 
+        // Pastikan pemain berhasil dipindah ke kamar sebelum menutup bab pertama dan menyiapkan tugas laptop.
         private IEnumerator WakeInDorm(Action leaveChapterOne)
         {
             if (transitioning || Beat != ChapterTwoBeat.None) yield break;
@@ -159,6 +162,7 @@ namespace NoRainbowAfter.AI
             yield return GetOutOfBed();
         }
 
+        // Interpolasi posisi dan rotasi kamera selama fade memberi kesan Raka bangkit dari kasur.
         private IEnumerator GetOutOfBed()
         {
             var camera = motor.ViewCamera.transform;
@@ -183,6 +187,7 @@ namespace NoRainbowAfter.AI
             return new Pose(center + Vector3.up * .18f, Quaternion.Euler(-58f, 110f, 30f));
         }
 
+        // Jumlah kalimat yang selesai menentukan cabang cerita. Nol kalimat memicu adegan rebahan.
         private void OnEssayFinished(int completed)
         {
             if (transitioning || Beat != ChapterTwoBeat.WokeInDorm) return;
@@ -288,6 +293,7 @@ namespace NoRainbowAfter.AI
             return null;
         }
 
+        // Pasang event jalan saat prefab dibuat. Tahap cerita maju setelah posisi pemain berhasil dipindah.
         private IEnumerator EnterStreet()
         {
             SetTransition(true);
@@ -326,6 +332,7 @@ namespace NoRainbowAfter.AI
                 StartCoroutine(BoardBus());
         }
 
+        // Pemain naik bus setelah mencapai tempat aman. Gerak normal dipulihkan jika berhasil naik.
         private IEnumerator BoardBus()
         {
             SetTransition(true);
@@ -430,6 +437,7 @@ namespace NoRainbowAfter.AI
             }
         }
 
+        // Pilih checkpoint jalan atau kamar berdasarkan tahap cerita. Tolak pemulihan selama transisi.
         private bool RestoreCheckpoint()
         {
             if (transitioning) return false;
@@ -498,6 +506,7 @@ namespace NoRainbowAfter.AI
             transitionCanvas.enabled = active && !player.IsPaused;
         }
 
+        // Fade dan animasi yang mengikutinya berhenti selama menu jeda terbuka.
         private IEnumerator Fade(float from, float to, float duration, Action<float> animate = null)
         {
             float elapsed = 0f;

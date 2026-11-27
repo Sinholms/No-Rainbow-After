@@ -15,6 +15,7 @@ namespace NoRainbowAfter.Level
         {
             get
             {
+                // Trigger memberi kandidat penghuni; irisan bounds menjadi cek aktual untuk checkpoint/encounter.
                 if (volume == null) volume = GetComponent<BoxCollider>();
                 return isActiveAndEnabled && volume != null && volume.enabled && occupant != null &&
                     occupant.enabled && occupant.gameObject.activeInHierarchy && volume.bounds.Intersects(occupant.bounds);

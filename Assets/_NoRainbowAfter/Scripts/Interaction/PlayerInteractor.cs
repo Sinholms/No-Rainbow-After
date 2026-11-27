@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 namespace NoRainbowAfter.Interaction
 {
+    // Mencari objek di arah kamera dan meneruskan permintaan interaksi.
     [RequireComponent(typeof(FirstPersonPlayer))]
     public sealed class PlayerInteractor : MonoBehaviour
     {
@@ -61,7 +62,8 @@ namespace NoRainbowAfter.Interaction
             if (player.IsHiding) { SetFocus(null); prompt.text="[E] Keluar lemari"; return; }
             SetFocus(FindTarget(new Ray(viewCamera.transform.position, viewCamera.transform.forward), transform));
         }
-        // The first non-trigger solid on any layer wins, even if it has no interactable.
+        // Sinar dari kamera berhenti di collider padat terdekat. Dinding pun bisa menutupi
+        // target, sehingga tombol E tidak dapat mengaktifkan objek di baliknya.
         public static IInteractable FindTarget(Ray ray, Transform ignoredRoot = null)
         {
             var hits = Physics.RaycastAll(ray, Reach, ~0, QueryTriggerInteraction.Ignore);

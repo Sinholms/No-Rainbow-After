@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace NoRainbowAfter.AI
 {
-    // Re-enter the authored chapter entry scene so its runtime world and story start cleanly.
+    // Memuat ulang scene awal bab untuk membangun kembali dunia dan progres cerita bab itu.
     public sealed class ChapterStressRestart : MonoBehaviour
     {
         private ChapterDirector director;
@@ -28,7 +28,7 @@ namespace NoRainbowAfter.AI
 
         private void Update()
         {
-            // Also handle arriving in a dangerous area already at maximum stress.
+            // Periksa juga pemain yang memasuki area berbahaya saat stresnya sudah maksimum.
             if (stress != null && stress.CurrentStress >= StressBarometer.MaxStress)
                 OnStressChanged(stress.CurrentStress);
         }
