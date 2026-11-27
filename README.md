@@ -22,6 +22,18 @@ Untuk tes per bab, buka satu scene dari folder `Assets/_NoRainbowAfter/Scenes` d
 
 Scene tes `Chapter1` dan `Chapter2` memuat aset yang sama dari `MasterGameplay`. Clue yang dikumpulkan saat tes berlaku sampai sesi Play berakhir.
 
+## Menelusuri mekanik permainan
+
+| Mekanik | Mulai membaca di sini |
+| --- | --- |
+| Gerak Raka, jongkok, dan kendali saat bersembunyi | [FirstPersonPlayer.cs](Assets/_NoRainbowAfter/Scripts/Player/FirstPersonPlayer.cs) dan [FirstPersonMotor.cs](Assets/_NoRainbowAfter/Scripts/Player/FirstPersonMotor.cs) |
+| Masuk lemari dan menghindari Shadow | [HidingWardrobe.cs](Assets/_NoRainbowAfter/Scripts/AI/HidingWardrobe.cs) lalu [ShadowEncounterController.cs](Assets/_NoRainbowAfter/Scripts/AI/ShadowEncounterController.cs) |
+| Cincin napas dan pemulihan stres | [BreathingMinigame.cs](Assets/_NoRainbowAfter/Scripts/Player/BreathingMinigame.cs) |
+| Sorot polisi, perlindungan di balik benda, dan checkpoint | [ChapterTwoSpotlightEncounter.cs](Assets/_NoRainbowAfter/Scripts/AI/Chapter2/ChapterTwoSpotlightEncounter.cs) dan [ChapterTwoStreet.cs](Assets/_NoRainbowAfter/Scripts/AI/Chapter2/ChapterTwoStreet.cs) |
+| Pengejaran di parkiran dan penentuan ending | [ChapterThreeFlow.cs](Assets/_NoRainbowAfter/Scripts/AI/Chapter3/ChapterThreeFlow.cs) dan [EndingResolver.cs](Assets/_NoRainbowAfter/Scripts/Narrative/EndingResolver.cs) |
+
+Alat Unity untuk membuat ulang jalan Bab 2, arena Bab 3, dan prefab Raka ada di [folder Editor](Assets/_NoRainbowAfter/Editor). Scene dan prefab hasilnya sudah tersedia saat proyek dibuka.
+
 ## Membuka proyek setelah clone
 
 1. Pasang Git dan Unity Editor **6000.6.8f1** melalui Unity Hub (Windows Build Support untuk membuat build Windows).
